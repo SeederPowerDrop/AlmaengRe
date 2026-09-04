@@ -23,6 +23,7 @@ struct ViewerCanvas: View {
       let tileHeight = max(1, (geometry.size.height - rowSpacing - 6) / CGFloat(rowCount))
       let canPan = store.canPan
       let usesPrimaryDrag = store.panInteractionMode == .primaryDrag
+      let showsTileBoundary = ViewerTileChrome.showsBoundary(itemCount: visible.count)
 
       ZStack {
         Color.black
@@ -42,7 +43,11 @@ struct ViewerCanvas: View {
                 width: store.panOffset.width + (canPan && usesPrimaryDrag ? livePan.width : 0),
                 height: store.panOffset.height + (canPan && usesPrimaryDrag ? livePan.height : 0)
               ),
-              isCurrent: asset.id == store.currentAsset?.id
+              showsTileBoundary: showsTileBoundary,
+              highlightsSelection: ViewerTileChrome.highlightsSelection(
+                isCurrent: asset.id == store.currentAsset?.id,
+                itemCount: visible.count
+              )
             )
             // GeometryReader는 LazyVGrid 안에서 고유 높이가 없으므로 행 수로
             // 높이를 명시해야 이미지가 캔버스 전체를 채웁니다.

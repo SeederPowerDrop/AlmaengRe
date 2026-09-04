@@ -269,6 +269,12 @@ final class AppStore: ObservableObject {
     presentationMode = presentationMode == .viewer ? .overview : .viewer
   }
 
+  /// 단일/다중 이미지 뷰어에서 폴더 전체 썸네일 화면으로 명시적으로 돌아갑니다.
+  func returnToOverview() {
+    isFocusMode = false
+    presentationMode = .overview
+  }
+
   func toggleInspector(_ panel: InspectorPanel) {
     inspectorPanel = inspectorPanel == panel ? nil : panel
   }
@@ -293,6 +299,25 @@ final class AppStore: ObservableObject {
     if isFocusMode {
       presentationMode = .viewer
     }
+  }
+
+  /// 집중 모드의 숨겨진 툴바에 의존하지 않고 일반 뷰어로 복귀합니다.
+  func exitFocusMode() {
+    isFocusMode = false
+  }
+
+  /// Esc는 집중 모드, 일반 뷰어 순서로 한 단계씩 이전 보기로 이동합니다.
+  @discardableResult
+  func handleEscapeKey() -> Bool {
+    if isFocusMode {
+      exitFocusMode()
+      return true
+    }
+    if presentationMode == .viewer {
+      returnToOverview()
+      return true
+    }
+    return false
   }
 
   func toggleFullScreen() {

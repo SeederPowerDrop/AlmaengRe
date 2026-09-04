@@ -18,7 +18,8 @@ struct ViewerImageTile: View {
   let committedZoom: CGFloat
   let effectiveZoom: CGFloat
   let effectivePan: CGSize
-  let isCurrent: Bool
+  let showsTileBoundary: Bool
+  let highlightsSelection: Bool
 
   @State private var frame: RenderedFrame?
   @State private var errorMessage: String?
@@ -70,10 +71,14 @@ struct ViewerImageTile: View {
         }
       }
       .overlay {
-        Rectangle()
-          .stroke(
-            isCurrent ? Color.accentColor.opacity(0.8) : Color.white.opacity(0.08),
-            lineWidth: isCurrent ? 2 : 1)
+        // 단일 이미지는 캔버스와 자연스럽게 이어지게 하고, 다중 보기에서만
+        // 타일 구분선과 현재 이미지의 선택 강조를 그립니다.
+        if showsTileBoundary {
+          Rectangle()
+            .stroke(
+              highlightsSelection ? Color.accentColor.opacity(0.8) : Color.white.opacity(0.08),
+              lineWidth: highlightsSelection ? 2 : 1)
+        }
       }
       .clipped()
       .task(id: request) {

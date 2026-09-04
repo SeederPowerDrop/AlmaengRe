@@ -172,6 +172,10 @@ struct RootView: View {
     .background {
       InputEventMonitor(
         onKeyDown: { event in
+          // Esc는 사용자 설정과 무관하게 언제나 현재 보기에서 한 단계 돌아갑니다.
+          if event.keyCode == 53 {
+            return store.handleEscapeKey()
+          }
           // Space+드래그 모드에서는 확대 중 Space를 팬 전용으로 예약합니다.
           if event.keyCode == 49, store.canPan, store.panInteractionMode == .spacePrimaryDrag {
             return true

@@ -24,6 +24,33 @@ struct ImageViewerTests {
         == 5)
   }
 
+  @Test("단일 보기에는 선택 테두리를 표시하지 않는다")
+  func singleImageTileChrome() {
+    #expect(!ViewerTileChrome.showsBoundary(itemCount: 1))
+    #expect(!ViewerTileChrome.highlightsSelection(isCurrent: true, itemCount: 1))
+    #expect(ViewerTileChrome.showsBoundary(itemCount: 2))
+    #expect(ViewerTileChrome.highlightsSelection(isCurrent: true, itemCount: 2))
+    #expect(!ViewerTileChrome.highlightsSelection(isCurrent: false, itemCount: 2))
+  }
+
+  @Test("Esc는 집중 보기에서 일반 보기와 전체 보기로 순서대로 돌아간다")
+  @MainActor
+  func escapeNavigation() {
+    let store = AppStore()
+    store.presentationMode = .overview
+    store.toggleFocusMode()
+
+    #expect(store.isFocusMode)
+    #expect(store.presentationMode == .viewer)
+    #expect(store.handleEscapeKey())
+    #expect(!store.isFocusMode)
+    #expect(store.presentationMode == .viewer)
+
+    #expect(store.handleEscapeKey())
+    #expect(store.presentationMode == .overview)
+    #expect(!store.handleEscapeKey())
+  }
+
   @Test("회전 횟수는 항상 0~3 범위로 정규화된다")
   func adjustmentRotationNormalization() {
     var adjustments = ImageAdjustments()

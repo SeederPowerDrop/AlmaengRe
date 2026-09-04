@@ -6,6 +6,24 @@ struct BottomControlBar: View {
   var body: some View {
     HStack(spacing: 8) {
       Button {
+        if store.isFocusMode {
+          store.exitFocusMode()
+        } else {
+          store.returnToOverview()
+        }
+      } label: {
+        if store.isFocusMode {
+          Label("집중 보기 종료", systemImage: "xmark")
+        } else {
+          Image(systemName: "rectangle.grid.3x2")
+        }
+      }
+      .help(store.isFocusMode ? "집중 보기 종료 (Esc)" : "전체 보기로 돌아가기 (Esc)")
+
+      Divider()
+        .frame(height: 16)
+
+      Button {
         store.navigatePage(-1)
       } label: {
         Image(systemName: "chevron.left")

@@ -144,3 +144,15 @@ enum ViewerGridLayout {
     return max(1, min(itemCount, suggested))
   }
 }
+
+/// 단일 보기에는 프레임을 그리지 않고, 여러 이미지를 함께 볼 때만 타일 경계와
+/// 현재 이미지 강조를 표시합니다.
+enum ViewerTileChrome {
+  static func showsBoundary(itemCount: Int) -> Bool {
+    itemCount > 1
+  }
+
+  static func highlightsSelection(isCurrent: Bool, itemCount: Int) -> Bool {
+    showsBoundary(itemCount: itemCount) && isCurrent
+  }
+}
