@@ -50,8 +50,30 @@ fi
 
 cp "$PROJECT_DIRECTORY/Packaging/Info.plist" "$CONTENTS_DIRECTORY/Info.plist"
 
+# 릴리스에는 디버그 심볼이 필요하지 않습니다. 서명 전에 제거해 Universal 2
+# 실행 파일도 작게 유지합니다.
+if [[ "$CONFIGURATION" == "release" ]]; then
+  strip -S "$CONTENTS_DIRECTORY/MacOS/ImageViewer"
+fi
+
 # 로컬 실행용 ad-hoc 서명입니다. 공개 배포 때는 Developer ID 서명과 공증으로 교체합니다.
 codesign --force --deep --sign - "$APP_DIRECTORY"
 
 lipo -info "$CONTENTS_DIRECTORY/MacOS/ImageViewer"
 echo "$APP_DIRECTORY"
+
+if [[ "$CONFIGURATION" == "release" ]]; then
+  APP_VERSION="$(/usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" \
+    "$PROJECT_DIRECTORY/Packaging/Info.plist")"
+  ZIP_SUFFIX="$ARCHITECTURE_MODE"
+  ZIP_PATH="$PROJECT_DIRECTORY/dist/이미지뷰어-$APP_VERSION-macos-$ZIP_SUFFIX.zip"
+  IMAGEVIEWER_TEMP_ROOT="${TMPDIR:-/tmp}"
+  PACKAGE_TEMP_DIRECTORY="$(mktemp -d "${IMAGEVIEWER_TEMP_ROOT%/}/imageviewer-package.XXXXXX")"
+  TEMP_ZIP_PATH="$PACKAGE_TEMP_DIRECTORY/$(basename "$ZIP_PATH")"
+
+  # 기존 릴리스가 있어도 완성된 새 ZIP을 한 번에 교체해 중간 파일을 남기지 않습니다.
+  ditto -c -k --sequesterRsrc --keepParent "$APP_DIRECTORY" "$TEMP_ZIP_PATH"
+  mv -f "$TEMP_ZIP_PATH" "$ZIP_PATH"
+  rmdir "$PACKAGE_TEMP_DIRECTORY"
+  echo "$ZIP_PATH"
+fi

@@ -2,43 +2,56 @@
 
 ## 큰 흐름
 
-```text
-Folder / Files
-      │
-      ▼
-ImageLibrary ── 가벼운 파일 메타데이터와 자연 정렬
-      │
-      ▼
-AppStore ── 현재 위치, 1~10장 배치, 확대, 조정값, 단축키
-      │
-      ├──────────────► Overview / Sidebar (지연 로딩 썸네일)
-      │
-      ▼
-ImagePipeline actor
-      ├─ Image I/O / Core Image / RAW
-      ├─ QOI·PCX 자체 디코더
-      ├─ AppKit 표현 폴백
-      └─ 축소·필터·색상 변환·프레임 캐시
-      │
-      ├──────────────► SwiftUI HDR/EDR 화면
-      └──────────────► ImageExporter ── 새 파일
-```
+    Folder / Files
+          │
+          ▼
+    ImageLibrary ── 가벼운 파일 메타데이터와 자연 정렬
+          │
+          ▼
+    AppStore ── 현재 위치, 1~10장 배치, 패널, 확대/팬, 조정값
+          │
+          ├──────────────► ThumbnailPipeline actor
+          │                  └─ macOS Quick Look 디스크 캐시
+          │                         └─ Overview / 썸네일 패널 / 선행 미리보기
+          │
+          ▼
+    ImagePipeline actor
+          ├─ Image I/O / Core Image / RAW
+          ├─ QOI·PCX 자체 디코더
+          ├─ AppKit 표현 폴백
+          └─ 축소·필터·색상 변환·프레임 캐시
+          │
+          ├──────────────► SwiftUI HDR/EDR 화면
+          ├──────────────► EXIF/TIFF/GPS ── i 정보 패널 ── 지도 링크
+          └──────────────► ImageExporter ── 새 파일
 
 ## 왜 핵심 엔진이 Rust가 아닌가
 
 이 앱의 주 경로는 이미 Apple이 C/C++·GPU 수준에서 최적화한 Image I/O, Core Image와 Metal입니다. 같은 파일을 Rust로 다시 디코딩한 뒤 SwiftUI로 복사하면 메모리 복사와 컬러 프로파일 변환이 하나 더 생기고, 최신 macOS RAW/HDR 지원을 중복 구현해야 합니다.
 
-따라서 UI 상태는 Swift, 디코딩/색상/필터는 Apple 프레임워크, 시스템에 없는 작은 오픈 포맷만 독립 코덱으로 둡니다. 이후 libjxl/libheif/LibRaw 같은 외부 엔진이 실제 측정에서 필요해지면 `ImagePipeline` 뒤에 어댑터로 추가할 수 있습니다.
+따라서 UI 상태는 Swift, 디코딩/색상/필터는 Apple 프레임워크, 시스템에 없는 작은 오픈 포맷만 독립 코덱으로 둡니다. 이후 libjxl/libheif/LibRaw 같은 외부 엔진이 실제 측정에서 필요해지면 ImagePipeline 뒤에 어댑터로 추가할 수 있습니다.
 
 ## 성능 설계
 
 - 폴더 스캔과 이미지 파이프라인은 actor로 UI 스레드에서 분리합니다.
-- 그리드 셀은 화면에 보일 때만 `.task`로 디코딩하며 사라지면 취소됩니다.
+- 그리드 셀은 화면에 보일 때만 작업을 요청하며 사라지면 취소됩니다.
+- 목록은 Finder와 같은 Quick Look 썸네일 캐시를 사용합니다. 큰 이미지도 빠른 미리보기를 먼저 표시하고 정밀 렌더가 완료되면 교체합니다.
+- 화면 크기가 정해진 SDR 이미지는 Image I/O에서 먼저 축소하고, HDR/gain-map 이미지만 16-bit Core Image 경로를 유지합니다.
+- 현재 페이지를 제외한 앞뒤 파일만 선읽기하며, 탐색이 바뀌면 이전 작업을 취소하고 각 이미지 사이에서 actor를 양보합니다.
 - 요청 크기는 256픽셀 버킷으로 묶어 확대 중 캐시 파편화를 줄입니다.
-- 캐시는 물리 메모리의 1/16(최소 256MB, 최대 768MB)을 목표로 합니다.
-- HDR 경로는 Core Image `RGBAh`, extended-linear Display P3와 EDR이 활성화된 전용 `CALayer`를 사용합니다.
+- 정밀 렌더 캐시는 물리 메모리의 1/24(최소 128MB, 최대 512MB), 썸네일 캐시는 최대 128MB입니다.
+- HDR 경로는 Core Image RGBAh, extended-linear Display P3와 EDR이 활성화된 전용 CALayer를 사용합니다.
 - 집중 보기의 1:1 모드는 현재 8K 미리보기 상한을 둡니다. 초대형 이미지의 완전한 1:1 이동은 다음 단계의 타일 피라미드 렌더러가 담당합니다.
+
+Quick Look, Image I/O, Core Image는 macOS 동적 프레임워크이므로 앱 번들에 대형 코덱 바이너리를 복제하지 않습니다. 시스템 미지원 형식만 작은 독립 디코더로 추가하는 것이 용량 원칙입니다.
+
+## 입력과 패널
+
+- 썸네일 패널 배치는 ThumbnailPanelPlacement 하나로 관리하며, 위·아래에서는 가로 지연 그리드, 좌·우에서는 세로 지연 그리드를 재사용합니다.
+- 팬 방식은 PanInteractionMode로 저장합니다. AppKit 이벤트 감시 영역은 이미지 캔버스에만 붙어 정보 패널이나 설정 창의 스크롤을 가로채지 않습니다.
+- 오른쪽 보조 패널은 정보와 편집 중 하나만 열어 좁은 창에서도 이미지 영역을 보존합니다.
+- 지도 버튼은 EXIF GPS가 유효할 때만 보이며, 클릭할 때만 [Apple 지도 링크](https://developer.apple.com/library/archive/featuredarticles/iPhoneURLScheme_Reference/MapLinks/MapLinks.html) 또는 [Google Maps URL](https://developers.google.com/maps/documentation/urls/get-started)을 엽니다. API 키나 위치 업로드는 없습니다.
 
 ## 비파괴 조정
 
-조정값은 파일 URL별 `ImageAdjustments`에만 저장됩니다. 화면에서는 Core Image 필터 체인으로 적용하고, 사용자가 내보내기를 선택했을 때 같은 체인을 원본 해상도로 평가합니다. 원본 파일 덮어쓰기는 제공하지 않습니다.
+조정값은 파일 URL별 ImageAdjustments에만 저장됩니다. 화면에서는 Core Image 필터 체인으로 적용하고, 사용자가 내보내기를 선택했을 때 같은 체인을 원본 해상도로 평가합니다. 원본 파일 덮어쓰기는 제공하지 않습니다.

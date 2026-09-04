@@ -1,69 +1,126 @@
 import SwiftUI
 
+/// 폴더의 이미지를 창 가장자리에 세로 또는 가로로 보여 주는 썸네일 패널입니다.
 struct SidebarView: View {
   @ObservedObject var store: AppStore
+  let placement: ThumbnailPanelPlacement
 
   var body: some View {
-    VStack(spacing: 0) {
-      VStack(alignment: .leading, spacing: 3) {
-        Text(store.activeFolderName)
-          .font(.headline)
-          .lineLimit(1)
-        Text("\(store.assets.count)개 이미지")
-          .font(.caption)
-          .foregroundStyle(.secondary)
+    Group {
+      if placement.isHorizontal {
+        horizontalPanel
+      } else {
+        verticalPanel
       }
-      .frame(maxWidth: .infinity, alignment: .leading)
-      .padding(12)
+    }
+    .background(.ultraThinMaterial)
+  }
+
+  private var verticalPanel: some View {
+    VStack(spacing: 0) {
+      folderHeader
+        .padding(12)
 
       Divider()
 
       ScrollViewReader { proxy in
-        ScrollView {
+        ScrollView(.vertical) {
           LazyVStack(spacing: 8) {
-            ForEach(Array(store.assets.enumerated()), id: \.element.id) { index, asset in
-              Button {
-                store.select(index: index)
-              } label: {
-                VStack(spacing: 4) {
-                  ThumbnailImageView(
-                    asset: asset,
-                    pipeline: store.pipeline,
-                    maxPixelSize: 192
-                  )
-                  .frame(width: 88, height: 68)
-                  .clipShape(RoundedRectangle(cornerRadius: 5))
-
-                  Text("\(index + 1)")
-                    .font(.caption2.monospacedDigit())
-                    .foregroundStyle(.secondary)
-                }
-                .padding(5)
-                .background {
-                  RoundedRectangle(cornerRadius: 8)
-                    .fill(index == store.currentIndex ? Color.accentColor.opacity(0.25) : .clear)
-                }
-                .overlay {
-                  RoundedRectangle(cornerRadius: 8)
-                    .stroke(
-                      index == store.currentIndex ? Color.accentColor : .clear, lineWidth: 1.5)
-                }
-              }
-              .buttonStyle(.plain)
-              .id(index)
-              .help(asset.filename)
-            }
+            thumbnailCells(width: 88, height: 68)
           }
           .padding(8)
         }
         .onChange(of: store.currentIndex) { _, newIndex in
-          withAnimation(.easeOut(duration: 0.15)) {
-            proxy.scrollTo(newIndex, anchor: .center)
-          }
+          scrollToCurrent(newIndex, with: proxy)
+        }
+        .task(id: store.assets.first?.id) {
+          await Task.yield()
+          proxy.scrollTo(store.currentIndex, anchor: .center)
         }
       }
     }
     .frame(width: 116)
-    .background(.ultraThinMaterial)
+  }
+
+  private var horizontalPanel: some View {
+    HStack(spacing: 0) {
+      folderHeader
+        .frame(width: 132, alignment: .leading)
+        .padding(.horizontal, 12)
+
+      Divider()
+
+      ScrollViewReader { proxy in
+        ScrollView(.horizontal) {
+          LazyHStack(spacing: 8) {
+            thumbnailCells(width: 82, height: 58)
+          }
+          .padding(.horizontal, 9)
+          .padding(.vertical, 7)
+        }
+        .onChange(of: store.currentIndex) { _, newIndex in
+          scrollToCurrent(newIndex, with: proxy)
+        }
+        .task(id: store.assets.first?.id) {
+          await Task.yield()
+          proxy.scrollTo(store.currentIndex, anchor: .center)
+        }
+      }
+    }
+    .frame(height: 102)
+  }
+
+  private var folderHeader: some View {
+    VStack(alignment: .leading, spacing: 3) {
+      Text(store.activeFolderName)
+        .font(.headline)
+        .lineLimit(1)
+      Text("\(store.assets.count)개 이미지")
+        .font(.caption)
+        .foregroundStyle(.secondary)
+    }
+    .frame(maxWidth: .infinity, alignment: .leading)
+  }
+
+  @ViewBuilder
+  private func thumbnailCells(width: CGFloat, height: CGFloat) -> some View {
+    ForEach(Array(store.assets.enumerated()), id: \.element.id) { index, asset in
+      Button {
+        store.select(index: index)
+      } label: {
+        VStack(spacing: 4) {
+          ThumbnailImageView(
+            asset: asset,
+            thumbnailPipeline: store.thumbnailPipeline,
+            pipeline: store.pipeline,
+            maxPixelSize: 192
+          )
+          .frame(width: width, height: height)
+          .clipShape(RoundedRectangle(cornerRadius: 5))
+
+          Text("\(index + 1)")
+            .font(.caption2.monospacedDigit())
+            .foregroundStyle(.secondary)
+        }
+        .padding(5)
+        .background {
+          RoundedRectangle(cornerRadius: 8)
+            .fill(index == store.currentIndex ? Color.accentColor.opacity(0.25) : .clear)
+        }
+        .overlay {
+          RoundedRectangle(cornerRadius: 8)
+            .stroke(index == store.currentIndex ? Color.accentColor : .clear, lineWidth: 1.5)
+        }
+      }
+      .buttonStyle(.plain)
+      .id(index)
+      .help(asset.filename)
+    }
+  }
+
+  private func scrollToCurrent(_ index: Int, with proxy: ScrollViewProxy) {
+    withAnimation(.easeOut(duration: 0.15)) {
+      proxy.scrollTo(index, anchor: .center)
+    }
   }
 }

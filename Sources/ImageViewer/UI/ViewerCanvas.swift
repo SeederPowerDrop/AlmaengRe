@@ -21,7 +21,8 @@ struct ViewerCanvas: View {
       let rowCount = max(1, Int(ceil(Double(visible.count) / Double(max(columnCount, 1)))))
       let rowSpacing = CGFloat(max(0, rowCount - 1)) * 3
       let tileHeight = max(1, (geometry.size.height - rowSpacing - 6) / CGFloat(rowCount))
-      let canPan = store.zoom > 1 || store.baseScaleMode == .actualPixels
+      let canPan = store.canPan
+      let usesPrimaryDrag = store.panInteractionMode == .primaryDrag
 
       ZStack {
         Color.black
@@ -30,6 +31,7 @@ struct ViewerCanvas: View {
           ForEach(visible) { asset in
             ViewerImageTile(
               asset: asset,
+              thumbnailPipeline: store.thumbnailPipeline,
               pipeline: store.pipeline,
               adjustments: store.adjustments(for: asset),
               prefersHDR: store.prefersHDR,
@@ -37,8 +39,8 @@ struct ViewerCanvas: View {
               committedZoom: store.zoom,
               effectiveZoom: store.zoom * liveMagnification,
               effectivePan: CGSize(
-                width: store.panOffset.width + (canPan ? livePan.width : 0),
-                height: store.panOffset.height + (canPan ? livePan.height : 0)
+                width: store.panOffset.width + (canPan && usesPrimaryDrag ? livePan.width : 0),
+                height: store.panOffset.height + (canPan && usesPrimaryDrag ? livePan.height : 0)
               ),
               isCurrent: asset.id == store.currentAsset?.id
             )
@@ -73,7 +75,7 @@ struct ViewerCanvas: View {
       }
       .contentShape(Rectangle())
       .simultaneousGesture(magnificationGesture)
-      .simultaneousGesture(dragGesture(canPan: canPan))
+      .simultaneousGesture(dragGesture(canPan: canPan, usesPrimaryDrag: usesPrimaryDrag))
       .onHover { isInside in
         withAnimation(.easeOut(duration: 0.16)) {
           controlsVisible = isInside
@@ -92,15 +94,15 @@ struct ViewerCanvas: View {
       }
   }
 
-  private func dragGesture(canPan: Bool) -> some Gesture {
+  private func dragGesture(canPan: Bool, usesPrimaryDrag: Bool) -> some Gesture {
     DragGesture(minimumDistance: 2)
       .updating($livePan) { value, state, _ in
-        if canPan { state = value.translation }
+        if canPan, usesPrimaryDrag { state = value.translation }
       }
       .onEnded { value in
-        if canPan {
+        if canPan, usesPrimaryDrag {
           store.updatePan(by: value.translation)
-        } else if abs(value.translation.width) > 80,
+        } else if !canPan, abs(value.translation.width) > 80,
           abs(value.translation.width) > abs(value.translation.height) * 1.4
         {
           store.navigatePage(value.translation.width < 0 ? 1 : -1)

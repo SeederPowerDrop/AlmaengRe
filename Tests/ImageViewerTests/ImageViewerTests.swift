@@ -2,6 +2,7 @@ import CoreGraphics
 import Foundation
 import ImageIO
 import Testing
+import UniformTypeIdentifiers
 
 @testable import ImageViewer
 
@@ -107,6 +108,93 @@ struct ImageViewerTests {
   func customFormatsAreRegistered() {
     #expect(ImageFormatRegistry.knownExtensions.contains("qoi"))
     #expect(ImageFormatRegistry.knownExtensions.contains("pcx"))
+  }
+
+  @Test("썸네일 패널은 네 방향과 숨김을 지원한다")
+  func thumbnailPanelPlacements() {
+    #expect(ThumbnailPanelPlacement.allCases.count == 5)
+    #expect(ThumbnailPanelPlacement.top.isHorizontal)
+    #expect(ThumbnailPanelPlacement.bottom.isHorizontal)
+    #expect(!ThumbnailPanelPlacement.left.isHorizontal)
+    #expect(!ThumbnailPanelPlacement.hidden.isHorizontal)
+  }
+
+  @Test("설정한 포인터 입력만 확대 이미지 팬으로 허용한다")
+  func configurablePanInput() {
+    #expect(PanInteractionMode.spacePrimaryDrag.accepts(.spacePrimaryDrag))
+    #expect(PanInteractionMode.secondaryDrag.accepts(.secondaryDrag))
+    #expect(PanInteractionMode.middleDrag.accepts(.middleDrag))
+    #expect(PanInteractionMode.trackpadScroll.accepts(.trackpadScroll))
+    #expect(!PanInteractionMode.primaryDrag.accepts(.secondaryDrag))
+    #expect(!PanInteractionMode.trackpadScroll.accepts(.spacePrimaryDrag))
+  }
+
+  @Test("GPS 좌표가 Apple 및 Google 지도 표준 URL로 변환된다")
+  func mapURLs() throws {
+    let location = ImageLocation(latitude: 48.858_37, longitude: 2.294_481)
+
+    let appleURL = try #require(location.mapURL(for: .apple))
+    let appleComponents = try #require(URLComponents(url: appleURL, resolvingAgainstBaseURL: false))
+    #expect(appleComponents.scheme == "http")
+    #expect(appleComponents.host == "maps.apple.com")
+    #expect(
+      appleComponents.queryItems?.first(where: { $0.name == "ll" })?.value == "48.858370,2.294481")
+
+    let googleURL = try #require(location.mapURL(for: .google))
+    let googleComponents = try #require(
+      URLComponents(url: googleURL, resolvingAgainstBaseURL: false))
+    #expect(googleComponents.scheme == "https")
+    #expect(googleComponents.host == "www.google.com")
+    #expect(googleComponents.queryItems?.first(where: { $0.name == "api" })?.value == "1")
+    #expect(
+      googleComponents.queryItems?.first(where: { $0.name == "query" })?.value
+        == "48.858370,2.294481")
+  }
+
+  @Test("Image I/O에서 카메라와 GPS EXIF 메타데이터를 읽는다")
+  func detailedMetadata() async throws {
+    let directory = FileManager.default.temporaryDirectory
+      .appendingPathComponent("imageviewer-metadata-\(UUID().uuidString)", isDirectory: true)
+    try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+    defer { try? FileManager.default.removeItem(at: directory) }
+
+    let qoiURL = directory.appendingPathComponent("pixel.qoi")
+    let jpegURL = directory.appendingPathComponent("metadata.jpg")
+    try makeTwoPixelQOI().write(to: qoiURL, options: .atomic)
+    let image = try QOIDecoder.decode(url: qoiURL)
+    let destination = try #require(
+      CGImageDestinationCreateWithURL(jpegURL as CFURL, UTType.jpeg.identifier as CFString, 1, nil)
+    )
+    let properties: [CFString: Any] = [
+      kCGImagePropertyTIFFDictionary: [
+        kCGImagePropertyTIFFMake: "Open Camera",
+        kCGImagePropertyTIFFModel: "Test Model",
+      ],
+      kCGImagePropertyExifDictionary: [
+        kCGImagePropertyExifFNumber: 2.8,
+        kCGImagePropertyExifISOSpeedRatings: [200],
+        kCGImagePropertyExifFocalLength: 35.0,
+      ],
+      kCGImagePropertyGPSDictionary: [
+        kCGImagePropertyGPSLatitude: 37.5665,
+        kCGImagePropertyGPSLatitudeRef: "N",
+        kCGImagePropertyGPSLongitude: 126.978,
+        kCGImagePropertyGPSLongitudeRef: "E",
+        kCGImagePropertyGPSAltitude: 38.0,
+      ],
+    ]
+    CGImageDestinationAddImage(destination, image, properties as CFDictionary)
+    #expect(CGImageDestinationFinalize(destination))
+
+    let metadata = try await ImagePipeline().metadata(for: jpegURL)
+    #expect(metadata.cameraMake == "Open Camera")
+    #expect(metadata.cameraModel == "Test Model")
+    #expect(metadata.aperture == 2.8)
+    #expect(metadata.iso == 200)
+    #expect(metadata.focalLength == 35)
+    #expect(metadata.location?.latitude == 37.5665)
+    #expect(metadata.location?.longitude == 126.978)
+    #expect(metadata.location?.altitude == 38)
   }
 
   private func makeTwoPixelQOI() -> Data {

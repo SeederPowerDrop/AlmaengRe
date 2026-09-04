@@ -48,6 +48,18 @@ struct BottomControlBar: View {
       }
       .help("실제 픽셀 크기")
 
+      Menu {
+        Picker("확대 이미지 이동", selection: $store.panInteractionMode) {
+          ForEach(PanInteractionMode.allCases) { mode in
+            Text(mode.title).tag(mode)
+          }
+        }
+      } label: {
+        Image(systemName: "hand.draw")
+      }
+      .menuStyle(.borderlessButton)
+      .help("팬 조작: \(store.panInteractionMode.title)")
+
       Button {
         store.navigatePage(1)
       } label: {

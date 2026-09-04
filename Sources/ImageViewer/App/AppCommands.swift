@@ -32,6 +32,16 @@ struct AppCommands: Commands {
         store.toggleFullScreen()
       }
       .keyboardShortcut("f", modifiers: [.command, .control])
+      Divider()
+      Menu("썸네일 패널 위치") {
+        Picker("위치", selection: $store.thumbnailPanelPlacement) {
+          ForEach(ThumbnailPanelPlacement.allCases) { placement in
+            Text(placement.title).tag(placement)
+          }
+        }
+      }
+      Button("이미지 정보 패널") { store.toggleInspector(.information) }
+      Button("이미지 편집 패널") { store.toggleInspector(.editing) }
     }
 
     CommandMenu("이미지") {

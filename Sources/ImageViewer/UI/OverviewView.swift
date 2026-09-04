@@ -20,6 +20,7 @@ struct OverviewView: View {
               VStack(alignment: .leading, spacing: 7) {
                 ThumbnailImageView(
                   asset: asset,
+                  thumbnailPipeline: store.thumbnailPipeline,
                   pipeline: store.pipeline,
                   maxPixelSize: Int(store.thumbnailSize * 2.2),
                   adjustments: store.adjustments(for: asset)
@@ -71,6 +72,10 @@ struct OverviewView: View {
           withAnimation(.easeOut(duration: 0.2)) {
             proxy.scrollTo(newIndex, anchor: .center)
           }
+        }
+        .task(id: store.assets.first?.id) {
+          await Task.yield()
+          proxy.scrollTo(store.currentIndex, anchor: .center)
         }
       }
 

@@ -19,6 +19,7 @@ let package = Package(
         .linkedFramework("AppKit"),
         .linkedFramework("CoreImage"),
         .linkedFramework("ImageIO"),
+        .linkedFramework("QuickLookThumbnailing"),
         .linkedFramework("QuartzCore"),
       ]
     ),

@@ -11,27 +11,7 @@ struct RootView: View {
       if store.assets.isEmpty {
         EmptyLibraryView(store: store)
       } else {
-        HStack(spacing: 0) {
-          if store.showsSidebar && !store.isFocusMode {
-            SidebarView(store: store)
-            Divider()
-          }
-
-          Group {
-            switch store.presentationMode {
-            case .viewer:
-              ViewerCanvas(store: store)
-            case .overview:
-              OverviewView(store: store)
-            }
-          }
-          .frame(maxWidth: .infinity, maxHeight: .infinity)
-
-          if store.showsInspector && !store.isFocusMode {
-            Divider()
-            InspectorView(store: store)
-          }
-        }
+        viewerWorkspace
       }
 
       if store.isLoading {
@@ -44,20 +24,6 @@ struct RootView: View {
         .padding(22)
         .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 14))
       }
-    }
-    .background {
-      InputEventMonitor(
-        onKeyDown: { event in
-          guard let action = shortcuts.action(matching: event) else { return false }
-          store.perform(action)
-          return true
-        },
-        onHorizontalSwipe: { delta in
-          guard store.presentationMode == .viewer else { return }
-          store.navigatePage(delta < 0 ? 1 : -1)
-        }
-      )
-      .frame(width: 0, height: 0)
     }
     .toolbar(store.isFocusMode ? .hidden : .visible, for: .windowToolbar)
     .toolbar {
@@ -111,19 +77,24 @@ struct RootView: View {
         }
         .help(store.prefersHDR ? "HDR 출력 켜짐" : "HDR 출력 꺼짐")
 
-        Button {
-          store.showsSidebar.toggle()
-        } label: {
-          Image(systemName: "sidebar.left")
-        }
-        .help("썸네일 사이드바")
+        thumbnailPlacementMenu
 
         Button {
-          store.showsInspector.toggle()
+          store.toggleInspector(.information)
         } label: {
-          Image(systemName: "sidebar.right")
+          Image(
+            systemName: store.inspectorPanel == .information ? "info.circle.fill" : "info.circle")
         }
-        .help("이미지 조정 및 내보내기")
+        .accessibilityLabel("이미지 정보")
+        .help("이미지 정보 (i)")
+
+        Button {
+          store.toggleInspector(.editing)
+        } label: {
+          EditingGlyph(isActive: store.inspectorPanel == .editing)
+        }
+        .accessibilityLabel("이미지 편집")
+        .help("이미지 편집 (e)")
 
         Button {
           store.toggleFocusMode()
@@ -153,5 +124,104 @@ struct RootView: View {
       store.purgeCaches()
     }
     .preferredColorScheme(.dark)
+  }
+
+  private var viewerWorkspace: some View {
+    VStack(spacing: 0) {
+      if showsThumbnailPanel(at: .top) {
+        SidebarView(store: store, placement: .top)
+        Divider()
+      }
+
+      HStack(spacing: 0) {
+        if showsThumbnailPanel(at: .left) {
+          SidebarView(store: store, placement: .left)
+          Divider()
+        }
+
+        viewerContent
+          .frame(maxWidth: .infinity, maxHeight: .infinity)
+
+        if showsThumbnailPanel(at: .right) {
+          Divider()
+          SidebarView(store: store, placement: .right)
+        }
+
+        if let panel = store.inspectorPanel, !store.isFocusMode {
+          Divider()
+          InspectorView(store: store, panel: panel)
+        }
+      }
+
+      if showsThumbnailPanel(at: .bottom) {
+        Divider()
+        SidebarView(store: store, placement: .bottom)
+      }
+    }
+  }
+
+  private var viewerContent: some View {
+    Group {
+      switch store.presentationMode {
+      case .viewer:
+        ViewerCanvas(store: store)
+      case .overview:
+        OverviewView(store: store)
+      }
+    }
+    .background {
+      InputEventMonitor(
+        onKeyDown: { event in
+          // Space+드래그 모드에서는 확대 중 Space를 팬 전용으로 예약합니다.
+          if event.keyCode == 49, store.canPan, store.panInteractionMode == .spacePrimaryDrag {
+            return true
+          }
+          guard let action = shortcuts.action(matching: event) else { return false }
+          store.perform(action)
+          return true
+        },
+        onPointerPan: { input, delta in
+          store.handlePanInput(input, delta: delta)
+        },
+        onHorizontalSwipe: { delta in
+          guard store.presentationMode == .viewer else { return }
+          store.navigatePage(delta < 0 ? 1 : -1)
+        }
+      )
+    }
+  }
+
+  private var thumbnailPlacementMenu: some View {
+    Menu {
+      Picker("썸네일 패널 위치", selection: $store.thumbnailPanelPlacement) {
+        ForEach(ThumbnailPanelPlacement.allCases) { placement in
+          Label(placement.title, systemImage: placement.systemImage)
+            .tag(placement)
+        }
+      }
+    } label: {
+      Image(systemName: store.thumbnailPanelPlacement.systemImage)
+    }
+    .help("썸네일 패널 위치")
+  }
+
+  private func showsThumbnailPanel(at placement: ThumbnailPanelPlacement) -> Bool {
+    !store.isFocusMode && store.thumbnailPanelPlacement == placement
+  }
+}
+
+/// SF Symbols에 없는 소문자 e를 편집 도구의 고유하고 가벼운 글리프로 사용합니다.
+private struct EditingGlyph: View {
+  let isActive: Bool
+
+  var body: some View {
+    Text("e")
+      .font(.system(size: 14, weight: .bold, design: .rounded))
+      .foregroundStyle(isActive ? Color.accentColor : .primary)
+      .frame(width: 17, height: 17)
+      .overlay {
+        RoundedRectangle(cornerRadius: 4)
+          .stroke(isActive ? Color.accentColor : Color.secondary, lineWidth: 1.25)
+      }
   }
 }

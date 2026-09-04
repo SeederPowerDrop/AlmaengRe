@@ -10,6 +10,7 @@ private struct ViewerFrameRequest: Hashable {
 /// 한 타일이 정지 이미지와 GIF/APNG/WebP 같은 다중 프레임 이미지를 모두 재생합니다.
 struct ViewerImageTile: View {
   let asset: ImageAsset
+  let thumbnailPipeline: ThumbnailPipeline
   let pipeline: ImagePipeline
   let adjustments: ImageAdjustments
   let prefersHDR: Bool
@@ -117,8 +118,29 @@ struct ViewerImageTile: View {
   }
 
   private func loadAndPlay(request: ViewerFrameRequest) async {
+    frame = nil
     errorMessage = nil
     var frameIndex = 0
+
+    // Quick Look의 캐시 이미지를 먼저 보여 주고, 아래의 정밀 렌더가 끝나는 즉시
+    // 색상 관리/HDR 결과로 교체해 큰 RAW에서도 빈 화면 시간을 줄입니다.
+    var previewTask: Task<Void, Never>?
+    if request.adjustments.isIdentity {
+      previewTask = Task { @MainActor in
+        guard
+          let image = try? await thumbnailPipeline.thumbnail(
+            for: request.url,
+            maxPixelSize: min(2_048, request.maxPixelSize)
+          ),
+          !Task.isCancelled,
+          frame == nil
+        else {
+          return
+        }
+        frame = RenderedFrame(image: image, frameIndex: 0, frameCount: 1, duration: nil)
+      }
+    }
+    defer { previewTask?.cancel() }
 
     do {
       while !Task.isCancelled {
@@ -139,8 +161,10 @@ struct ViewerImageTile: View {
     } catch is CancellationError {
       // 다른 파일이나 확대 단계로 전환한 정상적인 취소입니다.
     } catch {
-      frame = nil
-      errorMessage = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+      // 정밀 렌더만 실패하고 Quick Look 미리보기가 남아 있다면 그것이라도 유지합니다.
+      if frame == nil {
+        errorMessage = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+      }
     }
   }
 }

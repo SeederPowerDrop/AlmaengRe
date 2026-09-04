@@ -54,10 +54,10 @@ actor ImagePipeline {
   init() {
     let physicalMemory = ProcessInfo.processInfo.physicalMemory
     let cacheBytes = min(
-      UInt64(768 * 1_024 * 1_024), max(UInt64(256 * 1_024 * 1_024), physicalMemory / 16))
+      UInt64(512 * 1_024 * 1_024), max(UInt64(128 * 1_024 * 1_024), physicalMemory / 24))
     renderedCache.totalCostLimit = Int(cacheBytes)
-    renderedCache.countLimit = 192
-    sourceCache.countLimit = 24
+    renderedCache.countLimit = 128
+    sourceCache.countLimit = 16
 
     context = CIContext(options: [
       .cacheIntermediates: false,
@@ -74,15 +74,40 @@ actor ImagePipeline {
 
   func metadata(for url: URL) throws -> ImageMetadata {
     if let source = imageSource(for: url) {
-      let properties = CGImageSourceCopyPropertiesAtIndex(source, 0, nil) as? [CFString: Any]
+      let properties =
+        CGImageSourceCopyPropertiesAtIndex(source, 0, nil) as? [CFString: Any] ?? [:]
+      let exif = dictionary(properties[kCGImagePropertyExifDictionary])
+      let tiff = dictionary(properties[kCGImagePropertyTIFFDictionary])
+      let gps = dictionary(properties[kCGImagePropertyGPSDictionary])
+      let capturedAt: String?
+      if let originalDate = text(exif[kCGImagePropertyExifDateTimeOriginal]) {
+        capturedAt = originalDate
+      } else {
+        capturedAt = text(tiff[kCGImagePropertyTIFFDateTime])
+      }
       return ImageMetadata(
-        pixelWidth: number(properties?[kCGImagePropertyPixelWidth]),
-        pixelHeight: number(properties?[kCGImagePropertyPixelHeight]),
+        pixelWidth: number(properties[kCGImagePropertyPixelWidth]),
+        pixelHeight: number(properties[kCGImagePropertyPixelHeight]),
         frameCount: max(1, CGImageSourceGetCount(source)),
-        bitDepth: optionalNumber(properties?[kCGImagePropertyDepth]),
-        colorModel: properties?[kCGImagePropertyColorModel] as? String,
-        profileName: properties?[kCGImagePropertyProfileName] as? String,
-        typeIdentifier: CGImageSourceGetType(source) as String?
+        bitDepth: optionalNumber(properties[kCGImagePropertyDepth]),
+        colorModel: text(properties[kCGImagePropertyColorModel]),
+        profileName: text(properties[kCGImagePropertyProfileName]),
+        typeIdentifier: CGImageSourceGetType(source) as String?,
+        orientation: optionalNumber(properties[kCGImagePropertyOrientation]),
+        hasAlpha: optionalBool(properties[kCGImagePropertyHasAlpha]),
+        dpiWidth: optionalDouble(properties[kCGImagePropertyDPIWidth]),
+        dpiHeight: optionalDouble(properties[kCGImagePropertyDPIHeight]),
+        cameraMake: text(tiff[kCGImagePropertyTIFFMake]),
+        cameraModel: text(tiff[kCGImagePropertyTIFFModel]),
+        lensModel: text(exif[kCGImagePropertyExifLensModel]),
+        software: text(tiff[kCGImagePropertyTIFFSoftware]),
+        artist: text(tiff[kCGImagePropertyTIFFArtist]),
+        capturedAt: capturedAt,
+        exposureTime: optionalDouble(exif[kCGImagePropertyExifExposureTime]),
+        aperture: optionalDouble(exif[kCGImagePropertyExifFNumber]),
+        iso: isoValue(exif[kCGImagePropertyExifISOSpeedRatings]),
+        focalLength: optionalDouble(exif[kCGImagePropertyExifFocalLength]),
+        location: imageLocation(from: gps)
       )
     }
 
@@ -125,7 +150,22 @@ actor ImagePipeline {
 
     let input: CIImage
     var directlyDecodedBitmap: CGImage?
-    if frameCount == 1,
+    var shouldDecodeWithImageIO = frameCount > 1
+    if !shouldDecodeWithImageIO, pixelBucket > 0, let source {
+      shouldDecodeWithImageIO = !shouldPreserveHDR(source: source, url: url)
+    }
+    if let source,
+      shouldDecodeWithImageIO,
+      let frameImage = makeImageIOFrame(
+        source: source,
+        frameIndex: frameIndex,
+        maxPixelSize: pixelBucket == 0 ? nil : pixelBucket
+      )
+    {
+      // 화면 크기가 정해진 SDR 이미지는 Image I/O 단계에서 먼저 축소합니다.
+      // 수천만 화소 JPEG/RAW를 온전히 디코딩한 뒤 줄이는 비용을 피하는 핵심 경로입니다.
+      input = CIImage(cgImage: frameImage)
+    } else if frameCount == 1,
       let directImage = CIImage(
         contentsOf: url,
         options: [
@@ -136,14 +176,6 @@ actor ImagePipeline {
       )
     {
       input = directImage
-    } else if let source,
-      let frameImage = makeImageIOFrame(
-        source: source,
-        frameIndex: frameIndex,
-        maxPixelSize: pixelBucket == 0 ? nil : pixelBucket
-      )
-    {
-      input = CIImage(cgImage: frameImage)
     } else {
       let bitmap = try decodeCustomOrAppKit(url: url)
       directlyDecodedBitmap = bitmap
@@ -162,11 +194,13 @@ actor ImagePipeline {
         frameCount: 1,
         duration: nil
       )
-      renderedCache.setObject(
-        RenderedFrameBox(frame),
-        forKey: key,
-        cost: bitmap.bytesPerRow * bitmap.height
-      )
+      if pixelBucket > 0 {
+        renderedCache.setObject(
+          RenderedFrameBox(frame),
+          forKey: key,
+          cost: bitmap.bytesPerRow * bitmap.height
+        )
+      }
       return frame
     }
 
@@ -207,8 +241,12 @@ actor ImagePipeline {
       throw ImagePipelineError.renderingFailed(url)
     }
 
-    let duration = source.flatMap {
-      animationDuration(source: $0, frameIndex: frameIndex, frameCount: frameCount)
+    let duration: TimeInterval?
+    if let source {
+      duration = animationDuration(
+        source: source, frameIndex: frameIndex, frameCount: frameCount)
+    } else {
+      duration = nil
     }
     let frame = RenderedFrame(
       image: rendered,
@@ -216,12 +254,16 @@ actor ImagePipeline {
       frameCount: frameCount,
       duration: duration
     )
-    let cost = rendered.bytesPerRow * rendered.height
-    renderedCache.setObject(RenderedFrameBox(frame), forKey: key, cost: cost)
+    // pixelBucket 0은 내보내기용 원본 해상도입니다. 거대한 RAW 결과를 캐시에
+    // 붙잡아 두지 않고 저장이 끝나면 즉시 해제될 수 있게 합니다.
+    if pixelBucket > 0 {
+      let cost = rendered.bytesPerRow * rendered.height
+      renderedCache.setObject(RenderedFrameBox(frame), forKey: key, cost: cost)
+    }
     return frame
   }
 
-  func prefetch(urls: [URL], maxPixelSize: Int, prefersHDR: Bool) {
+  func prefetch(urls: [URL], maxPixelSize: Int, prefersHDR: Bool) async {
     for url in urls {
       guard !Task.isCancelled else { return }
       _ = try? renderFrame(
@@ -230,6 +272,8 @@ actor ImagePipeline {
         adjustments: .identity,
         prefersHDR: prefersHDR
       )
+      // actor를 잠시 양보해 사용자가 선택한 이미지의 전경 요청이 먼저 실행되게 합니다.
+      await Task.yield()
     }
   }
 
@@ -271,9 +315,39 @@ actor ImagePipeline {
       kCGImageSourceShouldAllowFloat: true,
     ]
     if let maxPixelSize {
-      options[kCGImageSourceThumbnailMaxPixelSize] = maxPixelSize
+      let properties =
+        CGImageSourceCopyPropertiesAtIndex(source, frameIndex, nil) as? [CFString: Any]
+      let sourceMaximumDimension = max(
+        number(properties?[kCGImagePropertyPixelWidth]),
+        number(properties?[kCGImagePropertyPixelHeight])
+      )
+      // Image I/O는 원본보다 큰 썸네일 상한을 오류로 기록합니다. 작은 이미지에는
+      // 원본 치수를 상한으로 써 불필요한 업스케일과 로그 잡음을 함께 피합니다.
+      options[kCGImageSourceThumbnailMaxPixelSize] =
+        sourceMaximumDimension > 0 ? min(maxPixelSize, sourceMaximumDimension) : maxPixelSize
     }
     return CGImageSourceCreateThumbnailAtIndex(source, frameIndex, options as CFDictionary)
+  }
+
+  private func shouldPreserveHDR(source: CGImageSource, url: URL) -> Bool {
+    let extensionName = url.pathExtension.lowercased()
+    if extensionName == "hdr" || extensionName == "exr" {
+      return true
+    }
+
+    if CGImageSourceCopyAuxiliaryDataInfoAtIndex(
+      source, 0, kCGImageAuxiliaryDataTypeHDRGainMap) != nil
+    {
+      return true
+    }
+
+    let wideDynamicRangeContainers: Set<String> = ["avif", "heic", "heif", "hif", "jxl"]
+    guard wideDynamicRangeContainers.contains(extensionName),
+      let properties = CGImageSourceCopyPropertiesAtIndex(source, 0, nil) as? [CFString: Any]
+    else {
+      return false
+    }
+    return number(properties[kCGImagePropertyDepth]) > 8
   }
 
   private func decodeCustomOrAppKit(url: URL) throws -> CGImage {
@@ -412,6 +486,72 @@ actor ImagePipeline {
 
   private func optionalNumber(_ value: Any?) -> Int? {
     (value as? NSNumber)?.intValue
+  }
+
+  private func optionalDouble(_ value: Any?) -> Double? {
+    (value as? NSNumber)?.doubleValue
+  }
+
+  private func optionalBool(_ value: Any?) -> Bool? {
+    (value as? NSNumber)?.boolValue
+  }
+
+  private func text(_ value: Any?) -> String? {
+    guard let value = value as? String else { return nil }
+    let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
+    return trimmed.isEmpty ? nil : trimmed
+  }
+
+  private func dictionary(_ value: Any?) -> [CFString: Any] {
+    value as? [CFString: Any] ?? [:]
+  }
+
+  private func isoValue(_ value: Any?) -> Int? {
+    if let number = value as? NSNumber {
+      return number.intValue
+    }
+    if let values = value as? [NSNumber] {
+      return values.first?.intValue
+    }
+    if let values = value as? [Any], let first = values.first {
+      return optionalNumber(first)
+    }
+    return nil
+  }
+
+  private func imageLocation(from gps: [CFString: Any]) -> ImageLocation? {
+    guard var latitude = optionalDouble(gps[kCGImagePropertyGPSLatitude]),
+      var longitude = optionalDouble(gps[kCGImagePropertyGPSLongitude])
+    else {
+      return nil
+    }
+
+    switch text(gps[kCGImagePropertyGPSLatitudeRef])?.uppercased() {
+    case "S": latitude = -abs(latitude)
+    case "N": latitude = abs(latitude)
+    default: break
+    }
+    switch text(gps[kCGImagePropertyGPSLongitudeRef])?.uppercased() {
+    case "W": longitude = -abs(longitude)
+    case "E": longitude = abs(longitude)
+    default: break
+    }
+
+    guard (-90...90).contains(latitude), (-180...180).contains(longitude) else {
+      return nil
+    }
+
+    var altitude = optionalDouble(gps[kCGImagePropertyGPSAltitude])
+    if optionalNumber(gps[kCGImagePropertyGPSAltitudeRef]) == 1, let value = altitude {
+      altitude = -abs(value)
+    }
+
+    return ImageLocation(
+      latitude: latitude,
+      longitude: longitude,
+      altitude: altitude,
+      direction: optionalDouble(gps[kCGImagePropertyGPSImgDirection])
+    )
   }
 }
 

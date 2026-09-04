@@ -10,6 +10,7 @@ private struct ThumbnailRequest: Hashable {
 /// 목록 셀은 보일 때만 디코딩되고 사라지면 작업이 자동 취소됩니다.
 struct ThumbnailImageView: View {
   let asset: ImageAsset
+  let thumbnailPipeline: ThumbnailPipeline
   let pipeline: ImagePipeline
   let maxPixelSize: Int
   var adjustments: ImageAdjustments = .identity
@@ -46,8 +47,19 @@ struct ThumbnailImageView: View {
       }
     }
     .task(id: request) {
+      image = nil
       failed = false
       do {
+        if adjustments.isIdentity,
+          let quickImage = try? await thumbnailPipeline.thumbnail(
+            for: asset.url, maxPixelSize: maxPixelSize)
+        {
+          try Task.checkCancellation()
+          image = quickImage
+          return
+        }
+
+        // 자체 포맷이나 조정된 이미지는 Quick Look 대신 앱 디코더로 처리합니다.
         let frame = try await pipeline.renderFrame(
           url: asset.url,
           maxPixelSize: maxPixelSize,

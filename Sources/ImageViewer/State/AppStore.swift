@@ -23,8 +23,18 @@ final class AppStore: ObservableObject {
   @Published var thumbnailSize: CGFloat = 150
   @Published var zoom: CGFloat = 1
   @Published var panOffset: CGSize = .zero
-  @Published var showsSidebar = true
-  @Published var showsInspector = false
+  @Published var thumbnailPanelPlacement: ThumbnailPanelPlacement {
+    didSet {
+      UserDefaults.standard.set(
+        thumbnailPanelPlacement.rawValue, forKey: Self.thumbnailPlacementDefaultsKey)
+    }
+  }
+  @Published var panInteractionMode: PanInteractionMode {
+    didSet {
+      UserDefaults.standard.set(panInteractionMode.rawValue, forKey: Self.panModeDefaultsKey)
+    }
+  }
+  @Published var inspectorPanel: InspectorPanel?
   @Published var isFocusMode = false
   @Published var prefersHDR = true
   @Published var wrapsNavigation = true
@@ -37,18 +47,33 @@ final class AppStore: ObservableObject {
   @Published var statusMessage: String?
 
   let pipeline: ImagePipeline
+  let thumbnailPipeline: ThumbnailPipeline
 
   private let library = ImageLibrary()
   private let exporter: ImageExporter
   private var adjustments: [URL: ImageAdjustments] = [:]
   private var loadTask: Task<Void, Never>?
   private var metadataTask: Task<Void, Never>?
+  private var prefetchTask: Task<Void, Never>?
   private var securityScopedURL: URL?
+
+  private static let thumbnailPlacementDefaultsKey = "ImageViewer.ThumbnailPlacement.v1"
+  private static let panModeDefaultsKey = "ImageViewer.PanInteractionMode.v1"
 
   init() {
     let pipeline = ImagePipeline()
     self.pipeline = pipeline
+    thumbnailPipeline = ThumbnailPipeline()
     exporter = ImageExporter(pipeline: pipeline)
+
+    let defaults = UserDefaults.standard
+    thumbnailPanelPlacement =
+      defaults.string(forKey: Self.thumbnailPlacementDefaultsKey)
+      .flatMap(ThumbnailPanelPlacement.init(rawValue:)) ?? .left
+    panInteractionMode =
+      defaults.string(forKey: Self.panModeDefaultsKey)
+      .flatMap(PanInteractionMode.init(rawValue:)) ?? .primaryDrag
+    inspectorPanel = nil
   }
 
   var currentAsset: ImageAsset? {
@@ -64,6 +89,10 @@ final class AppStore: ObservableObject {
     guard !assets.isEmpty else { return [] }
     let end = min(assets.count, pageStartIndex + imagesPerPage)
     return Array(assets[pageStartIndex..<end])
+  }
+
+  var canPan: Bool {
+    zoom > 1 || baseScaleMode == .actualPixels
   }
 
   var positionDescription: String {
@@ -195,9 +224,19 @@ final class AppStore: ObservableObject {
   }
 
   func updatePan(by translation: CGSize) {
-    guard zoom > 1 || baseScaleMode == .actualPixels else { return }
+    guard canPan else { return }
     panOffset.width += translation.width
     panOffset.height += translation.height
+  }
+
+  /// AppKit에서 받은 보조 버튼/트랙패드 입력이 현재 설정과 일치할 때만 팬합니다.
+  @discardableResult
+  func handlePanInput(_ input: PanInputKind, delta: CGSize) -> Bool {
+    guard presentationMode == .viewer, canPan, panInteractionMode.accepts(input) else {
+      return false
+    }
+    updatePan(by: delta)
+    return true
   }
 
   func updateAdjustments(_ change: (inout ImageAdjustments) -> Void) {
@@ -228,6 +267,25 @@ final class AppStore: ObservableObject {
 
   func toggleOverview() {
     presentationMode = presentationMode == .viewer ? .overview : .viewer
+  }
+
+  func toggleInspector(_ panel: InspectorPanel) {
+    inspectorPanel = inspectorPanel == panel ? nil : panel
+  }
+
+  func openMap(_ service: MapService) {
+    guard let location = currentMetadata?.location,
+      let url = location.mapURL(for: service)
+    else {
+      return
+    }
+
+    if !NSWorkspace.shared.open(url) {
+      alert = ViewerAlert(
+        title: "지도를 열 수 없음",
+        message: "\(service.title)를 여는 데 실패했습니다. 기본 브라우저 설정을 확인해 주세요."
+      )
+    }
   }
 
   func toggleFocusMode() {
@@ -299,12 +357,16 @@ final class AppStore: ObservableObject {
   }
 
   func purgeCaches() {
-    Task { await pipeline.purgeCaches() }
+    Task {
+      await pipeline.purgeCaches()
+      await thumbnailPipeline.purgeCache()
+    }
   }
 
   private func load(folder: URL, focusing selectedURL: URL? = nil) {
     retainSecurityScope(for: folder)
     loadTask?.cancel()
+    prefetchTask?.cancel()
     isLoading = true
 
     loadTask = Task { [weak self] in
@@ -324,6 +386,7 @@ final class AppStore: ObservableObject {
 
   private func load(explicitFiles urls: [URL]) {
     loadTask?.cancel()
+    prefetchTask?.cancel()
     isLoading = true
 
     loadTask = Task { [weak self] in
@@ -375,14 +438,20 @@ final class AppStore: ObservableObject {
   }
 
   private func prefetchAroundCurrentPosition() {
+    prefetchTask?.cancel()
     guard !assets.isEmpty else { return }
     let lower = max(0, pageStartIndex - 2)
     let upper = min(assets.count, pageStartIndex + imagesPerPage + 4)
-    let urls = assets[lower..<upper].map(\.url)
+    let visibleEnd = min(assets.count, pageStartIndex + imagesPerPage)
+    // 현재 화면은 각 타일이 최고 우선순위로 직접 요청합니다. 배경 선읽기가 그 요청을
+    // 가로막지 않도록 직전·직후 파일만 넣습니다.
+    let urls =
+      assets[lower..<pageStartIndex].map(\.url)
+      + assets[visibleEnd..<upper].map(\.url)
     let hdr = prefersHDR
 
-    Task(priority: .utility) { [pipeline] in
-      await pipeline.prefetch(urls: urls, maxPixelSize: 2_048, prefersHDR: hdr)
+    prefetchTask = Task(priority: .background) { [pipeline] in
+      await pipeline.prefetch(urls: urls, maxPixelSize: 1_536, prefersHDR: hdr)
     }
   }
 

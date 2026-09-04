@@ -18,7 +18,6 @@ actor ImageLibrary {
     .isDirectoryKey,
     .fileSizeKey,
     .contentModificationDateKey,
-    .contentTypeKey,
   ]
 
   func scan(folder: URL) throws -> [ImageAsset] {

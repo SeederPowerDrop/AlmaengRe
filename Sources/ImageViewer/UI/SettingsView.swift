@@ -23,10 +23,28 @@ struct SettingsView: View {
         Text("HDR 디스플레이에서 확장 밝기 범위를 사용합니다. SDR 화면에서는 자동으로 안전하게 표시됩니다.")
           .font(.caption)
           .foregroundStyle(.secondary)
+
+        Picker("썸네일 패널 위치", selection: $store.thumbnailPanelPlacement) {
+          ForEach(ThumbnailPanelPlacement.allCases) { placement in
+            Label(placement.title, systemImage: placement.systemImage)
+              .tag(placement)
+          }
+        }
       }
 
       Section("탐색") {
         Toggle("마지막 이미지 다음에 첫 이미지로 이동", isOn: $store.wrapsNavigation)
+      }
+
+      Section("확대 이미지 이동") {
+        Picker("팬 조작", selection: $store.panInteractionMode) {
+          ForEach(PanInteractionMode.allCases) { mode in
+            Text(mode.title).tag(mode)
+          }
+        }
+        Text(store.panInteractionMode.detail)
+          .font(.caption)
+          .foregroundStyle(.secondary)
       }
 
       Section("디코더") {
