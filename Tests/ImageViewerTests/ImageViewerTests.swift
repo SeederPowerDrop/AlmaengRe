@@ -272,6 +272,230 @@ struct ImageViewerTests {
     #expect(metadata.location?.altitude == 38)
   }
 
+  @Test("메타데이터 편집값이 파일명과 숫자 범위를 검증한다")
+  func metadataEditValidation() throws {
+    let sourceURL = URL(fileURLWithPath: "/Pictures/photo.jpg")
+    let asset = ImageAsset(url: sourceURL, byteCount: 100, modificationDate: Date())
+    var draft = ImageMetadataEditDraft(asset: asset, metadata: nil)
+    draft.exposureTime = "1/125"
+    draft.dpiWidth = "300"
+    draft.dpiHeight = ""
+    draft.includesLocation = true
+    draft.latitude = "37.5665"
+    draft.longitude = "126.978"
+
+    let update = try draft.validated(for: sourceURL)
+    #expect(update.metadata.exposureTime == 1.0 / 125.0)
+    #expect(update.metadata.dpiWidth == 300)
+    #expect(update.metadata.dpiHeight == 300)
+    #expect(update.metadata.location?.latitude == 37.5665)
+
+    draft.filename = "photo.png"
+    do {
+      _ = try draft.validated(for: sourceURL)
+      Issue.record("정보 편집에서 확장자 변경을 허용했습니다.")
+    } catch let error as ImageMetadataEditValidationError {
+      #expect(error == .changedExtension(expected: "jpg"))
+    }
+
+    draft.filename = "photo.jpg"
+    draft.latitude = "91"
+    do {
+      _ = try draft.validated(for: sourceURL)
+      Issue.record("범위를 벗어난 위도를 허용했습니다.")
+    } catch let error as ImageMetadataEditValidationError {
+      #expect(error == .outOfRange(field: "위도", range: "-90~90"))
+    }
+  }
+
+  @Test("PNG 픽셀을 바꾸지 않고 정보·GPS·파일명을 수정한다")
+  func losslessMetadataEditing() async throws {
+    let directory = FileManager.default.temporaryDirectory
+      .appendingPathComponent("imageviewer-metadata-edit-\(UUID().uuidString)", isDirectory: true)
+    try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+    defer { try? FileManager.default.removeItem(at: directory) }
+
+    let qoiURL = directory.appendingPathComponent("source.qoi")
+    let sourceURL = directory.appendingPathComponent("source.png")
+    try makeTwoPixelQOI().write(to: qoiURL, options: .atomic)
+    let image = try QOIDecoder.decode(url: qoiURL)
+    let destination = try #require(
+      CGImageDestinationCreateWithURL(sourceURL as CFURL, UTType.png.identifier as CFString, 1, nil)
+    )
+    CGImageDestinationAddImage(destination, image, nil)
+    #expect(CGImageDestinationFinalize(destination))
+
+    let sourceValues = try sourceURL.resourceValues(forKeys: [
+      .fileSizeKey, .contentModificationDateKey,
+    ])
+    let asset = ImageAsset(
+      url: sourceURL,
+      byteCount: sourceValues.fileSize.map(Int64.init),
+      modificationDate: sourceValues.contentModificationDate
+    )
+    let initialMetadata = try await ImagePipeline().metadata(for: sourceURL)
+    let originalDraft = ImageMetadataEditDraft(asset: asset, metadata: initialMetadata)
+    var editedDraft = originalDraft
+    editedDraft.filename = "renamed.png"
+    editedDraft.modificationDate = Date(timeIntervalSince1970: 1_700_000_000)
+    editedDraft.imageDescription = "테스트 이미지 설명"
+    editedDraft.copyright = "© ImageViewer"
+    editedDraft.dpiWidth = "144"
+    editedDraft.dpiHeight = "144"
+    editedDraft.cameraMake = "Open Camera"
+    editedDraft.cameraModel = "Test Model"
+    editedDraft.lensModel = "Test Lens"
+    editedDraft.software = "이미지뷰어"
+    editedDraft.artist = "테스트 작성자"
+    editedDraft.capturedAt = "2026:01:02 03:04:05"
+    editedDraft.exposureTime = "1/125"
+    editedDraft.aperture = "2.8"
+    editedDraft.iso = "200"
+    editedDraft.focalLength = "35"
+    editedDraft.includesLocation = true
+    editedDraft.latitude = "37.5665"
+    editedDraft.longitude = "126.978"
+    editedDraft.altitude = "38"
+    editedDraft.direction = "120"
+
+    let original = try originalDraft.validated(for: sourceURL)
+    let update = try editedDraft.validated(for: sourceURL)
+    let beforePixels = try pixelBytes(at: sourceURL)
+    let outputURL = try await ImageMetadataWriter().apply(
+      update,
+      replacing: original,
+      to: sourceURL
+    )
+
+    #expect(outputURL.lastPathComponent == "renamed.png")
+    #expect(!FileManager.default.fileExists(atPath: sourceURL.path))
+    #expect(try pixelBytes(at: outputURL) == beforePixels)
+
+    let metadata = try await ImagePipeline().metadata(for: outputURL)
+    #expect(metadata.imageDescription == "테스트 이미지 설명")
+    #expect(metadata.copyright == "© ImageViewer")
+    #expect(metadata.dpiWidth == 144)
+    #expect(metadata.dpiHeight == 144)
+    #expect(metadata.cameraMake == "Open Camera")
+    #expect(metadata.cameraModel == "Test Model")
+    #expect(metadata.lensModel == "Test Lens")
+    #expect(metadata.software == "이미지뷰어")
+    #expect(metadata.artist == "테스트 작성자")
+    #expect(metadata.capturedAt == "2026:01:02 03:04:05")
+    #expect(abs(try #require(metadata.exposureTime) - (1.0 / 125.0)) < 0.000_000_1)
+    #expect(metadata.aperture == 2.8)
+    #expect(metadata.iso == 200)
+    #expect(metadata.focalLength == 35)
+    #expect(metadata.location?.latitude == 37.5665)
+    #expect(metadata.location?.longitude == 126.978)
+    #expect(metadata.location?.altitude == 38)
+    #expect(metadata.location?.direction == 120)
+
+    let modified = try outputURL.resourceValues(forKeys: [.contentModificationDateKey])
+      .contentModificationDate
+    #expect(abs(try #require(modified).timeIntervalSince1970 - 1_700_000_000) < 1)
+
+    // 입력란을 비우거나 GPS 저장을 끄면 기존 태그도 실제 파일에서 제거해야 합니다.
+    let refreshedValues = try outputURL.resourceValues(forKeys: [
+      .fileSizeKey, .contentModificationDateKey,
+    ])
+    let refreshedAsset = ImageAsset(
+      url: outputURL,
+      byteCount: refreshedValues.fileSize.map(Int64.init),
+      modificationDate: refreshedValues.contentModificationDate
+    )
+    let removalOriginalDraft = ImageMetadataEditDraft(
+      asset: refreshedAsset,
+      metadata: metadata
+    )
+    var removalDraft = removalOriginalDraft
+    removalDraft.imageDescription = ""
+    removalDraft.artist = ""
+    removalDraft.copyright = ""
+    removalDraft.includesLocation = false
+
+    let removalOutputURL = try await ImageMetadataWriter().apply(
+      try removalDraft.validated(for: outputURL),
+      replacing: try removalOriginalDraft.validated(for: outputURL),
+      to: outputURL
+    )
+    #expect(removalOutputURL == outputURL)
+    #expect(try pixelBytes(at: removalOutputURL) == beforePixels)
+
+    let metadataAfterRemoval = try await ImagePipeline().metadata(for: removalOutputURL)
+    #expect(metadataAfterRemoval.imageDescription == nil)
+    #expect(metadataAfterRemoval.artist == nil)
+    #expect(metadataAfterRemoval.copyright == nil)
+    #expect(metadataAfterRemoval.location == nil)
+  }
+
+  @Test("JPEG도 재압축하지 않고 기존 EXIF와 GPS를 수정한다")
+  func losslessJPEGMetadataEditing() async throws {
+    let directory = FileManager.default.temporaryDirectory
+      .appendingPathComponent("imageviewer-jpeg-edit-\(UUID().uuidString)", isDirectory: true)
+    try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+    defer { try? FileManager.default.removeItem(at: directory) }
+
+    let qoiURL = directory.appendingPathComponent("source.qoi")
+    let jpegURL = directory.appendingPathComponent("source.jpg")
+    try makeTwoPixelQOI().write(to: qoiURL, options: .atomic)
+    let image = try QOIDecoder.decode(url: qoiURL)
+    let destination = try #require(
+      CGImageDestinationCreateWithURL(jpegURL as CFURL, UTType.jpeg.identifier as CFString, 1, nil)
+    )
+    CGImageDestinationAddImage(
+      destination,
+      image,
+      [
+        kCGImagePropertyTIFFDictionary: [
+          kCGImagePropertyTIFFArtist: "이전 작성자"
+        ],
+        kCGImagePropertyGPSDictionary: [
+          kCGImagePropertyGPSLatitude: 48.858_37,
+          kCGImagePropertyGPSLatitudeRef: "N",
+          kCGImagePropertyGPSLongitude: 2.294_481,
+          kCGImagePropertyGPSLongitudeRef: "E",
+        ],
+      ] as CFDictionary
+    )
+    #expect(CGImageDestinationFinalize(destination))
+
+    let values = try jpegURL.resourceValues(forKeys: [
+      .fileSizeKey, .contentModificationDateKey,
+    ])
+    let asset = ImageAsset(
+      url: jpegURL,
+      byteCount: values.fileSize.map(Int64.init),
+      modificationDate: values.contentModificationDate
+    )
+    let metadata = try await ImagePipeline().metadata(for: jpegURL)
+    let originalDraft = ImageMetadataEditDraft(asset: asset, metadata: metadata)
+    var editedDraft = originalDraft
+    editedDraft.artist = "새 작성자"
+    editedDraft.imageDescription = "JPEG 설명"
+    editedDraft.includesLocation = false
+
+    let beforePixels = try pixelBytes(at: jpegURL)
+    _ = try await ImageMetadataWriter().apply(
+      try editedDraft.validated(for: jpegURL),
+      replacing: try originalDraft.validated(for: jpegURL),
+      to: jpegURL
+    )
+
+    #expect(try pixelBytes(at: jpegURL) == beforePixels)
+    let updatedMetadata = try await ImagePipeline().metadata(for: jpegURL)
+    #expect(updatedMetadata.artist == "새 작성자")
+    #expect(updatedMetadata.imageDescription == "JPEG 설명")
+    #expect(updatedMetadata.location == nil)
+  }
+
+  private func pixelBytes(at url: URL) throws -> Data {
+    let source = try #require(CGImageSourceCreateWithURL(url as CFURL, nil))
+    let image = try #require(CGImageSourceCreateImageAtIndex(source, 0, nil))
+    let provider = try #require(image.dataProvider)
+    return try #require(provider.data) as Data
+  }
+
   private func makeTwoPixelQOI() -> Data {
     var qoi = Data([0x71, 0x6F, 0x69, 0x66])
     qoi.append(contentsOf: [0, 0, 0, 2])  // width = 2

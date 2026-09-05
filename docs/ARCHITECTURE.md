@@ -23,6 +23,7 @@
           │
           ├──────────────► SwiftUI HDR/EDR 화면
           ├──────────────► EXIF/TIFF/GPS ── i 정보 패널 ── 지도 링크
+          ├──────────────► i 정보 수정 ── ImageMetadataWriter ── 원본 경로 갱신
           └──────────────► ImageExporter ── 새 파일
 
 ## 왜 핵심 엔진이 Rust가 아닌가
@@ -50,8 +51,17 @@ Quick Look, Image I/O, Core Image는 macOS 동적 프레임워크이므로 앱 �
 - 썸네일 패널 배치는 ThumbnailPanelPlacement 하나로 관리하며, 위·아래에서는 가로 지연 그리드, 좌·우에서는 세로 지연 그리드를 재사용합니다.
 - 팬 방식은 PanInteractionMode로 저장합니다. AppKit 이벤트 감시 영역은 이미지 캔버스에만 붙어 정보 패널이나 설정 창의 스크롤을 가로채지 않습니다.
 - 오른쪽 보조 패널은 정보와 편집 중 하나만 열어 좁은 창에서도 이미지 영역을 보존합니다.
+- i 정보 패널의 수정 시트는 파일 이름·수정일과 TIFF/EXIF/GPS 표준 태그를 편집합니다. 픽셀 크기·포맷·비트 심도·UTI처럼 파일에서 계산되는 속성은 읽기 전용입니다.
 - 지도 버튼은 EXIF GPS가 유효할 때만 보이며, 클릭할 때만 [Apple 지도 링크](https://developer.apple.com/library/archive/featuredarticles/iPhoneURLScheme_Reference/MapLinks/MapLinks.html) 또는 [Google Maps URL](https://developers.google.com/maps/documentation/urls/get-started)을 엽니다. API 키나 위치 업로드는 없습니다.
 
 ## 비파괴 조정
 
-조정값은 파일 URL별 ImageAdjustments에만 저장됩니다. 화면에서는 Core Image 필터 체인으로 적용하고, 사용자가 내보내기를 선택했을 때 같은 체인을 원본 해상도로 평가합니다. 원본 파일 덮어쓰기는 제공하지 않습니다.
+조정값은 파일 URL별 ImageAdjustments에만 저장됩니다. 화면에서는 Core Image 필터 체인으로 적용하고, 사용자가 내보내기를 선택했을 때 같은 체인을 원본 해상도로 평가합니다. 밝기·채도·회전 같은 픽셀 편집은 원본 파일을 덮어쓰지 않습니다.
+
+## 메타데이터 편집 안전성
+
+- 정보 수정은 사용자가 i 패널에서 저장을 명시적으로 선택할 때만 실행합니다.
+- 확장자 변경, 중복 파일명과 숫자·GPS 범위를 먼저 검증합니다.
+- ImageMetadataWriter는 Image I/O의 무손실 복사 경로로 임시 파일을 완성한 뒤 원본 경로를 교체하므로 픽셀을 다시 압축하지 않습니다.
+- 지원하지 않는 형식에서는 내장 태그 입력을 잠그고 파일 이름과 파일 시스템 수정일만 허용합니다.
+- 저장 후 소스·렌더·Quick Look 캐시를 폐기하고 폴더를 다시 스캔해 변경된 이름과 정보를 즉시 반영합니다.

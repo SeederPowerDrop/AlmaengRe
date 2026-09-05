@@ -46,6 +46,7 @@ final class AppStore: ObservableObject {
   @Published var wrapsNavigation = true
   @Published private(set) var isLoading = false
   @Published private(set) var isExporting = false
+  @Published private(set) var isSavingMetadata = false
   @Published private(set) var currentMetadata: ImageMetadata?
   @Published var exportFormat: ExportFormat = ExportFormat.available.first ?? .jpeg
   @Published var exportQuality = 0.92
@@ -57,6 +58,7 @@ final class AppStore: ObservableObject {
 
   private let library = ImageLibrary()
   private let exporter: ImageExporter
+  private let metadataWriter = ImageMetadataWriter()
   private var adjustments: [URL: ImageAdjustments] = [:]
   private var loadTask: Task<Void, Never>?
   private var metadataTask: Task<Void, Never>?
@@ -117,6 +119,12 @@ final class AppStore: ObservableObject {
   var activeFolderName: String {
     guard let currentAsset else { return "이미지뷰어" }
     return currentAsset.url.deletingLastPathComponent().lastPathComponent
+  }
+
+  var canEditCurrentEmbeddedMetadata: Bool {
+    ImageMetadataWriter.supportsEmbeddedMetadata(
+      typeIdentifier: currentMetadata?.typeIdentifier
+    )
   }
 
   func chooseFolder() {
@@ -302,6 +310,56 @@ final class AppStore: ObservableObject {
         message: "\(service.title)를 여는 데 실패했습니다. 기본 브라우저 설정을 확인해 주세요."
       )
     }
+  }
+
+  /// i 패널의 편집값을 원본 파일에 기록하고 목록·캐시·메타데이터를 한 번에 갱신합니다.
+  func saveMetadataEdits(
+    _ draft: ImageMetadataEditDraft,
+    replacing originalDraft: ImageMetadataEditDraft
+  ) async throws {
+    guard let asset = currentAsset else {
+      throw ImageMetadataWriterError.noCurrentImage
+    }
+
+    let sourceURL = asset.url
+    let update = try draft.validated(for: sourceURL)
+    let original = try originalDraft.validated(for: sourceURL)
+    isSavingMetadata = true
+    defer { isSavingMetadata = false }
+
+    let destinationURL = try await metadataWriter.apply(
+      update,
+      replacing: original,
+      to: sourceURL
+    )
+
+    if sourceURL != destinationURL,
+      let existingAdjustments = adjustments.removeValue(forKey: sourceURL)
+    {
+      adjustments[destinationURL] = existingAdjustments
+    }
+
+    // 같은 URL의 소스·렌더·Quick Look 결과가 남지 않도록 저장 직후 모두 비웁니다.
+    await pipeline.purgeCaches()
+    await thumbnailPipeline.purgeCache()
+
+    let refreshedAssets = try await library.scan(
+      folder: destinationURL.deletingLastPathComponent()
+    )
+    guard
+      let refreshedIndex = refreshedAssets.firstIndex(where: {
+        $0.url.standardizedFileURL == destinationURL.standardizedFileURL
+      })
+    else {
+      throw ImageMetadataWriterError.sourceUnavailable(destinationURL)
+    }
+
+    assets = refreshedAssets
+    pageStartIndex = refreshedIndex
+    currentIndex = refreshedIndex
+    refreshMetadata()
+    prefetchAroundCurrentPosition()
+    showStatus("\(destinationURL.lastPathComponent) 정보 저장 완료")
   }
 
   func toggleFocusMode() {

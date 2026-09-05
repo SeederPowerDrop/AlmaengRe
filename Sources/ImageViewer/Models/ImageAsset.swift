@@ -40,6 +40,8 @@ struct ImageMetadata: Equatable, Sendable {
   var cameraMake: String?
   var cameraModel: String?
   var lensModel: String?
+  var imageDescription: String?
+  var copyright: String?
   var software: String?
   var artist: String?
   var capturedAt: String?

@@ -100,6 +100,8 @@ actor ImagePipeline {
         cameraMake: text(tiff[kCGImagePropertyTIFFMake]),
         cameraModel: text(tiff[kCGImagePropertyTIFFModel]),
         lensModel: text(exif[kCGImagePropertyExifLensModel]),
+        imageDescription: text(tiff[kCGImagePropertyTIFFImageDescription]),
+        copyright: text(tiff[kCGImagePropertyTIFFCopyright]),
         software: text(tiff[kCGImagePropertyTIFFSoftware]),
         artist: text(tiff[kCGImagePropertyTIFFArtist]),
         capturedAt: capturedAt,

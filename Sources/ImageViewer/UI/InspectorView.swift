@@ -4,6 +4,7 @@ import SwiftUI
 struct InspectorView: View {
   @ObservedObject var store: AppStore
   let panel: InspectorPanel
+  @State private var isMetadataEditorPresented = false
 
   var body: some View {
     ScrollView {
@@ -19,13 +20,28 @@ struct InspectorView: View {
     }
     .frame(width: 294)
     .background(.ultraThinMaterial)
+    .sheet(isPresented: $isMetadataEditorPresented) {
+      MetadataEditorView(store: store)
+    }
   }
 
   private var informationPanel: some View {
     VStack(alignment: .leading, spacing: 18) {
       VStack(alignment: .leading, spacing: 7) {
-        Label("이미지 정보", systemImage: "info.circle")
-          .font(.headline)
+        HStack {
+          Label("이미지 정보", systemImage: "info.circle")
+            .font(.headline)
+          Spacer()
+          Button {
+            isMetadataEditorPresented = true
+          } label: {
+            Label("수정", systemImage: "square.and.pencil")
+          }
+          .buttonStyle(.bordered)
+          .controlSize(.small)
+          .disabled(store.currentAsset == nil || store.currentMetadata == nil)
+          .help("파일 및 내장 메타데이터 수정")
+        }
         Text(store.currentAsset?.filename ?? "—")
           .font(.subheadline.weight(.medium))
           .lineLimit(2)
@@ -66,6 +82,12 @@ struct InspectorView: View {
       }
       if let profile = store.currentMetadata?.profileName {
         informationRow("색상 프로파일", profile)
+      }
+      if let description = store.currentMetadata?.imageDescription {
+        informationRow("설명", description)
+      }
+      if let copyright = store.currentMetadata?.copyright {
+        informationRow("저작권", copyright)
       }
       if let model = store.currentMetadata?.colorModel {
         informationRow("색상 모델", model)
