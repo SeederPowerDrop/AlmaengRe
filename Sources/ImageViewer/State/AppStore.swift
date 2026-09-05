@@ -34,6 +34,12 @@ final class AppStore: ObservableObject {
       UserDefaults.standard.set(panInteractionMode.rawValue, forKey: Self.panModeDefaultsKey)
     }
   }
+  @Published var filenameDisplaySize: FilenameDisplaySize {
+    didSet {
+      UserDefaults.standard.set(
+        filenameDisplaySize.rawValue, forKey: Self.filenameDisplaySizeDefaultsKey)
+    }
+  }
   @Published var inspectorPanel: InspectorPanel?
   @Published var isFocusMode = false
   @Published var prefersHDR = true
@@ -59,6 +65,7 @@ final class AppStore: ObservableObject {
 
   private static let thumbnailPlacementDefaultsKey = "ImageViewer.ThumbnailPlacement.v1"
   private static let panModeDefaultsKey = "ImageViewer.PanInteractionMode.v1"
+  private static let filenameDisplaySizeDefaultsKey = "ImageViewer.FilenameDisplaySize.v1"
 
   init() {
     let pipeline = ImagePipeline()
@@ -73,6 +80,9 @@ final class AppStore: ObservableObject {
     panInteractionMode =
       defaults.string(forKey: Self.panModeDefaultsKey)
       .flatMap(PanInteractionMode.init(rawValue:)) ?? .primaryDrag
+    filenameDisplaySize =
+      defaults.string(forKey: Self.filenameDisplaySizeDefaultsKey)
+      .flatMap(FilenameDisplaySize.init(rawValue:)) ?? .medium
     inspectorPanel = nil
   }
 

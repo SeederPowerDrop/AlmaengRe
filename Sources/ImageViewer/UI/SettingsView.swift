@@ -30,6 +30,15 @@ struct SettingsView: View {
               .tag(placement)
           }
         }
+
+        Picker("뷰어 파일 이름", selection: $store.filenameDisplaySize) {
+          ForEach(FilenameDisplaySize.allCases) { size in
+            Text(size.title).tag(size)
+          }
+        }
+        Text("이미지 왼쪽 위의 파일 이름을 숨기거나 크기를 조절합니다. 글자는 흰색, 배경은 검정으로 표시됩니다.")
+          .font(.caption)
+          .foregroundStyle(.secondary)
       }
 
       Section("탐색") {

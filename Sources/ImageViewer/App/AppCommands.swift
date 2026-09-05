@@ -40,6 +40,13 @@ struct AppCommands: Commands {
           }
         }
       }
+      Menu("파일 이름 표시") {
+        Picker("크기", selection: $store.filenameDisplaySize) {
+          ForEach(FilenameDisplaySize.allCases) { size in
+            Text(size.title).tag(size)
+          }
+        }
+      }
       Button("이미지 정보 패널") { store.toggleInspector(.information) }
       Button("이미지 편집 패널") { store.toggleInspector(.editing) }
     }

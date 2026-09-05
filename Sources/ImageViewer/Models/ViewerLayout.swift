@@ -29,6 +29,64 @@ enum BaseScaleMode: String, CaseIterable, Identifiable, Sendable {
   }
 }
 
+/// 뷰어 왼쪽 위에 표시하는 파일 이름의 크기와 표시 여부입니다.
+///
+/// 원시값을 UserDefaults에 저장하므로 사용자가 고른 크기가 다음 실행에도 유지됩니다.
+enum FilenameDisplaySize: String, CaseIterable, Codable, Identifiable, Sendable {
+  case hidden
+  case small
+  case medium
+  case large
+  case extraLarge
+
+  var id: Self { self }
+
+  var title: String {
+    switch self {
+    case .hidden: "숨김"
+    case .small: "작게"
+    case .medium: "보통"
+    case .large: "크게"
+    case .extraLarge: "매우 크게"
+    }
+  }
+
+  var isVisible: Bool {
+    self != .hidden
+  }
+
+  /// 기존 caption보다 기본값부터 크게 보이도록 15pt를 보통 크기로 사용합니다.
+  var fontSize: CGFloat {
+    switch self {
+    case .hidden: 0
+    case .small: 12
+    case .medium: 15
+    case .large: 19
+    case .extraLarge: 24
+    }
+  }
+
+  var horizontalPadding: CGFloat {
+    switch self {
+    case .hidden: 0
+    case .small: 9
+    case .medium: 11
+    case .large: 13
+    case .extraLarge: 15
+    }
+  }
+
+  var verticalPadding: CGFloat {
+    switch self {
+    case .hidden: 0
+    case .small: 5
+    case .medium: 7
+    case .large: 9
+    case .extraLarge: 11
+    }
+  }
+}
+
 /// 폴더 썸네일을 창의 어느 가장자리에 둘지 나타냅니다.
 ///
 /// 문자열 원시값을 그대로 저장하므로 이후 열거형 순서가 바뀌어도 사용자 설정이

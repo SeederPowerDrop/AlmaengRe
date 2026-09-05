@@ -36,6 +36,7 @@ struct ViewerCanvas: View {
               pipeline: store.pipeline,
               adjustments: store.adjustments(for: asset),
               prefersHDR: store.prefersHDR,
+              filenameDisplaySize: store.filenameDisplaySize,
               baseScaleMode: store.baseScaleMode,
               committedZoom: store.zoom,
               effectiveZoom: store.zoom * liveMagnification,

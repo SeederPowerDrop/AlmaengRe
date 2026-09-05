@@ -14,6 +14,7 @@ struct ViewerImageTile: View {
   let pipeline: ImagePipeline
   let adjustments: ImageAdjustments
   let prefersHDR: Bool
+  let filenameDisplaySize: FilenameDisplaySize
   let baseScaleMode: BaseScaleMode
   let committedZoom: CGFloat
   let effectiveZoom: CGFloat
@@ -51,23 +52,9 @@ struct ViewerImageTile: View {
             .controlSize(.large)
         }
 
-        VStack {
-          HStack {
-            Text(asset.filename)
-              .lineLimit(1)
-              .truncationMode(.middle)
-            Spacer()
-            if let frame, frame.frameCount > 1 {
-              Text("\(frame.frameIndex + 1)/\(frame.frameCount)")
-                .monospacedDigit()
-            }
-          }
-          .font(.caption)
-          .foregroundStyle(.white.opacity(0.82))
-          .padding(.horizontal, 9)
-          .padding(.vertical, 6)
-          .background(.black.opacity(0.45))
-          Spacer()
+        VStack(spacing: 0) {
+          filenameOverlay(frame: frame)
+          Spacer(minLength: 0)
         }
       }
       .overlay {
@@ -83,6 +70,43 @@ struct ViewerImageTile: View {
       .clipped()
       .task(id: request) {
         await loadAndPlay(request: request)
+      }
+    }
+  }
+
+  @ViewBuilder
+  private func filenameOverlay(frame: RenderedFrame?) -> some View {
+    if filenameDisplaySize.isVisible {
+      HStack(spacing: 10) {
+        Text(asset.filename)
+          .lineLimit(1)
+          .truncationMode(.middle)
+
+        Spacer(minLength: 8)
+
+        if let frame, frame.frameCount > 1 {
+          Text("\(frame.frameIndex + 1)/\(frame.frameCount)")
+            .monospacedDigit()
+        }
+      }
+      .font(.system(size: filenameDisplaySize.fontSize, weight: .semibold))
+      // 불투명 검정과 완전한 흰색을 써 밝은 이미지 위에서도 대비를 보장합니다.
+      .foregroundStyle(Color.white)
+      .padding(.horizontal, filenameDisplaySize.horizontalPadding)
+      .padding(.vertical, filenameDisplaySize.verticalPadding)
+      .frame(maxWidth: .infinity)
+      .background(Color.black)
+    } else if let frame, frame.frameCount > 1 {
+      // 파일명을 숨겨도 애니메이션 재생 위치는 작은 배지로 유지합니다.
+      HStack {
+        Spacer()
+        Text("\(frame.frameIndex + 1)/\(frame.frameCount)")
+          .font(.caption.monospacedDigit())
+          .foregroundStyle(Color.white)
+          .padding(.horizontal, 7)
+          .padding(.vertical, 4)
+          .background(Color.black, in: RoundedRectangle(cornerRadius: 5))
+          .padding(6)
       }
     }
   }

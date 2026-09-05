@@ -33,6 +33,16 @@ struct ImageViewerTests {
     #expect(!ViewerTileChrome.highlightsSelection(isCurrent: false, itemCount: 2))
   }
 
+  @Test("파일명은 숨김과 네 단계 크기를 지원한다")
+  func filenameDisplaySizes() {
+    #expect(FilenameDisplaySize.allCases.count == 5)
+    #expect(!FilenameDisplaySize.hidden.isVisible)
+    #expect(FilenameDisplaySize.small.isVisible)
+    #expect(FilenameDisplaySize.medium.fontSize > FilenameDisplaySize.small.fontSize)
+    #expect(FilenameDisplaySize.large.fontSize > FilenameDisplaySize.medium.fontSize)
+    #expect(FilenameDisplaySize.extraLarge.fontSize > FilenameDisplaySize.large.fontSize)
+  }
+
   @Test("폴더가 바뀌면 같은 순번과 파일명도 별도 썸네일로 식별한다")
   func thumbnailIdentityAcrossFolders() {
     let date = Date(timeIntervalSinceReferenceDate: 123_456)
