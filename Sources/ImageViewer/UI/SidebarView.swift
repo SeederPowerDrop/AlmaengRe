@@ -35,7 +35,7 @@ struct SidebarView: View {
         }
         .task(id: store.assets.first?.id) {
           await Task.yield()
-          proxy.scrollTo(store.currentIndex, anchor: .center)
+          scrollToCurrent(store.currentIndex, with: proxy, animated: false)
         }
       }
     }
@@ -63,7 +63,7 @@ struct SidebarView: View {
         }
         .task(id: store.assets.first?.id) {
           await Task.yield()
-          proxy.scrollTo(store.currentIndex, anchor: .center)
+          scrollToCurrent(store.currentIndex, with: proxy, animated: false)
         }
       }
     }
@@ -113,14 +113,27 @@ struct SidebarView: View {
         }
       }
       .buttonStyle(.plain)
-      .id(index)
+      // 목록 순번은 새 폴더에서도 다시 0부터 시작합니다. 실제 파일 URL을 써야
+      // 같은 순번에 있던 이전 폴더의 썸네일 상태가 재사용되지 않습니다.
+      .id(asset.id)
       .help(asset.filename)
     }
   }
 
-  private func scrollToCurrent(_ index: Int, with proxy: ScrollViewProxy) {
-    withAnimation(.easeOut(duration: 0.15)) {
-      proxy.scrollTo(index, anchor: .center)
+  private func scrollToCurrent(
+    _ index: Int,
+    with proxy: ScrollViewProxy,
+    animated: Bool = true
+  ) {
+    guard store.assets.indices.contains(index) else { return }
+    let target = store.assets[index].id
+
+    if animated {
+      withAnimation(.easeOut(duration: 0.15)) {
+        proxy.scrollTo(target, anchor: .center)
+      }
+    } else {
+      proxy.scrollTo(target, anchor: .center)
     }
   }
 }

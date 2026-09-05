@@ -63,19 +63,18 @@ struct OverviewView: View {
               .onTapGesture {
                 store.select(index: index)
               }
-              .id(index)
+              // 폴더를 바꾸면 순번은 반복되므로 파일 URL을 스크롤/뷰 식별자로 씁니다.
+              .id(asset.id)
             }
           }
           .padding(18)
         }
         .onChange(of: store.currentIndex) { _, newIndex in
-          withAnimation(.easeOut(duration: 0.2)) {
-            proxy.scrollTo(newIndex, anchor: .center)
-          }
+          scrollToCurrent(newIndex, with: proxy)
         }
         .task(id: store.assets.first?.id) {
           await Task.yield()
-          proxy.scrollTo(store.currentIndex, anchor: .center)
+          scrollToCurrent(store.currentIndex, with: proxy, animated: false)
         }
       }
 
@@ -96,5 +95,22 @@ struct OverviewView: View {
       .background(.ultraThinMaterial)
     }
     .background(Color(nsColor: .underPageBackgroundColor))
+  }
+
+  private func scrollToCurrent(
+    _ index: Int,
+    with proxy: ScrollViewProxy,
+    animated: Bool = true
+  ) {
+    guard store.assets.indices.contains(index) else { return }
+    let target = store.assets[index].id
+
+    if animated {
+      withAnimation(.easeOut(duration: 0.2)) {
+        proxy.scrollTo(target, anchor: .center)
+      }
+    } else {
+      proxy.scrollTo(target, anchor: .center)
+    }
   }
 }

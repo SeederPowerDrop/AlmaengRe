@@ -33,6 +33,44 @@ struct ImageViewerTests {
     #expect(!ViewerTileChrome.highlightsSelection(isCurrent: false, itemCount: 2))
   }
 
+  @Test("폴더가 바뀌면 같은 순번과 파일명도 별도 썸네일로 식별한다")
+  func thumbnailIdentityAcrossFolders() {
+    let date = Date(timeIntervalSinceReferenceDate: 123_456)
+    let first = ImageAsset(
+      url: URL(fileURLWithPath: "/Pictures/A/frame.png"),
+      byteCount: 1_024,
+      modificationDate: date
+    )
+    let second = ImageAsset(
+      url: URL(fileURLWithPath: "/Pictures/B/frame.png"),
+      byteCount: 1_024,
+      modificationDate: date
+    )
+    let replaced = ImageAsset(
+      url: first.url,
+      byteCount: 2_048,
+      modificationDate: date.addingTimeInterval(1)
+    )
+
+    #expect(first.id != second.id)
+    #expect(
+      ThumbnailCacheKey(asset: first, pixelSize: 256)
+        != ThumbnailCacheKey(asset: second, pixelSize: 256))
+    #expect(
+      ThumbnailCacheKey(asset: first, pixelSize: 256)
+        != ThumbnailCacheKey(asset: replaced, pixelSize: 256))
+  }
+
+  @Test("이전 폴더에서 늦게 완료된 요청은 최신 썸네일을 덮어쓰지 않는다")
+  func latestThumbnailRequestWins() {
+    var gate = LatestRequestGate<String>()
+    let oldGeneration = gate.begin("A/first.png")
+    let newGeneration = gate.begin("B/first.png")
+
+    #expect(!gate.accepts(oldGeneration, for: "A/first.png"))
+    #expect(gate.accepts(newGeneration, for: "B/first.png"))
+  }
+
   @Test("Esc는 집중 보기에서 일반 보기와 전체 보기로 순서대로 돌아간다")
   @MainActor
   func escapeNavigation() {

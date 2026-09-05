@@ -24,6 +24,31 @@ private struct GeneratedThumbnail: @unchecked Sendable {
   let image: CGImage
 }
 
+/// 경로뿐 아니라 파일 버전 정보도 포함해 같은 위치의 이미지가 교체됐을 때
+/// 앱 메모리 캐시에서 예전 썸네일을 반환하지 않게 합니다.
+struct ThumbnailCacheKey: Hashable, Sendable {
+  let fileURL: URL
+  let byteCount: Int64?
+  let modificationDate: Date?
+  let pixelSize: Int
+
+  init(asset: ImageAsset, pixelSize: Int) {
+    fileURL = asset.url.standardizedFileURL
+    byteCount = asset.byteCount
+    modificationDate = asset.modificationDate
+    self.pixelSize = pixelSize
+  }
+
+  var encoded: NSString {
+    let sizePart = byteCount.map(String.init) ?? "unknown"
+    let datePart =
+      modificationDate.map {
+        String($0.timeIntervalSinceReferenceDate.bitPattern)
+      } ?? "unknown"
+    return "\(fileURL.absoluteString)|\(sizePart)|\(datePart)|\(pixelSize)" as NSString
+  }
+}
+
 /// macOS의 디스크 썸네일 캐시를 이용하는 가벼운 미리보기 전용 파이프라인입니다.
 ///
 /// 목록과 대용량 RAW의 첫 화면은 Quick Look 결과로 즉시 채우고, 뷰어 타일은 뒤에서
@@ -37,14 +62,15 @@ actor ThumbnailPipeline {
     cache.countLimit = 1_024
   }
 
-  func thumbnail(for url: URL, maxPixelSize: Int) async throws -> CGImage {
+  func thumbnail(for asset: ImageAsset, maxPixelSize: Int) async throws -> CGImage {
+    let url = asset.url
     // 앱 자체 디코더 형식에는 Quick Look 생성기가 없으므로 실패 응답을 기다리지 않습니다.
     if url.pathExtension.lowercased() == "qoi" || url.pathExtension.lowercased() == "pcx" {
       throw ThumbnailPipelineError.generationFailed(url)
     }
 
     let pixelSize = Self.pixelBucket(maxPixelSize)
-    let key = "\(url.path)|\(pixelSize)" as NSString
+    let key = ThumbnailCacheKey(asset: asset, pixelSize: pixelSize).encoded
     if let cached = cache.object(forKey: key) {
       return cached.image
     }

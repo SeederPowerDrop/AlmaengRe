@@ -134,7 +134,7 @@ struct ViewerImageTile: View {
       previewTask = Task { @MainActor in
         guard
           let image = try? await thumbnailPipeline.thumbnail(
-            for: request.url,
+            for: asset,
             maxPixelSize: min(2_048, request.maxPixelSize)
           ),
           !Task.isCancelled,
