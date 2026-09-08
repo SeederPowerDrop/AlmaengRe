@@ -10,9 +10,12 @@ enum ImagePipelineError: LocalizedError {
 
   var errorDescription: String? {
     switch self {
-    case .unsupported(let url): "지원 코덱으로 ‘\(url.lastPathComponent)’을 열 수 없습니다."
-    case .decodingFailed(let url): "‘\(url.lastPathComponent)’의 이미지 데이터를 읽지 못했습니다."
-    case .renderingFailed(let url): "‘\(url.lastPathComponent)’을 화면용 이미지로 만들지 못했습니다."
+    case .unsupported(let url):
+      L10n.format("지원 코덱으로 ‘%@’을 열 수 없습니다.", url.lastPathComponent)
+    case .decodingFailed(let url):
+      L10n.format("‘%@’의 이미지 데이터를 읽지 못했습니다.", url.lastPathComponent)
+    case .renderingFailed(let url):
+      L10n.format("‘%@’을 화면용 이미지로 만들지 못했습니다.", url.lastPathComponent)
     }
   }
 }

@@ -63,7 +63,7 @@ struct RootView: View {
             )
           ) {
             ForEach(1...10, id: \.self) { count in
-              Text("\(count)장").tag(count)
+              Text(L10n.format("%d장", count)).tag(count)
             }
           }
           .frame(width: 76)
@@ -75,7 +75,7 @@ struct RootView: View {
         } label: {
           Image(systemName: store.prefersHDR ? "sun.max.fill" : "sun.max")
         }
-        .help(store.prefersHDR ? "HDR 출력 켜짐" : "HDR 출력 꺼짐")
+        .help(L10n.text(store.prefersHDR ? "HDR 출력 켜짐" : "HDR 출력 꺼짐"))
 
         thumbnailPlacementMenu
 
@@ -197,10 +197,15 @@ struct RootView: View {
 
   private var thumbnailPlacementMenu: some View {
     Menu {
-      Picker("썸네일 패널 위치", selection: $store.thumbnailPanelPlacement) {
-        ForEach(ThumbnailPanelPlacement.allCases) { placement in
-          Label(placement.title, systemImage: placement.systemImage)
-            .tag(placement)
+      ForEach(ThumbnailPanelPlacement.quickSelectionOrder) { placement in
+        Button {
+          store.thumbnailPanelPlacement = placement
+        } label: {
+          Label(
+            placement.title,
+            systemImage: store.thumbnailPanelPlacement == placement
+              ? "checkmark" : placement.systemImage
+          )
         }
       }
     } label: {

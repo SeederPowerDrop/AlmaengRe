@@ -117,7 +117,7 @@ final class AppStore: ObservableObject {
   }
 
   var activeFolderName: String {
-    guard let currentAsset else { return "이미지뷰어" }
+    guard let currentAsset else { return L10n.text("이미지뷰어") }
     return currentAsset.url.deletingLastPathComponent().lastPathComponent
   }
 
@@ -129,8 +129,8 @@ final class AppStore: ObservableObject {
 
   func chooseFolder() {
     let panel = NSOpenPanel()
-    panel.title = "이미지 폴더 열기"
-    panel.prompt = "열기"
+    panel.title = L10n.text("이미지 폴더 열기")
+    panel.prompt = L10n.text("열기")
     panel.canChooseDirectories = true
     panel.canChooseFiles = false
     panel.allowsMultipleSelection = false
@@ -142,8 +142,8 @@ final class AppStore: ObservableObject {
 
   func chooseFiles() {
     let panel = NSOpenPanel()
-    panel.title = "이미지 열기"
-    panel.prompt = "열기"
+    panel.title = L10n.text("이미지 열기")
+    panel.prompt = L10n.text("열기")
     panel.canChooseDirectories = false
     panel.canChooseFiles = true
     panel.allowsMultipleSelection = true
@@ -306,8 +306,11 @@ final class AppStore: ObservableObject {
 
     if !NSWorkspace.shared.open(url) {
       alert = ViewerAlert(
-        title: "지도를 열 수 없음",
-        message: "\(service.title)를 여는 데 실패했습니다. 기본 브라우저 설정을 확인해 주세요."
+        title: L10n.text("지도를 열 수 없음"),
+        message: L10n.format(
+          "%@를 여는 데 실패했습니다. 기본 브라우저 설정을 확인해 주세요.",
+          service.title
+        )
       )
     }
   }
@@ -359,7 +362,7 @@ final class AppStore: ObservableObject {
     currentIndex = refreshedIndex
     refreshMetadata()
     prefetchAroundCurrentPosition()
-    showStatus("\(destinationURL.lastPathComponent) 정보 저장 완료")
+    showStatus(L10n.format("%@ 정보 저장 완료", destinationURL.lastPathComponent))
   }
 
   func toggleFocusMode() {
@@ -417,8 +420,8 @@ final class AppStore: ObservableObject {
       ? exportFormat
       : (ExportFormat.available.first ?? .jpeg)
     let panel = NSSavePanel()
-    panel.title = "이미지 내보내기"
-    panel.prompt = "저장"
+    panel.title = L10n.text("이미지 내보내기")
+    panel.prompt = L10n.text("저장")
     panel.canCreateDirectories = true
     panel.nameFieldStringValue =
       asset.url.deletingPathExtension().lastPathComponent
@@ -441,10 +444,10 @@ final class AppStore: ObservableObject {
           adjustments: adjustments(for: asset)
         )
         isExporting = false
-        showStatus("\(destination.lastPathComponent) 저장 완료")
+        showStatus(L10n.format("%@ 저장 완료", destination.lastPathComponent))
       } catch {
         isExporting = false
-        show(error: error, title: "내보내기 실패")
+        show(error: error, title: L10n.text("내보내기 실패"))
       }
     }
   }
@@ -472,7 +475,7 @@ final class AppStore: ObservableObject {
         // 사용자가 다른 폴더를 열었을 때 이전 스캔의 결과는 조용히 폐기합니다.
       } catch {
         isLoading = false
-        show(error: error, title: "폴더를 열 수 없음")
+        show(error: error, title: L10n.text("폴더를 열 수 없음"))
       }
     }
   }
@@ -492,7 +495,7 @@ final class AppStore: ObservableObject {
         // 새 열기 작업으로 대체되었습니다.
       } catch {
         isLoading = false
-        show(error: error, title: "이미지를 열 수 없음")
+        show(error: error, title: L10n.text("이미지를 열 수 없음"))
       }
     }
   }

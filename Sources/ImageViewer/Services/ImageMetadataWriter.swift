@@ -12,17 +12,23 @@ enum ImageMetadataWriterError: LocalizedError {
   var errorDescription: String? {
     switch self {
     case .noCurrentImage:
-      "편집할 이미지가 선택되지 않았습니다."
+      L10n.text("편집할 이미지가 선택되지 않았습니다.")
     case .sourceUnavailable(let url):
-      "‘\(url.lastPathComponent)’ 파일을 읽을 수 없습니다."
+      L10n.format("‘%@’ 파일을 읽을 수 없습니다.", url.lastPathComponent)
     case .filenameAlreadyExists(let filename):
-      "같은 폴더에 ‘\(filename)’ 파일이 이미 있습니다."
+      L10n.format("같은 폴더에 ‘%@’ 파일이 이미 있습니다.", filename)
     case .embeddedMetadataUnsupported(let url):
-      "‘.\(url.pathExtension.lowercased())’ 형식은 내장 메타데이터를 안전하게 수정할 수 없습니다. 파일 이름과 수정일만 바꿀 수 있습니다."
+      L10n.format(
+        "‘.%@’ 형식은 내장 메타데이터를 안전하게 수정할 수 없습니다. 파일 이름과 수정일만 바꿀 수 있습니다.",
+        url.pathExtension.lowercased()
+      )
     case .metadataFieldUnsupported(let field):
-      "이 이미지 형식은 ‘\(field)’ 메타데이터 기록을 지원하지 않습니다."
+      L10n.format(
+        "이 이미지 형식은 ‘%@’ 메타데이터 기록을 지원하지 않습니다.",
+        L10n.text(field)
+      )
     case .metadataWriteFailed(let message):
-      "메타데이터를 저장하지 못했습니다. \(message)"
+      L10n.format("메타데이터를 저장하지 못했습니다. %@", message)
     }
   }
 }
@@ -161,7 +167,7 @@ actor ImageMetadataWriter {
     else {
       let message =
         unmanagedError?.takeRetainedValue().localizedDescription
-        ?? "Image I/O가 이 형식의 무손실 메타데이터 복사를 거부했습니다."
+        ?? L10n.text("Image I/O가 이 형식의 무손실 메타데이터 복사를 거부했습니다.")
       throw ImageMetadataWriterError.metadataWriteFailed(message)
     }
   }

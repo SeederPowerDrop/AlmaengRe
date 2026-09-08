@@ -4,6 +4,17 @@
 <dict>
     <key>CFBundleDevelopmentRegion</key>
     <string>ko</string>
+    <key>CFBundleLocalizations</key>
+    <array>
+        <string>ko</string>
+        <string>en</string>
+        <string>zh-Hans</string>
+        <string>ja</string>
+        <string>fr</string>
+        <string>es</string>
+        <string>ar</string>
+        <string>vi</string>
+    </array>
     <key>CFBundleDisplayName</key>
     <string>이미지뷰어</string>
     <key>CFBundleExecutable</key>
@@ -17,9 +28,9 @@
     <key>CFBundlePackageType</key>
     <string>APPL</string>
     <key>CFBundleShortVersionString</key>
-    <string>0.2.4</string>
+    <string>0.3.0</string>
     <key>CFBundleVersion</key>
-    <string>6</string>
+    <string>7</string>
     <key>LSMinimumSystemVersion</key>
     <string>14.0</string>
     <key>NSHighResolutionCapable</key>
@@ -34,10 +45,73 @@
             <key>CFBundleTypeRole</key>
             <string>Viewer</string>
             <key>LSHandlerRank</key>
-            <string>Alternate</string>
+            <string>Default</string>
             <key>LSItemContentTypes</key>
             <array>
                 <string>public.image</string>
+                <string>public.jpeg</string>
+                <string>public.png</string>
+                <string>com.compuserve.gif</string>
+                <string>public.tiff</string>
+                <string>com.microsoft.bmp</string>
+                <string>public.heic</string>
+                <string>public.heics</string>
+                <string>public.heif</string>
+                <string>org.webmproject.webp</string>
+                <string>public.avif</string>
+                <string>public.avis</string>
+                <string>public.avci</string>
+                <string>public.jpeg-xl</string>
+                <string>public.jpeg-2000</string>
+                <string>com.adobe.photoshop-image</string>
+                <string>com.ilm.openexr-image</string>
+                <string>public.radiance</string>
+                <string>com.truevision.tga-image</string>
+                <string>com.microsoft.dds</string>
+                <string>com.microsoft.ico</string>
+                <string>com.microsoft.cur</string>
+                <string>com.apple.icns</string>
+                <string>public.pbm</string>
+                <string>public.svg-image</string>
+                <string>org.khronos.ktx</string>
+                <string>org.khronos.ktx2</string>
+                <string>org.khronos.astc</string>
+                <string>public.pvr</string>
+                <string>public.camera-raw-image</string>
+                <string>com.adobe.raw-image</string>
+                <string>com.canon.cr2-raw-image</string>
+                <string>com.canon.cr3-raw-image</string>
+                <string>com.canon.crw-raw-image</string>
+                <string>com.canon.tif-raw-image</string>
+                <string>com.dxo.raw-image</string>
+                <string>com.epson.raw-image</string>
+                <string>com.fuji.raw-image</string>
+                <string>com.hasselblad.3fr-raw-image</string>
+                <string>com.hasselblad.fff-raw-image</string>
+                <string>com.kodak.raw-image</string>
+                <string>com.konicaminolta.raw-image</string>
+                <string>com.leafamerica.raw-image</string>
+                <string>com.leica.raw-image</string>
+                <string>com.leica.rwl-raw-image</string>
+                <string>com.nikon.nefx-raw-image</string>
+                <string>com.nikon.nrw-raw-image</string>
+                <string>com.nikon.raw-image</string>
+                <string>com.olympus.or-raw-image</string>
+                <string>com.olympus.raw-image</string>
+                <string>com.olympus.sr-raw-image</string>
+                <string>com.panasonic.raw-image</string>
+                <string>com.panasonic.rw2-raw-image</string>
+                <string>com.pentax.raw-image</string>
+                <string>com.phaseone.raw-image</string>
+                <string>com.samsung.raw-image</string>
+                <string>com.sony.arw-raw-image</string>
+                <string>com.sony.axr-raw-image</string>
+                <string>com.sony.raw-image</string>
+                <string>com.sony.sr2-raw-image</string>
+                <string>com.apple.pict</string>
+                <string>com.sgi.sgi-image</string>
+                <string>public.mpo-image</string>
+                <string>com.apple.atx</string>
                 <string>org.openimageviewer.qoi</string>
                 <string>org.openimageviewer.pcx</string>
             </array>

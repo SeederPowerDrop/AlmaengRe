@@ -37,17 +37,20 @@ enum ImageMetadataEditValidationError: LocalizedError, Equatable {
   var errorDescription: String? {
     switch self {
     case .invalidFilename:
-      "파일 이름에는 ‘/’, ‘:’ 또는 줄바꿈을 사용할 수 없습니다."
+      L10n.text("파일 이름에는 ‘/’, ‘:’ 또는 줄바꿈을 사용할 수 없습니다.")
     case .hiddenFilename:
-      "점(.)으로 시작하는 숨김 파일 이름은 사용할 수 없습니다."
+      L10n.text("점(.)으로 시작하는 숨김 파일 이름은 사용할 수 없습니다.")
     case .changedExtension(let expected):
-      "정보 편집에서는 파일 형식을 바꿀 수 없습니다. 확장자를 .\(expected)로 유지해 주세요."
+      L10n.format(
+        "정보 편집에서는 파일 형식을 바꿀 수 없습니다. 확장자를 .%@로 유지해 주세요.",
+        expected
+      )
     case .invalidNumber(let field):
-      "‘\(field)’에 올바른 숫자를 입력해 주세요."
+      L10n.format("‘%@’에 올바른 숫자를 입력해 주세요.", L10n.text(field))
     case .outOfRange(let field, let range):
-      "‘\(field)’ 값은 \(range) 범위여야 합니다."
+      L10n.format("‘%@’ 값은 %@ 범위여야 합니다.", L10n.text(field), range)
     case .incompleteLocation:
-      "위치 정보를 사용하려면 위도와 경도를 모두 입력해 주세요."
+      L10n.text("위치 정보를 사용하려면 위도와 경도를 모두 입력해 주세요.")
     }
   }
 }

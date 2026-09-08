@@ -10,11 +10,14 @@ enum BitmapDecoderError: LocalizedError {
 
   var errorDescription: String? {
     switch self {
-    case .invalidHeader(let format): "손상되었거나 올바르지 않은 \(format) 파일입니다."
-    case .unsupportedVariant(let detail): "아직 지원하지 않는 이미지 변형입니다: \(detail)"
-    case .truncatedData(let format): "\(format) 이미지 데이터가 중간에 끝났습니다."
-    case .imageTooLarge: "안전한 메모리 한도를 넘는 이미지입니다."
-    case .imageCreationFailed: "디코딩한 픽셀로 이미지를 만들지 못했습니다."
+    case .invalidHeader(let format):
+      L10n.format("손상되었거나 올바르지 않은 %@ 파일입니다.", L10n.text(format))
+    case .unsupportedVariant(let detail):
+      L10n.format("아직 지원하지 않는 이미지 변형입니다: %@", detail)
+    case .truncatedData(let format):
+      L10n.format("%@ 이미지 데이터가 중간에 끝났습니다.", L10n.text(format))
+    case .imageTooLarge: L10n.text("안전한 메모리 한도를 넘는 이미지입니다.")
+    case .imageCreationFailed: L10n.text("디코딩한 픽셀로 이미지를 만들지 못했습니다.")
     }
   }
 }
@@ -111,7 +114,8 @@ enum QOIDecoder {
     let height = Int(readBigEndianUInt32(bytes, at: 8))
     let pixelCount = try RasterImageFactory.validatedPixelCount(width: width, height: height)
     guard bytes[12] == 3 || bytes[12] == 4 else {
-      throw BitmapDecoderError.unsupportedVariant("QOI 채널 수 \(bytes[12])")
+      throw BitmapDecoderError.unsupportedVariant(
+        L10n.format("QOI 채널 수 %d", Int(bytes[12])))
     }
 
     var output = Data(count: pixelCount * 4)
@@ -319,7 +323,7 @@ enum PCXDecoder {
     if bitsPerPixel == 8, planeCount == 1 {
       let paletteOffset = originalBytes.count - 769
       guard paletteOffset >= 0, originalBytes[paletteOffset] == 0x0C else {
-        throw BitmapDecoderError.truncatedData("PCX 팔레트")
+        throw BitmapDecoderError.truncatedData(L10n.text("PCX 팔레트"))
       }
       let colorIndex = Int(decoded[rowStart + x])
       let base = paletteOffset + 1 + colorIndex * 3
@@ -344,7 +348,7 @@ enum PCXDecoder {
     }
 
     throw BitmapDecoderError.unsupportedVariant(
-      "PCX \(bitsPerPixel)비트 × \(planeCount)플레인"
+      L10n.format("PCX %d비트 × %d플레인", bitsPerPixel, planeCount)
     )
   }
 

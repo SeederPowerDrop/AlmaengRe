@@ -19,18 +19,18 @@ enum ShortcutAction: String, CaseIterable, Identifiable, Codable, Sendable {
 
   var title: String {
     switch self {
-    case .previousPage: "이전 이미지/페이지"
-    case .nextPage: "다음 이미지/페이지"
-    case .zoomIn: "확대"
-    case .zoomOut: "축소"
-    case .fitToWindow: "화면 맞춤"
-    case .actualPixels: "실제 크기"
-    case .toggleOverview: "전체 보기 전환"
-    case .toggleFocus: "집중 모드 전환"
-    case .fewerImages: "한 화면 이미지 수 줄이기"
-    case .moreImages: "한 화면 이미지 수 늘리기"
-    case .openFolder: "폴더 열기"
-    case .exportImage: "이미지 내보내기"
+    case .previousPage: L10n.text("이전 이미지/페이지")
+    case .nextPage: L10n.text("다음 이미지/페이지")
+    case .zoomIn: L10n.text("확대")
+    case .zoomOut: L10n.text("축소")
+    case .fitToWindow: L10n.text("화면 맞춤")
+    case .actualPixels: L10n.text("실제 크기")
+    case .toggleOverview: L10n.text("전체 보기 전환")
+    case .toggleFocus: L10n.text("집중 모드 전환")
+    case .fewerImages: L10n.text("한 화면 이미지 수 줄이기")
+    case .moreImages: L10n.text("한 화면 이미지 수 늘리기")
+    case .openFolder: L10n.text("폴더 열기")
+    case .exportImage: L10n.text("이미지 내보내기")
     }
   }
 

@@ -52,7 +52,7 @@ struct ImageMetadata: Equatable, Sendable {
   var location: ImageLocation?
 
   var dimensionsDescription: String {
-    guard pixelWidth > 0, pixelHeight > 0 else { return "크기 확인 중" }
+    guard pixelWidth > 0, pixelHeight > 0 else { return L10n.text("크기 확인 중") }
     return "\(pixelWidth) × \(pixelHeight)"
   }
 }
@@ -85,7 +85,7 @@ struct ImageLocation: Equatable, Sendable {
       components.queryItems = [
         URLQueryItem(
           name: "ll", value: coordinateDescription.replacingOccurrences(of: " ", with: "")),
-        URLQueryItem(name: "q", value: "사진 위치"),
+        URLQueryItem(name: "q", value: L10n.text("사진 위치")),
       ]
     case .google:
       components.scheme = "https"
@@ -110,8 +110,8 @@ enum MapService: String, CaseIterable, Identifiable, Sendable {
 
   var title: String {
     switch self {
-    case .apple: "Apple 지도"
-    case .google: "Google 지도"
+    case .apple: L10n.text("Apple 지도")
+    case .google: L10n.text("Google 지도")
     }
   }
 }

@@ -50,6 +50,10 @@ fi
 
 cp "$PROJECT_DIRECTORY/Packaging/Info.plist" "$CONTENTS_DIRECTORY/Info.plist"
 
+# SwiftPM 실행 파일의 언어 리소스를 실제 macOS 앱의 주 번들에도 넣습니다.
+# SwiftUI의 기본 문자열 처리와 Finder의 앱 이름 현지화가 같은 .lproj를 사용합니다.
+ditto "$PROJECT_DIRECTORY/Sources/ImageViewer/Resources" "$CONTENTS_DIRECTORY/Resources"
+
 # 릴리스에는 디버그 심볼이 필요하지 않습니다. 서명 전에 제거해 Universal 2
 # 실행 파일도 작게 유지합니다.
 if [[ "$CONFIGURATION" == "release" ]]; then

@@ -75,7 +75,7 @@ struct SidebarView: View {
       Text(store.activeFolderName)
         .font(.headline)
         .lineLimit(1)
-      Text("\(store.assets.count)개 이미지")
+      Text(L10n.format("%d개 이미지", store.assets.count))
         .font(.caption)
         .foregroundStyle(.secondary)
     }

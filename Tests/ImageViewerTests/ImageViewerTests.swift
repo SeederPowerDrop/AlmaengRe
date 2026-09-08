@@ -188,10 +188,54 @@ struct ImageViewerTests {
   @Test("썸네일 패널은 네 방향과 숨김을 지원한다")
   func thumbnailPanelPlacements() {
     #expect(ThumbnailPanelPlacement.allCases.count == 5)
+    #expect(
+      ThumbnailPanelPlacement.quickSelectionOrder
+        == [.hidden, .left, .right, .bottom, .top]
+    )
     #expect(ThumbnailPanelPlacement.top.isHorizontal)
     #expect(ThumbnailPanelPlacement.bottom.isHorizontal)
     #expect(!ThumbnailPanelPlacement.left.isHorizontal)
     #expect(!ThumbnailPanelPlacement.hidden.isHorizontal)
+  }
+
+  @Test("기본 앱 연결 형식의 식별자와 확장자는 중복되지 않는다")
+  func defaultAppAssociationFormats() {
+    let formats = DefaultImageFormat.all
+    let typeIdentifiers = formats.flatMap(\.typeIdentifiers)
+    let filenameExtensions = formats.flatMap(\.filenameExtensions)
+    #expect(formats.contains { $0.id == "jpeg" && $0.filenameExtensions.contains("jpg") })
+    #expect(formats.contains { $0.id == "raw" && $0.filenameExtensions.contains("dng") })
+    #expect(formats.contains { $0.id == "qoi" })
+    #expect(Set(formats.map(\.id)).count == formats.count)
+    #expect(Set(typeIdentifiers).count == typeIdentifiers.count)
+    #expect(Set(filenameExtensions).count == filenameExtensions.count)
+    #expect(formats.flatMap(\.contentTypes).map(\.identifier) == typeIdentifiers)
+    #expect(formats.allSatisfy { !$0.typeIdentifiers.isEmpty && !$0.filenameExtensions.isEmpty })
+  }
+
+  @Test("8개 언어가 같은 번역 키와 각 언어의 앱 이름을 제공한다")
+  func localizationResources() {
+    let expectedNames = [
+      "ko": "이미지뷰어",
+      "en": "Image Viewer",
+      "zh-Hans": "图像查看器",
+      "ja": "画像ビューア",
+      "fr": "Visionneuse d’images",
+      "es": "Visor de imágenes",
+      "ar": "عارض الصور",
+      "vi": "Trình xem ảnh",
+    ]
+    #expect(L10n.supportedLocalizations == ["ko", "en", "zh-Hans", "ja", "fr", "es", "ar", "vi"])
+
+    let koreanKeys = L10n.keys(localeIdentifier: "ko")
+    #expect(koreanKeys.count >= 260)
+    for localeIdentifier in L10n.supportedLocalizations {
+      #expect(L10n.keys(localeIdentifier: localeIdentifier) == koreanKeys)
+      #expect(
+        L10n.text("이미지뷰어", localeIdentifier: localeIdentifier)
+          == expectedNames[localeIdentifier]
+      )
+    }
   }
 
   @Test("설정한 포인터 입력만 확대 이미지 팬으로 허용한다")

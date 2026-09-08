@@ -9,8 +9,8 @@ enum PresentationMode: String, CaseIterable, Identifiable, Sendable {
 
   var title: String {
     switch self {
-    case .viewer: "뷰어"
-    case .overview: "전체 보기"
+    case .viewer: L10n.text("뷰어")
+    case .overview: L10n.text("전체 보기")
     }
   }
 }
@@ -23,8 +23,8 @@ enum BaseScaleMode: String, CaseIterable, Identifiable, Sendable {
 
   var title: String {
     switch self {
-    case .fit: "화면 맞춤"
-    case .actualPixels: "실제 크기"
+    case .fit: L10n.text("화면 맞춤")
+    case .actualPixels: L10n.text("실제 크기")
     }
   }
 }
@@ -43,11 +43,11 @@ enum FilenameDisplaySize: String, CaseIterable, Codable, Identifiable, Sendable 
 
   var title: String {
     switch self {
-    case .hidden: "숨김"
-    case .small: "작게"
-    case .medium: "보통"
-    case .large: "크게"
-    case .extraLarge: "매우 크게"
+    case .hidden: L10n.text("숨김")
+    case .small: L10n.text("작게")
+    case .medium: L10n.text("보통")
+    case .large: L10n.text("크게")
+    case .extraLarge: L10n.text("매우 크게")
     }
   }
 
@@ -100,13 +100,16 @@ enum ThumbnailPanelPlacement: String, CaseIterable, Codable, Identifiable, Senda
 
   var id: Self { self }
 
+  /// 툴바 메뉴에서 사용자가 요청한 빠른 선택 순서를 고정합니다.
+  static let quickSelectionOrder: [Self] = [.hidden, .left, .right, .bottom, .top]
+
   var title: String {
     switch self {
-    case .hidden: "숨김"
-    case .left: "왼쪽"
-    case .right: "오른쪽"
-    case .top: "위쪽"
-    case .bottom: "아래쪽"
+    case .hidden: L10n.text("숨김")
+    case .left: L10n.text("왼쪽")
+    case .right: L10n.text("오른쪽")
+    case .top: L10n.text("위쪽")
+    case .bottom: L10n.text("아래쪽")
     }
   }
 
@@ -134,8 +137,8 @@ enum InspectorPanel: String, CaseIterable, Identifiable, Sendable {
 
   var title: String {
     switch self {
-    case .information: "이미지 정보"
-    case .editing: "이미지 편집"
+    case .information: L10n.text("이미지 정보")
+    case .editing: L10n.text("이미지 편집")
     }
   }
 }
@@ -160,21 +163,21 @@ enum PanInteractionMode: String, CaseIterable, Codable, Identifiable, Sendable {
 
   var title: String {
     switch self {
-    case .primaryDrag: "왼쪽 버튼 드래그"
-    case .spacePrimaryDrag: "Space + 왼쪽 드래그"
-    case .secondaryDrag: "오른쪽 버튼 드래그"
-    case .middleDrag: "가운데 버튼 드래그"
-    case .trackpadScroll: "트랙패드 두 손가락 이동"
+    case .primaryDrag: L10n.text("왼쪽 버튼 드래그")
+    case .spacePrimaryDrag: L10n.text("Space + 왼쪽 드래그")
+    case .secondaryDrag: L10n.text("오른쪽 버튼 드래그")
+    case .middleDrag: L10n.text("가운데 버튼 드래그")
+    case .trackpadScroll: L10n.text("트랙패드 두 손가락 이동")
     }
   }
 
   var detail: String {
     switch self {
-    case .primaryDrag: "이미지를 직접 잡아 옮깁니다."
-    case .spacePrimaryDrag: "Space를 누른 동안만 왼쪽 버튼으로 옮깁니다."
-    case .secondaryDrag: "오른쪽 버튼을 누른 채 이미지를 옮깁니다."
-    case .middleDrag: "휠 또는 가운데 버튼을 누른 채 옮깁니다."
-    case .trackpadScroll: "확대 중 두 손가락 스크롤로 상하좌우를 이동합니다."
+    case .primaryDrag: L10n.text("이미지를 직접 잡아 옮깁니다.")
+    case .spacePrimaryDrag: L10n.text("Space를 누른 동안만 왼쪽 버튼으로 옮깁니다.")
+    case .secondaryDrag: L10n.text("오른쪽 버튼을 누른 채 이미지를 옮깁니다.")
+    case .middleDrag: L10n.text("휠 또는 가운데 버튼을 누른 채 옮깁니다.")
+    case .trackpadScroll: L10n.text("확대 중 두 손가락 스크롤로 상하좌우를 이동합니다.")
     }
   }
 

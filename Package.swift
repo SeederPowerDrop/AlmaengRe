@@ -15,6 +15,9 @@ let package = Package(
     .executableTarget(
       name: "ImageViewer",
       path: "Sources/ImageViewer",
+      resources: [
+        .process("Resources")
+      ],
       linkerSettings: [
         .linkedFramework("AppKit"),
         .linkedFramework("CoreImage"),

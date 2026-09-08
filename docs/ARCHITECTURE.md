@@ -10,6 +10,11 @@
           ▼
     AppStore ── 현재 위치, 1~10장 배치, 패널, 확대/팬, 조정값
           │
+          ├──────────────► 8개 .lproj ── SwiftUI·동적 오류·Finder 앱 이름
+          │
+          ├──────────────► DefaultAppAssociationStore
+          │                  └─ 선택한 UTType만 NSWorkspace 기본 앱으로 연결
+          │
           ├──────────────► ThumbnailPipeline actor
           │                  └─ macOS Quick Look 디스크 캐시
           │                         └─ Overview / 썸네일 패널 / 선행 미리보기
@@ -48,11 +53,25 @@ Quick Look, Image I/O, Core Image는 macOS 동적 프레임워크이므로 앱 �
 
 ## 입력과 패널
 
-- 썸네일 패널 배치는 ThumbnailPanelPlacement 하나로 관리하며, 위·아래에서는 가로 지연 그리드, 좌·우에서는 세로 지연 그리드를 재사용합니다.
+- 썸네일 패널 배치는 ThumbnailPanelPlacement 하나로 관리합니다. 툴바와 메뉴에서는 숨김·왼쪽·오른쪽·아래·위를 중첩 단계 없이 바로 고르며, 위·아래에서는 가로 지연 그리드, 좌·우에서는 세로 지연 그리드를 재사용합니다.
 - 팬 방식은 PanInteractionMode로 저장합니다. AppKit 이벤트 감시 영역은 이미지 캔버스에만 붙어 정보 패널이나 설정 창의 스크롤을 가로채지 않습니다.
 - 오른쪽 보조 패널은 정보와 편집 중 하나만 열어 좁은 창에서도 이미지 영역을 보존합니다.
 - i 정보 패널의 수정 시트는 파일 이름·수정일과 TIFF/EXIF/GPS 표준 태그를 편집합니다. 픽셀 크기·포맷·비트 심도·UTI처럼 파일에서 계산되는 속성은 읽기 전용입니다.
 - 지도 버튼은 EXIF GPS가 유효할 때만 보이며, 클릭할 때만 [Apple 지도 링크](https://developer.apple.com/library/archive/featuredarticles/iPhoneURLScheme_Reference/MapLinks/MapLinks.html) 또는 [Google Maps URL](https://developers.google.com/maps/documentation/urls/get-started)을 엽니다. API 키나 위치 업로드는 없습니다.
+
+## 현지화
+
+- `Localizable.strings`는 한국어 키를 기준으로 8개 언어가 같은 키 집합과 서식 지정자를 갖도록 테스트합니다.
+- SwiftUI의 정적 문구는 macOS 번들 현지화를 사용하고, 열거형 제목·오류처럼 실행 중 조합되는 문구는 `L10n`을 통해 같은 리소스를 읽습니다.
+- 배포 스크립트는 각 `.lproj`를 앱의 `Contents/Resources`에 복사하므로 Finder 앱 이름의 `InfoPlist.strings`와 앱 화면이 같은 언어를 사용합니다.
+- 언어 선택은 별도 사설 설정을 만들지 않고 macOS의 전역 또는 앱별 언어 설정을 따릅니다. 아랍어에서는 시스템의 오른쪽에서 왼쪽 레이아웃 전환도 그대로 적용됩니다.
+
+## 기본 앱 연결
+
+- `Info.plist`의 문서 타입 선언으로 이미지뷰어를 폭넓은 이미지 UTI의 Viewer 후보로 등록합니다. QOI와 PCX는 앱이 가져오는 자체 UTI 선언을 사용합니다.
+- 설정 화면의 `DefaultAppAssociationStore`는 JPEG, PNG, RAW 같은 23개 형식군을 보여 주며 사용자가 고른 형식의 UTI만 처리합니다.
+- 적용은 macOS 12 이상 공식 `NSWorkspace.setDefaultApplication` API를 사용합니다. 운영체제의 사용자 확인을 우회하지 않으며 선택하지 않은 형식의 연결은 건드리지 않습니다.
+- 현재 기본 앱은 각 UTI의 실제 처리 앱 URL과 현재 번들을 비교해 없음·일부·전체 상태로 표시합니다.
 
 ## 비파괴 조정
 

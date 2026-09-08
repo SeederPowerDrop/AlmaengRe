@@ -7,7 +7,7 @@ enum ThumbnailPipelineError: LocalizedError {
   var errorDescription: String? {
     switch self {
     case .generationFailed(let url):
-      "‘\(url.lastPathComponent)’의 빠른 미리보기를 만들지 못했습니다."
+      L10n.format("‘%@’의 빠른 미리보기를 만들지 못했습니다.", url.lastPathComponent)
     }
   }
 }

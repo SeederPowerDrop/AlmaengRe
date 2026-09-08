@@ -65,9 +65,10 @@ enum ImageExportError: LocalizedError {
 
   var errorDescription: String? {
     switch self {
-    case .formatUnavailable(let format): "이 macOS에서는 \(format.title) 저장을 지원하지 않습니다."
-    case .destinationCreationFailed: "출력 파일을 만들 수 없습니다."
-    case .finalizationFailed: "이미지 파일 저장을 마무리하지 못했습니다."
+    case .formatUnavailable(let format):
+      L10n.format("이 macOS에서는 %@ 저장을 지원하지 않습니다.", format.title)
+    case .destinationCreationFailed: L10n.text("출력 파일을 만들 수 없습니다.")
+    case .finalizationFailed: L10n.text("이미지 파일 저장을 마무리하지 못했습니다.")
     }
   }
 }

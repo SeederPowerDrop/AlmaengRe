@@ -18,7 +18,9 @@ struct BottomControlBar: View {
           Image(systemName: "rectangle.grid.3x2")
         }
       }
-      .help(store.isFocusMode ? "집중 보기 종료 (Esc)" : "전체 보기로 돌아가기 (Esc)")
+      .help(
+        L10n.text(store.isFocusMode ? "집중 보기 종료 (Esc)" : "전체 보기로 돌아가기 (Esc)")
+      )
 
       Divider()
         .frame(height: 16)
@@ -76,7 +78,7 @@ struct BottomControlBar: View {
         Image(systemName: "hand.draw")
       }
       .menuStyle(.borderlessButton)
-      .help("팬 조작: \(store.panInteractionMode.title)")
+      .help(L10n.format("팬 조작: %@", store.panInteractionMode.title))
 
       Button {
         store.navigatePage(1)

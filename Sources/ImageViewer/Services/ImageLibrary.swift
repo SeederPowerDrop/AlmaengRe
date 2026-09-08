@@ -6,7 +6,7 @@ enum ImageLibraryError: LocalizedError {
   var errorDescription: String? {
     switch self {
     case .noImages(let url):
-      "‘\(url.lastPathComponent)’에서 읽을 수 있는 이미지를 찾지 못했습니다."
+      L10n.format("‘%@’에서 읽을 수 있는 이미지를 찾지 못했습니다.", url.lastPathComponent)
     }
   }
 }

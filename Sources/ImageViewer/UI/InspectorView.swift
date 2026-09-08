@@ -96,7 +96,7 @@ struct InspectorView: View {
         informationRow("비트 심도", "\(depth)-bit")
       }
       if let hasAlpha = store.currentMetadata?.hasAlpha {
-        informationRow("알파 채널", hasAlpha ? "있음" : "없음")
+        informationRow("알파 채널", L10n.text(hasAlpha ? "있음" : "없음"))
       }
       if let dpi = dpiDescription {
         informationRow("해상도", dpi)
@@ -315,7 +315,7 @@ struct InspectorView: View {
   }
 
   private func informationRow(_ title: String, _ value: String) -> some View {
-    LabeledContent(title) {
+    LabeledContent(L10n.text(title)) {
       Text(value)
         .multilineTextAlignment(.trailing)
         .textSelection(.enabled)
@@ -329,7 +329,7 @@ struct InspectorView: View {
   ) -> some View {
     VStack(alignment: .leading, spacing: 4) {
       HStack {
-        Text(title)
+        Text(L10n.text(title))
         Spacer()
         Text(value.wrappedValue.formatted(.number.precision(.fractionLength(2))))
           .font(.caption.monospacedDigit())
@@ -353,9 +353,9 @@ struct InspectorView: View {
   private func exposureDescription(_ seconds: Double) -> String {
     guard seconds > 0 else { return "—" }
     if seconds < 0.5 {
-      return "1/\(max(1, Int((1 / seconds).rounded())))초"
+      return L10n.format("1/%d초", max(1, Int((1 / seconds).rounded())))
     }
-    return "\(decimal(seconds))초"
+    return L10n.format("%@초", decimal(seconds))
   }
 
   private func decimal(_ value: Double) -> String {
@@ -364,13 +364,13 @@ struct InspectorView: View {
 
   private func orientationDescription(_ value: Int) -> String {
     switch value {
-    case 1: "정방향"
-    case 2: "좌우 반전"
+    case 1: L10n.text("정방향")
+    case 2: L10n.text("좌우 반전")
     case 3: "180°"
-    case 4: "상하 반전"
-    case 5: "좌우 반전 + 90°"
+    case 4: L10n.text("상하 반전")
+    case 5: L10n.text("좌우 반전 + 90°")
     case 6: "90°"
-    case 7: "좌우 반전 + 270°"
+    case 7: L10n.text("좌우 반전 + 270°")
     case 8: "270°"
     default: "\(value)"
     }
