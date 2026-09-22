@@ -44,6 +44,9 @@
 "집중 모드 전환" = "Toggle Focus Mode";
 "집중 보기 종료" = "Exit Focus Mode";
 "집중 보기 종료 (Esc)" = "Exit Focus Mode (Esc)";
+
+"조작창 숨기기" = "Hide Controls";
+"조작창 표시" = "Show Controls";
 "몽땅보기로 돌아가기 (Esc)" = "Return to All at Once (Esc)";
 "전체 화면" = "Full Screen";
 "이전 이미지/페이지" = "Previous Image/Page";

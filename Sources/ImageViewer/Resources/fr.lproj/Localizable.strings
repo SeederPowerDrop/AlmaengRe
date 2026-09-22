@@ -44,6 +44,9 @@
 "집중 모드 전환" = "Activer/désactiver le mode concentration";
 "집중 보기 종료" = "Quitter le mode concentration";
 "집중 보기 종료 (Esc)" = "Quitter le mode concentration (Échap.)";
+
+"조작창 숨기기" = "Masquer les commandes";
+"조작창 표시" = "Afficher les commandes";
 "몽땅보기로 돌아가기 (Esc)" = "Revenir à « Tout voir » (Échap.)";
 "전체 화면" = "Plein écran";
 "이전 이미지/페이지" = "Image/page précédente";

@@ -14,6 +14,7 @@ struct ViewerCanvas: View {
   @GestureState private var liveMagnification: CGFloat = 1
   @GestureState private var livePan: CGSize = .zero
   @State private var controlsVisible = true
+  @State private var controlsDismissed = false
 
   var body: some View {
     VStack(spacing: 0) {
@@ -23,6 +24,10 @@ struct ViewerCanvas: View {
         Divider()
         BottomControlBar(store: store, shortcuts: shortcuts)
       }
+    }
+    .onChange(of: store.isFocusMode) { _, _ in
+      controlsDismissed = false
+      controlsVisible = true
     }
   }
 
@@ -91,7 +96,16 @@ struct ViewerCanvas: View {
                 isCurrent: asset.id == store.currentAsset?.id,
                 itemCount: visible.count
               ),
-              onPresentationReady: { store.slideshowAssetPresented($0) }
+              onPresentationReady: { store.slideshowAssetPresented($0) },
+              onExitFocus: store.isFocusMode && asset.id == visible.first?.id
+                ? { store.exitFocusMode() } : nil,
+              onShowControls: store.isFocusMode && controlsDismissed && asset.id == visible.first?.id
+                ? {
+                  withAnimation(.easeOut(duration: 0.16)) {
+                    controlsDismissed = false
+                    controlsVisible = true
+                  }
+                } : nil
             )
             // GeometryReader는 LazyVGrid 안에서 고유 높이가 없으므로 행 수로
             // 높이를 명시해야 이미지가 캔버스 전체를 채웁니다.
@@ -113,8 +127,11 @@ struct ViewerCanvas: View {
 
         VStack {
           Spacer()
-          if store.isFocusMode && controlsVisible {
-            BottomControlBar(store: store, shortcuts: shortcuts)
+          if store.isFocusMode && controlsVisible && !controlsDismissed {
+            BottomControlBar(store: store, shortcuts: shortcuts, onHideControls: {
+              // Explicit dismissal survives hover and photo navigation until reopened.
+              withAnimation(.easeOut(duration: 0.16)) { controlsDismissed = true }
+            })
               .frame(maxWidth: 740)
               .clipShape(RoundedRectangle(cornerRadius: 10))
               .overlay { RoundedRectangle(cornerRadius: 10).stroke(.white.opacity(0.12)) }

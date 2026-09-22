@@ -44,6 +44,9 @@
 "집중 모드 전환" = "Alternar modo de concentración";
 "집중 보기 종료" = "Salir del modo de concentración";
 "집중 보기 종료 (Esc)" = "Salir del modo de concentración (Esc)";
+
+"조작창 숨기기" = "Ocultar controles";
+"조작창 표시" = "Mostrar controles";
 "몽땅보기로 돌아가기 (Esc)" = "Volver a « Todo a la vista » (Esc)";
 "전체 화면" = "Pantalla completa";
 "이전 이미지/페이지" = "Imagen/página anterior";
