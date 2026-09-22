@@ -1,4 +1,5 @@
 import Foundation
+import ImageIO
 import QuickLookThumbnailing
 
 enum ThumbnailPipelineError: LocalizedError {
@@ -14,6 +15,77 @@ enum ThumbnailPipelineError: LocalizedError {
 
 private struct GeneratedThumbnail: @unchecked Sendable {
   let image: CGImage
+}
+
+/// Quick Look can report success with a completely transparent bitmap, notably for
+/// some camera JPEGs at specific thumbnail sizes. Validate actual pixels before
+/// caching that result, and repair it from the source within the same I/O job.
+enum ThumbnailBitmapDecoder {
+  struct Bitmap {
+    let image: CGImage
+    let hasVisiblePixels: Bool
+  }
+
+  static func validatedThumbnail(_ thumbnail: CGImage, sourceURL: URL, maxPixelSize: Int)
+    throws -> CGImage
+  {
+    try Task.checkCancellation()
+    if let bitmap = rasterized(thumbnail, maxPixelSize: maxPixelSize), bitmap.hasVisiblePixels {
+      try Task.checkCancellation()
+      return bitmap.image
+    }
+
+    try Task.checkCancellation()
+    guard let source = CGImageSourceCreateWithURL(
+      sourceURL as CFURL, [kCGImageSourceShouldCache: false] as CFDictionary),
+      let decoded = CGImageSourceCreateThumbnailAtIndex(source, 0, [
+        kCGImageSourceCreateThumbnailFromImageAlways: true,
+        kCGImageSourceCreateThumbnailWithTransform: true,
+        kCGImageSourceThumbnailMaxPixelSize: min(4096, max(1, maxPixelSize)),
+        kCGImageSourceShouldCacheImmediately: true,
+      ] as CFDictionary),
+      let repaired = rasterized(decoded, maxPixelSize: maxPixelSize)
+    else {
+      // The view can now try its format-specific precise decoder. Never cache
+      // the empty Quick Look result as a successful thumbnail.
+      throw ThumbnailPipelineError.generationFailed(sourceURL)
+    }
+    try Task.checkCancellation()
+    // An actually transparent source image is valid; only Quick Look's result
+    // needs to be verified against the source before accepting transparency.
+    return repaired.image
+  }
+
+  static func rasterized(_ image: CGImage, maxPixelSize: Int) -> Bitmap? {
+    guard image.width > 0, image.height > 0 else { return nil }
+    let limit = min(4096, max(1, maxPixelSize))
+    let scale = min(1, Double(limit) / Double(max(image.width, image.height)))
+    let width = max(1, Int((Double(image.width) * scale).rounded()))
+    let height = max(1, Int((Double(image.height) * scale).rounded()))
+    let bytesPerRow = width * 4
+    // A detached, bounded 8-bit bitmap avoids retaining Quick Look's 16-bit
+    // backing storage. Display P3 preserves wide-gamut camera thumbnails.
+    guard let space = CGColorSpace(name: CGColorSpace.displayP3),
+      let context = CGContext(
+        data: nil, width: width, height: height, bitsPerComponent: 8,
+        bytesPerRow: bytesPerRow, space: space,
+        bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
+          | CGBitmapInfo.byteOrder32Big.rawValue),
+      let data = context.data
+    else { return nil }
+    context.interpolationQuality = .high
+    context.draw(image, in: CGRect(x: 0, y: 0, width: width, height: height))
+    let pixels = data.assumingMemoryBound(to: UInt8.self)
+    var hasVisiblePixels = false
+    for offset in stride(from: 3, to: bytesPerRow * height, by: 4) {
+      if pixels[offset] != 0 {
+        hasVisiblePixels = true
+        break
+      }
+    }
+    guard let result = context.makeImage() else { return nil }
+    return Bitmap(image: result, hasVisiblePixels: hasVisiblePixels)
+  }
 }
 
 /// 경로뿐 아니라 파일 버전 정보도 포함해 같은 위치의 이미지가 교체됐을 때
@@ -230,7 +302,10 @@ actor ThumbnailPipeline {
       url: url, priority: priority
     ) { _ in
       let request = NativeThumbnailRequest(url: url, pixelSize: pixelSize)
-      return try await request.value()
+      let generated = try await request.value()
+      let image = try ThumbnailBitmapDecoder.validatedThumbnail(
+        generated.image, sourceURL: url, maxPixelSize: pixelSize)
+      return GeneratedThumbnail(image: image)
     }
     try Task.checkCancellation()
     if cacheGeneration == generation { cache.insert(generated.image, for: key) }

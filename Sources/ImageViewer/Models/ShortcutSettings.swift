@@ -223,6 +223,11 @@ final class ShortcutStore: ObservableObject {
     }
   }
 
+  /// The convenience Space tap never replaces a user's assigned shortcut.
+  var hasPlainSpaceBinding: Bool {
+    ShortcutAction.allCases.contains { binding(for: $0) == KeyBinding(key: "space") }
+  }
+
   var conflictingActions: Set<ShortcutAction> {
     var grouped: [KeyBinding: [ShortcutAction]] = [:]
     for (action, binding) in bindings {

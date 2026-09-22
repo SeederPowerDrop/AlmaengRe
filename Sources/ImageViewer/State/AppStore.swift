@@ -787,6 +787,39 @@ final class AppStore: ObservableObject {
     showStatus(L10n.format("%@ 정보 저장 완료", destinationURL.lastPathComponent))
   }
 
+  /// Shared keyboard routing keeps explicit shortcuts ahead of convenience gestures.
+  func handleViewerKeyDown(_ event: NSEvent, shortcuts: ShortcutStore) -> Bool {
+    guard batchSheet == nil, !isBatchBusy, wallpaperRequest == nil,
+      !isSettingWallpaper, !showsAIUpscaling else { return false }
+    if event.modifierFlags.intersection(.deviceIndependentFlagsMask) == .command,
+      event.charactersIgnoringModifiers?.lowercased() == "a" {
+      selectAllAssets()
+      return true
+    }
+    if event.keyCode == 53 { return handleEscapeKey() }
+    if let action = shortcuts.action(matching: event) {
+      perform(action)
+      return true
+    }
+    return event.keyCode == 49 && canPan && panInteractionMode == .spacePrimaryDrag
+      && event.modifierFlags.intersection([.command, .option, .control, .shift]).isEmpty
+  }
+
+  var canToggleImageFocus: Bool {
+    presentationMode == .viewer && currentAsset != nil && !isLoading && !isFiltering
+      && batchSheet == nil && !isBatchBusy && !isExporting && !isSavingMetadata
+      && wallpaperRequest == nil && !isSettingWallpaper && !showsAIUpscaling && alert == nil
+  }
+
+  func toggleImageFocus(on asset: ImageAsset? = nil) {
+    guard canToggleImageFocus else { return }
+    if let asset, asset.id != currentAsset?.id {
+      guard assets.contains(where: { $0.id == asset.id }) else { return }
+      select(asset: asset)
+    }
+    toggleFocusMode()
+  }
+
   func toggleFocusMode() {
     isFocusMode.toggle()
     if isFocusMode {

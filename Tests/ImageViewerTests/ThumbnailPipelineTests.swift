@@ -1,5 +1,6 @@
 import CoreGraphics
 import Foundation
+import ImageIO
 import Testing
 
 @testable import ImageViewer
@@ -105,5 +106,110 @@ struct ThumbnailPipelineTests {
         #expect(!completion.isPending)
       }
     }
+  }
+}
+
+@Suite("Quick Look 빈 썸네일 복구")
+struct ThumbnailBitmapDecoderTests {
+  private func bitmap(width: Int = 40, height: Int = 20, opaque: Bool) throws -> CGImage {
+    let context = try #require(CGContext(
+      data: nil, width: width, height: height, bitsPerComponent: 8, bytesPerRow: 0,
+      space: CGColorSpaceCreateDeviceRGB(),
+      bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue))
+    if opaque {
+      context.setFillColor(CGColor(gray: 0, alpha: 1))
+      context.fill(CGRect(x: 0, y: 0, width: width, height: height))
+    }
+    return try #require(context.makeImage())
+  }
+
+  private func writeSource(_ image: CGImage, type: String = "public.png", orientation: Int = 1)
+    throws -> URL
+  {
+    let url = FileManager.default.temporaryDirectory
+      .appendingPathComponent("thumbnail-source-\(UUID().uuidString)")
+      .appendingPathExtension(type == "public.jpeg" ? "jpeg" : "png")
+    let destination = try #require(CGImageDestinationCreateWithURL(
+      url as CFURL, type as CFString, 1, nil))
+    CGImageDestinationAddImage(destination, image, [
+      kCGImagePropertyOrientation: orientation,
+    ] as CFDictionary)
+    #expect(CGImageDestinationFinalize(destination))
+    return url
+  }
+
+  @Test("완전히 검은 불투명 사진은 빈 이미지로 오인하지 않는다")
+  func opaqueBlackQuickLookImageIsValid() throws {
+    let image = try bitmap(opaque: true)
+    let result = try ThumbnailBitmapDecoder.validatedThumbnail(
+      image, sourceURL: URL(fileURLWithPath: "/nonexistent/unused-source.jpg"), maxPixelSize: 256)
+    #expect(result.width == 40)
+    #expect(result.height == 20)
+    #expect(ThumbnailBitmapDecoder.rasterized(result, maxPixelSize: 256)?.hasVisiblePixels == true)
+  }
+
+  @Test("성공으로 반환된 투명 Quick Look 결과는 원본에서 방향과 크기를 적용해 복구한다")
+  func transparentQuickLookIsRepairedFromOrientedSource() throws {
+    let source = try writeSource(bitmap(opaque: true), type: "public.jpeg", orientation: 6)
+    defer { try? FileManager.default.removeItem(at: source) }
+    let result = try ThumbnailBitmapDecoder.validatedThumbnail(
+      bitmap(opaque: false), sourceURL: source, maxPixelSize: 16)
+    #expect(result.width == 8)
+    #expect(result.height == 16)
+    #expect(result.bitsPerComponent == 8)
+    #expect(ThumbnailBitmapDecoder.rasterized(result, maxPixelSize: 16)?.hasVisiblePixels == true)
+  }
+
+  @Test("원본이 실제로 투명한 PNG면 정상 썸네일로 유지한다")
+  func genuinelyTransparentSourceRemainsValid() throws {
+    let transparent = try bitmap(opaque: false)
+    let source = try writeSource(transparent)
+    defer { try? FileManager.default.removeItem(at: source) }
+    let result = try ThumbnailBitmapDecoder.validatedThumbnail(
+      transparent, sourceURL: source, maxPixelSize: 256)
+    #expect(result.width == 40)
+    #expect(result.height == 20)
+    #expect(ThumbnailBitmapDecoder.rasterized(result, maxPixelSize: 256)?.hasVisiblePixels == false)
+  }
+
+  @Test("16비트 Quick Look 결과를 별도 8비트 픽셀 메모리로 변환한다")
+  func highBitDepthQuickLookIsDetachedAndNormalized() throws {
+    let channels: [UInt16] = [0, 0, 0, .max, .max, 0, 0, .max]
+    let data = channels.withUnsafeBytes { Data($0) }
+    let provider = try #require(CGDataProvider(data: data as CFData))
+    let original = try #require(CGImage(
+      width: 2, height: 1, bitsPerComponent: 16, bitsPerPixel: 64, bytesPerRow: 16,
+      space: CGColorSpaceCreateDeviceRGB(),
+      bitmapInfo: CGBitmapInfo(rawValue: CGImageAlphaInfo.premultipliedLast.rawValue)
+        .union(.byteOrder16Little),
+      provider: provider, decode: nil, shouldInterpolate: false, intent: .defaultIntent))
+    let result = try #require(ThumbnailBitmapDecoder.rasterized(original, maxPixelSize: 256))
+    #expect(result.hasVisiblePixels)
+    #expect(result.image.bitsPerComponent == 8)
+    #expect(result.image.bitsPerPixel == 32)
+    #expect(result.image.width == 2)
+    #expect(result.image.height == 1)
+  }
+
+  @Test("빈 Quick Look 결과와 읽을 수 없는 원본은 정밀 디코더로 넘긴다")
+  func unavailableSourceDoesNotAcceptEmptyQuickLookImage() throws {
+    let transparent = try bitmap(opaque: false)
+    #expect(throws: ThumbnailPipelineError.self) {
+      try ThumbnailBitmapDecoder.validatedThumbnail(
+        transparent, sourceURL: URL(fileURLWithPath: "/nonexistent/thumbnail-source.jpg"),
+        maxPixelSize: 256)
+    }
+  }
+
+  @Test("취소된 요청은 원본 재생성을 시작하지 않는다")
+  func cancelledRequestDoesNotRepairOrReturnImage() async throws {
+    let task = Task {
+      let transparent = try bitmap(opaque: false)
+      withUnsafeCurrentTask { $0?.cancel() }
+      return try ThumbnailBitmapDecoder.validatedThumbnail(
+        transparent, sourceURL: URL(fileURLWithPath: "/nonexistent/thumbnail-source.jpg"),
+        maxPixelSize: 256).width
+    }
+    await #expect(throws: CancellationError.self) { try await task.value }
   }
 }

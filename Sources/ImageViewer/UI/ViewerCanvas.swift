@@ -1,3 +1,4 @@
+import AppKit
 import SwiftUI
 
 private struct ViewerPrefetchRequest: Hashable {
@@ -23,6 +24,13 @@ struct ViewerCanvas: View {
         BottomControlBar(store: store, shortcuts: shortcuts)
       }
     }
+  }
+
+  private func focusImageCanvas() {
+    // Clicking a photo ends search-field editing so subsequent Space/arrows
+    // control the photo instead of an offscreen or previously active field.
+    guard let window = NSApp.keyWindow, window.firstResponder is NSTextView else { return }
+    window.makeFirstResponder(nil)
   }
 
   private var imageArea: some View {
@@ -89,7 +97,12 @@ struct ViewerCanvas: View {
             // 높이를 명시해야 이미지가 캔버스 전체를 채웁니다.
             .frame(height: tileHeight)
             .contentShape(Rectangle())
+            .onTapGesture(count: 2) {
+              focusImageCanvas()
+              store.toggleImageFocus(on: asset)
+            }
             .onTapGesture {
+              focusImageCanvas()
               // 활성 이미지를 클릭할 때 비교 중의 배율과 팬 위치가 초기화되지 않게 합니다.
               if asset.id != store.currentAsset?.id { store.select(asset: asset) }
             }

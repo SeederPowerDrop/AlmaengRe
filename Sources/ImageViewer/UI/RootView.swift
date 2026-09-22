@@ -284,26 +284,7 @@ struct RootView: View {
     .background {
       InputEventMonitor(
         onKeyDown: { event in
-          guard store.batchSheet == nil, !store.isBatchBusy,
-            store.wallpaperRequest == nil, !store.isSettingWallpaper,
-            !store.showsAIUpscaling else { return false }
-          if event.modifierFlags.intersection(.deviceIndependentFlagsMask) == .command,
-            event.charactersIgnoringModifiers?.lowercased() == "a"
-          {
-            store.selectAllAssets()
-            return true
-          }
-          // Esc는 사용자 설정과 무관하게 언제나 현재 보기에서 한 단계 돌아갑니다.
-          if event.keyCode == 53 {
-            return store.handleEscapeKey()
-          }
-          // Space+드래그 모드에서는 확대 중 Space를 팬 전용으로 예약합니다.
-          if event.keyCode == 49, store.canPan, store.panInteractionMode == .spacePrimaryDrag {
-            return true
-          }
-          guard let action = shortcuts.action(matching: event) else { return false }
-          store.perform(action)
-          return true
+          store.handleViewerKeyDown(event, shortcuts: shortcuts)
         },
         onPointerPan: { input, delta in
           store.handlePanInput(input, delta: delta)
@@ -311,7 +292,9 @@ struct RootView: View {
         onHorizontalSwipe: { delta in
           guard store.presentationMode == .viewer else { return }
           store.navigatePage(delta < 0 ? 1 : -1)
-        }
+        },
+        canHandleSpaceTap: { store.canToggleImageFocus && !shortcuts.hasPlainSpaceBinding },
+        onSpaceTap: { store.toggleImageFocus() }
       )
     }
   }
