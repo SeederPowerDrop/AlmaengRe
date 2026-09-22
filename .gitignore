@@ -5,3 +5,5 @@
 *.xcuserstate
 xcuserdata/
 DerivedData/
+# Local design experiments and third-party reference material are not app sources.
+/design/

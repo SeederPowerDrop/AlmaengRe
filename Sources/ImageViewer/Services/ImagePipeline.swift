@@ -26,13 +26,16 @@ struct RenderedFrame: @unchecked Sendable {
   let frameIndex: Int
   let frameCount: Int
   let duration: TimeInterval?
-}
+  let sourcePixelSize: CGSize?
 
-private final class RenderedFrameBox: NSObject {
-  let frame: RenderedFrame
-
-  init(_ frame: RenderedFrame) {
-    self.frame = frame
+  init(image: CGImage, frameIndex: Int, frameCount: Int, duration: TimeInterval?,
+    sourcePixelSize: CGSize? = nil)
+  {
+    self.image = image
+    self.frameIndex = frameIndex
+    self.frameCount = frameCount
+    self.duration = duration
+    self.sourcePixelSize = sourcePixelSize
   }
 }
 
@@ -44,38 +47,170 @@ private final class ImageSourceBox: NSObject {
   }
 }
 
-/// 디코딩, 축소, 색상 변환과 필터를 한 직렬 파이프라인에서 처리합니다.
-///
-/// 화면에는 뷰 크기에 필요한 픽셀만 만들고, 원본 크기 이미지는 내보낼 때만
-/// 렌더링합니다. NSCache는 압박이 생기면 자동으로 항목을 버립니다.
+private struct FrameCacheKey: Hashable, Sendable {
+  let file: ImageFileVersion
+  let frameIndex: Int
+  let pixelSize: Int?
+  let adjustments: ImageAdjustments
+  let prefersHDR: Bool
+  let generation: UInt64
+
+  var needsSerialDecoder: Bool {
+    // Full-size exports, RAW, TIFF, floating point and custom decoders may need
+    // a full-size workspace even when their resulting thumbnail is small.
+    guard pixelSize != nil else { return true }
+    return !["jpg", "jpeg", "png", "heic", "heif", "hif", "webp", "gif", "avif", "jxl", "bmp"]
+      .contains(file.url.pathExtension.lowercased())
+  }
+}
+
+/// A small worker pool keeps multi-image pages moving without spawning a decoder
+/// per file. The scheduler prioritizes visible work and shares identical requests.
 actor ImagePipeline {
-  private let renderedCache = NSCache<NSString, RenderedFrameBox>()
-  private let sourceCache = NSCache<NSURL, ImageSourceBox>()
-  private let context: CIContext
-  private let softwareContext: CIContext
+  private let workers = (0..<4).map { _ in ImageDecoder() }
+  private let largeImageDecoder = ImageDecoder()
+  private let metadataDecoder = ImageDecoder()
+  private let governor: ImageResourceGovernor
+  private let renderNamespace = UUID()
+  private let metadataNamespace = UUID()
+  private let cacheClientID = UUID()
+  private var cache = ImageCostCache<FrameCacheKey, RenderedFrame>(costLimit: 0)
+  private var generation: UInt64 = 0
+  private var resourceRevision: UInt64 = 0
+  private var registeredCacheClient = false
 
-  init() {
-    let physicalMemory = ProcessInfo.processInfo.physicalMemory
-    let cacheBytes = min(
-      UInt64(512 * 1_024 * 1_024), max(UInt64(128 * 1_024 * 1_024), physicalMemory / 24))
-    renderedCache.totalCostLimit = Int(cacheBytes)
-    renderedCache.countLimit = 128
-    sourceCache.countLimit = 16
+  init(maxConcurrentDecodes: Int? = nil, governor: ImageResourceGovernor? = nil) {
+    self.governor = governor ?? ImageResourceGovernor(
+      mode: maxConcurrentDecodes == nil ? .comfortable : .priority,
+      maximumConcurrentLoadsOverride: maxConcurrentDecodes)
+  }
 
-    context = CIContext(options: [
+  func metadata(for url: URL) async throws -> ImageMetadata {
+    try Task.checkCancellation()
+    let decoder = metadataDecoder
+    return try await governor.value(
+      for: ImageResourceWorkKey(namespace: metadataNamespace, key: ImageFileVersion(url: url)),
+      url: url
+    ) { _ in
+      try await decoder.metadata(for: url)
+    }
+  }
+
+  func renderFrame(
+    url: URL,
+    frameIndex: Int = 0,
+    maxPixelSize: Int?,
+    adjustments: ImageAdjustments,
+    prefersHDR: Bool,
+    priority: ImageWorkPriority = .visible
+  ) async throws -> RenderedFrame {
+    try Task.checkCancellation()
+    await registerCacheClientIfNeeded()
+    let key = FrameCacheKey(
+      file: ImageFileVersion(url: url), frameIndex: max(0, frameIndex),
+      pixelSize: maxPixelSize.map(ImageLoadingPolicy.pixelBucket),
+      adjustments: adjustments, prefersHDR: prefersHDR, generation: generation)
+    if let frame = cache.value(for: key) { return frame }
+
+    let workers = workers
+    let largeImageDecoder = largeImageDecoder
+    let frame = try await governor.value(
+      for: ImageResourceWorkKey(namespace: renderNamespace, key: key), url: url, priority: priority
+    ) { slot in
+      let decoder = key.needsSerialDecoder ? largeImageDecoder : workers[slot]
+      return try await decoder.renderFrame(
+        url: key.file.url, frameIndex: key.frameIndex, maxPixelSize: key.pixelSize,
+        adjustments: key.adjustments, prefersHDR: key.prefersHDR,
+        hdrFallback: key.needsSerialDecoder ? nil : largeImageDecoder)
+    }
+    try Task.checkCancellation()
+    if key.pixelSize != nil, key.generation == generation {
+      cache.insert(frame, for: key, cost: frame.image.bytesPerRow * frame.image.height)
+    }
+    return frame
+  }
+
+  func prefetch(urls: [URL], maxPixelSize: Int, prefersHDR: Bool) async {
+    guard let first = urls.first else { return }
+    let limits = await governor.limits(for: first)
+    guard limits.permitsSpeculation else { return }
+    for url in urls.prefix(limits.prefetchCount) {
+      guard !Task.isCancelled else { return }
+      _ = try? await renderFrame(url: url, maxPixelSize: maxPixelSize,
+        adjustments: .identity, prefersHDR: prefersHDR, priority: .prefetch)
+    }
+  }
+
+  func purgeCaches() async {
+    generation &+= 1
+    cache.removeAll()
+    await clearDecoderCaches()
+  }
+
+  private func registerCacheClientIfNeeded() async {
+    guard !registeredCacheClient else { return }
+    registeredCacheClient = true
+    await governor.registerCacheClient(id: cacheClientID) { [weak self] update in
+      await self?.applyResourceLimits(update)
+    }
+  }
+
+  private func applyResourceLimits(_ update: ImageResourceUpdate) async {
+    guard update.revision >= resourceRevision else { return }
+    resourceRevision = update.revision
+    let smaller = update.limits.renderCacheBytes < cache.costLimit
+    cache.costLimit = update.limits.renderCacheBytes
+    if smaller {
+      generation &+= 1
+      cache.removeAll()
+      await clearDecoderCaches()
+    }
+  }
+
+  private func clearDecoderCaches() async {
+    for decoder in workers { await decoder.purgeCaches() }
+    await largeImageDecoder.purgeCaches()
+    await metadataDecoder.purgeCaches()
+  }
+}
+
+/// Each scheduler slot owns a decoder. Synchronous codec calls never run on the UI actor.
+private actor ImageDecoder {
+  private let sourceCache = NSCache<NSString, ImageSourceBox>()
+  private var existingContext: CIContext?
+  private var context: CIContext {
+    if let existingContext { return existingContext }
+    let context = CIContext(options: [
       .cacheIntermediates: false,
       .highQualityDownsample: true,
-      .name: "ImageViewer Core Image Pipeline",
+      .name: "ImageViewer Core Image Decoder",
     ])
-    softwareContext = CIContext(options: [
+    existingContext = context
+    return context
+  }
+  private var existingSoftwareContext: CIContext?
+  private var softwareContext: CIContext {
+    if let existingSoftwareContext { return existingSoftwareContext }
+    let context = CIContext(options: [
       .useSoftwareRenderer: true,
       .cacheIntermediates: false,
       .highQualityDownsample: true,
       .name: "ImageViewer CPU Fallback",
     ])
+    existingSoftwareContext = context
+    return context
+  }
+
+  init() {
+    sourceCache.countLimit = 2
   }
 
   func metadata(for url: URL) throws -> ImageMetadata {
+    try Task.checkCancellation()
+    return try autoreleasepool { try readMetadata(for: url) }
+  }
+
+  private func readMetadata(for url: URL) throws -> ImageMetadata {
     if let source = imageSource(for: url) {
       let properties =
         CGImageSourceCopyPropertiesAtIndex(source, 0, nil) as? [CFString: Any] ?? [:]
@@ -130,46 +265,72 @@ actor ImagePipeline {
 
   func renderFrame(
     url: URL,
-    frameIndex requestedFrameIndex: Int = 0,
+    frameIndex: Int,
+    maxPixelSize: Int?,
+    adjustments: ImageAdjustments,
+    prefersHDR: Bool,
+    hdrFallback: ImageDecoder? = nil
+  ) async throws -> RenderedFrame {
+    try Task.checkCancellation()
+    // Gain-map JPEG and high-bit HEIC/AVIF can require a full HDR workspace too.
+    // Inspect before decoding and route them through the single large-image actor.
+    if let hdrFallback, let source = imageSource(for: url),
+      shouldPreserveHDR(source: source, url: url)
+    {
+      return try await hdrFallback.renderFrame(url: url, frameIndex: frameIndex,
+        maxPixelSize: maxPixelSize, adjustments: adjustments, prefersHDR: prefersHDR)
+    }
+    return try autoreleasepool {
+      try decodeFrame(url: url, frameIndex: frameIndex, maxPixelSize: maxPixelSize,
+        adjustments: adjustments, prefersHDR: prefersHDR)
+    }
+  }
+
+  private func decodeFrame(
+    url: URL,
+    frameIndex requestedFrameIndex: Int,
     maxPixelSize: Int?,
     adjustments: ImageAdjustments,
     prefersHDR: Bool
   ) throws -> RenderedFrame {
     try Task.checkCancellation()
-
     let source = imageSource(for: url)
     let frameCount = max(1, source.map(CGImageSourceGetCount) ?? 1)
     let frameIndex = min(max(0, requestedFrameIndex), frameCount - 1)
-    let pixelBucket = maxPixelSize.map(Self.pixelBucket) ?? 0
-    let key = cacheKey(
-      url: url,
-      frameIndex: frameIndex,
-      pixelBucket: pixelBucket,
-      adjustments: adjustments,
-      prefersHDR: prefersHDR
-    )
-
-    if let cached = renderedCache.object(forKey: key) {
-      return cached.frame
+    let pixelBucket = maxPixelSize ?? 0
+    let preservesHDRSource = source.map { shouldPreserveHDR(source: $0, url: url) } ?? true
+    var sourcePixelSize: CGSize?
+    if let source,
+      let properties = CGImageSourceCopyPropertiesAtIndex(source, frameIndex, nil) as? [CFString: Any]
+    {
+      let width = number(properties[kCGImagePropertyPixelWidth])
+      let height = number(properties[kCGImagePropertyPixelHeight])
+      if width > 0, height > 0 {
+        let swapsAxes = (5...8).contains(number(properties[kCGImagePropertyOrientation]))
+        sourcePixelSize = CGSize(width: swapsAxes ? height : width, height: swapsAxes ? width : height)
+      }
     }
+    let decodePixels = cropDecodePixelSize(
+      requestedPixels: maxPixelSize, sourceSize: sourcePixelSize, adjustments: adjustments)
 
     let input: CIImage
     var directlyDecodedBitmap: CGImage?
     var shouldDecodeWithImageIO = frameCount > 1
-    if !shouldDecodeWithImageIO, pixelBucket > 0, let source {
-      shouldDecodeWithImageIO = !shouldPreserveHDR(source: source, url: url)
+    if !shouldDecodeWithImageIO, pixelBucket > 0, source != nil {
+      shouldDecodeWithImageIO = !preservesHDRSource
     }
     if let source,
       shouldDecodeWithImageIO,
       let frameImage = makeImageIOFrame(
         source: source,
         frameIndex: frameIndex,
-        maxPixelSize: pixelBucket == 0 ? nil : pixelBucket
+        maxPixelSize: decodePixels
       )
     {
       // 화면 크기가 정해진 SDR 이미지는 Image I/O 단계에서 먼저 축소합니다.
       // 수천만 화소 JPEG/RAW를 온전히 디코딩한 뒤 줄이는 비용을 피하는 핵심 경로입니다.
       input = CIImage(cgImage: frameImage)
+      if !preservesHDRSource { directlyDecodedBitmap = frameImage }
     } else if frameCount == 1,
       let directImage = CIImage(
         contentsOf: url,
@@ -187,30 +348,36 @@ actor ImagePipeline {
       input = CIImage(cgImage: bitmap)
     }
 
-    // 자체 디코더가 이미 목표 크기의 표준 비트맵을 만들었고 보정도 없다면
-    // 불필요한 GPU 왕복 없이 그대로 표시·저장합니다.
+    if sourcePixelSize == nil { sourcePixelSize = input.extent.size }
+    if adjustments.normalizedQuarterTurns.isMultiple(of: 2) == false, let size = sourcePixelSize {
+      sourcePixelSize = CGSize(width: size.height, height: size.width)
+    }
+    if let crop = adjustments.effectiveCrop, let size = sourcePixelSize {
+      sourcePixelSize = crop.pixelRect(in: size).size
+    }
+
+    // A decoded SDR bitmap already carries its ICC profile. Core Animation performs
+    // display color management; an identity edit needs no extra GPU/P3/half-float copy.
     if let bitmap = directlyDecodedBitmap,
       adjustments.isIdentity,
       pixelBucket == 0 || max(bitmap.width, bitmap.height) <= pixelBucket
     {
-      let frame = RenderedFrame(
+      try Task.checkCancellation()
+      return RenderedFrame(
         image: bitmap,
-        frameIndex: 0,
-        frameCount: 1,
-        duration: nil
+        frameIndex: frameIndex,
+        frameCount: frameCount,
+        duration: source.flatMap {
+          animationDuration(source: $0, frameIndex: frameIndex, frameCount: frameCount)
+        },
+        sourcePixelSize: sourcePixelSize
       )
-      if pixelBucket > 0 {
-        renderedCache.setObject(
-          RenderedFrameBox(frame),
-          forKey: key,
-          cost: bitmap.bytesPerRow * bitmap.height
-        )
-      }
-      return frame
     }
 
     try Task.checkCancellation()
-    var image = downsample(input, maxPixelSize: pixelBucket == 0 ? nil : pixelBucket)
+    // 원본 좌표에서 회전·자르기를 먼저 적용해야 작은 선택 영역도 화면 크기를 채웁니다.
+    var image = applyingGeometry(adjustments, to: input)
+    image = downsample(image, maxPixelSize: maxPixelSize)
     image = applying(adjustments, to: image)
 
     let extent = image.extent.integral
@@ -257,40 +424,22 @@ actor ImagePipeline {
       image: rendered,
       frameIndex: frameIndex,
       frameCount: frameCount,
-      duration: duration
+      duration: duration,
+      sourcePixelSize: sourcePixelSize
     )
-    // pixelBucket 0은 내보내기용 원본 해상도입니다. 거대한 RAW 결과를 캐시에
-    // 붙잡아 두지 않고 저장이 끝나면 즉시 해제될 수 있게 합니다.
-    if pixelBucket > 0 {
-      let cost = rendered.bytesPerRow * rendered.height
-      renderedCache.setObject(RenderedFrameBox(frame), forKey: key, cost: cost)
-    }
+    try Task.checkCancellation()
     return frame
   }
 
-  func prefetch(urls: [URL], maxPixelSize: Int, prefersHDR: Bool) async {
-    for url in urls {
-      guard !Task.isCancelled else { return }
-      _ = try? renderFrame(
-        url: url,
-        maxPixelSize: maxPixelSize,
-        adjustments: .identity,
-        prefersHDR: prefersHDR
-      )
-      // actor를 잠시 양보해 사용자가 선택한 이미지의 전경 요청이 먼저 실행되게 합니다.
-      await Task.yield()
-    }
-  }
-
   func purgeCaches() {
-    renderedCache.removeAllObjects()
     sourceCache.removeAllObjects()
-    context.clearCaches()
-    softwareContext.clearCaches()
+    existingContext?.clearCaches()
+    existingSoftwareContext?.clearCaches()
   }
 
   private func imageSource(for url: URL) -> CGImageSource? {
-    if let cached = sourceCache.object(forKey: url as NSURL) {
+    let key = ImageFileVersion(url: url).encoded
+    if let cached = sourceCache.object(forKey: key) {
       return cached.source
     }
 
@@ -304,7 +453,7 @@ actor ImagePipeline {
       return nil
     }
 
-    sourceCache.setObject(ImageSourceBox(source), forKey: url as NSURL)
+    sourceCache.setObject(ImageSourceBox(source), forKey: key)
     return source
   }
 
@@ -342,6 +491,12 @@ actor ImagePipeline {
 
     if CGImageSourceCopyAuxiliaryDataInfoAtIndex(
       source, 0, kCGImageAuxiliaryDataTypeHDRGainMap) != nil
+    {
+      return true
+    }
+
+    if #available(macOS 15.0, *),
+      CGImageSourceCopyAuxiliaryDataInfoAtIndex(source, 0, kCGImageAuxiliaryDataTypeISOGainMap) != nil
     {
       return true
     }
@@ -385,8 +540,92 @@ actor ImagePipeline {
     return image.transformed(by: CGAffineTransform(scaleX: scale, y: scale))
   }
 
-  private func applying(_ adjustments: ImageAdjustments, to input: CIImage) -> CIImage {
+  private func cropDecodePixelSize(
+    requestedPixels: Int?, sourceSize: CGSize?, adjustments: ImageAdjustments
+  ) -> Int? {
+    guard let requestedPixels, let crop = adjustments.effectiveCrop else { return requestedPixels }
+    let retainedFraction: Double
+    if var size = sourceSize, size.width > 0, size.height > 0 {
+      if !adjustments.normalizedQuarterTurns.isMultiple(of: 2) {
+        size = CGSize(width: size.height, height: size.width)
+      }
+      let retained = crop.pixelRect(in: size).size
+      retainedFraction = max(retained.width, retained.height) / max(size.width, size.height)
+    } else {
+      retainedFraction = max(crop.width, crop.height)
+    }
+    // A small crop must not force every thumbnail through an unbounded full decode.
+    // Keep the existing 8K ceiling and allow at most four times the requested edge.
+    let multiplier = min(4, max(1, 1 / max(retainedFraction, 0.000_001)))
+    return min(8_192, max(requestedPixels, Int(ceil(Double(requestedPixels) * multiplier))))
+  }
+
+  private func applyingGeometry(_ adjustments: ImageAdjustments, to input: CIImage) -> CIImage {
     var image = input
+    switch adjustments.normalizedQuarterTurns {
+    case 1: image = image.oriented(.right)
+    case 2: image = image.oriented(.down)
+    case 3: image = image.oriented(.left)
+    default: break
+    }
+    if let crop = adjustments.effectiveCrop {
+      image = image.cropped(to: crop.coreImageRect(in: image.extent))
+    }
+    let extent = image.extent
+    if extent.origin != .zero {
+      image = image.transformed(by: CGAffineTransform(translationX: -extent.minX, y: -extent.minY))
+    }
+    return image
+  }
+
+  private func applying(_ adjustments: ImageAdjustments, to input: CIImage) -> CIImage {
+    guard !adjustments.isIdentity else { return input }
+    var image = input
+
+    let noise = adjustmentValue(adjustments.noiseReduction, range: 0...1)
+    if noise > 0 {
+      let extent = image.extent
+      let filter = CIFilter.noiseReduction()
+      filter.inputImage = image.clampedToExtent()
+      filter.noiseLevel = Float(noise * 0.1)
+      filter.sharpness = 0
+      if let output = filter.outputImage { image = output.cropped(to: extent) }
+    }
+
+    let exposure = adjustmentValue(adjustments.exposure, range: -4...4)
+    if exposure != 0 {
+      let filter = CIFilter.exposureAdjust()
+      filter.inputImage = image
+      filter.ev = Float(exposure)
+      if let output = filter.outputImage { image = output }
+    }
+
+    let temperature = adjustmentValue(adjustments.temperature, range: -100...100)
+    if temperature != 0 {
+      let filter = CIFilter.temperatureAndTint()
+      filter.inputImage = image
+      filter.neutral = CIVector(x: 6_500, y: 0)
+      // Lower target white-point temperatures add warmth; this is a relative control,
+      // not a claim to recover the camera's original Kelvin white-balance setting.
+      filter.targetNeutral = CIVector(x: 6_500 - temperature * 30, y: 0)
+      if let output = filter.outputImage { image = output }
+    }
+
+    let hue = adjustmentValue(adjustments.hue, range: -180...180)
+    if hue != 0 {
+      let filter = CIFilter.hueAdjust()
+      filter.inputImage = image
+      filter.angle = Float(hue * .pi / 180)
+      if let output = filter.outputImage { image = output }
+    }
+
+    let vibrance = adjustmentValue(adjustments.vibrance, range: -1...1)
+    if vibrance != 0 {
+      let filter = CIFilter.vibrance()
+      filter.inputImage = image
+      filter.amount = Float(vibrance)
+      if let output = filter.outputImage { image = output }
+    }
 
     if adjustments.brightness != 0 || adjustments.contrast != 1 || adjustments.saturation != 1 {
       let controls = CIFilter.colorControls()
@@ -410,14 +649,20 @@ actor ImagePipeline {
       if let output = invert.outputImage { image = output }
     }
 
-    switch adjustments.normalizedQuarterTurns {
-    case 1: image = image.oriented(.right)
-    case 2: image = image.oriented(.down)
-    case 3: image = image.oriented(.left)
-    default: break
+    let sharpness = adjustmentValue(adjustments.sharpness, range: 0...2)
+    if sharpness > 0 {
+      let extent = image.extent
+      let filter = CIFilter.sharpenLuminance()
+      filter.inputImage = image.clampedToExtent()
+      filter.sharpness = Float(sharpness)
+      if let output = filter.outputImage { image = output.cropped(to: extent) }
     }
 
     return image
+  }
+
+  private func adjustmentValue(_ value: Double, range: ClosedRange<Double>) -> Double {
+    value.isFinite ? min(range.upperBound, max(range.lowerBound, value)) : 0
   }
 
   private func animationDuration(
@@ -456,33 +701,6 @@ actor ImagePipeline {
       }
     }
     return nil
-  }
-
-  private func cacheKey(
-    url: URL,
-    frameIndex: Int,
-    pixelBucket: Int,
-    adjustments: ImageAdjustments,
-    prefersHDR: Bool
-  ) -> NSString {
-    let value = [
-      url.path,
-      String(frameIndex),
-      String(pixelBucket),
-      String(format: "%.4f", adjustments.brightness),
-      String(format: "%.4f", adjustments.contrast),
-      String(format: "%.4f", adjustments.saturation),
-      String(format: "%.4f", adjustments.highlights),
-      adjustments.isInverted ? "1" : "0",
-      String(adjustments.normalizedQuarterTurns),
-      prefersHDR ? "hdr" : "sdr",
-    ].joined(separator: "|")
-    return value as NSString
-  }
-
-  private static func pixelBucket(_ value: Int) -> Int {
-    let clamped = max(64, value)
-    return ((clamped + 255) / 256) * 256
   }
 
   private func number(_ value: Any?) -> Int {

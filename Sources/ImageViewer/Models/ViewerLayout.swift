@@ -3,14 +3,17 @@ import Foundation
 
 enum PresentationMode: String, CaseIterable, Identifiable, Sendable {
   case viewer
+  // 표시 이름은 몽땅보기로 바뀌어도 내부 식별자는 이전 버전과 동일하게 유지합니다.
   case overview
+  case folderComparison
 
   var id: Self { self }
 
   var title: String {
     switch self {
     case .viewer: L10n.text("뷰어")
-    case .overview: L10n.text("전체 보기")
+    case .overview: L10n.text("몽땅보기")
+    case .folderComparison: L10n.text("이미지 비교")
     }
   }
 }
@@ -25,6 +28,88 @@ enum BaseScaleMode: String, CaseIterable, Identifiable, Sendable {
     switch self {
     case .fit: L10n.text("화면 맞춤")
     case .actualPixels: L10n.text("실제 크기")
+    }
+  }
+}
+
+/// 폴더 몽땅보기의 셀 크기와 해상도 요청을 한곳에서 관리합니다.
+///
+/// 작은 아이콘을 넓게 확대해 보는 용도와 대용량 폴더의 메모리 사용을
+/// 모두 고려해 기존 64~512pt에서 양 끝을 30% 확장합니다.
+enum OverviewThumbnailSizing {
+  static let range: ClosedRange<CGFloat> = 44.8...665.6
+  static let defaultSize: CGFloat = 150
+
+  static func normalized(_ value: CGFloat) -> CGFloat {
+    guard value.isFinite else { return defaultSize }
+    return min(range.upperBound, max(range.lowerBound, value))
+  }
+
+  static func requestedPixelSize(for pointSize: CGFloat, displayScale: CGFloat) -> Int {
+    let points = normalized(pointSize)
+    let scale = min(3, max(1, displayScale.isFinite ? displayScale : 2))
+    // 가로 사진은 adaptive 열 안에서 높이의 최대 1.35배 너비로 표시됩니다.
+    // 실제 표시 너비와 Retina 배율을 함께 반영해 작은 미리보기의 재확대를 줄입니다.
+    return min(4_096, max(128, Int(ceil(points * 1.35 * scale * 1.1))))
+  }
+}
+
+/// 같은 프레임을 같은 크기의 두 영역에 그려 보간만 비교합니다.
+enum MagnificationComparisonLayout: String, CaseIterable, Identifiable, Sendable {
+  case off
+  case sideBySide
+  case stacked
+
+  var id: Self { self }
+  var title: String {
+    switch self {
+    case .off: L10n.text("비교 끄기")
+    case .sideBySide: L10n.text("좌우 비교")
+    case .stacked: L10n.text("상하 비교")
+    }
+  }
+
+  var shortcutAction: ShortcutAction {
+    switch self {
+    case .off: .endMagnificationComparison
+    case .sideBySide: .compareSideBySide
+    case .stacked: .compareStacked
+    }
+  }
+
+  /// 구분선 2pt를 제외하고 양쪽에 정확히 같은 크기를 배정합니다.
+  func paneSize(in container: CGSize) -> CGSize {
+    switch self {
+    case .off: container
+    case .sideBySide:
+      CGSize(width: max(1, (container.width - 2) / 2), height: max(1, container.height))
+    case .stacked:
+      CGSize(width: max(1, container.width), height: max(1, (container.height - 2) / 2))
+    }
+  }
+}
+
+/// 원본 픽셀보다 크게 볼 때 적용할 표시 보간 방식입니다.
+///
+/// 사진과 일반 이미지는 안티앨리어싱을 적용한 `smooth`를 기본으로 사용하고,
+/// 픽셀 아트나 작은 UI 자산은 `pixelated`로 경계를 그대로 확인할 수 있습니다.
+enum ImageInterpolationMode: String, CaseIterable, Codable, Identifiable, Sendable {
+  case smooth
+  case pixelated
+
+  var id: Self { self }
+
+  var title: String {
+    switch self {
+    case .smooth: L10n.text("고화질 확대")
+    case .pixelated: L10n.text("픽셀 그대로")
+    }
+  }
+
+  var detail: String {
+    switch self {
+    case .smooth: L10n.text("사진과 작은 아이콘의 픽셀 경계를 부드럽게 확대합니다. 원본에 없는 세부 정보가 복원되는 것은 아닙니다.")
+    case .pixelated: L10n.text("원본 픽셀 경계를 유지해 확대합니다.")
     }
   }
 }
@@ -103,6 +188,17 @@ enum ThumbnailPanelPlacement: String, CaseIterable, Codable, Identifiable, Senda
   /// 툴바 메뉴에서 사용자가 요청한 빠른 선택 순서를 고정합니다.
   static let quickSelectionOrder: [Self] = [.hidden, .left, .right, .bottom, .top]
 
+  /// 메뉴를 따로 열어도 무엇을 숨기거나 옮기는지 알 수 있게 대상을 포함합니다.
+  var menuTitle: String {
+    switch self {
+    case .hidden: L10n.text("썸네일 숨기기")
+    case .left: L10n.text("썸네일 왼쪽에 표시")
+    case .right: L10n.text("썸네일 오른쪽에 표시")
+    case .top: L10n.text("썸네일 위쪽에 표시")
+    case .bottom: L10n.text("썸네일 아래쪽에 표시")
+    }
+  }
+
   var title: String {
     switch self {
     case .hidden: L10n.text("숨김")
@@ -160,6 +256,16 @@ enum PanInteractionMode: String, CaseIterable, Codable, Identifiable, Sendable {
   case trackpadScroll
 
   var id: Self { self }
+
+  var shortcutAction: ShortcutAction {
+    switch self {
+    case .primaryDrag: .panPrimaryDrag
+    case .spacePrimaryDrag: .panSpaceDrag
+    case .secondaryDrag: .panSecondaryDrag
+    case .middleDrag: .panMiddleDrag
+    case .trackpadScroll: .panTrackpadScroll
+    }
+  }
 
   var title: String {
     switch self {

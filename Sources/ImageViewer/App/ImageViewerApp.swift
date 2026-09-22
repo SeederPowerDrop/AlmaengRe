@@ -7,10 +7,17 @@ struct ImageViewerApp: App {
   @StateObject private var store = AppStore()
   @StateObject private var shortcuts = ShortcutStore()
 
+  private var windowTitle: String {
+    guard let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String else {
+      return "알맹Re"
+    }
+    return "알맹Re \(version)"
+  }
+
   var body: some Scene {
-    WindowGroup("이미지뷰어") {
+    WindowGroup(Text(verbatim: windowTitle)) {
       RootView(store: store, shortcuts: shortcuts)
-        .frame(minWidth: 820, minHeight: 540)
+        .frame(minWidth: 960, minHeight: 600)
     }
     .defaultSize(width: 1_240, height: 800)
     .windowToolbarStyle(.unifiedCompact)

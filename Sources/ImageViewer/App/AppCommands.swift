@@ -6,16 +6,8 @@ struct AppCommands: Commands {
 
   var body: some Commands {
     CommandGroup(replacing: .newItem) {
-      Button(
-        L10n.format(
-          "%@…  %@", ShortcutAction.openFolder.title,
-          shortcuts.binding(for: .openFolder).displayText)
-      ) {
-        store.chooseFolder()
-      }
-      Button("이미지 파일 열기…") {
-        store.chooseFiles()
-      }
+      Button("열기…") { store.chooseItems() }
+        .keyboardShortcut(shortcuts.binding(for: .openFolder).menuShortcut)
     }
 
     CommandMenu("탐색") {
@@ -51,14 +43,18 @@ struct AppCommands: Commands {
         store.toggleFullScreen()
       }
       .keyboardShortcut("f", modifiers: [.command, .control])
+      Menu("전자 앨범") {
+        SlideshowMenuItems(store: store, shortcuts: shortcuts)
+      }
       Divider()
+      Toggle("폴더 트리 표시", isOn: $store.showsFolderTree)
       Menu("썸네일 패널 위치") {
         ForEach(ThumbnailPanelPlacement.quickSelectionOrder) { placement in
           Button {
             store.thumbnailPanelPlacement = placement
           } label: {
             Label(
-              placement.title,
+              placement.menuTitle,
               systemImage: store.thumbnailPanelPlacement == placement
                 ? "checkmark" : placement.systemImage
             )
@@ -72,11 +68,44 @@ struct AppCommands: Commands {
           }
         }
       }
+      Toggle("몽땅보기 번호 표시", isOn: $store.showsOverviewNumbers)
       Button("이미지 정보 패널") { store.toggleInspector(.information) }
       Button("이미지 편집 패널") { store.toggleInspector(.editing) }
     }
 
+    CommandMenu("이미지 비교") {
+      if store.presentationMode != .folderComparison {
+        Button("비교할 폴더 선택…") {
+          store.presentationMode = .folderComparison
+          store.folderComparison.choosePair()
+        }
+        .disabled(store.folderComparison.first.isLocked || store.folderComparison.second.isLocked)
+        Divider()
+      }
+      Button(L10n.format("%@  %@", ShortcutAction.toggleFolderComparison.title,
+        shortcuts.binding(for: .toggleFolderComparison).displayText)) { store.toggleFolderComparison() }
+      if store.presentationMode == .folderComparison {
+        FolderComparisonMenuItems(comparison: store.folderComparison, shortcuts: shortcuts)
+      }
+    }
+
     CommandMenu("이미지") {
+      Group {
+      Button(L10n.format("%@…  %@", ShortcutAction.setWallpaper.title,
+        shortcuts.binding(for: .setWallpaper).displayText)) {
+        store.presentWallpaperSettings()
+      }
+      .disabled(!store.canSetWallpaper)
+      Divider()
+      Button("모두 선택") { store.selectAllAssets() }
+        .disabled(store.assets.isEmpty || store.batchSheet != nil || store.isBatchBusy)
+      Button("선택 해제") { store.clearSelection() }
+        .disabled(store.selectedURLs.isEmpty || store.batchSheet != nil || store.isBatchBusy)
+      Button("이름 일괄 변경…") { store.presentBatchRename() }
+        .disabled(!store.canStartBatchOperation)
+      Button("형식 일괄 변환…") { store.presentBatchExport() }
+        .disabled(!store.canStartBatchOperation || ExportFormat.available.isEmpty)
+      Divider()
       Button("왼쪽으로 회전") { store.rotateCounterclockwise() }
       Button("오른쪽으로 회전") { store.rotateClockwise() }
       Button("조정 초기화") { store.resetAdjustments() }
@@ -89,9 +118,17 @@ struct AppCommands: Commands {
         store.exportCurrentImage()
       }
       .disabled(store.currentAsset == nil)
+      }.disabled(store.presentationMode == .folderComparison)
     }
 
     CommandMenu("확대/축소") {
+      Menu("확대 이미지 이동") {
+        PanModeMenuItems(store: store, shortcuts: shortcuts)
+      }
+      Menu("고화질 확대 및 비교") {
+        MagnificationMenuItems(store: store, shortcuts: shortcuts)
+      }
+      Divider()
       Button(
         L10n.format(
           "%@  %@", ShortcutAction.zoomIn.title, shortcuts.binding(for: .zoomIn).displayText)

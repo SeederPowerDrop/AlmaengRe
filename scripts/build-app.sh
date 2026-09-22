@@ -6,8 +6,12 @@ SCRIPT_DIRECTORY="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_DIRECTORY="$(cd "$SCRIPT_DIRECTORY/.." && pwd)"
 CONFIGURATION="${1:-release}"
 ARCHITECTURE_MODE="${2:-universal}"
-APP_DIRECTORY="$PROJECT_DIRECTORY/dist/이미지뷰어.app"
+# 사용자에게 보이는 이름만 변경합니다. 실행 파일·번들 ID·설정 키는 이전 버전과 같습니다.
+# 실행 중인 배포본을 건드리지 않고 검증할 때 별도 출력 폴더를 지정합니다.
+DISTRIBUTION_DIRECTORY="${IMAGEVIEWER_DIST_DIRECTORY:-$PROJECT_DIRECTORY/dist}"
+APP_DIRECTORY="$DISTRIBUTION_DIRECTORY/알맹Re.app"
 CONTENTS_DIRECTORY="$APP_DIRECTORY/Contents"
+APP_ICON_PATH="$PROJECT_DIRECTORY/Packaging/AppIcon.icns"
 
 cd "$PROJECT_DIRECTORY"
 
@@ -18,6 +22,10 @@ fi
 if [[ "$ARCHITECTURE_MODE" != "universal" && "$ARCHITECTURE_MODE" != "native" ]]; then
   echo "사용법: $0 [debug|release] [universal|native]" >&2
   exit 2
+fi
+if [[ ! -s "$APP_ICON_PATH" ]]; then
+  echo "앱 아이콘 파일을 찾을 수 없거나 비어 있습니다: $APP_ICON_PATH" >&2
+  exit 1
 fi
 
 mkdir -p "$CONTENTS_DIRECTORY/MacOS" "$CONTENTS_DIRECTORY/Resources"
@@ -53,6 +61,7 @@ cp "$PROJECT_DIRECTORY/Packaging/Info.plist" "$CONTENTS_DIRECTORY/Info.plist"
 # SwiftPM 실행 파일의 언어 리소스를 실제 macOS 앱의 주 번들에도 넣습니다.
 # SwiftUI의 기본 문자열 처리와 Finder의 앱 이름 현지화가 같은 .lproj를 사용합니다.
 ditto "$PROJECT_DIRECTORY/Sources/ImageViewer/Resources" "$CONTENTS_DIRECTORY/Resources"
+cp "$APP_ICON_PATH" "$CONTENTS_DIRECTORY/Resources/AppIcon.icns"
 
 # 릴리스에는 디버그 심볼이 필요하지 않습니다. 서명 전에 제거해 Universal 2
 # 실행 파일도 작게 유지합니다.
@@ -70,7 +79,7 @@ if [[ "$CONFIGURATION" == "release" ]]; then
   APP_VERSION="$(/usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" \
     "$PROJECT_DIRECTORY/Packaging/Info.plist")"
   ZIP_SUFFIX="$ARCHITECTURE_MODE"
-  ZIP_PATH="$PROJECT_DIRECTORY/dist/이미지뷰어-$APP_VERSION-macos-$ZIP_SUFFIX.zip"
+  ZIP_PATH="$DISTRIBUTION_DIRECTORY/알맹Re-$APP_VERSION-macos-$ZIP_SUFFIX.zip"
   IMAGEVIEWER_TEMP_ROOT="${TMPDIR:-/tmp}"
   PACKAGE_TEMP_DIRECTORY="$(mktemp -d "${IMAGEVIEWER_TEMP_ROOT%/}/imageviewer-package.XXXXXX")"
   TEMP_ZIP_PATH="$PACKAGE_TEMP_DIRECTORY/$(basename "$ZIP_PATH")"

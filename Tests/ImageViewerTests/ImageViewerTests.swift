@@ -81,7 +81,7 @@ struct ImageViewerTests {
     #expect(gate.accepts(newGeneration, for: "B/first.png"))
   }
 
-  @Test("Esc는 집중 보기에서 일반 보기와 전체 보기로 순서대로 돌아간다")
+  @Test("Esc는 집중 보기에서 일반 보기와 몽땅보기로 순서대로 돌아간다")
   @MainActor
   func escapeNavigation() {
     let store = AppStore()
@@ -213,18 +213,8 @@ struct ImageViewerTests {
     #expect(formats.allSatisfy { !$0.typeIdentifiers.isEmpty && !$0.filenameExtensions.isEmpty })
   }
 
-  @Test("8개 언어가 같은 번역 키와 각 언어의 앱 이름을 제공한다")
+  @Test("8개 언어가 같은 번역 키와 확정된 알맹Re 이름을 제공한다")
   func localizationResources() {
-    let expectedNames = [
-      "ko": "이미지뷰어",
-      "en": "Image Viewer",
-      "zh-Hans": "图像查看器",
-      "ja": "画像ビューア",
-      "fr": "Visionneuse d’images",
-      "es": "Visor de imágenes",
-      "ar": "عارض الصور",
-      "vi": "Trình xem ảnh",
-    ]
     #expect(L10n.supportedLocalizations == ["ko", "en", "zh-Hans", "ja", "fr", "es", "ar", "vi"])
 
     let koreanKeys = L10n.keys(localeIdentifier: "ko")
@@ -232,8 +222,7 @@ struct ImageViewerTests {
     for localeIdentifier in L10n.supportedLocalizations {
       #expect(L10n.keys(localeIdentifier: localeIdentifier) == koreanKeys)
       #expect(
-        L10n.text("이미지뷰어", localeIdentifier: localeIdentifier)
-          == expectedNames[localeIdentifier]
+        L10n.text("알맹Re", localeIdentifier: localeIdentifier) == "알맹Re"
       )
     }
   }

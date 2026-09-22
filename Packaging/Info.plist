@@ -16,21 +16,23 @@
         <string>vi</string>
     </array>
     <key>CFBundleDisplayName</key>
-    <string>이미지뷰어</string>
+    <string>알맹Re</string>
     <key>CFBundleExecutable</key>
     <string>ImageViewer</string>
+    <key>CFBundleIconFile</key>
+    <string>AppIcon</string>
     <key>CFBundleIdentifier</key>
     <string>org.openimageviewer.ImageViewer</string>
     <key>CFBundleInfoDictionaryVersion</key>
     <string>6.0</string>
     <key>CFBundleName</key>
-    <string>이미지뷰어</string>
+    <string>알맹Re</string>
     <key>CFBundlePackageType</key>
     <string>APPL</string>
     <key>CFBundleShortVersionString</key>
-    <string>0.3.0</string>
+    <string>0.10.2</string>
     <key>CFBundleVersion</key>
-    <string>7</string>
+    <string>23</string>
     <key>LSMinimumSystemVersion</key>
     <string>14.0</string>
     <key>NSHighResolutionCapable</key>

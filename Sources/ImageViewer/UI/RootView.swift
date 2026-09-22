@@ -1,17 +1,29 @@
 import SwiftUI
 
 struct RootView: View {
+  @Environment(\.scenePhase) private var scenePhase
   @ObservedObject var store: AppStore
   @ObservedObject var shortcuts: ShortcutStore
 
   var body: some View {
     ZStack {
-      Color.black.ignoresSafeArea()
+      ViewerTheme.chrome.ignoresSafeArea()
 
-      if store.assets.isEmpty {
-        EmptyLibraryView(store: store)
-      } else {
-        viewerWorkspace
+      HStack(spacing: 0) {
+        if store.showsFolderTree && !store.isFocusMode {
+          folderNavigation
+          Divider()
+        }
+        Group {
+          if store.presentationMode == .folderComparison {
+            FolderComparisonView(store: store, shortcuts: shortcuts, comparison: store.folderComparison)
+          } else if store.assets.isEmpty {
+            EmptyLibraryView(store: store)
+          } else {
+            viewerWorkspace
+          }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
       }
 
       if store.isLoading {
@@ -27,63 +39,59 @@ struct RootView: View {
     }
     .toolbar(store.isFocusMode ? .hidden : .visible, for: .windowToolbar)
     .toolbar {
-      ToolbarItemGroup(placement: .navigation) {
-        Button {
-          store.chooseFolder()
-        } label: {
-          Image(systemName: "folder")
+      ToolbarItem(placement: .navigation) {
+        Button { store.showsFolderTree.toggle() } label: {
+          Label("폴더 트리", systemImage: "list.bullet.indent")
+            .foregroundStyle(store.showsFolderTree ? ViewerTheme.accent : Color.primary)
         }
-        .help("폴더 열기")
-
-        Button {
-          store.chooseFiles()
-        } label: {
-          Image(systemName: "photo.badge.plus")
+        .labelStyle(.titleAndIcon)
+        .help("폴더를 펼쳐 다른 폴더로 이동합니다.")
+        .accessibilityValue(L10n.text(store.showsFolderTree ? "선택됨" : "선택 안 됨"))
+      }
+      ToolbarItem(placement: .navigation) {
+        Button { store.chooseItems() } label: {
+          Label("열기…", systemImage: "folder")
         }
-        .help("이미지 파일 열기")
+        .labelStyle(.titleAndIcon)
+        .help("이미지 또는 폴더를 선택하세요.")
       }
 
       ToolbarItem(placement: .principal) {
         Picker("보기", selection: $store.presentationMode) {
           ForEach(PresentationMode.allCases) { mode in
             Text(mode.title).tag(mode)
+              .help(mode == .folderComparison
+                ? L10n.text("이미지 두 장을 좌우·상하로 비교합니다.") : mode.title)
           }
         }
         .pickerStyle(.segmented)
-        .frame(width: 190)
+        // 언어마다 다른 이름 길이를 반영해 모드 이름이 고정 폭 안에서 잘리지 않게 합니다.
+        .fixedSize(horizontal: true, vertical: false)
+        .frame(minWidth: 190)
       }
 
       ToolbarItemGroup(placement: .primaryAction) {
-        if store.presentationMode == .viewer {
-          Picker(
-            "한 화면 이미지 수",
-            selection: Binding(
-              get: { store.imagesPerPage },
-              set: { store.setImagesPerPage($0) }
-            )
-          ) {
-            ForEach(1...10, id: \.self) { count in
-              Text(L10n.format("%d장", count)).tag(count)
-            }
-          }
-          .frame(width: 76)
-          .help("한 화면에 표시할 이미지 수")
-        }
 
         Button {
           store.prefersHDR.toggle()
         } label: {
-          Image(systemName: store.prefersHDR ? "sun.max.fill" : "sun.max")
+          Text(verbatim: store.prefersHDR ? "HDR ON" : "HDR OFF")
+            .font(.system(size: 11, weight: .semibold))
+            .foregroundStyle(store.prefersHDR ? ViewerTheme.accent : Color.secondary)
+            .padding(.horizontal, 4)
         }
+        .accessibilityLabel("HDR 출력")
+        .accessibilityValue(Text(verbatim: store.prefersHDR ? "ON" : "OFF"))
         .help(L10n.text(store.prefersHDR ? "HDR 출력 켜짐" : "HDR 출력 꺼짐"))
 
+        if store.presentationMode != .folderComparison {
         thumbnailPlacementMenu
 
         Button {
           store.toggleInspector(.information)
         } label: {
-          Image(
-            systemName: store.inspectorPanel == .information ? "info.circle.fill" : "info.circle")
+          Label("이미지 정보", systemImage: "info.circle")
+            .foregroundStyle(store.inspectorPanel == .information ? ViewerTheme.accent : Color.primary)
         }
         .accessibilityLabel("이미지 정보")
         .help("이미지 정보 (i)")
@@ -91,17 +99,13 @@ struct RootView: View {
         Button {
           store.toggleInspector(.editing)
         } label: {
-          EditingGlyph(isActive: store.inspectorPanel == .editing)
+          Label("이미지 편집", systemImage: "slider.horizontal.3")
+            .foregroundStyle(store.inspectorPanel == .editing ? ViewerTheme.accent : Color.primary)
         }
         .accessibilityLabel("이미지 편집")
         .help("이미지 편집 (e)")
 
-        Button {
-          store.toggleFocusMode()
-        } label: {
-          Image(systemName: "viewfinder")
         }
-        .help("집중 모드")
       }
     }
     .alert(item: $store.alert) { alert in
@@ -111,6 +115,25 @@ struct RootView: View {
         dismissButton: .default(Text("확인"))
       )
     }
+    .sheet(item: $store.batchSheet) { sheet in
+      switch sheet {
+      case .rename: BatchRenameView(store: store)
+      case .export: BatchExportView(store: store)
+      }
+    }
+    .sheet(item: $store.wallpaperRequest) { request in
+      WallpaperSettingsView(store: store, request: request)
+    }
+    .onChange(of: scenePhase) { _, phase in
+      if phase != .active { store.pauseSlideshow() }
+    }
+    .onReceive(NotificationCenter.default.publisher(for: NSApplication.didResignActiveNotification)) { _ in
+      store.pauseSlideshow()
+    }
+    .onReceive(NSWorkspace.shared.notificationCenter.publisher(for: NSWorkspace.willSleepNotification)) { _ in
+      store.pauseSlideshow()
+    }
+    .onDisappear { store.pauseSlideshow() }
     .dropDestination(for: URL.self) { urls, _ in
       store.open(urls: urls)
       return !urls.isEmpty
@@ -123,11 +146,15 @@ struct RootView: View {
     .onChange(of: store.prefersHDR) { _, _ in
       store.purgeCaches()
     }
-    .preferredColorScheme(.dark)
+    .tint(ViewerTheme.accent)
   }
 
   private var viewerWorkspace: some View {
     VStack(spacing: 0) {
+      if !store.isFocusMode {
+        workspaceHeader
+        Divider()
+      }
       if showsThumbnailPanel(at: .top) {
         SidebarView(store: store, placement: .top)
         Divider()
@@ -160,18 +187,74 @@ struct RootView: View {
     }
   }
 
+  private var folderNavigation: some View {
+    VSplitView {
+      FolderTreeView(store: store, comparison: store.folderComparison, tree: store.folderTree)
+        .frame(minHeight: 180, idealHeight: 300, maxHeight: .infinity)
+      if store.thumbnailPanelPlacement == .left && !store.assets.isEmpty
+        && store.presentationMode != .folderComparison {
+        SidebarView(store: store, placement: .left, panelWidth: 240)
+          .frame(minHeight: 160, idealHeight: 320, maxHeight: .infinity)
+      }
+    }
+    .frame(width: 240)
+    .background(ViewerTheme.sidebar)
+  }
+
+  private var workspaceHeader: some View {
+    HStack(spacing: 10) {
+      Image(systemName: "folder")
+        .foregroundStyle(.secondary)
+      Text(store.activeFolderName)
+        .font(.system(size: 12, weight: .semibold))
+        .lineLimit(1).truncationMode(.middle)
+      Text(L10n.format("%d개 이미지", store.assets.count))
+        .font(.system(size: 11)).foregroundStyle(.secondary)
+      Spacer(minLength: 12)
+      if store.presentationMode == .viewer {
+        Picker("한 화면 이미지 수", selection: Binding(
+          get: { store.imagesPerPage }, set: { store.setImagesPerPage($0) }
+        )) {
+          ForEach(1...10, id: \.self) { count in
+            Text(L10n.format("%d장", count)).tag(count)
+          }
+        }
+        .labelsHidden()
+        .frame(width: 66)
+        .help("한 화면에 표시할 이미지 수")
+      }
+      BatchActionsMenu(store: store, compact: true)
+      Button { store.toggleFocusMode() } label: { Image(systemName: "viewfinder") }
+        .buttonStyle(ViewerToolButtonStyle())
+        .help("집중 모드")
+    }
+    .padding(.horizontal, 16)
+    .frame(height: 42)
+    .background(ViewerTheme.chrome)
+  }
+
   private var viewerContent: some View {
     Group {
       switch store.presentationMode {
       case .viewer:
-        ViewerCanvas(store: store)
+        ViewerCanvas(store: store, shortcuts: shortcuts)
       case .overview:
         OverviewView(store: store)
+      case .folderComparison:
+        FolderComparisonView(store: store, shortcuts: shortcuts, comparison: store.folderComparison)
       }
     }
     .background {
       InputEventMonitor(
         onKeyDown: { event in
+          guard store.batchSheet == nil, !store.isBatchBusy,
+            store.wallpaperRequest == nil, !store.isSettingWallpaper else { return false }
+          if event.modifierFlags.intersection(.deviceIndependentFlagsMask) == .command,
+            event.charactersIgnoringModifiers?.lowercased() == "a"
+          {
+            store.selectAllAssets()
+            return true
+          }
           // Esc는 사용자 설정과 무관하게 언제나 현재 보기에서 한 단계 돌아갑니다.
           if event.keyCode == 53 {
             return store.handleEscapeKey()
@@ -197,40 +280,30 @@ struct RootView: View {
 
   private var thumbnailPlacementMenu: some View {
     Menu {
+      Text("썸네일 사이드바")
+      Text("폴더의 사진 목록을 표시할 위치를 선택하세요.")
+      Divider()
       ForEach(ThumbnailPanelPlacement.quickSelectionOrder) { placement in
         Button {
           store.thumbnailPanelPlacement = placement
         } label: {
           Label(
-            placement.title,
+            placement.menuTitle,
             systemImage: store.thumbnailPanelPlacement == placement
               ? "checkmark" : placement.systemImage
           )
         }
       }
     } label: {
-      Image(systemName: store.thumbnailPanelPlacement.systemImage)
+      Label("썸네일", systemImage: store.thumbnailPanelPlacement.systemImage)
+        .labelStyle(.titleAndIcon)
     }
-    .help("썸네일 패널 위치")
+    .accessibilityLabel("썸네일 사이드바")
+    .help("폴더의 사진 목록을 표시할 위치를 선택하세요.")
   }
 
   private func showsThumbnailPanel(at placement: ThumbnailPanelPlacement) -> Bool {
     !store.isFocusMode && store.thumbnailPanelPlacement == placement
-  }
-}
-
-/// SF Symbols에 없는 소문자 e를 편집 도구의 고유하고 가벼운 글리프로 사용합니다.
-private struct EditingGlyph: View {
-  let isActive: Bool
-
-  var body: some View {
-    Text("e")
-      .font(.system(size: 14, weight: .bold, design: .rounded))
-      .foregroundStyle(isActive ? Color.accentColor : .primary)
-      .frame(width: 17, height: 17)
-      .overlay {
-        RoundedRectangle(cornerRadius: 4)
-          .stroke(isActive ? Color.accentColor : Color.secondary, lineWidth: 1.25)
-      }
+      && !(placement == .left && store.showsFolderTree)
   }
 }

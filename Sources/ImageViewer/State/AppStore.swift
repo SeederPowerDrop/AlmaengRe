@@ -9,73 +9,231 @@ struct ViewerAlert: Identifiable {
   let message: String
 }
 
+enum BatchSheet: String, Identifiable {
+  case rename, export
+  var id: Self { self }
+}
+
 /// 앱의 탐색 상태와 비파괴 편집 상태를 소유하는 메인 액터 모델입니다.
 @MainActor
 final class AppStore: ObservableObject {
-  @Published private(set) var assets: [ImageAsset] = []
+  @Published private(set) var assets: [ImageAsset] = [] {
+    didSet {
+      libraryRevision = UUID()
+      overviewSelectionSession = nil
+      pauseSlideshow()
+      slideshowPresentedAsset = nil
+    }
+  }
+  @Published private(set) var libraryRevision = UUID()
+  @Published private(set) var currentFolderURL: URL?
+  @Published var showsFolderTree: Bool {
+    didSet { preferences.set(showsFolderTree, forKey: Self.folderTreeDefaultsKey) }
+  }
+  @Published private(set) var overviewSelectionSession: OverviewSelectionSession?
+  @Published private(set) var selectedURLs: Set<URL> = []
+  @Published var batchSheet: BatchSheet? {
+    didSet { if batchSheet != nil { pauseSlideshow() } }
+  }
+  @Published var wallpaperRequest: WallpaperRequest? {
+    didSet { if wallpaperRequest != nil { pauseSlideshow() } }
+  }
+  @Published private(set) var isSettingWallpaper = false
+  @Published private(set) var isRenaming = false
+  @Published private(set) var isBatchExporting = false
   /// 현재 다중 보기 페이지의 첫 번째 이미지입니다.
   @Published private(set) var pageStartIndex = 0
   /// 조정 패널과 테두리가 가리키는 활성 이미지입니다.
-  @Published private(set) var currentIndex = 0
-  @Published var presentationMode: PresentationMode = .viewer
+  @Published private(set) var currentIndex = 0 {
+    didSet {
+      if oldValue != currentIndex {
+        slideshowPresentedAsset = nil
+        invalidateSlideshowCountdown()
+      }
+    }
+  }
+  @Published var presentationMode: PresentationMode = .viewer {
+    didSet {
+      guard oldValue != presentationMode else { return }
+      if presentationMode == .folderComparison {
+        comparisonReturnMode = oldValue
+        cancelLibraryLoad()
+      }
+      if oldValue == .folderComparison { folderComparison.cancelLoads() }
+      if presentationMode != .viewer {
+        pauseSlideshow()
+        slideshowPresentedAsset = nil
+        isFocusMode = false
+      }
+      prefetchAroundCurrentPosition()
+    }
+  }
   @Published var baseScaleMode: BaseScaleMode = .fit
   @Published var imagesPerPage = 1
-  @Published var thumbnailSize: CGFloat = 150
+  @Published var thumbnailSize: CGFloat {
+    didSet {
+      let normalized = OverviewThumbnailSizing.normalized(thumbnailSize)
+      if thumbnailSize != normalized {
+        thumbnailSize = normalized
+      }
+      preferences.set(Double(normalized), forKey: Self.thumbnailSizeDefaultsKey)
+    }
+  }
   @Published var zoom: CGFloat = 1
+  @Published var showsOverviewNumbers: Bool {
+    didSet { preferences.set(showsOverviewNumbers, forKey: Self.overviewNumbersDefaultsKey) }
+  }
   @Published var panOffset: CGSize = .zero
   @Published var thumbnailPanelPlacement: ThumbnailPanelPlacement {
     didSet {
-      UserDefaults.standard.set(
+      preferences.set(
         thumbnailPanelPlacement.rawValue, forKey: Self.thumbnailPlacementDefaultsKey)
     }
   }
   @Published var panInteractionMode: PanInteractionMode {
     didSet {
-      UserDefaults.standard.set(panInteractionMode.rawValue, forKey: Self.panModeDefaultsKey)
+      preferences.set(panInteractionMode.rawValue, forKey: Self.panModeDefaultsKey)
     }
   }
   @Published var filenameDisplaySize: FilenameDisplaySize {
     didSet {
-      UserDefaults.standard.set(
+      preferences.set(
         filenameDisplaySize.rawValue, forKey: Self.filenameDisplaySizeDefaultsKey)
     }
   }
+  @Published var imageLoadingMode: ImageLoadingMode {
+    didSet {
+      guard oldValue != imageLoadingMode else { return }
+      preferences.set(imageLoadingMode.rawValue, forKey: Self.imageLoadingModeDefaultsKey)
+      updateImageLoadingMode()
+    }
+  }
+  @Published var imageInterpolationMode: ImageInterpolationMode {
+    didSet {
+      preferences.set(
+        imageInterpolationMode.rawValue, forKey: Self.imageInterpolationModeDefaultsKey)
+      if imageInterpolationMode == .pixelated { comparisonLayout = .off }
+    }
+  }
+  /// 비교는 현재 보기에서만 사용하며 재실행 시 일반 보기로 시작합니다.
+  @Published private(set) var comparisonLayout: MagnificationComparisonLayout = .off
+
+  // 사용자 표기는 ‘고화질 확대’입니다. 이전 설정/단축키를 위해 내부 이름은 유지합니다.
+  var isAntialiasingEnabled: Bool {
+    get { imageInterpolationMode == .smooth }
+    set { imageInterpolationMode = newValue ? .smooth : .pixelated }
+  }
+
+  func setComparisonLayout(_ layout: MagnificationComparisonLayout) {
+    if layout != .off { isAntialiasingEnabled = true }
+    comparisonLayout = layout
+  }
   @Published var inspectorPanel: InspectorPanel?
-  @Published var isFocusMode = false
+  @Published var isFocusMode = false {
+    didSet { if !isFocusMode { pauseSlideshow() } }
+  }
+  @Published private(set) var isSlideshowPlaying = false
+  @Published var slideshowInterval: TimeInterval {
+    didSet {
+      let normalized = SlideshowSettings.normalized(slideshowInterval)
+      if slideshowInterval != normalized { slideshowInterval = normalized }
+      preferences.set(normalized, forKey: Self.slideshowIntervalDefaultsKey)
+      restartSlideshowCountdown()
+    }
+  }
+  @Published var slideshowRepeats: Bool {
+    didSet { preferences.set(slideshowRepeats, forKey: Self.slideshowRepeatsDefaultsKey) }
+  }
   @Published var prefersHDR = true
   @Published var wrapsNavigation = true
-  @Published private(set) var isLoading = false
+  @Published private(set) var isLoading = false {
+    didSet { if isLoading { pauseSlideshow() } }
+  }
   @Published private(set) var isExporting = false
   @Published private(set) var isSavingMetadata = false
   @Published private(set) var currentMetadata: ImageMetadata?
   @Published var exportFormat: ExportFormat = ExportFormat.available.first ?? .jpeg
   @Published var exportQuality = 0.92
-  @Published var alert: ViewerAlert?
+  @Published var alert: ViewerAlert? {
+    didSet { if alert != nil { pauseSlideshow() } }
+  }
   @Published var statusMessage: String?
 
   let pipeline: ImagePipeline
   let thumbnailPipeline: ThumbnailPipeline
+  let loadingGovernor: ImageResourceGovernor
+  let wallpaperService: WallpaperService
+  let folderComparison: FolderComparisonStore
+  let folderTree = FolderTreeStore()
+  private var comparisonReturnMode: PresentationMode = .viewer
 
+  private let preferences: UserDefaults
   private let library = ImageLibrary()
   private let exporter: ImageExporter
   private let metadataWriter = ImageMetadataWriter()
+  private let batchRenamer = BatchRenamer()
+  private let batchExporter: BatchImageExporter
+  private var selectionAnchor: Int?
   private var adjustments: [URL: ImageAdjustments] = [:]
   private var loadTask: Task<Void, Never>?
+  private var loadGeneration = UUID()
   private var metadataTask: Task<Void, Never>?
   private var prefetchTask: Task<Void, Never>?
-  private var securityScopedURL: URL?
+  private var loadingModeUpdateTask: Task<Void, Never>?
+  private var resourceMonitor: ImageSystemResourceMonitor?
+  private var viewerPrefetchPixels = 512
+  private var libraryAccess: [ImageLibraryAccess] = []
+  private var slideshowTask: Task<Void, Never>?
+  private var slideshowGeneration = UUID()
+  private var slideshowPresentedAsset: ImageAsset?
+  private var slideshowActivity: SlideshowDisplayActivity?
+  private let managesSlideshowDisplaySleep: Bool
 
   private static let thumbnailPlacementDefaultsKey = "ImageViewer.ThumbnailPlacement.v1"
+  private static let folderTreeDefaultsKey = "ImageViewer.ShowsFolderTree.v1"
+  private static let thumbnailSizeDefaultsKey = "ImageViewer.OverviewThumbnailSize.v1"
+  private static let overviewNumbersDefaultsKey = "ImageViewer.ShowsOverviewNumbers.v1"
   private static let panModeDefaultsKey = "ImageViewer.PanInteractionMode.v1"
   private static let filenameDisplaySizeDefaultsKey = "ImageViewer.FilenameDisplaySize.v1"
+  private static let imageLoadingModeDefaultsKey = "ImageViewer.ImageLoadingMode.v1"
+  private static let imageInterpolationModeDefaultsKey = "ImageViewer.ImageInterpolationMode.v1"
+  private static let slideshowIntervalDefaultsKey = "ImageViewer.SlideshowInterval.v1"
+  private static let slideshowRepeatsDefaultsKey = "ImageViewer.SlideshowRepeats.v1"
 
-  init() {
-    let pipeline = ImagePipeline()
+  init(defaults: UserDefaults = .standard, monitorsSystemResources: Bool = true) {
+    preferences = defaults
+    showsFolderTree = defaults.bool(forKey: Self.folderTreeDefaultsKey)
+    folderComparison = FolderComparisonStore(defaults: defaults)
+    managesSlideshowDisplaySleep = monitorsSystemResources
+    slideshowInterval = SlideshowSettings.normalized(
+      defaults.object(forKey: Self.slideshowIntervalDefaultsKey) == nil
+        ? SlideshowSettings.defaultInterval : defaults.double(forKey: Self.slideshowIntervalDefaultsKey))
+    slideshowRepeats = defaults.object(forKey: Self.slideshowRepeatsDefaultsKey) == nil
+      ? true : defaults.bool(forKey: Self.slideshowRepeatsDefaultsKey)
+    let savedThumbnailSize =
+      defaults.object(forKey: Self.thumbnailSizeDefaultsKey) == nil
+      ? OverviewThumbnailSizing.defaultSize
+      : CGFloat(defaults.double(forKey: Self.thumbnailSizeDefaultsKey))
+    thumbnailSize = OverviewThumbnailSizing.normalized(savedThumbnailSize)
+    showsOverviewNumbers = defaults.object(forKey: Self.overviewNumbersDefaultsKey) == nil
+      ? true : defaults.bool(forKey: Self.overviewNumbersDefaultsKey)
+
+    let loadingMode =
+      defaults.string(forKey: Self.imageLoadingModeDefaultsKey)
+      .flatMap(ImageLoadingMode.init(rawValue:)) ?? .comfortable
+    imageLoadingMode = loadingMode
+    imageInterpolationMode =
+      defaults.string(forKey: Self.imageInterpolationModeDefaultsKey)
+      .flatMap(ImageInterpolationMode.init(rawValue:)) ?? .smooth
+    let loadingGovernor = ImageResourceGovernor(mode: loadingMode)
+    self.loadingGovernor = loadingGovernor
+    let pipeline = ImagePipeline(governor: loadingGovernor)
     self.pipeline = pipeline
-    thumbnailPipeline = ThumbnailPipeline()
+    wallpaperService = WallpaperService(pipeline: pipeline)
+    thumbnailPipeline = ThumbnailPipeline(governor: loadingGovernor)
     exporter = ImageExporter(pipeline: pipeline)
+    batchExporter = BatchImageExporter(pipeline: pipeline)
 
-    let defaults = UserDefaults.standard
     thumbnailPanelPlacement =
       defaults.string(forKey: Self.thumbnailPlacementDefaultsKey)
       .flatMap(ThumbnailPanelPlacement.init(rawValue:)) ?? .left
@@ -86,10 +244,172 @@ final class AppStore: ObservableObject {
       defaults.string(forKey: Self.filenameDisplaySizeDefaultsKey)
       .flatMap(FilenameDisplaySize.init(rawValue:)) ?? .medium
     inspectorPanel = nil
+    if monitorsSystemResources {
+      resourceMonitor = ImageSystemResourceMonitor(isAppActive: NSApp?.isActive ?? true) {
+        snapshot in
+        Task { await loadingGovernor.update(snapshot) }
+      }
+    }
+  }
+
+  private func updateImageLoadingMode() {
+    prefetchTask?.cancel()
+    prefetchTask = nil
+    let mode = imageLoadingMode
+    let previousUpdate = loadingModeUpdateTask
+    // Preserve selection order across actor hops when the picker changes rapidly.
+    loadingModeUpdateTask = Task { [weak self, loadingGovernor] in
+      await previousUpdate?.value
+      guard let self, self.imageLoadingMode == mode else { return }
+      await loadingGovernor.setMode(mode)
+      guard self.imageLoadingMode == mode else { return }
+      self.prefetchAroundCurrentPosition()
+    }
   }
 
   var currentAsset: ImageAsset? {
     assets.indices.contains(currentIndex) ? assets[currentIndex] : nil
+  }
+
+  var selectedAssets: [ImageAsset] {
+    assets.filter { selectedURLs.contains($0.url) }
+  }
+
+  var isBatchBusy: Bool { isRenaming || isBatchExporting }
+
+  var canStartBatchOperation: Bool {
+    presentationMode != .folderComparison && !selectedURLs.isEmpty && !isLoading && !isBatchBusy && !isSavingMetadata && !isExporting
+      && batchSheet == nil && overviewSelectionSession == nil
+      && wallpaperRequest == nil && !isSettingWallpaper
+  }
+
+  func selectForBatch(index: Int, modifiers: NSEvent.ModifierFlags) {
+    guard assets.indices.contains(index), batchSheet == nil, !isBatchBusy,
+      overviewSelectionSession == nil else { return }
+    if modifiers.contains(.shift) {
+      let anchor = selectionAnchor ?? currentIndex
+      let range = Set(assets[min(anchor, index)...max(anchor, index)].map(\.url))
+      selectedURLs = modifiers.contains(.command) ? selectedURLs.union(range) : range
+    } else if modifiers.contains(.command) {
+      let url = assets[index].url
+      if selectedURLs.contains(url) { selectedURLs.remove(url) }
+      else { selectedURLs.insert(url) }
+      selectionAnchor = index
+    } else {
+      selectedURLs = [assets[index].url]
+      selectionAnchor = index
+    }
+    focus(index: index)
+  }
+
+  func selectAllAssets() {
+    guard batchSheet == nil, !isBatchBusy else { return }
+    if let session = overviewSelectionSession { finishOverviewSelection(session.id) }
+    selectedURLs = Set(assets.map(\.url))
+    if selectionAnchor == nil { selectionAnchor = currentIndex }
+  }
+
+  func clearSelection() {
+    guard batchSheet == nil, !isBatchBusy else { return }
+    if let session = overviewSelectionSession { finishOverviewSelection(session.id) }
+    selectedURLs = []
+    selectionAnchor = nil
+  }
+
+  func beginOverviewSelection(modifiers: NSEvent.ModifierFlags) -> UUID? {
+    guard presentationMode == .overview, !assets.isEmpty, !isLoading, batchSheet == nil, !isBatchBusy,
+      overviewSelectionSession == nil else { return nil }
+    let session = OverviewSelectionSession(
+      libraryRevision: libraryRevision, baseline: selectedURLs,
+      allowedURLs: Set(assets.map(\.url)), operation: .init(modifiers: modifiers))
+    overviewSelectionSession = session
+    return session.id
+  }
+
+  func updateOverviewSelection(_ id: UUID, hits: Set<URL>) {
+    guard let session = overviewSelectionSession, session.id == id,
+      session.libraryRevision == libraryRevision, !isLoading,
+      batchSheet == nil, !isBatchBusy else { return }
+    let selection = session.operation.applying(
+      hits: hits.intersection(session.allowedURLs), to: session.baseline)
+    // 드래그 중 초점/메타데이터/선읽기를 바꾸지 않아 자동 스크롤과 디코딩 폭주를 막습니다.
+    if selectedURLs != selection { selectedURLs = selection }
+  }
+
+  func finishOverviewSelection(_ id: UUID) {
+    guard overviewSelectionSession?.id == id else { return }
+    overviewSelectionSession = nil
+    selectionAnchor = assets.firstIndex { selectedURLs.contains($0.url) }
+  }
+
+  func cancelOverviewSelection(_ id: UUID) {
+    guard let session = overviewSelectionSession, session.id == id else { return }
+    overviewSelectionSession = nil
+    if session.libraryRevision == libraryRevision { selectedURLs = session.baseline }
+  }
+
+  func presentBatchRename() {
+    guard canStartBatchOperation else { return }
+    batchSheet = .rename
+  }
+
+  func presentBatchExport() {
+    guard canStartBatchOperation, !ExportFormat.available.isEmpty else { return }
+    batchSheet = .export
+  }
+
+  func renameSelectedFiles(using plan: BatchRenamePlan) async throws {
+    guard !isBatchBusy, !isLoading, !isSavingMetadata, !isExporting else { return }
+    isRenaming = true
+    prefetchTask?.cancel()
+    metadataTask?.cancel()
+    defer { isRenaming = false }
+    // Standardization may change when a file stops existing, so capture keys before any move.
+    let sourceKeys = assets.map { (original: $0.url, canonical: $0.url.standardizedFileURL) }
+    let mapping: [URL: URL]
+    do {
+      let renamed = try await batchRenamer.apply(plan)
+      // Foundation standardizes /private/tmp to /tmp, among other path aliases.
+      // Translate the planner's canonical keys back to the URLs used by the open library.
+      mapping = Dictionary(uniqueKeysWithValues: sourceKeys.compactMap { source in
+        guard let destination = renamed[source.canonical] else { return nil }
+        return (source.original, destination)
+      })
+    } catch {
+      refreshMetadata()
+      prefetchAroundCurrentPosition()
+      throw error
+    }
+    let focusedURL = currentAsset.map { mapping[$0.url] ?? $0.url }
+    let previousAdjustments = adjustments
+    for source in mapping.keys { adjustments.removeValue(forKey: source) }
+    for (source, destination) in mapping {
+      adjustments[destination] = previousAdjustments[source]
+    }
+    selectedURLs = Set(selectedURLs.map { mapping[$0] ?? $0 })
+    // Refresh only the open library so an explicit selection from several folders stays intact.
+    assets = assets.map { asset in
+      ImageAsset(url: mapping[asset.url] ?? asset.url,
+        byteCount: asset.byteCount, modificationDate: asset.modificationDate)
+    }.sorted { $0.filename.localizedStandardCompare($1.filename) == .orderedAscending }
+    currentIndex = assets.firstIndex { $0.url == focusedURL } ?? 0
+    pageStartIndex = currentIndex
+    selectionAnchor = currentIndex
+    await pipeline.purgeCaches()
+    await thumbnailPipeline.purgeCache()
+    refreshMetadata()
+    prefetchAroundCurrentPosition()
+    showStatus(L10n.format("%d개 파일 이름 변경 완료", mapping.count))
+  }
+
+  func convertSelectedFiles(
+    items: [BatchExportItem], format: ExportFormat, quality: Double,
+    progress: @escaping @Sendable (Int, Int) -> Void
+  ) async -> BatchExportResult {
+    isBatchExporting = true
+    defer { isBatchExporting = false }
+    return await batchExporter.export(
+      items: items, format: format, quality: quality, adjustments: adjustments, progress: progress)
   }
 
   var currentAdjustments: ImageAdjustments {
@@ -117,8 +437,23 @@ final class AppStore: ObservableObject {
   }
 
   var activeFolderName: String {
-    guard let currentAsset else { return L10n.text("이미지뷰어") }
-    return currentAsset.url.deletingLastPathComponent().lastPathComponent
+    let folder = currentFolderURL ?? currentAsset?.url.deletingLastPathComponent()
+    return folder?.lastPathComponent ?? L10n.text("알맹Re")
+  }
+
+  var canOpenFolderFromTree: Bool {
+    batchSheet == nil && !isBatchBusy && !isSavingMetadata && !isExporting
+      && wallpaperRequest == nil && !isSettingWallpaper
+      && (presentationMode != .folderComparison || !folderComparison.pane(folderComparison.activeSide).isLocked)
+  }
+
+  func openFolderFromTree(_ folder: URL) {
+    guard canOpenFolderFromTree else { return }
+    if presentationMode == .folderComparison {
+      folderComparison.pane(folderComparison.activeSide).load(folder)
+    } else {
+      load(folder: folder, fromTree: true)
+    }
   }
 
   var canEditCurrentEmbeddedMetadata: Bool {
@@ -127,44 +462,28 @@ final class AppStore: ObservableObject {
     )
   }
 
-  func chooseFolder() {
-    let panel = NSOpenPanel()
-    panel.title = L10n.text("이미지 폴더 열기")
-    panel.prompt = L10n.text("열기")
-    panel.canChooseDirectories = true
-    panel.canChooseFiles = false
-    panel.allowsMultipleSelection = false
-
-    if panel.runModal() == .OK, let url = panel.url {
-      load(folder: url)
+  func chooseItems() {
+    guard canOpenFolderFromTree else { return }
+    if presentationMode == .folderComparison {
+      folderComparison.chooseItems(for: folderComparison.activeSide)
+      return
     }
+    pauseSlideshow()
+    let panel = ImageOpenPanel.make()
+    if panel.runModal() == .OK { open(urls: panel.urls) }
   }
 
-  func chooseFiles() {
-    let panel = NSOpenPanel()
-    panel.title = L10n.text("이미지 열기")
-    panel.prompt = L10n.text("열기")
-    panel.canChooseDirectories = false
-    panel.canChooseFiles = true
-    panel.allowsMultipleSelection = true
-    // QOI/PCX처럼 시스템에 등록되지 않은 이미지도 선택할 수 있게 data를 포함합니다.
-    panel.allowedContentTypes = [.image, .data]
-
-    if panel.runModal() == .OK {
-      open(urls: panel.urls)
-    }
-  }
+  // Keep old call sites and saved shortcut actions compatible with the unified opener.
+  func chooseFolder() { chooseItems() }
+  func chooseFiles() { chooseItems() }
 
   func open(urls: [URL]) {
-    guard !urls.isEmpty else { return }
-
-    if let folder = urls.first(where: { $0.hasDirectoryPath }) {
-      load(folder: folder)
-    } else if urls.count == 1, let selected = urls.first {
-      load(folder: selected.deletingLastPathComponent(), focusing: selected)
-    } else {
-      load(explicitFiles: urls)
+    guard !urls.isEmpty, canOpenFolderFromTree else { return }
+    if presentationMode == .folderComparison {
+      folderComparison.open(urls: urls, for: folderComparison.activeSide)
+      return
     }
+    load(urls: urls)
   }
 
   func select(asset: ImageAsset, switchToViewer: Bool = false) {
@@ -174,7 +493,13 @@ final class AppStore: ObservableObject {
   }
 
   func select(index: Int) {
-    guard assets.indices.contains(index) else { return }
+    guard assets.indices.contains(index), batchSheet == nil, !isBatchBusy else { return }
+    selectedURLs = [assets[index].url]
+    selectionAnchor = index
+    focus(index: index)
+  }
+
+  private func focus(index: Int) {
     let visibleRange = pageStartIndex..<min(assets.count, pageStartIndex + imagesPerPage)
     if !visibleRange.contains(index) {
       pageStartIndex = index
@@ -183,10 +508,15 @@ final class AppStore: ObservableObject {
     resetViewport()
     refreshMetadata()
     prefetchAroundCurrentPosition()
+    restartSlideshowCountdown()
   }
 
   func navigatePage(_ direction: Int) {
-    guard !assets.isEmpty, direction != 0 else { return }
+    if presentationMode == .folderComparison {
+      folderComparison.navigateBoth(direction)
+      return
+    }
+    guard !assets.isEmpty, direction != 0, batchSheet == nil, !isBatchBusy else { return }
     let step = max(1, imagesPerPage) * (direction > 0 ? 1 : -1)
     var target = pageStartIndex + step
     let lastFullPageStart = max(0, assets.count - imagesPerPage)
@@ -202,12 +532,16 @@ final class AppStore: ObservableObject {
     }
     pageStartIndex = target
     currentIndex = target
+    selectedURLs = [assets[target].url]
+    selectionAnchor = target
     resetViewport()
     refreshMetadata()
     prefetchAroundCurrentPosition()
+    restartSlideshowCountdown()
   }
 
   func setImagesPerPage(_ count: Int) {
+    if count != 1 { pauseSlideshow() }
     imagesPerPage = min(10, max(1, count))
     let visibleRange = pageStartIndex..<min(assets.count, pageStartIndex + imagesPerPage)
     if !visibleRange.contains(currentIndex) {
@@ -218,20 +552,24 @@ final class AppStore: ObservableObject {
   }
 
   func zoomIn() {
+    if presentationMode == .folderComparison { folderComparison.updateZoom(1.25); return }
     zoom = min(16, zoom * 1.25)
   }
 
   func zoomOut() {
+    if presentationMode == .folderComparison { folderComparison.updateZoom(1 / 1.25); return }
     zoom = max(0.1, zoom / 1.25)
     if zoom <= 1 { panOffset = .zero }
   }
 
   func setFitToWindow() {
+    if presentationMode == .folderComparison { folderComparison.setScale(.fit); return }
     baseScaleMode = .fit
     resetViewport()
   }
 
   func setActualPixels() {
+    if presentationMode == .folderComparison { folderComparison.setScale(.actualPixels); return }
     baseScaleMode = .actualPixels
     resetViewport()
   }
@@ -259,9 +597,28 @@ final class AppStore: ObservableObject {
 
   func updateAdjustments(_ change: (inout ImageAdjustments) -> Void) {
     guard let currentAsset else { return }
+    pauseSlideshow()
     var value = currentAdjustments
     change(&value)
     adjustments[currentAsset.url] = value
+    objectWillChange.send()
+  }
+
+  /// A sheet applies to its captured file only; navigation or replacement cannot
+  /// accidentally transfer that draft crop to a different image.
+  func applyCrop(_ crop: NormalizedCrop?, to asset: ImageAsset,
+    relativeToQuarterTurns referenceTurns: Int? = nil)
+  {
+    guard assets.contains(asset) else { return }
+    pauseSlideshow()
+    var value = adjustments(for: asset)
+    var adjustedCrop = crop?.normalized
+    if let referenceTurns {
+      let delta = (value.normalizedQuarterTurns - ((referenceTurns % 4 + 4) % 4) + 4) % 4
+      for _ in 0..<delta { adjustedCrop = adjustedCrop?.rotatedClockwise() }
+    }
+    value.crop = adjustedCrop
+    adjustments[asset.url] = value
     objectWillChange.send()
   }
 
@@ -287,13 +644,19 @@ final class AppStore: ObservableObject {
     presentationMode = presentationMode == .viewer ? .overview : .viewer
   }
 
-  /// 단일/다중 이미지 뷰어에서 폴더 전체 썸네일 화면으로 명시적으로 돌아갑니다.
+  /// 단일/다중 이미지 뷰어에서 폴더의 몽땅보기 화면으로 명시적으로 돌아갑니다.
   func returnToOverview() {
     isFocusMode = false
     presentationMode = .overview
   }
 
   func toggleInspector(_ panel: InspectorPanel) {
+    pauseSlideshow()
+    if panel == .editing, inspectorPanel != .editing, presentationMode == .overview,
+      currentAsset != nil
+    {
+      presentationMode = .viewer
+    }
     inspectorPanel = inspectorPanel == panel ? nil : panel
   }
 
@@ -360,6 +723,8 @@ final class AppStore: ObservableObject {
     assets = refreshedAssets
     pageStartIndex = refreshedIndex
     currentIndex = refreshedIndex
+    selectedURLs = [destinationURL]
+    selectionAnchor = refreshedIndex
     refreshMetadata()
     prefetchAroundCurrentPosition()
     showStatus(L10n.format("%@ 정보 저장 완료", destinationURL.lastPathComponent))
@@ -377,9 +742,134 @@ final class AppStore: ObservableObject {
     isFocusMode = false
   }
 
-  /// Esc는 집중 모드, 일반 뷰어 순서로 한 단계씩 이전 보기로 이동합니다.
+  // MARK: - 전자 앨범
+
+  var canStartSlideshow: Bool {
+    presentationMode != .folderComparison && assets.count > 1 && !isLoading && batchSheet == nil && !isBatchBusy && !isExporting
+      && !isSavingMetadata && wallpaperRequest == nil && !isSettingWallpaper && alert == nil
+  }
+
+  func toggleSlideshow() {
+    if isSlideshowPlaying { pauseSlideshow(); return }
+    guard canStartSlideshow else { return }
+    setComparisonLayout(.off)
+    presentationMode = .viewer
+    isFocusMode = true
+    setImagesPerPage(1)
+    pageStartIndex = currentIndex
+    setFitToWindow()
+    isSlideshowPlaying = true
+    if managesSlideshowDisplaySleep { slideshowActivity = SlideshowDisplayActivity() }
+    restartSlideshowCountdown()
+  }
+
+  func pauseSlideshow() {
+    isSlideshowPlaying = false
+    invalidateSlideshowCountdown()
+    slideshowActivity = nil
+  }
+
+  /// 이미지/미리보기 또는 오류 화면이 실제로 준비된 뒤 표시 시간을 셉니다.
+  /// 애니메이션 프레임·정밀 재렌더마다 타이머가 다시 시작되지 않게 중복을 무시합니다.
+  func slideshowAssetPresented(_ asset: ImageAsset) {
+    guard currentAsset == asset, slideshowPresentedAsset != asset else { return }
+    slideshowPresentedAsset = asset
+    restartSlideshowCountdown()
+  }
+
+  private func invalidateSlideshowCountdown() {
+    slideshowGeneration = UUID()
+    slideshowTask?.cancel()
+    slideshowTask = nil
+  }
+
+  private func restartSlideshowCountdown() {
+    invalidateSlideshowCountdown()
+    guard isSlideshowPlaying, isFocusMode, presentationMode == .viewer,
+      let asset = currentAsset, slideshowPresentedAsset == asset else { return }
+    let generation = slideshowGeneration
+    let interval = slideshowInterval
+    slideshowTask = Task { [weak self] in
+      do { try await Task.sleep(for: .seconds(interval)) }
+      catch { return }
+      guard !Task.isCancelled, let self, self.slideshowGeneration == generation else { return }
+      self.advanceSlideshow()
+    }
+  }
+
+  /// 한 번 깨어날 때 한 장만 넘깁니다. 느린 디코딩이나 잠자기 후 몰아서 넘기지 않습니다.
+  func advanceSlideshow() {
+    guard isSlideshowPlaying, isFocusMode, presentationMode == .viewer,
+      canStartSlideshow, slideshowPresentedAsset == currentAsset else {
+      pauseSlideshow()
+      return
+    }
+    guard let next = SlideshowSettings.nextIndex(after: currentIndex, count: assets.count,
+      repeats: slideshowRepeats) else {
+      pauseSlideshow()
+      showStatus(L10n.text("전자 앨범 재생 완료"))
+      return
+    }
+    select(index: next)
+  }
+
+  // MARK: - 바탕화면
+
+  var canSetWallpaper: Bool {
+    presentationMode != .folderComparison && currentAsset != nil && !isLoading && !isBatchBusy && !isExporting && !isSavingMetadata
+      && batchSheet == nil && wallpaperRequest == nil && !isSettingWallpaper
+  }
+
+  func presentWallpaperSettings() {
+    guard canSetWallpaper, let asset = currentAsset else { return }
+    let displays = wallpaperService.displays
+    guard let screenID = (NSApp.keyWindow?.screen ?? NSScreen.main)
+      .flatMap(WorkspaceWallpaperClient.displayID), displays.contains(where: { $0.id == screenID }) else {
+      show(error: WallpaperError.displayUnavailable, title: L10n.text("바탕화면을 설정할 수 없음"))
+      return
+    }
+    wallpaperRequest = WallpaperRequest(asset: asset, adjustments: currentAdjustments,
+      displays: displays, currentDisplayID: screenID)
+  }
+
+  func applyWallpaper(_ request: WallpaperRequest, displayIDs: Set<UInt32>,
+    scaling: WallpaperScaling, appliesAdjustments: Bool) async {
+    guard !isSettingWallpaper, wallpaperRequest?.id == request.id else { return }
+    pauseSlideshow()
+    isSettingWallpaper = true
+    defer { isSettingWallpaper = false }
+    do {
+      let result = try await wallpaperService.apply(request: request, displayIDs: displayIDs,
+        scaling: scaling, appliesAdjustments: appliesAdjustments)
+      wallpaperRequest = nil
+      if result.failures.isEmpty {
+        showStatus(L10n.format("%d개 화면의 바탕화면 설정 완료", result.appliedCount))
+      } else {
+        alert = ViewerAlert(title: L10n.text("바탕화면 설정 결과"),
+          message: L10n.format("%d개 화면에 적용했습니다.\n%@", result.appliedCount,
+            result.failures.joined(separator: "\n")))
+      }
+    } catch {
+      wallpaperRequest = nil
+      show(error: error, title: L10n.text("바탕화면을 설정할 수 없음"))
+    }
+  }
+
+  /// Esc는 확대 비교, 집중 모드, 일반 뷰어 순서로 한 단계씩 이전 보기로 이동합니다.
   @discardableResult
   func handleEscapeKey() -> Bool {
+    if presentationMode == .folderComparison {
+      presentationMode = comparisonReturnMode
+      return true
+    }
+    if let session = overviewSelectionSession {
+      cancelOverviewSelection(session.id)
+      return true
+    }
+    if presentationMode == .viewer, comparisonLayout != .off {
+      setComparisonLayout(.off)
+      return true
+    }
     if isFocusMode {
       exitFocusMode()
       return true
@@ -395,7 +885,23 @@ final class AppStore: ObservableObject {
     NSApp.keyWindow?.toggleFullScreen(nil)
   }
 
+  func toggleFolderComparison() {
+    guard batchSheet == nil, !isBatchBusy, wallpaperRequest == nil, !isSettingWallpaper else { return }
+    if presentationMode == .folderComparison { presentationMode = comparisonReturnMode }
+    else { presentationMode = .folderComparison }
+  }
+
   func perform(_ action: ShortcutAction) {
+    guard batchSheet == nil, !isBatchBusy, overviewSelectionSession == nil,
+      wallpaperRequest == nil, !isSettingWallpaper else { return }
+    // 비교 화면에서 내보내기/편집 같은 명령이 뒤에 보존된 일반 폴더를 건드리지 않게 합니다.
+    if presentationMode == .folderComparison {
+      let allowed: Set<ShortcutAction> = [.previousPage, .nextPage, .zoomIn, .zoomOut,
+        .fitToWindow, .actualPixels, .openFolder, .toggleOverview, .toggleFolderComparison,
+        .previousFirstFolder, .nextFirstFolder, .previousSecondFolder, .nextSecondFolder,
+        .toggleAntialiasing, .panPrimaryDrag, .panSpaceDrag, .panSecondaryDrag, .panMiddleDrag, .panTrackpadScroll]
+      guard allowed.contains(action) else { return }
+    }
     switch action {
     case .previousPage: navigatePage(-1)
     case .nextPage: navigatePage(1)
@@ -409,11 +915,33 @@ final class AppStore: ObservableObject {
     case .moreImages: setImagesPerPage(imagesPerPage + 1)
     case .openFolder: chooseFolder()
     case .exportImage: exportCurrentImage()
+    case .toggleSlideshow: toggleSlideshow()
+    case .setWallpaper: presentWallpaperSettings()
+    case .toggleFolderComparison: toggleFolderComparison()
+    case .previousFirstFolder:
+      if presentationMode == .folderComparison { folderComparison.navigate(.first, direction: -1) }
+    case .nextFirstFolder:
+      if presentationMode == .folderComparison { folderComparison.navigate(.first, direction: 1) }
+    case .previousSecondFolder:
+      if presentationMode == .folderComparison { folderComparison.navigate(.second, direction: -1) }
+    case .nextSecondFolder:
+      if presentationMode == .folderComparison { folderComparison.navigate(.second, direction: 1) }
+    case .panPrimaryDrag: panInteractionMode = .primaryDrag
+    case .panSpaceDrag: panInteractionMode = .spacePrimaryDrag
+    case .panSecondaryDrag: panInteractionMode = .secondaryDrag
+    case .panMiddleDrag: panInteractionMode = .middleDrag
+    case .panTrackpadScroll: panInteractionMode = .trackpadScroll
+    case .toggleAntialiasing: isAntialiasingEnabled.toggle()
+    case .compareSideBySide: setComparisonLayout(.sideBySide)
+    case .compareStacked: setComparisonLayout(.stacked)
+    case .endMagnificationComparison: setComparisonLayout(.off)
     }
   }
 
   func exportCurrentImage() {
-    guard let asset = currentAsset else { return }
+    guard let asset = currentAsset, batchSheet == nil, !isBatchBusy, !isSavingMetadata,
+      !isExporting else { return }
+    pauseSlideshow()
 
     let selectedFormat =
       ExportFormat.available.contains(exportFormat)
@@ -425,7 +953,7 @@ final class AppStore: ObservableObject {
     panel.canCreateDirectories = true
     panel.nameFieldStringValue =
       asset.url.deletingPathExtension().lastPathComponent
-      + "." + selectedFormat.fileExtension
+      + "-edited." + selectedFormat.fileExtension
     if let type = UTType(selectedFormat.typeIdentifier) {
       panel.allowedContentTypes = [type]
     }
@@ -459,48 +987,46 @@ final class AppStore: ObservableObject {
     }
   }
 
-  private func load(folder: URL, focusing selectedURL: URL? = nil) {
-    retainSecurityScope(for: folder)
+  private func cancelLibraryLoad() {
+    loadGeneration = UUID()
     loadTask?.cancel()
-    prefetchTask?.cancel()
-    isLoading = true
+    loadTask = nil
+    isLoading = false
+  }
 
-    loadTask = Task { [weak self] in
-      guard let self else { return }
+  private func load(folder: URL, fromTree: Bool = false) {
+    load(urls: [folder], fromTree: fromTree)
+  }
+
+  private func load(urls: [URL], fromTree: Bool = false) {
+    cancelLibraryLoad()
+    let generation = loadGeneration
+    prefetchTask?.cancel()
+    metadataTask?.cancel()
+    isLoading = true
+    let destinationMode: PresentationMode = fromTree && presentationMode == .overview ? .overview : .viewer
+
+    loadTask = Task { [weak self, library] in
       do {
-        let scanned = try await library.scan(folder: folder)
+        let opened = try await library.open(urls: urls, allowsEmptyFolder: fromTree)
         try Task.checkCancellation()
-        applyLoadedAssets(scanned, focusing: selectedURL)
+        guard let self, self.loadGeneration == generation else { return }
+        self.libraryAccess = opened.access
+        self.currentFolderURL = opened.folderURL?.standardizedFileURL
+        self.applyLoadedAssets(opened.assets, focusing: opened.focusedURL, mode: destinationMode)
       } catch is CancellationError {
         // 사용자가 다른 폴더를 열었을 때 이전 스캔의 결과는 조용히 폐기합니다.
       } catch {
-        isLoading = false
-        show(error: error, title: L10n.text("폴더를 열 수 없음"))
+        guard !Task.isCancelled, let self, self.loadGeneration == generation else { return }
+        self.isLoading = false
+        self.show(error: error, title: L10n.text("이미지를 열 수 없음"))
       }
     }
   }
 
-  private func load(explicitFiles urls: [URL]) {
-    loadTask?.cancel()
+  private func applyLoadedAssets(_ newAssets: [ImageAsset], focusing selectedURL: URL?, mode: PresentationMode = .viewer) {
+    metadataTask?.cancel()
     prefetchTask?.cancel()
-    isLoading = true
-
-    loadTask = Task { [weak self] in
-      guard let self else { return }
-      do {
-        let loaded = try await library.assets(from: urls)
-        try Task.checkCancellation()
-        applyLoadedAssets(loaded, focusing: urls.first)
-      } catch is CancellationError {
-        // 새 열기 작업으로 대체되었습니다.
-      } catch {
-        isLoading = false
-        show(error: error, title: L10n.text("이미지를 열 수 없음"))
-      }
-    }
-  }
-
-  private func applyLoadedAssets(_ newAssets: [ImageAsset], focusing selectedURL: URL?) {
     assets = newAssets
     let focusedIndex =
       selectedURL.flatMap { selected in
@@ -508,8 +1034,10 @@ final class AppStore: ObservableObject {
       } ?? 0
     pageStartIndex = focusedIndex
     currentIndex = focusedIndex
+    selectedURLs = newAssets.indices.contains(focusedIndex) ? [newAssets[focusedIndex].url] : []
+    selectionAnchor = newAssets.isEmpty ? nil : focusedIndex
     isLoading = false
-    presentationMode = .viewer
+    presentationMode = mode
     resetViewport()
     refreshMetadata()
     prefetchAroundCurrentPosition()
@@ -533,28 +1061,35 @@ final class AppStore: ObservableObject {
     }
   }
 
-  private func prefetchAroundCurrentPosition() {
-    prefetchTask?.cancel()
-    guard !assets.isEmpty else { return }
-    let lower = max(0, pageStartIndex - 2)
-    let upper = min(assets.count, pageStartIndex + imagesPerPage + 4)
-    let visibleEnd = min(assets.count, pageStartIndex + imagesPerPage)
-    // 현재 화면은 각 타일이 최고 우선순위로 직접 요청합니다. 배경 선읽기가 그 요청을
-    // 가로막지 않도록 직전·직후 파일만 넣습니다.
-    let urls =
-      assets[lower..<pageStartIndex].map(\.url)
-      + assets[visibleEnd..<upper].map(\.url)
-    let hdr = prefersHDR
-
-    prefetchTask = Task(priority: .background) { [pipeline] in
-      await pipeline.prefetch(urls: urls, maxPixelSize: 1_536, prefersHDR: hdr)
-    }
+  /// 실제 타일과 같은 미리보기 크기를 써 다음 페이지가 캐시를 그대로 사용하게 합니다.
+  func updateViewerPrefetchSize(_ pixelSize: Int) {
+    let normalized = ImageLoadingPolicy.previewPixels(
+      for: ImageLoadingPolicy.pixelBucket(pixelSize))
+    guard normalized != viewerPrefetchPixels else { return }
+    viewerPrefetchPixels = normalized
+    prefetchAroundCurrentPosition()
   }
 
-  private func retainSecurityScope(for url: URL) {
-    securityScopedURL?.stopAccessingSecurityScopedResource()
-    securityScopedURL = url
-    _ = url.startAccessingSecurityScopedResource()
+  private func prefetchAroundCurrentPosition() {
+    prefetchTask?.cancel()
+    prefetchTask = nil
+    guard presentationMode == .viewer, !assets.isEmpty, !isLoading else { return }
+    let pageStart = min(assets.count, max(0, pageStartIndex))
+    let pageCount = min(10, max(1, imagesPerPage))
+    let visibleEnd = min(assets.count, pageStart + pageCount)
+    let nextEnd = min(assets.count, visibleEnd + pageCount)
+    let nextAssets = Array(assets[visibleEnd..<nextEnd])
+    let previousCount = min(2, 10 - nextAssets.count)
+    let previousStart = max(0, pageStart - previousCount)
+    // 다음 페이지를 먼저 준비하고, 여유가 있을 때만 직전 이미지도 준비합니다.
+    let nearbyAssets = nextAssets + Array(assets[previousStart..<pageStart].reversed())
+    guard !nearbyAssets.isEmpty else { return }
+    let pixels = viewerPrefetchPixels
+
+    prefetchTask = Task(priority: .background) { [thumbnailPipeline] in
+      // 파이프라인의 모드·저장장치별 대기 중 취소되어 마지막 페이지의 이웃만 읽습니다.
+      await thumbnailPipeline.prefetch(assets: nearbyAssets, maxPixelSize: pixels)
+    }
   }
 
   private func show(error: Error, title: String) {

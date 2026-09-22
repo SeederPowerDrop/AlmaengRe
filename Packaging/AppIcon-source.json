@@ -1,0 +1,74 @@
+{
+  "app_name": "알맹Re",
+  "selected_on": "2026-09-16",
+  "updated_on": "2026-09-17",
+  "selection": "사용자가 선택한 두 프레임과 삼색 붓기 모티프를 유지하고, 추가 요청에 따라 아이콘 바깥을 투명하게 수정",
+  "original_selected_source": "두 프레임에 삼색을 붓는 사용자 확정 시안",
+  "workspace_source": "AppIcon.png",
+  "prompt_document": "README.md",
+  "generation_mode": "built-in image_gen edit",
+  "source_png": "AppIcon.png",
+  "pixel_dimensions": [
+    1254,
+    1254
+  ],
+  "mode": "RGBA",
+  "sha256": "bfc8b413ea0cd70350dfd24efdd41208bd931b1805981d689cdc7b4ae969ab00",
+  "processing": "내장 이미지 편집 도구로 흰 사각 배경과 타일 제거. 생성한 RGBA PNG를 그대로 보존하고 앱 패키징에서는 알파를 유지한 채 크기 변환만 수행.",
+  "alpha_channel": {
+    "range": [
+      0,
+      255
+    ],
+    "transparent_pixels": 921525,
+    "corners": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  "icns_sha256": "bc40f793d7390f750ba82899927bb62788b961a88162af5bd3c6bfb289745985",
+  "icns_sizes": [
+    [
+      512,
+      512,
+      2
+    ],
+    [
+      512,
+      512,
+      1
+    ],
+    [
+      256,
+      256,
+      2
+    ],
+    [
+      256,
+      256,
+      1
+    ],
+    [
+      128,
+      128,
+      2
+    ],
+    [
+      128,
+      128,
+      1
+    ],
+    [
+      32,
+      32,
+      2
+    ],
+    [
+      16,
+      16,
+      2
+    ]
+  ]
+}

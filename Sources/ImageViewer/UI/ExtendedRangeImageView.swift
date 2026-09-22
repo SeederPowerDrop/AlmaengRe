@@ -9,15 +9,24 @@ import SwiftUI
 struct ExtendedRangeImageView: NSViewRepresentable {
   let image: CGImage
   let prefersHDR: Bool
+  let interpolationMode: ImageInterpolationMode
 
   func makeNSView(context: Context) -> ExtendedRangeBackingView {
     let view = ExtendedRangeBackingView()
-    view.update(image: image, prefersHDR: prefersHDR)
+    view.update(
+      image: image,
+      prefersHDR: prefersHDR,
+      interpolationMode: interpolationMode
+    )
     return view
   }
 
   func updateNSView(_ nsView: ExtendedRangeBackingView, context: Context) {
-    nsView.update(image: image, prefersHDR: prefersHDR)
+    nsView.update(
+      image: image,
+      prefersHDR: prefersHDR,
+      interpolationMode: interpolationMode
+    )
   }
 }
 
@@ -41,13 +50,18 @@ final class ExtendedRangeBackingView: NSView {
     layer?.contentsScale = window?.backingScaleFactor ?? NSScreen.main?.backingScaleFactor ?? 2
   }
 
-  func update(image: CGImage, prefersHDR: Bool) {
+  func update(
+    image: CGImage,
+    prefersHDR: Bool,
+    interpolationMode: ImageInterpolationMode
+  ) {
     guard let layer else { return }
 
     CATransaction.begin()
     CATransaction.setDisableActions(true)
     layer.contents = image
     layer.contentsScale = window?.backingScaleFactor ?? NSScreen.main?.backingScaleFactor ?? 2
+    apply(interpolationMode)
 
     if #available(macOS 26.0, *) {
       layer.preferredDynamicRange = prefersHDR ? .high : .standard
@@ -60,9 +74,22 @@ final class ExtendedRangeBackingView: NSView {
   private func configureLayer() {
     wantsLayer = true
     layer?.contentsGravity = .resize
-    layer?.minificationFilter = .trilinear
-    layer?.magnificationFilter = .linear
     layer?.backgroundColor = NSColor.clear.cgColor
     layer?.masksToBounds = true
+  }
+
+  /// 렌더링과 테스트가 동일한 Core Animation 필터 선택을 공유합니다.
+  func apply(_ interpolationMode: ImageInterpolationMode) {
+    switch interpolationMode {
+    case .smooth:
+      // 축소에는 mipmap 사이를, 확대에는 인접 픽셀 사이를 보간해
+      // 고배율에서도 계단 모양과 깨진 경계를 줄입니다.
+      layer?.minificationFilter = .trilinear
+      layer?.magnificationFilter = .linear
+    case .pixelated:
+      // 아이콘과 픽셀 아트의 원본 격자를 확인할 때는 인접 픽셀을 섞지 않습니다.
+      layer?.minificationFilter = .nearest
+      layer?.magnificationFilter = .nearest
+    }
   }
 }

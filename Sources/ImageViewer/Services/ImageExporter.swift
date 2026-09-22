@@ -1,4 +1,5 @@
 import CoreGraphics
+import Darwin
 import Foundation
 import ImageIO
 import UniformTypeIdentifiers
@@ -60,6 +61,7 @@ enum ExportFormat: String, CaseIterable, Identifiable, Sendable {
 
 enum ImageExportError: LocalizedError {
   case formatUnavailable(ExportFormat)
+  case sourceOverwrite
   case destinationCreationFailed
   case finalizationFailed
 
@@ -67,6 +69,7 @@ enum ImageExportError: LocalizedError {
     switch self {
     case .formatUnavailable(let format):
       L10n.format("이 macOS에서는 %@ 저장을 지원하지 않습니다.", format.title)
+    case .sourceOverwrite: L10n.text("원본 파일을 덮어쓰는 변환은 허용되지 않습니다.")
     case .destinationCreationFailed: L10n.text("출력 파일을 만들 수 없습니다.")
     case .finalizationFailed: L10n.text("이미지 파일 저장을 마무리하지 못했습니다.")
     }
@@ -88,6 +91,9 @@ actor ImageExporter {
     quality: Double,
     adjustments: ImageAdjustments
   ) async throws {
+    guard !refersToSameFile(sourceURL, destinationURL) else {
+      throw ImageExportError.sourceOverwrite
+    }
     guard ImageFormatRegistry.writableTypeIdentifiers.contains(format.typeIdentifier) else {
       throw ImageExportError.formatUnavailable(format)
     }
@@ -99,6 +105,10 @@ actor ImageExporter {
       prefersHDR: format == .heic || format == .avif || format == .jpegXL
     )
 
+    // 정밀 렌더를 기다리는 동안 저장 경로의 링크가 달라졌을 수도 있어 쓰기 직전 다시 확인합니다.
+    guard !refersToSameFile(sourceURL, destinationURL) else {
+      throw ImageExportError.sourceOverwrite
+    }
     guard
       let destination = CGImageDestinationCreateWithURL(
         destinationURL as CFURL,
@@ -117,8 +127,24 @@ actor ImageExporter {
       properties = sourceProperties
     }
 
-    // Image I/O가 원본 EXIF 회전을 다시 적용하지 않도록 픽셀 방향을 정규화합니다.
+    // 보정 결과는 이미 올바른 방향의 픽셀이므로 원본의 방향·치수를 재사용하지 않습니다.
     properties[kCGImagePropertyOrientation] = 1
+    properties[kCGImagePropertyPixelWidth] = frame.image.width
+    properties[kCGImagePropertyPixelHeight] = frame.image.height
+    var exif = properties[kCGImagePropertyExifDictionary] as? [CFString: Any] ?? [:]
+    exif[kCGImagePropertyExifPixelXDimension] = frame.image.width
+    exif[kCGImagePropertyExifPixelYDimension] = frame.image.height
+    properties[kCGImagePropertyExifDictionary] = exif
+    if var tiff = properties[kCGImagePropertyTIFFDictionary] as? [CFString: Any] {
+      tiff[kCGImagePropertyTIFFOrientation] = 1
+      properties[kCGImagePropertyTIFFDictionary] = tiff
+    }
+    // 원본 미리보기와 픽셀 형식 정보 대신 새 이미지로부터 메타데이터를 만듭니다.
+    properties.removeValue(forKey: kCGImagePropertyThumbnailImages)
+    properties.removeValue(forKey: kCGImagePropertyDepth)
+    properties.removeValue(forKey: kCGImagePropertyColorModel)
+    properties.removeValue(forKey: kCGImagePropertyProfileName)
+    properties.removeValue(forKey: kCGImagePropertyHasAlpha)
     if format.usesLossyQuality {
       properties[kCGImageDestinationLossyCompressionQuality] = max(0, min(1, quality))
     }
@@ -127,5 +153,25 @@ actor ImageExporter {
     guard CGImageDestinationFinalize(destination) else {
       throw ImageExportError.finalizationFailed
     }
+  }
+
+  private func refersToSameFile(_ sourceURL: URL, _ destinationURL: URL) -> Bool {
+    let source = sourceURL.standardizedFileURL.resolvingSymlinksInPath()
+    let destination = destinationURL.standardizedFileURL.resolvingSymlinksInPath()
+    if source == destination { return true }
+
+    // 경로가 다른 하드 링크와 대소문자 별칭도 파일시스템의 실제 파일 식별자로 비교합니다.
+    var sourceInfo = stat()
+    var destinationInfo = stat()
+    let sourceResult = source.withUnsafeFileSystemRepresentation { path -> Int32 in
+      guard let path else { return -1 }
+      return Darwin.lstat(path, &sourceInfo)
+    }
+    let destinationResult = destination.withUnsafeFileSystemRepresentation { path -> Int32 in
+      guard let path else { return -1 }
+      return Darwin.lstat(path, &destinationInfo)
+    }
+    return sourceResult == 0 && destinationResult == 0
+      && sourceInfo.st_dev == destinationInfo.st_dev && sourceInfo.st_ino == destinationInfo.st_ino
   }
 }

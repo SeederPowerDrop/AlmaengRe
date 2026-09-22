@@ -55,10 +55,66 @@ struct SettingsView: View {
         Text("이미지 왼쪽 위의 파일 이름을 숨기거나 크기를 조절합니다. 글자는 흰색, 배경은 검정으로 표시됩니다.")
           .font(.caption)
           .foregroundStyle(.secondary)
+
+        Toggle("고화질 확대", isOn: $store.isAntialiasingEnabled)
+        Text(store.imageInterpolationMode.detail)
+          .font(.caption)
+          .foregroundStyle(.secondary)
+        Picker(
+          "확대 비교",
+          selection: Binding(
+            get: { store.comparisonLayout }, set: { store.setComparisonLayout($0) }
+          )
+        ) {
+          ForEach(MagnificationComparisonLayout.allCases) { layout in
+            Text(layout.title).tag(layout)
+          }
+        }
+        Text("같은 이미지의 확대 배율과 이동 위치를 맞춰 비교합니다. 비교를 선택하면 고화질 확대가 켜집니다.")
+          .font(.caption)
+          .foregroundStyle(.secondary)
       }
 
       Section("탐색") {
+        Toggle("폴더 트리 표시", isOn: $store.showsFolderTree)
+        Text("폴더를 펼쳐 다른 폴더로 이동합니다.")
+          .font(.caption).foregroundStyle(.secondary)
         Toggle("마지막 이미지 다음에 첫 이미지로 이동", isOn: $store.wrapsNavigation)
+      }
+
+      Section("전자 앨범") {
+        SlideshowOptionsView(store: store)
+        Text("탐색 → 전자 앨범 또는 집중 보기 하단의 재생 버튼으로 시작합니다. 두 장 이상의 사진이 필요합니다.")
+          .font(.caption)
+          .foregroundStyle(.secondary)
+      }
+
+      Section("몽땅보기") {
+        Toggle("몽땅보기 번호 표시", isOn: $store.showsOverviewNumbers)
+        Text("번호가 이미지 면적의 ¼ 이상을 차지하면 사진 밖 카드의 왼쪽 위로 옮깁니다.")
+          .font(.caption)
+          .foregroundStyle(.secondary)
+        Text("드래그로 영역 선택 · Shift로 추가 · ⌘로 반전 · Esc로 취소")
+          .font(.caption)
+          .foregroundStyle(.secondary)
+      }
+
+      Section("이미지 로딩") {
+        Picker("자원 사용", selection: $store.imageLoadingMode) {
+          ForEach(ImageLoadingMode.allCases) { mode in
+            Text(mode == .comfortable ? L10n.format("%@ (권장)", mode.title) : mode.title)
+              .tag(mode)
+          }
+        }
+        Text(store.imageLoadingMode.detail)
+          .font(.caption)
+          .foregroundStyle(.secondary)
+        Text("모든 모드에서 메모리 여유와 발열을 살피고, 다른 앱을 사용하거나 저전력 모드일 때 처리량을 줄입니다.")
+          .font(.caption)
+          .foregroundStyle(.secondary)
+        Text("외장 SSD와 SD 카드에서는 미리 읽기를 줄여 현재 보이는 사진을 먼저 불러옵니다.")
+          .font(.caption)
+          .foregroundStyle(.secondary)
       }
 
       Section("확대 이미지 이동") {
@@ -125,7 +181,7 @@ struct SettingsView: View {
       VStack(alignment: .leading, spacing: 4) {
         Text("기본 이미지 앱")
           .font(.title3.weight(.semibold))
-        Text("선택한 파일 형식만 이미지뷰어로 열리도록 macOS 기본 앱을 변경합니다. 필요한 경우 macOS가 확인 창을 표시합니다.")
+        Text("선택한 파일 형식만 알맹Re로 열리도록 macOS 기본 앱을 변경합니다. 필요한 경우 macOS가 확인 창을 표시합니다.")
           .font(.caption)
           .foregroundStyle(.secondary)
         Text("앱을 ‘응용 프로그램’ 폴더처럼 이동하지 않을 위치에 둔 뒤 적용해 주세요.")

@@ -130,7 +130,7 @@ enum DefaultAppAssociationError: LocalizedError {
     case .noSelection:
       L10n.text("연결할 이미지 형식을 하나 이상 선택해 주세요.")
     case .applicationBundleRequired:
-      L10n.text("기본 앱 연결은 배포된 이미지뷰어.app을 실행했을 때 사용할 수 있습니다.")
+      L10n.text("기본 앱 연결은 배포된 알맹Re.app을 실행했을 때 사용할 수 있습니다.")
     case .noSupportedContentTypes:
       L10n.text("이 macOS에서 연결할 수 있는 이미지 형식을 찾지 못했습니다.")
     case .someTypesFailed(let successCount, let failureCount):
@@ -231,7 +231,7 @@ final class DefaultAppAssociationStore: ObservableObject {
         failureCount: failureCount
       )
     }
-    statusMessage = L10n.format("선택한 %d개 이미지 형식을 이미지뷰어에 연결했습니다.", selectedFormats.count)
+    statusMessage = L10n.format("선택한 %d개 이미지 형식을 알맹Re에 연결했습니다.", selectedFormats.count)
   }
 
   private func isCurrentApplicationDefault(_ identifier: String) -> Bool {
