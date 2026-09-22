@@ -28,6 +28,8 @@ if [[ ! -s "$APP_ICON_PATH" ]]; then
   exit 1
 fi
 
+"$SCRIPT_DIRECTORY/build-rust-engine.sh" "$ARCHITECTURE_MODE"
+
 mkdir -p "$CONTENTS_DIRECTORY/MacOS" "$CONTENTS_DIRECTORY/Resources"
 
 # 이 패키지는 빌드 플러그인이나 외부 스크립트를 사용하지 않습니다. SwiftPM의
@@ -62,6 +64,7 @@ cp "$PROJECT_DIRECTORY/Packaging/Info.plist" "$CONTENTS_DIRECTORY/Info.plist"
 # SwiftUI의 기본 문자열 처리와 Finder의 앱 이름 현지화가 같은 .lproj를 사용합니다.
 ditto "$PROJECT_DIRECTORY/Sources/ImageViewer/Resources" "$CONTENTS_DIRECTORY/Resources"
 cp "$APP_ICON_PATH" "$CONTENTS_DIRECTORY/Resources/AppIcon.icns"
+cp "$PROJECT_DIRECTORY/Engine/THIRD_PARTY_NOTICES.txt" "$CONTENTS_DIRECTORY/Resources/RustThirdPartyNotices.txt"
 
 # 릴리스에는 디버그 심볼이 필요하지 않습니다. 서명 전에 제거해 Universal 2
 # 실행 파일도 작게 유지합니다.

@@ -155,10 +155,11 @@ struct ComparisonFolderSelectionTests {
 
   private func waitForLoads(_ comparison: FolderComparisonStore) async throws {
     let deadline = ContinuousClock.now.advanced(by: .seconds(5))
-    while (comparison.first.isLoading || comparison.second.isLoading), ContinuousClock.now < deadline {
+    while (comparison.first.isLoading || comparison.second.isLoading || comparison.isMatching), ContinuousClock.now < deadline {
       try await Task.sleep(for: .milliseconds(10))
     }
     #expect(!comparison.first.isLoading && !comparison.second.isLoading)
+    #expect(!comparison.isMatching)
     #expect(comparison.first.errorMessage == nil && comparison.second.errorMessage == nil)
   }
 }

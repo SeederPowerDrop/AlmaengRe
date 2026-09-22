@@ -91,6 +91,12 @@ struct AppCommands: Commands {
 
     CommandMenu("이미지") {
       Group {
+      Button("AI 확대…") {
+        store.pauseSlideshow()
+        store.showsAIUpscaling = true
+      }
+      .disabled(store.currentAsset == nil || store.isBatchBusy)
+      Divider()
       Button(L10n.format("%@…  %@", ShortcutAction.setWallpaper.title,
         shortcuts.binding(for: .setWallpaper).displayText)) {
         store.presentWallpaperSettings()
@@ -102,7 +108,7 @@ struct AppCommands: Commands {
       Button("선택 해제") { store.clearSelection() }
         .disabled(store.selectedURLs.isEmpty || store.batchSheet != nil || store.isBatchBusy)
       Button("이름 일괄 변경…") { store.presentBatchRename() }
-        .disabled(!store.canStartBatchOperation)
+        .disabled(!store.canStartBatchOperation || store.selectedAssets.contains(where: \.isReadOnly))
       Button("형식 일괄 변환…") { store.presentBatchExport() }
         .disabled(!store.canStartBatchOperation || ExportFormat.available.isEmpty)
       Divider()

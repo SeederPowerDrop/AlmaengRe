@@ -53,23 +53,43 @@ struct FolderComparisonView: View {
       }
       ViewThatFits(in: .horizontal) {
         HStack(spacing: 16) {
-          endBehaviorPicker
+          matchingControls
           Spacer(minLength: 12)
           Toggle("썸네일 표시", isOn: $comparison.showsThumbnails)
             .toggleStyle(.checkbox)
             .fixedSize()
         }
         VStack(alignment: .leading, spacing: 8) {
-          endBehaviorPicker
+          matchingControls
           Toggle("썸네일 표시", isOn: $comparison.showsThumbnails).toggleStyle(.checkbox)
         }
       }
+      LibraryQueryControls(query: $comparison.query,
+        isWorking: comparison.isMatching || comparison.first.isFiltering || comparison.second.isFiltering)
+        .disabled(comparison.first.isLocked || comparison.second.isLocked)
     }
     .controlSize(.small)
     .padding(.horizontal, 16)
     .padding(.vertical, 11)
     .frame(maxWidth: .infinity, alignment: .leading)
     .background(ViewerTheme.chrome)
+  }
+
+  private var matchingControls: some View {
+    HStack(spacing: 12) {
+      Picker("이미지 맞추기", selection: $comparison.alignment) {
+        ForEach(ComparisonAlignment.allCases) { Text($0.title).tag($0) }
+      }
+      .fixedSize()
+      .disabled(comparison.first.isLocked || comparison.second.isLocked)
+      .help("확장자를 제외한 같은 이름을 짝지으며, 없는 쪽은 빈칸으로 표시합니다.")
+      if comparison.alignment == .sequence {
+        endBehaviorPicker
+      } else {
+        Text(L10n.format("비교 %1$@", comparison.matchedPosition))
+          .font(.caption.monospacedDigit()).foregroundStyle(.secondary)
+      }
+    }
   }
 
   private var endBehaviorPicker: some View {
@@ -244,7 +264,7 @@ private struct FolderComparisonPaneView: View {
       }
     }
     .frame(maxWidth: .infinity, maxHeight: .infinity)
-    .onChange(of: pane.index) { _, index in jumpNumber = index + 1 }
+    .onChange(of: pane.index, initial: true) { _, index in jumpNumber = index + 1 }
     .onChange(of: pane.folderURL) { _, _ in jumpNumber = pane.index + 1 }
   }
 
@@ -265,6 +285,11 @@ private struct FolderComparisonPaneView: View {
     .background(ViewerTheme.panel)
   }
 
+  private var sourceLabelURL: URL? {
+    pane.folderURL ?? (pane.sourceURLs.count == 1 && pane.sourceURLs.first?.pathExtension.lowercased() == "zip"
+      ? pane.sourceURLs.first : nil)
+  }
+
   private var folderControls: some View {
     HStack(spacing: 9) {
         Text(side == .first ? "A" : "B")
@@ -274,10 +299,10 @@ private struct FolderComparisonPaneView: View {
           .background(comparison.activeSide == side ? ViewerTheme.selection : Color.primary.opacity(0.055),
             in: RoundedRectangle(cornerRadius: 6))
           .help(side.title)
-        Text(pane.folderURL?.lastPathComponent ?? L10n.text(pane.assets.isEmpty ? "이미지 또는 폴더를 선택하세요." : "선택한 이미지"))
+        Text(sourceLabelURL?.lastPathComponent ?? L10n.text(pane.assets.isEmpty ? "이미지 또는 폴더를 선택하세요." : "선택한 이미지"))
           .font(.system(size: 12, weight: .semibold))
           .lineLimit(1).truncationMode(.middle)
-          .help(pane.folderURL?.path ?? "")
+          .help(sourceLabelURL?.path ?? "")
         Spacer(minLength: 4)
         Text("\(Int(pane.zoom * 100))%")
           .font(.caption.monospacedDigit()).foregroundStyle(.secondary)
@@ -292,13 +317,13 @@ private struct FolderComparisonPaneView: View {
   private var navigationControls: some View {
     HStack(spacing: 8) {
         Button { comparison.navigate(side, direction: -1) } label: { Image(systemName: "chevron.left") }
-          .disabled(!pane.canStep(-1))
+          .disabled(!comparison.canNavigate(side, direction: -1))
           .help(L10n.format("%@  %@", previousAction.title, shortcuts.binding(for: previousAction).displayText))
         Text(pane.position)
           .font(.caption.monospacedDigit())
           .foregroundStyle(.secondary)
         Button { comparison.navigate(side, direction: 1) } label: { Image(systemName: "chevron.right") }
-          .disabled(!pane.canStep(1))
+          .disabled(!comparison.canNavigate(side, direction: 1))
           .help(L10n.format("%@  %@", nextAction.title, shortcuts.binding(for: nextAction).displayText))
         Spacer(minLength: 4)
         TextField("이미지 번호", value: $jumpNumber, format: .number.grouping(.never))
@@ -316,20 +341,21 @@ private struct FolderComparisonPaneView: View {
       Label(L10n.text(pane.isLocked ? "잠김" : "잠금"), systemImage: pane.isLocked ? "lock.fill" : "lock.open")
     }
     .tint(pane.isLocked ? ViewerTheme.accent : nil)
-    .disabled(!pane.isLocked && (pane.isLoading || pane.currentAsset == nil))
+    .disabled(!pane.isLocked && (pane.isLoading || pane.isFiltering || comparison.isMatching || pane.currentAsset == nil))
     .help(pane.isLocked ? L10n.text("잠금 해제") : L10n.text("이 칸의 이미지와 확대·이동 위치를 고정합니다."))
   }
 
   private var emptyPane: some View {
     VStack(spacing: 14) {
-      Image(systemName: "folder")
+      Image(systemName: pane.showsMissingCounterpart ? "photo.badge.exclamationmark" : "folder")
         .font(.system(size: 38, weight: .ultraLight))
         .foregroundStyle(.white.opacity(0.35))
       VStack(spacing: 7) {
         Text(side.title)
           .font(.system(size: 13, weight: .semibold))
           .foregroundStyle(.white.opacity(0.9))
-        Text(pane.errorMessage ?? L10n.text("이미지 또는 폴더를 선택하세요."))
+        Text(pane.errorMessage ?? L10n.text(pane.showsMissingCounterpart
+          ? "대응 이미지 없음" : "이미지 또는 폴더를 선택하세요."))
           .font(.callout)
           .foregroundStyle(.white.opacity(0.55))
           .multilineTextAlignment(.center)
@@ -366,16 +392,21 @@ struct FolderComparisonMenuItems: View {
       let direction = [ShortcutAction.previousFirstFolder, .previousSecondFolder].contains(action) ? -1 : 1
       Button(L10n.format("%@  %@", action.title, shortcuts.binding(for: action).displayText)) {
         comparison.navigate(side, direction: direction)
-      }.disabled(!comparison.pane(side).canStep(direction))
+      }.disabled(!comparison.canNavigate(side, direction: direction))
     }
     Divider()
     Picker("비교 화면 배치", selection: $comparison.arrangement) {
       ForEach(FolderComparisonArrangement.allCases) { Text($0.title).tag($0) }
     }
     Toggle("확대·이동 함께", isOn: $comparison.linksViewport)
+    Picker("이미지 맞추기", selection: $comparison.alignment) {
+      ForEach(ComparisonAlignment.allCases) { Text($0.title).tag($0) }
+    }
+    .disabled(comparison.first.isLocked || comparison.second.isLocked)
     Picker("적은 쪽 이미지", selection: $comparison.endBehavior) {
       ForEach(ComparisonEndBehavior.allCases) { Text($0.title).tag($0) }
     }
+    .disabled(comparison.alignment == .filename)
     Toggle("썸네일 표시", isOn: $comparison.showsThumbnails)
   }
 }
