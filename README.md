@@ -4,6 +4,18 @@
 
 현재 버전은 **0.10.2 개발 기반(MVP)** 입니다. 폴더 탐색부터 이미지 비교, 전자 앨범, 바탕화면 설정, 이미지 정보 수정, 잘라내기와 비파괴 보정, 형식 변환까지 지원하며, 초대형 이미지 타일 렌더링과 배포 서명 등은 후속 마일스톤에서 강화합니다.
 
+## 사용설명서 / User guides
+
+앱의 **도움말 → 기본 사용법**에는 처음 사용할 때 필요한 조작만 간단히 담았습니다. 인터넷 없이 앱 안에서 읽을 수 있으며, **도움말 → 상세 사용설명서 (GitHub)**에서 자세한 설명서를 엽니다.
+
+자세한 설명서는 [GitHub 사용설명서 모음](docs/user-guide/README.md)에서 보세요. **0.12 개발 버전 기준**으로 실제 앱 화면에 번호·화살표·강조 테두리를 표시하고, 기능별 14개 장과 기본 단축키 29행을 정리했습니다. 공통 화면은 한국어 UI이며 설명과 번호 안내는 각 언어로 번역되어 있습니다.
+
+Open **Help → Basic Usage** for a short offline guide inside the app, or **Help → Detailed User Guide (GitHub)** for the illustrated manuals. These manuals describe the **0.12 development version**; older releases may not include every feature.
+
+[한국어](docs/user-guide/ko.md) · [English](docs/user-guide/en.md) · [日本語](docs/user-guide/ja.md) · [简体中文](docs/user-guide/zh-Hans.md) · [Français](docs/user-guide/fr.md) · [Español](docs/user-guide/es.md) · [Tiếng Việt](docs/user-guide/vi.md)
+
+각 설명서에서 공유·인쇄용 PDF도 받을 수 있습니다. 이 설명서는 0.12 개발 버전을 기준으로 하며, 이 저장소 main의 이전 앱 버전에는 일부 기능이 없습니다.
+
 ## 프로젝트의 출발점
 
 이 프로젝트에는 2000년대 국산 이미지 뷰어 **알맹이3**에서 느꼈던 개인적인 추억이 담겨 있습니다. 많은 이미지를 한눈에 훑고, 작은 아이콘을 크게 펼쳐 보고, 확대해도 부드럽게 보이던 경험을 오늘의 macOS에서 이어가고자 합니다.

@@ -1,0 +1,3 @@
+# Generated documents and screenshots must retain their original bytes.
+pdf/*.pdf binary
+figures/*.png binary
