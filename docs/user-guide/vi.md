@@ -1,4 +1,4 @@
-<!-- almeng-guide-source-sha256: d3bd9c97619002122762a0cc66f6a873fe2f9b8a8ddf7431804e2cf97511f4f4 -->
+<!-- almeng-guide-source-sha256: bea7524c51ee011a611aa8df5858af7d027dba4dd7a314b01c46590a8ad01fa2 -->
 
 <a name="top"></a>
 
@@ -10,9 +10,9 @@
 
 **Mở, xem, so sánh, phân loại và chỉnh sửa ảnh trên Mac**
 
-Hướng dẫn thực hành cho phiên bản phát triển 0.12 hiện tại. Hãy bắt đầu bằng một thư mục ảnh, rồi tra cứu chương phù hợp với việc bạn muốn làm. Tên menu trong hướng dẫn theo giao diện tiếng Việt của ứng dụng.
+Hướng dẫn thực hành cho phiên bản phát triển 0.13.1 hiện tại. Hãy bắt đầu bằng một thư mục ảnh, rồi tra cứu chương phù hợp với việc bạn muốn làm. Tên menu trong hướng dẫn theo giao diện tiếng Việt của ứng dụng.
 
-Phiên bản 0.12.0 · Tính đến 2026-10-05
+Phiên bản 0.13.1 · Tính đến 2026-10-06
 
 > Ảnh chụp màn hình lấy từ ứng dụng thật với giao diện tiếng Hàn và ảnh minh họa được tạo riêng. Các chú thích đánh số và phần giải thích được dịch sang ngôn ngữ của hướng dẫn; nội dung ảnh chụp màn hình giữ nguyên. Không sử dụng bộ sưu tập ảnh cá nhân.
 
@@ -28,10 +28,13 @@ Phiên bản 0.12.0 · Tính đến 2026-10-05
 - [8. Xem thông tin ảnh và siêu dữ liệu](#information)
 - [9. Chỉnh sửa ảnh và xuất bản sao](#editing)
 - [10. Đổi tên, chuyển đổi, thu nhỏ và chia sẻ nhiều ảnh](#batch)
-- [11. Hiểu phóng to AI, HDR và tải ảnh](#quality)
-- [12. Phát album ảnh hoặc đặt hình nền](#slideshow)
-- [13. Thiết lập theo cách làm việc của bạn](#settings)
-- [14. Phím tắt và xử lý nhanh vấn đề](#shortcuts)
+- [11. Thêm dấu chìm bằng chữ, EXIF và logo](#watermark)
+- [12. Phát video, trích xuất khung hình và lưu đoạn phim](#video)
+- [13. Duyệt và lưu các khung hình của ảnh động](#animation)
+- [14. Hiểu phóng to AI, HDR và tải ảnh](#quality)
+- [15. Phát album ảnh hoặc đặt hình nền](#slideshow)
+- [16. Thiết lập theo cách làm việc của bạn](#settings)
+- [17. Phím tắt và xử lý nhanh vấn đề](#shortcuts)
 - [Bảng phím tắt](#shortcut-reference)
 
 ---
@@ -45,7 +48,7 @@ Dùng Mở… cho mọi loại đầu vào. Một ảnh, một thư mục hay m�
 ### Các bước thực hiện
 
 1. Chạy 알맹Re trên macOS 14 trở lên. Chọn Mở… trên màn hình bắt đầu, thanh công cụ hoặc menu Tệp, hay nhấn ⌘O.
-2. Chọn một thư mục để duyệt ảnh bên trong. Chọn một ảnh để bắt đầu từ ảnh đó rồi xem tiếp các ảnh khác cùng thư mục. Nếu chọn nhiều ảnh, chỉ các ảnh được chọn sẽ được mở.
+2. Chọn một thư mục để duyệt ảnh bên trong. Chọn một ảnh để bắt đầu từ ảnh đó rồi xem tiếp các ảnh khác cùng thư mục. Nếu chọn nhiều ảnh, chỉ các ảnh được chọn sẽ được mở. Video mặc định bị ẩn: bật Hiển thị video phía trên danh sách để xem thêm video. Lựa chọn này được ghi nhớ; mở trực tiếp video được hỗ trợ sẽ tự bật tùy chọn và không thay đổi việc hiển thị GIF.
 3. Chọn tệp ZIP để xem các ảnh được hỗ trợ, kể cả ảnh trong thư mục con của tệp nén. Bạn cũng có thể mở tệp từ Finder hoặc kéo ảnh và thư mục vào ứng dụng.
 
 ### Thư mục và mục yêu thích
@@ -54,7 +57,7 @@ Cây thư mục mở rộng từng thư mục khi cần. Bấm tên thư mục �
 
 ### ZIP chỉ để đọc
 
-Ảnh được giải nén vào thư mục tạm trong lúc tệp ZIP đang mở. Hãy xuất bản sao trước khi đổi tên hoặc sửa siêu dữ liệu gốc. Ứng dụng không ghi lại tệp ZIP. Hỗ trợ phương thức Stored/Deflate; không mở tệp nén mã hóa hoặc dùng phương thức khác. Giới hạn gồm tệp ZIP 2 GiB, 10.000 mục, 256 MiB cho mỗi mục sau giải nén và tổng dữ liệu giải nén 1 GiB.
+Ảnh được giải nén vào thư mục tạm trong lúc tệp ZIP đang mở. Hãy xuất bản sao trước khi đổi tên hoặc sửa siêu dữ liệu gốc. Ứng dụng không ghi lại tệp ZIP. Hỗ trợ phương thức Stored/Deflate; không mở tệp nén mã hóa hoặc dùng phương thức khác. Giới hạn gồm tệp ZIP 2 GiB, 10.000 mục, 256 MiB cho mỗi mục sau giải nén và tổng dữ liệu giải nén 1 GiB. Không hỗ trợ video bên trong tệp ZIP.
 
 ### Trở về vị trí trước đó
 
@@ -119,7 +122,7 @@ Xem tất cả trải bộ ảnh hiện tại thành lưới ảnh thu nhỏ. D�
 **Màn hình 02.** Xem tất cả kết hợp lưới ảnh thu nhỏ với tìm kiếm, lựa chọn và điều chỉnh kích thước.
 
 1. **Lưới ảnh thu nhỏ** — Bấm, chọn theo khoảng hoặc kéo qua các thẻ; bấm đúp để mở ảnh.
-2. **Tìm kiếm và bộ lọc** — Thu hẹp bộ ảnh đang mở mà không thay đổi tệp.
+2. **Tìm kiếm, sắp xếp và lọc** — Tìm, sắp xếp và lọc danh sách theo định dạng, nhãn hoặc hiển thị video mà không đổi tệp.
 3. **Kích thước và lựa chọn** — Điều chỉnh ảnh xem trước và dùng các thao tác dành cho ảnh đã chọn để xử lý hàng loạt.
 
 ### Các bước thực hiện
@@ -134,11 +137,15 @@ Giữ Shift khi bắt đầu kéo vùng chọn để thêm vào lựa chọn hi�
 
 ### Sắp xếp danh sách hiện tại
 
-Sắp xếp theo tên, ngày sửa đổi, ngày tạo, kích thước tệp hoặc hướng GPS. Sắp xếp tên đặt 2 trước 10. Sắp xếp GPS đọc siêu dữ liệu vị trí và đưa ảnh không có GPS xuống cuối. Điều kiện tìm kiếm, định dạng, nhãn và bản đồ kết hợp với nhau; không điều kiện nào thay đổi tệp gốc.
+Các nhóm Tên và tệp, Kích thước và thời điểm chụp, Máy ảnh và màu sắc, Vị trí gồm tên, ngày của tệp, dung lượng, GPS, chiều rộng, chiều cao, thời điểm chụp, loại tệp, tốc độ màn trập, hãng sản xuất, mẫu máy, khẩu độ và không gian màu. Tên theo thứ tự số tự nhiên; màn trập theo thời gian phơi sáng; khẩu độ theo số f. Giá trị thiếu luôn ở cuối ở cả hai chiều. Loại tệp theo phần mở rộng, gộp các cách viết JPEG/TIFF tương đương. Không đổi tệp gốc.
 
 ### Số thứ tự và kích thước xem trước
 
 Nút # hiện hoặc ẩn số thứ tự ảnh thu nhỏ. Nhãn số quá lớn sẽ nằm ngoài ảnh nhỏ để không che ảnh. Kích thước ảnh thu nhỏ được ghi nhớ, với phạm vi 44,8–665,6 point; từng ô còn bị giới hạn bởi chiều rộng cửa sổ.
+
+### Giới hạn sắp xếp theo thông tin chụp
+
+Chiều rộng và cao là số pixel gốc theo hướng tệp, chưa áp dụng chỉnh sửa. Thời điểm chụp lấy từ EXIF hoặc ngày ghi trong video, không thay bằng ngày tạo tệp. Giờ EXIF không có múi giờ được coi là UTC khi sắp xếp. Video dùng kích thước, ngày, hãng, mẫu máy và màu đọc được; màn trập và khẩu độ coi là thiếu. Chỉ đọc dữ liệu khi chọn cách sắp xếp cần chúng rồi tái sử dụng, nên lần đầu có thể mất thời gian.
 
 ### Điều cần biết
 
@@ -158,7 +165,7 @@ So sánh ảnh giữ hai bộ A và B độc lập, đặt cạnh nhau hoặc tr
 
 **Màn hình 03.** Hai bộ ảnh trong So sánh ảnh.
 
-1. **Khung A và B** — Mỗi khung có bộ ảnh riêng và điều khiển Mở… riêng.
+1. **Khung A và B** — Mỗi khung có bộ ảnh và Mở… riêng, hiển thị tên thư mục hoặc tên riêng. Tên so sánh… dùng để đặt tên.
 2. **Cách so sánh** — Chọn cách ghép ảnh, bên cần chuyển, lặp bên ít ảnh hơn và liên kết thu phóng.
 3. **Khóa và ảnh thu nhỏ** — Cố định một bên hoặc chọn ảnh khác từ dải ảnh thu nhỏ của bên đó.
 
@@ -166,11 +173,11 @@ So sánh ảnh giữ hai bộ A và B độc lập, đặt cạnh nhau hoặc tr
 
 1. Chọn So sánh ảnh hoặc nhấn ⌃⌥C. Dùng Chọn thư mục để so sánh… để lần lượt chọn A và B, hoặc dùng nút Mở… của từng khung.
 2. Dùng Thứ tự danh sách để xem hai danh sách độc lập. Chọn Tên tệp trùng khớp để ghép tên không tính phần mở rộng: 001.jpg khớp với 001.png. Ảnh thiếu cặp vẫn có hàng so sánh với một bên trống.
-3. Trong Chuyển ảnh, chọn Chỉ A, Cả hai hoặc Chỉ B. Dùng các mũi tên chung hoặc ảnh thu nhỏ của từng khung để chuyển. Bật Liên kết phóng to và di chuyển để xem các vị trí tương đối tương ứng.
+3. Trong Chuyển ảnh, chọn một bên theo tên hiển thị hoặc Cả hai. Dùng mũi tên chung hoặc ảnh thu nhỏ để chuyển. Bật Liên kết phóng to và di chuyển để xem các vị trí tương đối tương ứng.
 
 ### Chuyển ảnh và lặp
 
-Chọn Chỉ A hoặc Chỉ B sẽ chuyển sang Thứ tự danh sách. Tên tệp trùng khớp trở lại cách chuyển theo cặp. Khi chọn Cả hai, Lặp bên ít ảnh hơn lặp danh sách ngắn trong lúc danh sách dài tiếp tục; khi tắt, danh sách ngắn giữ ảnh cuối. Chức năng lặp dùng cho Thứ tự danh sách.
+Chọn một bên sẽ chuyển sang Thứ tự danh sách. Tên tệp trùng khớp trở lại cách chuyển theo cặp. Khi chọn Cả hai, Lặp bên ít ảnh hơn lặp danh sách ngắn trong lúc danh sách dài tiếp tục; khi tắt, danh sách ngắn giữ ảnh cuối. Chức năng lặp dùng cho Thứ tự danh sách.
 
 ### Khóa
 
@@ -178,7 +185,7 @@ Khóa cố định ảnh, mức thu phóng và vị trí di chuyển của một
 
 ### Ảnh gốc và trạng thái đã lưu
 
-So sánh hiển thị ảnh gốc, không áp dụng các chỉnh sửa của trình xem thông thường. Hãy thoát so sánh để chỉnh sửa, xử lý hàng loạt hoặc đặt hình nền. Esc trở về chế độ xem trước đó. Bố trí, liên kết, tùy chọn chuyển ảnh cùng đầu vào và vị trí A/B gần nhất được ghi nhớ.
+So sánh hiển thị ảnh gốc, không áp dụng chỉnh sửa. Thoát để chỉnh sửa, xử lý hàng loạt hoặc đặt hình nền; Esc về chế độ trước. Bố trí, liên kết, chuyển ảnh và đầu vào/vị trí A/B cuối được ghi nhớ. Tên so sánh… cho đặt tên riêng tối đa 80 ký tự. Để trống hoặc chọn Dùng tên tự động để dùng tên thư mục/ZIP; Lưu mới áp dụng, Hủy giữ tên hiện tại. Cùng thư mục/ZIP hoặc danh sách trộn nhiều vị trí dùng A/B; thư mục khác nhau trùng tên thêm (A)/(B). Không đổi tên thư mục thật. Tên riêng khôi phục khi mở lại ứng dụng và chỉ đặt lại ở khung nhận đầu vào mới. Mở lại cùng đầu vào sẽ giữ tên. Trỏ vào tên rút gọn để xem đầy đủ.
 
 ### Điều cần biết
 
@@ -350,9 +357,9 @@ Chỉnh sửa ảnh xem trước thay đổi mà không ghi đè ảnh gốc. H�
 
 **Màn hình 07.** Bảng chỉnh sửa bên cạnh bản xem trước của ảnh hiện tại.
 
-1. **Điều khiển chỉnh sửa** — Cắt, xoay, lật và điều chỉnh tông sáng, màu cùng chi tiết.
+1. **Độ nổi bật và phong cách phim** — Mở Độ nổi bật để chỉnh ảnh hoặc chọn phong cách phim và cường độ.
 2. **Xem trước ảnh** — Kiểm tra kết quả hiện tại; dùng Kích thước thực khi điều chỉnh chi tiết.
-3. **Xuất — phía dưới bảng** — Cuộn xuống trong bảng chỉnh sửa hoặc nhấn ⌘E để lưu bản sao trước khi đóng ứng dụng.
+3. **Bản sao và dấu chìm** — Chọn định dạng, chất lượng rồi xuất bản sao. Thêm dấu chìm… chỉ áp dụng cho ảnh hiện tại.
 
 ### Các bước thực hiện
 
@@ -390,9 +397,9 @@ Xử lý hàng loạt ảnh đã chọn từ Trình xem, Xem tất cả, danh s�
 
 **Màn hình 08.** Cửa sổ chuyển đổi hàng loạt với định dạng, thu nhỏ đúng tỷ lệ và nơi lưu.
 
-1. **Định dạng và chất lượng** — Chọn định dạng, chất lượng hoặc dùng thiết lập giảm dung lượng.
-2. **Thu nhỏ đúng tỷ lệ** — Chọn giữ kích thước, cạnh dài nhất hoặc tỷ lệ phần trăm.
-3. **Nơi lưu và xem trước** — Kiểm tra thư mục đích và tên đầu ra rồi bắt đầu chuyển đổi.
+1. **Định dạng và kích thước** — Chọn định dạng và kích thước đúng tỷ lệ. Định dạng mất dữ liệu có chỉnh chất lượng; cũng có thiết lập giảm dung lượng.
+2. **Dấu chìm và thư mục** — Mở cài đặt dấu chìm hoặc chọn thư mục lưu bản sao.
+3. **Xem trước tệp lưu** — So sánh tên hiện tại và tên đầu ra trước khi chuyển đổi. Giữ nguyên bản gốc.
 
 ### Các bước thực hiện
 
@@ -410,7 +417,7 @@ Dùng tên phân loại tạo tên như Tải lên01, Tải lên02 theo thứ t�
 
 ### Ảnh gốc, kết quả và chia sẻ
 
-Chuyển đổi áp dụng điều chỉnh hiện tại vào bản sao và giữ tệp gốc. Tên đầu ra đã có được thêm số. Ảnh động và nhiều trang chỉ lưu khung đầu. Dừng thao tác vẫn giữ tệp đã xong; kết quả báo số đã lưu, thất bại và chưa xử lý. Chia sẻ tệp gốc không bao gồm điều chỉnh chưa lưu. Muốn chia sẻ ảnh đã chỉnh hoặc thu nhỏ, hãy hoàn thành chuyển đổi rồi chia sẻ các tệp đã hoàn tất.
+Chuyển đổi áp dụng điều chỉnh hiện tại vào bản sao và giữ tệp gốc. Tên đầu ra đã có được thêm số. Ảnh động và nhiều trang chỉ lưu khung đầu. Dừng thao tác vẫn giữ tệp đã xong; kết quả báo số đã lưu, thất bại và chưa xử lý. Chia sẻ tệp gốc không bao gồm điều chỉnh chưa lưu. Muốn chia sẻ ảnh đã chỉnh hoặc thu nhỏ, hãy hoàn thành chuyển đổi rồi chia sẻ các tệp đã hoàn tất. Chuyển đổi ảnh hàng loạt không xử lý video: dùng Khung hình và đoạn phim… để trích xuất PNG hoặc lưu đoạn phim. Để giữ nhiều khung của ảnh động trong GIF hoặc APNG, cũng dùng Khung hình và đoạn phim… (chương 13).
 
 ### Điều cần biết
 
@@ -420,9 +427,129 @@ Chuyển đổi áp dụng điều chỉnh hiện tại vào bản sao và giữ
 
 ---
 
+<a name="watermark"></a>
+
+## 11. Thêm dấu chìm bằng chữ, EXIF và logo
+
+Đặt chữ, chữ ký, thông tin chụp và logo lên bản sao của một hoặc nhiều ảnh đã chọn. Giữ nguyên tệp gốc và nhãn của chúng.
+
+![Kết hợp chữ, EXIF và logo, kéo dấu chìm trong bản xem trước rồi chọn mở rộng khung ảnh.](figures/watermark.png)
+
+**Màn hình 09.** Kết hợp chữ, EXIF và logo, kéo dấu chìm trong bản xem trước rồi chọn mở rộng khung ảnh.
+
+1. **Chữ, phông và EXIF** — Chọn chữ, phông và EXIF của từng ảnh. Thêm mục vẫn giữ cỡ chữ.
+2. **Logo và bố cục** — Chọn logo, chỉnh kích thước, lề và độ đục bằng thanh trượt hoặc số.
+3. **Xem trước ảnh đầu** — Kéo dấu chìm; đường viền hướng dẫn không được lưu. Ra ngoài ảnh sẽ hỏi mở rộng khung.
+
+### Các bước thực hiện
+
+1. Chọn ảnh rồi mở Thêm dấu chìm… từ menu Hình ảnh, thao tác lựa chọn hoặc menu bấm phải. Trên bản đồ, áp dụng cho vùng hoặc ghim được nêu. Thêm dấu chìm… trong bảng chỉnh sửa chỉ dùng ảnh hiện tại.
+2. Nhập chữ hoặc chữ ký. Bấm tên phông để mở bảng phông chữ macOS và chọn phông đã cài. Chọn mục EXIF muốn vẽ; Chọn ảnh… thêm logo hoặc ảnh chữ ký, chẳng hạn PNG trong suốt.
+3. Chọn một trong chín vị trí hoặc kéo dấu chìm trong bản xem trước. Chỉnh kích thước, lề, độ đục bằng thanh trượt hoặc số như 25,5%, rồi chọn chữ trắng/đen và bóng/nền. Đặt ra ngoài ảnh sẽ hỏi mở rộng khung. Bấm Áp dụng, chọn định dạng, chất lượng, thu nhỏ và thư mục rồi Bắt đầu chuyển đổi.
+
+### Thông tin chụp và cỡ chữ ổn định
+
+EXIF vẽ giá trị của từng ảnh gốc: thời điểm chụp, hãng, mẫu máy, ống kính, màn trập, khẩu độ, ISO, tiêu cự và tên tệp. Bỏ qua dữ liệu thiếu hoặc không đọc được. Thêm mục EXIF chỉ thêm hàng hoặc ngắt dòng, không thu nhỏ chữ. Muốn sửa siêu dữ liệu trong tệp, dùng trình chỉnh sửa trong Thông tin ảnh.
+
+### Kéo vị trí và mở rộng khung ảnh
+
+Cỡ chữ và logo theo chiều rộng ảnh trước khi mở rộng, logo giữ tỷ lệ. Lề theo cạnh ngắn chỉ dùng ở vị trí có sẵn; kéo sẽ đặt tâm tùy chỉnh. Vị trí, kích thước tương đối và đồng ý mở rộng áp dụng cho cả lựa chọn, chỉ thêm cạnh cần thiết mà không đổi kích thước ảnh. Phần thêm trong suốt với alpha, trắng với JPEG. Giữ trong ảnh chỉ đưa vị trí ngoài ảnh vào trong. Nội dung quá lớn cho chọn Mở rộng khung ảnh, Thu nhỏ dấu chìm cho vừa hoặc Hủy. Hủy giữ cài đặt hiện tại. Chỉ khi không mở rộng khung mà nội dung không vừa ảnh thì mới chặn lưu đến khi xử lý xong. Trở về khung gốc cũng kiểm tra kích thước.
+
+### Bản sao, xem trước và thiết kế ghi nhớ
+
+Dấu chìm áp dụng sau chỉnh sửa, cắt, xoay và thu nhỏ đầu ra. Bản xem trước ảnh đầu thu nhỏ có thể lệch nhẹ vị trí cuối do làm tròn điểm ảnh; kích thước và EXIF khác nhau theo ảnh. Giữ ảnh gốc và nhãn; chia sẻ bản sao hoàn tất qua macOS. Nhớ thiết kế và vị trí tùy chỉnh nhưng mỗi chuyển đổi mới phải bật lại dấu chìm. Đồng ý mở rộng được đặt lại cho mỗi đợt mới; kéo ra ngoài lần nữa sẽ hỏi lại. Giữ logo ở cùng đường dẫn; báo lỗi nếu không đọc được. Không dùng cho video; ảnh động và nhiều trang lưu khung đầu thành ảnh tĩnh.
+
+### Điều cần biết
+
+- Chữ tối đa 2.000 ký tự, 20 dòng; logo dùng khung đầu của ảnh ImageIO đọc được. Kích thước 2–90%, lề 0–20%, độ đục 0–100%. Số vượt phạm vi bị giới hạn; nhập sai giữ giá trị hợp lệ trước đó. Đầu ra mở rộng tối đa 64 MP, mỗi cạnh 32.768 px; vượt giới hạn thì kéo vào trong hoặc thu nhỏ. Dấu chìm không hiện trên ảnh gốc trong Trình xem.
+
+[Về đầu trang](#top)
+
+---
+
+<a name="video"></a>
+
+## 12. Phát video, trích xuất khung hình và lưu đoạn phim
+
+Video mặc định bị ẩn. Bật Hiển thị video để xem cùng với ảnh, rồi mở Khung hình và đoạn phim… để trích xuất PNG hoặc lưu một khoảng thành bản sao riêng.
+
+![Cửa sổ Khung hình và đoạn phim cho video, với trình phát và thiết lập xuất.](figures/video.png)
+
+**Màn hình 10.** Cửa sổ Khung hình và đoạn phim cho video, với trình phát và thiết lập xuất.
+
+1. **Trình phát video** — Phát hoặc tạm dừng video để kiểm tra hình ảnh và âm thanh.
+2. **Khung hình và vị trí** — Duyệt từng khung hình khi được hỗ trợ hoặc tìm theo thời điểm, rồi trích xuất khung hiện tại thành PNG.
+3. **Khoảng và chất lượng** — Đặt điểm đầu được bao gồm, điểm cuối không được bao gồm, định dạng và thiết lập trước khi lưu bản sao.
+
+### Các bước thực hiện
+
+1. Bật Hiển thị video phía trên danh sách. Ứng dụng ghi nhớ lựa chọn này và không thay đổi việc hiển thị GIF. Mở trực tiếp một tệp video được hỗ trợ sẽ tự bật tùy chọn này.
+2. Video trong trình xem ban đầu ở trạng thái tạm dừng; âm thanh chỉ bắt đầu khi bạn chủ động phát. Trong Khung hình và đoạn phim…, dùng vị trí phát và Khung hình trước / Khung hình tiếp theo nếu nội dung hỗ trợ bước từng khung. Thao tác này đi theo khung hình thực; ứng dụng không khẳng định số khung hình chính xác bằng cách tính từ tốc độ khung hình danh nghĩa của video có tốc độ thay đổi.
+3. Dùng Trích xuất khung hình hiện tại thành PNG… để lưu hình đang hiển thị. Để lưu đoạn phim, đặt Bắt đầu (giây) và Kết thúc (giây), có thể dùng Đặt điểm bắt đầu tại đây / Đặt điểm kết thúc tại đây; chọn MP4 hoặc MOV, chất lượng rồi Lưu bản sao đoạn phim….
+
+### Định dạng khả dụng trên máy Mac này
+
+Khả năng hỗ trợ tùy thuộc vào định dạng vùng chứa và codec mà phiên bản macOS đang cài thực sự giải mã được: MP4, MOV và các định dạng gốc khác có thể dùng mà không cần cài codec bên ngoài. Chỉ phần mở rộng không bảo đảm phát được. Không hỗ trợ WebM, MKV hoặc video bên trong ZIP. Không thể lưu khung hình hay đoạn phim từ video được bảo vệ bằng DRM. Bản đồ không sử dụng dữ liệu GPS của video.
+
+### Khoảng và chất lượng bản sao
+
+Bao gồm điểm bắt đầu và không bao gồm điểm kết thúc; ranh giới được lưu sẽ căn theo các mẫu của nội dung đa phương tiện. Đoạn phim được mã hóa lại thành H.264/AAC trong vùng chứa MP4 hoặc MOV, còn tệp gốc được giữ nguyên. Cài đặt giảm dung lượng chọn MP4 và mức tối đa 720p. Các mức chất lượng và độ phân giải không phóng lớn video nhỏ, cũng không bảo đảm tệp sẽ nhỏ hơn: đầu ra có thể lớn hơn bản gốc. Trích xuất PNG giữ độ phân giải của khung hình gốc; chất lượng đã chọn chỉ áp dụng cho bản sao đoạn phim.
+
+### Các tính năng chỉ dành cho ảnh
+
+Điều chỉnh ảnh, phóng to bằng AI, đặt hình nền và chuyển đổi ảnh hàng loạt không áp dụng cho video. So sánh ảnh vẫn chỉ dành cho ảnh. Không thể khởi động album ảnh nếu danh sách đang hiển thị có video; tắt Hiển thị video để chạy trình chiếu chỉ gồm ảnh. Video vẫn có thể được gắn nhãn, đổi tên và chia sẻ tệp gốc đã chọn. Bản sao mới không tự kế thừa nhãn của tệp gốc.
+
+### Điều cần biết
+
+- Hãy chọn tên mới: tệp gốc và tệp đã có sẽ không bị ghi đè. Hủy sẽ xóa bản sao chưa hoàn tất. Kết quả đã lưu thành công có thể được chia sẻ bằng chức năng chia sẻ của macOS.
+
+[Về đầu trang](#top)
+
+---
+
+<a name="animation"></a>
+
+## 13. Duyệt và lưu các khung hình của ảnh động
+
+Khung hình và đoạn phim… cho phép duyệt GIF, APNG và WebP mà máy Mac này giải mã được, trích xuất PNG và lưu một khoảng thành GIF hoặc APNG.
+
+![Cửa sổ Khung hình và đoạn phim cho ảnh động, với bản xem trước, khung hình và kích thước đầu ra.](figures/animation.png)
+
+**Màn hình 11.** Cửa sổ Khung hình và đoạn phim cho ảnh động, với bản xem trước, khung hình và kích thước đầu ra.
+
+1. **Bản xem trước ảnh động** — Kiểm tra khung đang hiển thị và chuyển động trước khi lưu.
+2. **Điều khiển khung hình** — Tiến hoặc lùi một khung và trích xuất khung hiện tại thành PNG.
+3. **Khoảng và kích thước** — Chọn khoảng bao gồm cả hai đầu, GIF hoặc APNG, kích thước và các khung cần giữ.
+
+### Các bước thực hiện
+
+1. Mở ảnh động được hỗ trợ rồi chọn Khung hình và đoạn phim…. GIF vẫn hiển thị khi Hiển thị video bị tắt. Kiểm tra bản xem trước và dùng Phát / Tạm dừng hoặc các nút khung hình trước và tiếp theo.
+2. Dùng Trích xuất khung hình hiện tại thành PNG… để lấy ảnh tĩnh. Để lưu một khoảng ảnh động, nhập Khung hình đầu và Khung hình cuối: số thứ tự bắt đầu từ 1 và bao gồm cả hai khung giới hạn.
+3. Chọn GIF hoặc APNG trong các định dạng khả dụng trên máy Mac này. Đặt kích thước và Giữ khung hình, rồi dùng Lưu bản sao đoạn phim… để tạo tệp mới.
+
+### Khung hình giữ lại và thời lượng
+
+Bạn có thể giữ tất cả khung hình hoặc 1 trong 2, 3 hay 4 khung của khoảng đã chọn. Thời lượng của các khung bị bỏ được cộng vào một khung giữ lại để duy trì tổng thời lượng của khoảng, thay vì làm ảnh động chạy nhanh hơn.
+
+### Kích thước và giảm dung lượng
+
+Giữ Kích thước gốc, đặt Cạnh dài nhất theo pixel hoặc dùng Tỷ lệ từ 1 đến 100 %. Tỷ lệ khung hình được giữ nguyên và ảnh nhỏ không bị phóng lớn. Cài đặt giảm dung lượng đặt 50 % và giữ 1 trong 2 khung hình. Dung lượng tùy thuộc nội dung và định dạng; không bảo đảm tệp sẽ nhỏ hơn. Trích xuất PNG giữ độ phân giải của khung hình gốc; thiết lập kích thước và giữ khung hình chỉ áp dụng cho bản sao ảnh động.
+
+### Định dạng và hình ảnh
+
+Khả năng đọc GIF, APNG, WebP và các định dạng đầu ra được cung cấp tùy thuộc khả năng giải mã và mã hóa của máy Mac này. Bản sao ảnh động chỉ được lưu thành GIF hoặc APNG. GIF giới hạn màu sắc và độ trong suốt nên hình ảnh có thể thay đổi. Các điều chỉnh chỉnh sửa ảnh hiện tại không được áp dụng cho khung PNG trích xuất hoặc bản sao ảnh động.
+
+### Điều cần biết
+
+- Giữ nguyên tệp gốc và từ chối tên tệp đã tồn tại. Hủy sẽ xóa đầu ra chưa hoàn tất. Sau khi lưu thành công, có thể chia sẻ bản sao đã hoàn tất qua chức năng chia sẻ của macOS. Bản sao mới không tự kế thừa nhãn của tệp gốc.
+
+[Về đầu trang](#top)
+
+---
+
 <a name="quality"></a>
 
-## 11. Hiểu phóng to AI, HDR và tải ảnh
+## 14. Hiểu phóng to AI, HDR và tải ảnh
 
 Phóng to chất lượng cao thay cách nội suy khi hiển thị. Phóng to bằng AI tạo ảnh lớn hơn để lưu. Đầu ra HDR là tùy chọn hiển thị, không phải dấu xác nhận ảnh đang xem là HDR.
 
@@ -450,13 +577,13 @@ Khả năng đọc và ghi phụ thuộc macOS đang chạy. Ứng dụng bổ s
 
 <a name="slideshow"></a>
 
-## 12. Phát album ảnh hoặc đặt hình nền
+## 15. Phát album ảnh hoặc đặt hình nền
 
 Album ảnh tự chuyển qua danh sách hiện tại trong chế độ tập trung một ảnh. Hình nền dùng bản sao riêng được chuẩn bị cho các màn hình đã chọn.
 
 ### Các bước thực hiện
 
-1. Mở danh sách có ít nhất hai ảnh. Chọn Điều hướng → Album ảnh → Phát album ảnh hoặc nhấn ⌃⌥P.
+1. Mở danh sách có ít nhất hai ảnh. Chọn Điều hướng → Album ảnh → Phát album ảnh hoặc nhấn ⌃⌥P. Danh sách phải chỉ có ảnh: nếu còn video, hãy tắt Hiển thị video trước khi khởi động album.
 2. Dùng các nút phát để tạm dừng. Chọn khoảng 1–300 giây và có lặp lại hay không từ điều khiển thời gian hoặc Cài đặt → Chung → Album ảnh.
 3. Để đặt hình nền, trở lại trình xem thông thường rồi chọn Hình ảnh → Đặt ảnh hiện tại làm hình nền… hoặc nhấn ⌃⌥W. Chọn màn hình hiện tại hoặc mọi màn hình kết nối, Lấp đầy màn hình hoặc Hiển thị toàn bộ ảnh, và có áp dụng điều chỉnh hiện tại hay không; sau đó áp dụng.
 
@@ -470,11 +597,11 @@ Phát tạm dừng khi thoát chế độ tập trung, chuyển ứng dụng, m�
 
 ### Bản sao hình nền
 
-Ứng dụng tạo PNG mà không sửa nguồn. Ảnh động dùng khung đầu và HDR được chuẩn bị thành SDR. Bản sao không có EXIF/GPS, được định kích thước cho màn hình với tối đa 8192 pixel và giữ trong thư mục Application Support/Wallpapers của ứng dụng. Các không gian màn hình nền khác theo cách hoạt động của macOS. Bản sao cũ không tự xóa vì không gian khác có thể vẫn dùng.
+Ứng dụng tạo PNG mà không sửa nguồn. Ảnh động dùng khung đầu và HDR được chuẩn bị thành SDR. Bản sao không có EXIF/GPS, được định kích thước cho màn hình với tối đa 8192 pixel và giữ trong thư mục Application Support/Wallpapers của ứng dụng. Các không gian màn hình nền khác theo cách hoạt động của macOS. Bản sao cũ không tự xóa vì không gian khác có thể vẫn dùng. Không thể dùng video làm nguồn để đặt hình nền.
 
 ### Điều cần biết
 
-- Nếu không thể phát, kiểm tra danh sách đã lọc hiện tại có ít nhất hai ảnh và không đang bật Phân loại, So sánh ảnh hoặc một thao tác khác.
+- Nếu không thể phát, kiểm tra danh sách đã lọc hiện tại có ít nhất hai ảnh và không đang bật Phân loại, So sánh ảnh hoặc một thao tác khác. Danh sách phải chỉ có ảnh: nếu còn video, hãy tắt Hiển thị video trước khi khởi động album.
 
 [Về đầu trang](#top)
 
@@ -482,13 +609,13 @@ Phát tạm dừng khi thoát chế độ tập trung, chuyển ứng dụng, m�
 
 <a name="settings"></a>
 
-## 13. Thiết lập theo cách làm việc của bạn
+## 16. Thiết lập theo cách làm việc của bạn
 
 Cài đặt tập hợp các lựa chọn xem thường ngày, phím tắt riêng, gán nhãn và liên kết tệp mặc định. Nhiều tùy chọn xem được tự khôi phục trong lần chạy sau.
 
 ![Cài đặt sắp xếp các tùy chọn chính trong bốn thẻ.](figures/settings.png)
 
-**Màn hình 09.** Cài đặt sắp xếp các tùy chọn chính trong bốn thẻ.
+**Màn hình 12.** Cài đặt sắp xếp các tùy chọn chính trong bốn thẻ.
 
 1. **Các thẻ cài đặt** — Chung, Phím tắt, Nhãn ảnh và Liên kết tệp phụ trách các thiết lập khác nhau.
 2. **Tùy chọn xem** — Đặt cách hiển thị, ảnh thu nhỏ, tên tệp, điều hướng và tải ảnh.
@@ -506,7 +633,7 @@ Giao diện theo ngôn ngữ mà macOS gán cho ứng dụng. Đổi trong Cài 
 
 ### Các tùy chọn được ghi nhớ
 
-Kích thước ảnh thu nhỏ, phóng to chất lượng cao, hiển thị tên tệp, tùy chọn tải, mục yêu thích, thiết lập nhãn và phím riêng được giữ lại. Bộ ảnh và vị trí xem gần nhất có thể khôi phục nếu tệp vẫn truy cập được. So sánh chất lượng phóng to bắt đầu ở trạng thái tắt sau khi chạy lại. Các chỉnh sửa hình ảnh và kết quả AI cần được xuất riêng.
+Kích thước ảnh thu nhỏ, phóng to chất lượng cao, hiển thị tên tệp, tùy chọn tải, mục yêu thích, thiết lập nhãn và phím riêng được giữ lại. Bộ ảnh và vị trí xem gần nhất có thể khôi phục nếu tệp vẫn truy cập được. So sánh chất lượng phóng to bắt đầu ở trạng thái tắt sau khi chạy lại. Các chỉnh sửa hình ảnh và kết quả AI cần được xuất riêng. Lựa chọn Hiển thị video phía trên danh sách cũng được ghi nhớ; mặc định tắt và không ảnh hưởng đến GIF.
 
 ### Liên kết tệp
 
@@ -522,13 +649,13 @@ Chỉ các nhóm định dạng được đánh dấu mới thay đổi. macOS c
 
 <a name="shortcuts"></a>
 
-## 14. Phím tắt và xử lý nhanh vấn đề
+## 17. Phím tắt và xử lý nhanh vấn đề
 
 Bảng tham khảo tiếp theo liệt kê các phím thao tác mặc định và phím cố định theo ngữ cảnh. ⌘ là Command, ⌥ là Option, ⌃ là Control và ⇧ là Shift.
 
 ![Thẻ Phím tắt hiển thị các thao tác có thể gán và thông báo xung đột.](figures/shortcuts.png)
 
-**Màn hình 10.** Thẻ Phím tắt hiển thị các thao tác có thể gán và thông báo xung đột.
+**Màn hình 13.** Thẻ Phím tắt hiển thị các thao tác có thể gán và thông báo xung đột.
 
 1. **Thao tác** — Di chuột lên tên để biết thao tác dùng ở đâu và hoạt động thế nào.
 2. **Phím và phím bổ trợ** — Chọn phím, rồi bật/tắt Control, Option, Shift hoặc Command.

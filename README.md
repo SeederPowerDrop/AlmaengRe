@@ -8,13 +8,13 @@
 
 앱의 **도움말 → 기본 사용법**에는 처음 사용할 때 필요한 조작만 간단히 담았습니다. 인터넷 없이 앱 안에서 읽을 수 있으며, **도움말 → 상세 사용설명서 (GitHub)**에서 자세한 설명서를 엽니다.
 
-자세한 설명서는 [GitHub 사용설명서 모음](docs/user-guide/README.md)에서 보세요. **0.12 개발 버전 기준**으로 실제 앱 화면에 번호·화살표·강조 테두리를 표시하고, 기능별 14개 장과 기본 단축키 29행을 정리했습니다. 공통 화면은 한국어 UI이며 설명과 번호 안내는 각 언어로 번역되어 있습니다.
+자세한 설명서는 [GitHub 사용설명서 모음](docs/user-guide/README.md)에서 보세요. **0.13.1 개발 버전 기준**으로 실제 앱 화면에 번호·화살표·강조 테두리를 표시하고, 기능별 17개 장과 기본 단축키 29행을 정리했습니다. 비교 폴더 이름·별칭, 워터마크, 촬영 정보 정렬, 영상·애니메이션 안내를 포함하며 PDF는 언어별 34쪽입니다. 공통 화면은 한국어 UI이며 설명과 번호 안내는 각 언어로 번역되어 있습니다.
 
-Open **Help → Basic Usage** for a short offline guide inside the app, or **Help → Detailed User Guide (GitHub)** for the illustrated manuals. These manuals describe the **0.12 development version**; older releases may not include every feature.
+Open **Help → Basic Usage** for a short offline guide inside the app, or **Help → Detailed User Guide (GitHub)** for the illustrated manuals. These manuals describe the **0.13.1 development version**; older releases may not include every feature.
 
 [한국어](docs/user-guide/ko.md) · [English](docs/user-guide/en.md) · [日本語](docs/user-guide/ja.md) · [简体中文](docs/user-guide/zh-Hans.md) · [Français](docs/user-guide/fr.md) · [Español](docs/user-guide/es.md) · [Tiếng Việt](docs/user-guide/vi.md)
 
-각 설명서에서 공유·인쇄용 PDF도 받을 수 있습니다. 이 설명서는 0.12 개발 버전을 기준으로 하며, 이 저장소 main의 이전 앱 버전에는 일부 기능이 없습니다.
+각 설명서에서 공유·인쇄용 PDF도 받을 수 있습니다. 이 설명서는 0.13.1 개발 버전을 기준으로 하며, 이 저장소 main의 이전 앱 버전에는 일부 기능이 없습니다.
 
 ## 프로젝트의 출발점
 

@@ -1,4 +1,4 @@
-<!-- almeng-guide-source-sha256: 7c91246c7888403265139f94271b713571028d2e89311e8119c1a9e2e95ec38c -->
+<!-- almeng-guide-source-sha256: 509528e050d862ac266ff1e258ad123604d7663fe06f4174aa0a377adb34e144 -->
 
 <a name="top"></a>
 
@@ -10,9 +10,9 @@
 
 **Ouvrir, parcourir, comparer, étiqueter et retoucher vos images sur Mac**
 
-Un guide pratique de la version de développement 0.12 actuelle. Commencez par ouvrir un dossier d’images, puis consultez le chapitre correspondant à votre tâche. Les noms de menus de ce guide reprennent ceux de l’interface française.
+Un guide pratique de la version de développement 0.13.1 actuelle. Commencez par ouvrir un dossier d’images, puis consultez le chapitre correspondant à votre tâche. Les noms de menus de ce guide reprennent ceux de l’interface française.
 
-Version 0.12.0 · Au 2026-10-05
+Version 0.13.1 · Au 2026-10-06
 
 > Les captures montrent l’application réelle avec une interface coréenne et des images de démonstration synthétiques. Les annotations numérotées et les explications sont traduites en français ; les pixels des captures restent inchangés. Aucune collection de photos personnelle n’est utilisée.
 
@@ -28,10 +28,13 @@ Version 0.12.0 · Au 2026-10-05
 - [8. Examiner les informations et les métadonnées](#information)
 - [9. Retoucher une image et exporter une copie](#editing)
 - [10. Renommer, redimensionner, convertir et partager en lot](#batch)
-- [11. Comprendre l’agrandissement IA, le HDR et le chargement](#quality)
-- [12. Lire un album photo ou définir le fond d’écran](#slideshow)
-- [13. Adapter l’application à vos habitudes](#settings)
-- [14. Raccourcis et dépannage rapide](#shortcuts)
+- [11. Ajouter un filigrane : texte, EXIF et logo](#watermark)
+- [12. Lire une vidéo, extraire une image et enregistrer un extrait](#video)
+- [13. Parcourir et enregistrer les images d’une animation](#animation)
+- [14. Comprendre l’agrandissement IA, le HDR et le chargement](#quality)
+- [15. Lire un album photo ou définir le fond d’écran](#slideshow)
+- [16. Adapter l’application à vos habitudes](#settings)
+- [17. Raccourcis et dépannage rapide](#shortcuts)
 - [Les raccourcis en un regard](#shortcut-reference)
 
 ---
@@ -45,7 +48,7 @@ La commande Ouvrir… accepte tous les types d’entrée. Une photo, un dossier 
 ### Marche à suivre
 
 1. Lancez 알맹Re sous macOS 14 ou ultérieur. Choisissez Ouvrir… sur l’écran d’accueil, dans la barre d’outils ou dans le menu Fichier, ou appuyez sur ⌘O.
-2. Choisissez un dossier pour parcourir ses images. Choisissez une seule image pour commencer par celle-ci et poursuivre avec les autres images du même dossier. Si vous sélectionnez plusieurs images, seules celles-ci sont ouvertes.
+2. Choisissez un dossier pour parcourir ses images. Choisissez une seule image pour commencer par celle-ci et poursuivre avec les autres images du même dossier. Si vous sélectionnez plusieurs images, seules celles-ci sont ouvertes. Les vidéos sont masquées par défaut : activez Afficher les vidéos au-dessus de la liste pour les inclure. Ce choix est mémorisé ; ouvrir directement une vidéo prise en charge l’active automatiquement, sans modifier la visibilité des GIF.
 3. Choisissez une archive ZIP pour afficher ses images prises en charge, y compris celles de ses sous-dossiers. Vous pouvez aussi ouvrir des fichiers depuis le Finder ou déposer des images et des dossiers dans l’application.
 
 ### Dossiers et favoris
@@ -54,7 +57,7 @@ L’arborescence des dossiers se développe selon vos besoins. Cliquez sur un no
 
 ### ZIP en lecture seule
 
-Les images sont extraites dans un dossier temporaire tant que l’archive est ouverte. Exportez une copie avant de renommer un fichier ou de modifier ses métadonnées source. L’application ne réécrit pas le ZIP. Les archives sans compression ou utilisant Deflate sont prises en charge ; les archives chiffrées et les autres méthodes de compression sont refusées. Les limites sont de 2 Gio par archive, 10 000 entrées, 256 Mio par entrée extraite et 1 Gio de données extraites au total.
+Les images sont extraites dans un dossier temporaire tant que l’archive est ouverte. Exportez une copie avant de renommer un fichier ou de modifier ses métadonnées source. L’application ne réécrit pas le ZIP. Les archives sans compression ou utilisant Deflate sont prises en charge ; les archives chiffrées et les autres méthodes de compression sont refusées. Les limites sont de 2 Gio par archive, 10 000 entrées, 256 Mio par entrée extraite et 1 Gio de données extraites au total. Les vidéos contenues dans les ZIP ne sont pas prises en charge.
 
 ### Retrouver votre position
 
@@ -119,7 +122,7 @@ Tout voir présente la collection actuelle sous forme de grille de vignettes. Ut
 **Écran 02.** Tout voir réunit la grille de vignettes, la recherche et les commandes de sélection et de taille.
 
 1. **Grille de vignettes** — Cliquez, sélectionnez une plage ou faites glisser sur les cartes ; double-cliquez pour ouvrir une photo.
-2. **Recherche et filtres** — Affinez la collection ouverte sans modifier les fichiers.
+2. **Recherche, tri et filtres** — Recherchez, triez et filtrez la liste par format, étiquette ou affichage des vidéos, sans modifier les fichiers.
 3. **Taille et sélection** — Réglez la taille des aperçus et utilisez les actions sur les images sélectionnées pour les opérations par lot.
 
 ### Marche à suivre
@@ -134,11 +137,15 @@ Maintenez Maj au début du tracé d’un rectangle pour ajouter à la sélection
 
 ### Trier la liste actuelle
 
-Triez par nom, date de modification, date de création, taille de fichier ou direction GPS. Le tri par nom place 2 avant 10. Le tri GPS lit les métadonnées de position et place les images sans GPS à la fin. La recherche et les restrictions de format, d’étiquette et de carte se combinent ; aucune ne modifie les fichiers originaux.
+Les groupes Nom et fichier, Dimensions et prise de vue, Appareil et couleur et Position réunissent nom, dates de fichier, poids, GPS, largeur, hauteur, date de prise de vue, type, vitesse d’obturation, fabricant, modèle, ouverture et espace colorimétrique. Les noms suivent l’ordre naturel des nombres, la vitesse compare la durée d’exposition et l’ouverture le nombre f. Les valeurs absentes restent à la fin dans les deux sens. Le type suit l’extension, en regroupant les variantes JPEG/TIFF. Les fichiers restent intacts.
 
 ### Numéros et taille des aperçus
 
 La commande # affiche ou masque les numéros des vignettes. Les grands numéros sont déplacés hors des petites photos pour préserver leur visibilité. La taille des vignettes est mémorisée ; sa plage est de 44,8 à 665,6 points, chaque cellule restant limitée par la largeur de la fenêtre.
+
+### Limites du tri par informations de prise de vue
+
+Largeur et hauteur décrivent les pixels originaux, orientation du fichier comprise, avant retouches. La date vient des données EXIF ou de la vidéo, jamais de la création du fichier. Sans fuseau horaire, l’heure EXIF est interprétée en UTC pour le tri. Les vidéos utilisent les dimensions, dates, fabricant, modèle et couleurs disponibles ; vitesse et ouverture restent inconnues. Ces données sont lues seulement pour les tris concernés, puis réutilisées : le premier tri peut prendre du temps.
 
 ### Bon à savoir
 
@@ -158,7 +165,7 @@ La Comparaison d’images conserve deux collections indépendantes, A et B, côt
 
 **Écran 03.** Deux collections dans la Comparaison d’images.
 
-1. **Volets A et B** — Chaque volet possède sa propre collection d’images et sa commande Ouvrir….
+1. **Volets A et B** — Chaque volet a sa collection et Ouvrir…, sous le nom du dossier ou un alias. Noms de comparaison… définit les alias.
 2. **Comportement de la comparaison** — Choisissez la méthode d’association, la cible de navigation, la répétition du côté le plus court et la liaison du zoom.
 3. **Verrous et vignettes** — Figez un côté ou choisissez une autre image dans sa bande de vignettes.
 
@@ -166,11 +173,11 @@ La Comparaison d’images conserve deux collections indépendantes, A et B, côt
 
 1. Choisissez Comparaison d’images ou appuyez sur ⌃⌥C. Utilisez Choisir les dossiers à comparer… pour sélectionner A puis B, ou le bouton Ouvrir… de chaque volet.
 2. Utilisez Ordre de la liste pour des listes indépendantes. Choisissez Noms identiques pour associer les noms sans leur extension : 001.jpg correspond à 001.png. Les correspondances absentes apparaissent comme des cases vides.
-3. Sous Navigation des images, choisissez A seul, Les deux ou B seul. Utilisez les flèches communes ou les vignettes d’un volet pour avancer. Activez Lier zoom et déplacement pour examiner les mêmes positions relatives.
+3. Sous Navigation des images, choisissez un côté par son nom affiché ou Les deux. Avancez avec les flèches communes ou les vignettes. Activez Lier zoom et déplacement pour examiner les mêmes positions relatives.
 
 ### Navigation et répétition
 
-Choisir A seul ou B seul passe à Ordre de la liste. Noms identiques rétablit la navigation par paires. Avec Les deux, Boucler le côté le plus court répète la liste la plus courte pendant que la plus longue avance ; sinon, la plus courte conserve sa dernière image. Cette répétition concerne Ordre de la liste.
+Choisir un côté passe à Ordre de la liste. Noms identiques rétablit la navigation par paires. Avec Les deux, Boucler le côté le plus court répète la liste la plus courte pendant que la plus longue avance ; sinon, la plus courte conserve sa dernière image. Cette répétition concerne Ordre de la liste.
 
 ### Verrouillage
 
@@ -178,7 +185,7 @@ Verrouiller fige l’image, le zoom et la position d’un volet. Verrouillez B p
 
 ### Originaux et état mémorisé
 
-La comparaison affiche les originaux sans les retouches de la visionneuse normale. Quittez-la pour retoucher, effectuer des opérations par lot ou définir un fond d’écran. Esc revient à la vue précédente. La disposition, la liaison, les préférences de navigation ainsi que les dernières entrées et positions A/B sont mémorisées.
+La comparaison montre les originaux sans retouches. Quittez-la pour retoucher, traiter par lot ou définir un fond d’écran ; Esc revient à la vue précédente. Disposition, liaison, navigation et dernières entrées/positions A/B sont mémorisées. Noms de comparaison… édite des alias de 80 caractères maximum. Laisser vide ou choisir Noms automatiques sélectionne les noms de dossier/ZIP ; Enregistrer applique, Annuler garde les noms actuels. Un même dossier/ZIP ou des lieux mélangés utilisent A/B ; des dossiers distincts homonymes ajoutent (A)/(B). Les dossiers ne sont pas renommés. Les alias reviennent au redémarrage ; seules de nouvelles entrées dans un volet le réinitialisent. Rouvrir les mêmes entrées les conserve. Survolez un nom abrégé pour le lire entièrement.
 
 ### Bon à savoir
 
@@ -350,9 +357,9 @@ Retouche d’image prévisualise les modifications sans écraser l’original. E
 
 **Écran 07.** Le panneau de retouche à côté de l’aperçu de l’image actuelle.
 
-1. **Commandes de retouche** — Recadrez, tournez, retournez et réglez les tons, les couleurs et les détails.
+1. **Présence et rendus argentiques** — Ouvrez Présence pour régler l’image ou choisissez un rendu argentique et son intensité.
 2. **Aperçu de l’image** — Examinez le résultat actuel ; utilisez Taille réelle pour les réglages de détail.
-3. **Exporter — en bas du panneau** — Faites défiler le panneau de retouche vers le bas ou appuyez sur ⌘E pour enregistrer une copie avant de fermer l’application.
+3. **Copies et filigranes** — Choisissez format et qualité pour exporter une copie. Ajouter un filigrane… vise uniquement la photo actuelle.
 
 ### Marche à suivre
 
@@ -390,31 +397,151 @@ Utilisez les fichiers sélectionnés dans la Visionneuse, Tout voir, les résult
 
 **Écran 08.** La fenêtre de conversion par lot, ses réglages de taille et la prévisualisation des fichiers.
 
-1. **Format et qualité** — Choisissez l’encodage de sortie et sa qualité lorsque le format le permet.
-2. **Réduction proportionnelle** — Conservez la taille ou fixez le côté le plus long ou un pourcentage ; Réduire le poids propose JPEG, 1920 pixels et 75 %.
-3. **Destination et aperçu** — Choisissez le dossier, vérifiez les noms puis convertissez. Les originaux sont conservés.
+1. **Format et taille** — Choisissez format et taille proportionnelle. Les formats avec perte proposent la qualité ; un préréglage réduit le poids.
+2. **Filigrane et dossier** — Ouvrez les réglages du filigrane ou choisissez le dossier des copies.
+3. **Aperçu des fichiers** — Comparez les noms actuels et futurs avant la conversion. Les originaux sont conservés.
 
 ### Marche à suivre
 
-1. Sélectionnez les images avec ⌘ + clic, ⇧ + clic ou ⌘A. Dans Tout voir, vous pouvez aussi tracer un rectangle de sélection. Utilisez le menu de sélection, le menu contextuel ou Image ; sur la carte, utilisez Photos de la zone, Cette photo ou Toutes les photos de ce lieu.
-2. Dans Renommer par lot…, conservez ou remplacez le nom, ou utilisez la recherche et le remplacement. Avec Utiliser un nom de classement, choisissez explicitement une étiquette : seuls les fichiers sélectionnés qui la portent seront renommés. Vérifiez la liste avant/après.
-3. Ouvrez Convertir, redimensionner et compresser…, choisissez le format, la qualité et Taille de l’image, puis le dossier. Côté le plus long ou Pourcentage réduit proportionnellement après les retouches et le recadrage, sans agrandir les petites images. Réduire le poids règle JPEG, 1920 pixels et 75 % de qualité.
+1. Sélectionnez avec ⌘ + clic, ⇧ + clic ou ⌘A ; dans Tout voir, tracez aussi un rectangle. Ouvrez le menu de sélection, le menu contextuel ou Image ; sur la carte, Photos de la zone, Cette photo ou Toutes les photos de ce lieu.
+2. Dans Renommer par lot…, conservez, remplacez ou recherchez/remplacez le nom. Avec Utiliser un nom de classement, choisissez une étiquette : seuls les fichiers sélectionnés qui la portent changent de nom. Vérifiez l’aperçu avant/après.
+3. Ouvrez Convertir, redimensionner et compresser… : réglez format, qualité, Taille de l’image et dossier. Côté le plus long ou Pourcentage réduit proportionnellement après retouches et recadrage, sans agrandissement. Réduire le poids choisit JPEG, 1920 pixels et 75 % de qualité.
 
 ### Numérotation et validité des noms
 
-Le mode classement crée Envoi01, Envoi02… sans séparateur. De 1 à 99 fichiers concernés, il utilise deux chiffres ; dès 100, trois chiffres à partir de 001, puis davantage si nécessaire. Il suit l’ordre de la liste et conserve l’extension. Les autres modes permettent de régler début, incrément, chiffres et séparateur. Des noms invalides ou en double empêchent le renommage. Les images ZIP ne peuvent pas être renommées sur place.
+Le classement produit Envoi01, Envoi02… sans séparateur, dans l’ordre de la liste, en conservant l’extension : deux chiffres pour 1–99 fichiers concernés, trois dès 100 (001…), davantage si nécessaire. Les autres modes règlent début, incrément, chiffres et séparateur. Noms invalides ou doublons bloquent le renommage ; les images ZIP ne sont pas renommables sur place.
 
 ### Extension, format et poids
 
-Renommer une extension normalise les majuscules et variantes du même format, comme .jpg/.jpeg ou .tif/.tiff. Passer de HEIC à JPEG exige la conversion pour modifier l’encodage. La réduction du poids dépend du contenu, du format, de la qualité et des dimensions ; elle ne vise pas un nombre exact d’octets et peut produire un fichier plus lourd.
+Le renommage d’extension normalise majuscules et variantes d’un format (.jpg/.jpeg, .tif/.tiff). HEIC vers JPEG nécessite une conversion de l’encodage. Le poids dépend du contenu, du format, de la qualité et des dimensions : aucun nombre d’octets garanti, et le fichier peut grossir.
 
 ### Copies converties et partage macOS
 
-La conversion applique les retouches actuelles en préservant les originaux et leurs étiquettes ; les copies sont distinctes. Un nom déjà utilisé reçoit un numéro. Les animations et images multipages ne conservent que leur première image. Un arrêt garde les fichiers terminés et affiche les nombres enregistrés, en échec et non traités. Partager les fichiers… partage les fichiers source, sans appliquer les retouches d’aperçu. Pour partager les copies retouchées ou réduites, utilisez Partager les fichiers terminés… après conversion, même si le lot est partiellement terminé.
+La conversion applique les retouches, conserve originaux et étiquettes, et crée des copies distinctes ; les noms existants reçoivent un numéro. Animations et images multipages donnent seulement leur première image. L’arrêt conserve les fichiers terminés et compte réussites, échecs et fichiers non traités. Partager les fichiers… envoie les originaux sans retouches d’aperçu ; Partager les fichiers terminés… envoie les copies retouchées ou réduites, même après un lot partiel. Les vidéos sont exclues de cette conversion : Images et extraits… extrait leurs PNG ou enregistre leurs extraits. Cette commande conserve aussi plusieurs images d’une animation en GIF/APNG (chapitre 13).
 
 ### Bon à savoir
 
-- Filtrez par recherche, format, étiquettes ou carte avant de tout sélectionner. Vérifiez le nombre et la liste avant tout renommage des originaux. Les services de partage proposés, tels qu’AirDrop, dépendent de macOS et de sa configuration.
+- Avant ⌘A, filtrez par recherche, format, étiquettes ou carte. Vérifiez nombre et liste avant de renommer les originaux. Les services proposés, dont AirDrop, dépendent de macOS et de sa configuration.
+
+[Retour en haut](#top)
+
+---
+
+<a name="watermark"></a>
+
+## 11. Ajouter un filigrane : texte, EXIF et logo
+
+Ajoutez texte, signature, EXIF et logo aux copies des photos sélectionnées, sans modifier les originaux ni leurs étiquettes.
+
+![Combinez texte, EXIF et logo, déplacez le filigrane dans l’aperçu et choisissez l’extension du canevas.](figures/watermark.png)
+
+**Écran 09.** Combinez texte, EXIF et logo, déplacez le filigrane dans l’aperçu et choisissez l’extension du canevas.
+
+1. **Texte, police et EXIF** — Choisissez texte, police et EXIF propres à chaque photo. Ajouter des champs conserve la taille du texte.
+2. **Logo et placement** — Choisissez un logo et réglez taille, marge et opacité par curseurs ou nombres.
+3. **Aperçu de la première photo** — Glissez le filigrane ; le cadre d’aide n’est pas enregistré. Hors de la photo, l’extension est à confirmer.
+
+### Marche à suivre
+
+1. Choisissez les photos, puis Ajouter un filigrane… dans Image, les actions de sélection ou le menu contextuel. Sur la carte, l’action vise la zone ou le repère ; dans le panneau de retouche, uniquement la photo actuelle.
+2. Saisissez texte ou signature. Cliquez sur le nom de la police pour choisir une police installée dans le panneau macOS. Cochez les champs EXIF ; Choisir une image… ajoute un logo ou une signature, dont les PNG transparents.
+3. Choisissez une des neuf positions ou glissez le filigrane. Réglez taille, marge et opacité par curseurs ou nombres (25,5 %), texte blanc/noir et ombre/fond. Hors photo, confirmez l’extension du canevas. Cliquez sur Appliquer, réglez format, qualité, réduction et dossier, puis Lancer la conversion.
+
+### Informations de prise de vue et taille du texte
+
+EXIF inscrit, pour chaque photo : date, fabricant, modèle, objectif, obturation, ouverture, ISO, focale et nom du fichier. Les valeurs absentes ou illisibles sont omises. Ajouter des champs ajoute des lignes ou des retours, sans réduire le texte. Modifiez les métadonnées intégrées dans leur éditeur sous Informations sur l’image.
+
+### Glisser et étendre le canevas
+
+Texte et logo suivent la largeur avant extension, sans déformer le logo. La marge suit le côté court aux positions prédéfinies ; glisser fixe un centre libre. Position, taille relatives et accord d’extension valent pour la sélection : seuls les bords nécessaires sont ajoutés, sans redimensionner les photos. L’ajout est transparent avec alpha, blanc en JPEG. Garder dans l’image replace la marque à l’intérieur. Si le contenu est trop grand : Étendre le canevas, Réduire le filigrane ou Annuler, qui garde les réglages. Sans extension, le contenu doit tenir avant l’enregistrement. Revenir au canevas d’origine vérifie aussi la taille.
+
+### Copies, aperçu et réglages mémorisés
+
+Le filigrane suit retouches, recadrage, rotation et réduction. L’aperçu réduit de la première photo peut légèrement décaler le placement par arrondi ; dimensions et EXIF varient selon la photo. Originaux et étiquettes sont préservés ; les copies terminées se partagent via macOS. Réglages et position libre sont mémorisés, mais activez le filigrane pour chaque conversion. L’accord d’extension repart à zéro pour chaque lot ; glisser dehors demande confirmation. Gardez le logo au même chemin ; une lecture impossible est signalée. Vidéos exclues ; animations et images multipages donnent une image fixe de leur première image.
+
+### Bon à savoir
+
+- Texte : 2 000 caractères et 20 lignes ; logo : première image d’un fichier lisible par ImageIO. Taille : 2–90 %, marge : 0–20 %, opacité : 0–100 %. Les nombres hors plage sont bornés ; une saisie invalide garde la dernière valeur valide. Sortie étendue limitée à 64 Mpx et 32 768 px par côté ; au-delà, rapprochez ou réduisez le filigrane. Il n’apparaît pas sur l’original dans la Visionneuse.
+
+[Retour en haut](#top)
+
+---
+
+<a name="video"></a>
+
+## 12. Lire une vidéo, extraire une image et enregistrer un extrait
+
+Les vidéos sont masquées par défaut. Activez Afficher les vidéos pour les parcourir avec vos images, puis ouvrez Images et extraits… pour extraire un PNG ou enregistrer une plage dans une copie distincte.
+
+![La fenêtre Images et extraits pour une vidéo, avec le lecteur et les réglages d’exportation.](figures/video.png)
+
+**Écran 10.** La fenêtre Images et extraits pour une vidéo, avec le lecteur et les réglages d’exportation.
+
+1. **Lecteur vidéo** — Lancez ou mettez en pause la vidéo pour vérifier l’image et le son.
+2. **Images et position** — Parcourez les images prises en charge ou une position temporelle, puis extrayez l’image actuelle en PNG.
+3. **Plage et qualité** — Définissez le début inclus, la fin exclue, le conteneur et le préréglage avant d’enregistrer une copie.
+
+### Marche à suivre
+
+1. Activez Afficher les vidéos au-dessus de la liste. Ce choix est mémorisé et ne change pas l’affichage des GIF. Ouvrir directement un fichier vidéo pris en charge active automatiquement cette option.
+2. Une vidéo affichée dans la visionneuse reste d’abord en pause ; le son ne démarre que lorsque vous lancez la lecture. Dans Images et extraits…, utilisez la position de lecture et Image précédente / Image suivante lorsque le média permet cette navigation. Le déplacement suit les images réelles ; un nombre d’images exact n’est pas déduit de la fréquence nominale d’une vidéo à fréquence variable.
+3. Choisissez Extraire l’image actuelle en PNG… pour l’image affichée. Pour un extrait, définissez Début (s) et Fin (s), éventuellement avec Définir le début ici / Définir la fin ici, puis choisissez MP4 ou MOV, la qualité et Enregistrer une copie de l’extrait….
+
+### Formats disponibles sur ce Mac
+
+La prise en charge dépend des conteneurs et des codecs que la version de macOS installée peut effectivement décoder : MP4, MOV et d’autres formats natifs peuvent fonctionner, sans installation de codecs externes. Une extension seule ne garantit pas la lecture. WebM, MKV et les vidéos contenues dans les ZIP ne sont pas pris en charge. L’enregistrement d’images ou d’extraits est indisponible pour les vidéos protégées par DRM. Les données GPS des vidéos ne sont pas utilisées pour la carte.
+
+### Plage et qualité de la copie
+
+Le début est inclus et la fin exclue ; les limites réellement enregistrées suivent les échantillons du média. L’extrait est réencodé en H.264/AAC dans un conteneur MP4 ou MOV, en conservant le fichier d’origine. Préréglage de réduction de taille choisit MP4 et un maximum de 720p. Les préréglages de qualité et de résolution n’agrandissent pas les petites vidéos et ne garantissent pas un fichier plus petit : le résultat peut être plus volumineux. L’extraction PNG conserve la résolution de l’image source ; la qualité choisie s’applique uniquement aux copies d’extraits.
+
+### Fonctions réservées aux images
+
+Les retouches photo, l’agrandissement IA, le fond d’écran et la conversion d’images par lot ne s’appliquent pas aux vidéos. La Comparaison d’images reste limitée aux images. Un album photo ne démarre pas si la liste affichée contient une vidéo ; désactivez Afficher les vidéos pour utiliser le diaporama avec les images seules. Les étiquettes, le renommage et le partage des originaux sélectionnés restent disponibles pour les vidéos. Les nouvelles copies n’héritent pas des étiquettes de l’original.
+
+### Bon à savoir
+
+- Choisissez un nouveau nom : le fichier d’origine et les fichiers déjà présents ne sont pas écrasés. Une annulation supprime la copie incomplète. Les résultats enregistrés avec succès peuvent être partagés avec le partage macOS.
+
+[Retour en haut](#top)
+
+---
+
+<a name="animation"></a>
+
+## 13. Parcourir et enregistrer les images d’une animation
+
+Images et extraits… permet de parcourir les animations GIF, APNG et WebP que ce Mac peut décoder, d’en extraire un PNG et d’enregistrer une plage en GIF ou APNG.
+
+![La fenêtre Images et extraits pour une animation, avec l’aperçu, les images et les dimensions de sortie.](figures/animation.png)
+
+**Écran 11.** La fenêtre Images et extraits pour une animation, avec l’aperçu, les images et les dimensions de sortie.
+
+1. **Aperçu de l’animation** — Contrôlez l’image affichée et le mouvement avant de sauvegarder.
+2. **Navigation dans les images** — Avancez ou reculez d’une image et extrayez l’image actuelle en PNG.
+3. **Plage et dimensions** — Choisissez une plage inclusive, GIF ou APNG, la taille et les images à conserver.
+
+### Marche à suivre
+
+1. Ouvrez une animation prise en charge, puis choisissez Images et extraits…. Les GIF restent visibles même si Afficher les vidéos est désactivé. Vérifiez l’aperçu et utilisez Lire / Pause ou les commandes d’image précédente et suivante.
+2. Choisissez Extraire l’image actuelle en PNG… pour obtenir une image fixe. Pour enregistrer une plage animée, indiquez Première image et Dernière image : la numérotation commence à 1 et les deux limites sont incluses.
+3. Choisissez GIF ou APNG selon les formats proposés sur ce Mac. Réglez la taille et les Images à conserver, puis utilisez Enregistrer une copie de l’extrait… pour créer un nouveau fichier.
+
+### Images conservées et durée
+
+Vous pouvez garder toutes les images ou une image sur 2, 3 ou 4 dans la plage choisie. La durée des images omises est ajoutée à celle d’une image conservée, afin de préserver la durée totale de la plage plutôt que d’accélérer l’animation.
+
+### Dimensions et réduction du poids
+
+Conservez la Taille d’origine, fixez le Côté le plus long en pixels ou utilisez un Pourcentage de 1 à 100 %. Les proportions sont conservées et les petites images ne sont pas agrandies. Préréglage de réduction de taille choisit 50 % et une image sur 2. Le poids dépend du contenu et du format ; la réduction n’est pas garantie. L’extraction PNG conserve la résolution de l’image source ; les réglages de taille et d’images à conserver s’appliquent uniquement aux copies animées.
+
+### Formats et rendu
+
+La lecture GIF, APNG ou WebP et les formats de sortie proposés dépendent des capacités de décodage et d’encodage de ce Mac. Les copies animées se limitent au GIF et à l’APNG. Le GIF limite les couleurs et la transparence : l’aspect peut donc changer. Les retouches photo actuellement affichées ne sont appliquées ni à l’extraction de l’image ni à la copie animée.
+
+### Bon à savoir
+
+- L’original est conservé et les noms de fichiers déjà utilisés sont refusés. Annuler supprime une sortie incomplète. Après une sauvegarde réussie, utilisez le partage macOS pour partager la copie terminée. Les nouvelles copies n’héritent pas des étiquettes de l’original.
 
 [Retour en haut](#top)
 
@@ -422,7 +549,7 @@ La conversion applique les retouches actuelles en préservant les originaux et l
 
 <a name="quality"></a>
 
-## 11. Comprendre l’agrandissement IA, le HDR et le chargement
+## 14. Comprendre l’agrandissement IA, le HDR et le chargement
 
 Zoom haute qualité change l’interpolation d’affichage. Agrandissement IA crée une image plus grande à enregistrer. La sortie HDR est une préférence d’affichage, pas une preuve que la photo est HDR.
 
@@ -450,13 +577,13 @@ Les formats lisibles et inscriptibles dépendent du macOS exécuté. L’applica
 
 <a name="slideshow"></a>
 
-## 12. Lire un album photo ou définir le fond d’écran
+## 15. Lire un album photo ou définir le fond d’écran
 
 Album photo fait défiler automatiquement la liste actuelle, une image à la fois en mode concentration. Le fond d’écran utilise une copie distincte préparée pour les écrans choisis.
 
 ### Marche à suivre
 
-1. Ouvrez une liste contenant au moins deux photos. Choisissez Navigation → Album photo → Lire l’album photo ou appuyez sur ⌃⌥P.
+1. Ouvrez une liste contenant au moins deux photos. Choisissez Navigation → Album photo → Lire l’album photo ou appuyez sur ⌃⌥P. La liste doit contenir uniquement des images : si une vidéo y figure, désactivez Afficher les vidéos avant de démarrer l’album.
 2. Utilisez les commandes de lecture pour mettre en pause. Choisissez un intervalle de 1 à 300 secondes et la répétition, avec la commande de durée ou dans Réglages → Général → Album photo.
 3. Pour définir un fond d’écran, revenez à la visionneuse normale et choisissez Image → Utiliser l’image actuelle comme fond d’écran… ou appuyez sur ⌃⌥W. Choisissez l’écran actuel ou tous les écrans connectés, Remplir l’écran ou Afficher toute la photo, et l’application éventuelle des réglages actuels ; puis appliquez.
 
@@ -470,11 +597,11 @@ La lecture se met en pause en quittant le mode concentration, en changeant d’a
 
 ### Copies de fond d’écran
 
-L’application crée un PNG sans modifier la source. Elle prend la première image des animations et prépare le HDR en SDR. Les copies excluent EXIF/GPS, sont dimensionnées pour l’écran jusqu’à 8192 pixels et restent dans le dossier Application Support/Wallpapers de l’application. Les autres espaces de bureau suivent le comportement de macOS. Les anciennes copies ne sont pas supprimées automatiquement, car un autre espace peut encore les utiliser.
+L’application crée un PNG sans modifier la source. Elle prend la première image des animations et prépare le HDR en SDR. Les copies excluent EXIF/GPS, sont dimensionnées pour l’écran jusqu’à 8192 pixels et restent dans le dossier Application Support/Wallpapers de l’application. Les autres espaces de bureau suivent le comportement de macOS. Les anciennes copies ne sont pas supprimées automatiquement, car un autre espace peut encore les utiliser. Les vidéos ne peuvent pas servir de source au fond d’écran.
 
 ### Bon à savoir
 
-- Si la lecture est indisponible, vérifiez que la liste filtrée contient au moins deux photos et que le marquage, la Comparaison d’images ou une autre opération ne sont pas actifs.
+- Si la lecture est indisponible, vérifiez que la liste filtrée contient au moins deux photos et que le marquage, la Comparaison d’images ou une autre opération ne sont pas actifs. La liste doit contenir uniquement des images : si une vidéo y figure, désactivez Afficher les vidéos avant de démarrer l’album.
 
 [Retour en haut](#top)
 
@@ -482,13 +609,13 @@ L’application crée un PNG sans modifier la source. Elle prend la première im
 
 <a name="settings"></a>
 
-## 13. Adapter l’application à vos habitudes
+## 16. Adapter l’application à vos habitudes
 
 Les réglages réunissent l’affichage quotidien, les raccourcis personnalisés, les étiquettes et les associations de fichiers. De nombreux choix reviennent automatiquement au lancement suivant.
 
 ![Les réglages regroupent les principales préférences dans quatre onglets.](figures/settings.png)
 
-**Écran 09.** Les réglages regroupent les principales préférences dans quatre onglets.
+**Écran 12.** Les réglages regroupent les principales préférences dans quatre onglets.
 
 1. **Onglets des réglages** — Général, Raccourcis, Étiquettes photo et Associations de fichiers correspondent chacun à une tâche.
 2. **Préférences d’affichage** — Réglez l’écran, les vignettes, les noms de fichiers, la navigation et le chargement.
@@ -506,7 +633,7 @@ L’interface suit la langue attribuée à l’application par macOS. Changez-la
 
 ### Préférences mémorisées
 
-La taille des vignettes, le zoom haute qualité, les noms de fichiers, le chargement, les favoris, les étiquettes et les raccourcis sont conservés. La dernière collection et la position d’affichage peuvent être restaurées si les fichiers restent accessibles. La comparaison de qualité du zoom est désactivée au prochain lancement. Retouches visuelles et résultats IA doivent être exportés séparément.
+La taille des vignettes, le zoom haute qualité, les noms de fichiers, le chargement, les favoris, les étiquettes et les raccourcis sont conservés. La dernière collection et la position d’affichage peuvent être restaurées si les fichiers restent accessibles. La comparaison de qualité du zoom est désactivée au prochain lancement. Retouches visuelles et résultats IA doivent être exportés séparément. Le choix Afficher les vidéos au-dessus de la liste est lui aussi mémorisé ; il est désactivé par défaut et n’affecte pas les GIF.
 
 ### Associations de fichiers
 
@@ -522,13 +649,13 @@ Seuls les groupes de formats cochés sont modifiés. macOS peut demander confirm
 
 <a name="shortcuts"></a>
 
-## 14. Raccourcis et dépannage rapide
+## 17. Raccourcis et dépannage rapide
 
 Le tableau suivant indique les touches d’action par défaut et les touches contextuelles fixes. ⌘ signifie Commande, ⌥ Option, ⌃ Contrôle et ⇧ Maj.
 
 ![L’onglet Raccourcis présente les actions configurables et les conflits.](figures/shortcuts.png)
 
-**Écran 10.** L’onglet Raccourcis présente les actions configurables et les conflits.
+**Écran 13.** L’onglet Raccourcis présente les actions configurables et les conflits.
 
 1. **Actions** — Survolez le nom d’une action pour savoir où et comment elle fonctionne.
 2. **Touches et modificateurs** — Choisissez la touche, puis activez Contrôle, Option, Maj ou Commande.

@@ -1,4 +1,4 @@
-<!-- almeng-guide-source-sha256: a6114a2904db5b3f072ed6bf9e127760419558bbec2a1f2fcdd061d20de37409 -->
+<!-- almeng-guide-source-sha256: 2b1f29a9ca1232c78bc89ef17c4af3af7f34fc1d4065182a472bd8a8f95571dc -->
 
 <a name="top"></a>
 
@@ -8,17 +8,17 @@
 
 [← 알맹Re](../../README.md) · [PDF](pdf/AlmaengRe-User-Guide-en.pdf)
 
-**Open, browse, compare, tag, and edit your images on Mac**
+**Browse, compare, tag, and edit images; play videos and save frames or clips**
 
-A practical guide to the current 0.12 development version. Start with a folder of images, then use the chapters as a reference for the task in front of you. Menu names in this guide follow the app's English interface.
+A practical guide to the current 0.13.1 development version. Start with a folder of images, then use the chapters as a reference for the task in front of you. Menu names in this guide follow the app's English interface.
 
-Version 0.12.0 · As of 2026-10-05
+Version 0.13.1 · As of 2026-10-06
 
-> Screenshots show the real app with a Korean interface and synthetic demonstration images. Numbered annotations and explanations are translated into this guide's language; the screenshot pixels remain unchanged. No personal photo collection is used.
+> Screenshots show the real app with a Korean interface and synthetic demonstration media. Numbered annotations and explanations are translated into this guide's language; the screenshot pixels remain unchanged. No personal photo or video collection is used.
 
 ## Contents
 
-- [1. Open images, folders, and ZIP archives](#open)
+- [1. Open images, videos, folders, and ZIP archives](#open)
 - [2. Browse and focus on your images](#viewer)
 - [3. Find and select images in All at Once](#overview)
 - [4. Compare two image collections](#compare)
@@ -28,24 +28,27 @@ Version 0.12.0 · As of 2026-10-05
 - [8. Inspect image information and metadata](#information)
 - [9. Edit an image and export a copy](#editing)
 - [10. Batch rename, convert, resize and share](#batch)
-- [11. Understand AI enlargement, HDR, and loading](#quality)
-- [12. Play a Photo Album or set wallpaper](#slideshow)
-- [13. Make the app work your way](#settings)
-- [14. Shortcuts and quick troubleshooting](#shortcuts)
+- [11. Add text, EXIF and logo watermarks](#watermark)
+- [12. Play videos and save frames or clips](#video)
+- [13. Extract and resize animated images](#animation)
+- [14. Understand AI enlargement, HDR, and loading](#quality)
+- [15. Play a Photo Album or set wallpaper](#slideshow)
+- [16. Make the app work your way](#settings)
+- [17. Shortcuts and quick troubleshooting](#shortcuts)
 - [Shortcuts at a glance](#shortcut-reference)
 
 ---
 
 <a name="open"></a>
 
-## 1. Open images, folders, and ZIP archives
+## 1. Open images, videos, folders, and ZIP archives
 
-Use Open… for every kind of input. A single photo, a folder, and a ZIP archive all enter the same browsing workflow.
+Use Open… for photos, folders, ZIP images, and supported videos. Images and GIFs appear by default; Show Videos adds videos to the browsing list.
 
 ### How to
 
 1. Launch 알맹Re on macOS 14 or later. Choose Open… on the start screen, toolbar, or File menu, or press ⌘O.
-2. Choose a folder to browse its images. Choose one image to start there and continue through other images in the same folder. Selecting several images opens only those selected images.
+2. Choose a folder to browse its images. Choose one image to start there and continue through the same folder; selecting several opens only those files. Turn on Show Videos to include videos. Opening a video directly also turns it on.
 3. Choose a ZIP archive to view its supported images, including images in nested archive paths. You can also open files from Finder or drag images and folders into the app.
 
 ### Folders and favorites
@@ -54,7 +57,7 @@ Folder Tree expands folders as needed. Click a folder name to open it, use the u
 
 ### ZIP is read-only
 
-Images are extracted into a temporary folder while the archive is open. Export a copy before renaming or editing source metadata. The app does not rewrite the ZIP. Stored/Deflate archives are supported; encrypted archives and other compression methods are rejected. Limits include a 2 GiB archive, 10,000 entries, 256 MiB per extracted entry, and 1 GiB total extracted data.
+Images are extracted into a temporary folder while the archive is open. Export a copy before renaming or editing source metadata. The app does not rewrite the ZIP. Stored/Deflate archives are supported; encrypted archives and other compression methods are rejected. Limits include a 2 GiB archive, 10,000 entries, 256 MiB per extracted entry, and 1 GiB total extracted data. ZIP videos are not supported, even when Show Videos is on.
 
 ### Return to your place
 
@@ -119,7 +122,7 @@ All at Once spreads the current collection into a thumbnail grid. Use it to scan
 **Screen 02.** All at Once combines the thumbnail grid with search, selection, and size controls.
 
 1. **Thumbnail grid** — Click, range-select, or drag across cards; double-click to open a photo.
-2. **Search and filters** — Narrow the open collection without changing the files.
+2. **Search, sorting and filters** — Search and sort the current list, or adjust format, classification and video filters without changing files.
 3. **Size and selection** — Adjust preview size and use the selected-image actions for batch work.
 
 ### How to
@@ -134,11 +137,15 @@ Hold Shift when starting a selection rectangle to add to the existing selection.
 
 ### Sort the current list
 
-Sort by name, modification date, creation date, file size, or GPS direction. Name sorting treats 2 before 10. GPS sorting reads location metadata and places images without GPS last. Search, format, tag, and map restrictions work together; none of them changes the original files.
+Sort groups are Name & File, Dimensions & Capture Time, Camera & Color, and Location. Alongside existing options, use width, height, capture date, type, shutter speed, manufacturer, model, aperture and color space. Names use natural numbers, shutter speed uses exposure duration and aperture uses f-number. Missing values stay last in either direction. Type uses extensions, grouping equivalent JPEG/TIFF spellings. Files remain unchanged.
 
 ### Numbers and preview size
 
 The # control shows or hides thumbnail numbers. Large badges move outside small photos to keep the image visible. The thumbnail-size setting is remembered; its range is 44.8–665.6 points, with individual cells constrained by the window width.
+
+### Capture metadata sorting limits
+
+Width and height are original pixel dimensions with file orientation applied, before viewer edits. Capture date uses EXIF or embedded video dates, never filesystem creation date. EXIF without a timezone is treated as UTC for ordering. Videos use available dimensions, dates, make, model and color information; shutter/aperture remain unknown. Metadata is read only for relevant sorts and reused, so the first sort may take time.
 
 ### Good to know
 
@@ -158,7 +165,7 @@ Image Comparison keeps independent A and B collections side by side or above and
 
 **Screen 03.** Two collections in Image Comparison.
 
-1. **A and B panes** — Each pane has its own image collection and Open… control.
+1. **A and B panes** — Each pane has its own collection and Open… control, labeled by folder name or alias. Use Comparison Names… to set aliases.
 2. **Comparison behavior** — Choose matching, the navigation target, shorter-side looping, and linked zoom.
 3. **Locks and thumbnails** — Freeze one side or choose another image from that pane's thumbnail strip.
 
@@ -166,11 +173,11 @@ Image Comparison keeps independent A and B collections side by side or above and
 
 1. Choose Image Comparison or press ⌃⌥C. Use Choose Folders to Compare… to select A and B in sequence, or use each pane's Open… button.
 2. Use List Order for independent lists. Choose Matching Names to pair filenames without their extensions: 001.jpg matches 001.png. Missing partners stay visible as empty comparison rows.
-3. Choose A Only, Both, or B Only under Image Navigation. Use the common arrows or the pane's thumbnails to move. Turn Link Zoom and Pan on to inspect corresponding relative positions.
+3. Under Image Navigation, choose one side by its displayed name or Both. Use the common arrows or pane thumbnails to move. Turn Link Zoom and Pan on to inspect corresponding relative positions.
 
 ### Navigation and looping
 
-Choosing A Only or B Only switches to List Order. Matching Names returns to paired navigation. Under Both, Loop Shorter Side repeats the shorter list while the longer one advances; when off, the shorter list stays on its last image. Looping is for List Order.
+Choosing one side switches to List Order. Matching Names returns to paired navigation. Under Both, Loop Shorter Side repeats the shorter list while the longer one advances; when off, the shorter list stays on its last image. Looping is for List Order.
 
 ### Locks
 
@@ -178,7 +185,7 @@ Lock freezes a pane's image, zoom, and pan position. Lock B to navigate A; lock 
 
 ### Originals and saved state
 
-Comparison displays originals without the regular viewer's editing adjustments. Exit comparison for editing, batch operations, or wallpaper. Esc returns to the preceding view. Layout, linking, navigation preferences, and the last A/B inputs and positions are remembered.
+Comparison shows originals without viewer edits. Exit for editing, batch work or wallpaper; Esc returns to the preceding view. Layout, linking, navigation, and the last A/B inputs and positions are remembered. Comparison Names… edits aliases up to 80 characters. Blank fields or Use Automatic Names select folder/ZIP names; Save applies changes, Cancel keeps current names. The same folder/ZIP or mixed locations use A/B; distinct folders with matching names add (A)/(B). Aliases do not rename folders, survive restart, and reset only for the pane receiving new inputs. Reopening the same inputs keeps them. Hover over a shortened name to read it fully. Comparison excludes videos even when Show Videos is on.
 
 ### Good to know
 
@@ -298,7 +305,7 @@ Opening the selection in Viewer or All at Once keeps the map restriction active.
 
 ### Loading and saved state
 
-Map backgrounds need an internet connection. Photos without GPS do not appear as map thumbnails. Location reads may take time in a large collection. Areas are restored with the last session; opening a new folder clears the previous area's selection.
+Map backgrounds need an internet connection. Photos without GPS do not appear as map thumbnails. Location reads may take time in a large collection. Areas are restored with the last session; opening a new folder clears the previous area's selection. Video GPS is not read, so videos do not appear as location thumbnails.
 
 ### Good to know
 
@@ -350,9 +357,9 @@ Image Editing previews changes without overwriting the original. Export the resu
 
 **Screen 07.** The editing panel beside a preview of the current image.
 
-1. **Editing controls** — Crop, rotate, flip, and adjust tone, color, and detail.
+1. **Presence and Film Looks** — Expand Presence to adjust the image, or choose a film look and its strength.
 2. **Image preview** — Inspect the current result; use Actual Size for detail adjustments.
-3. **Export — below the panel** — Scroll down the editing panel or press ⌘E to save a copy before closing the app.
+3. **Save copies and add watermarks** — Choose format and quality to export a copy. Add Watermark… targets only the current photo.
 
 ### How to
 
@@ -390,9 +397,9 @@ Select photos in the viewer, overview or a classification-filtered list, then us
 
 **Screen 08.** The batch dialog converts selected photos and resizes them proportionally.
 
-1. **Format and quality** — Choose output format and lossy quality, or start with the compression preset.
-2. **Proportional resizing** — Choose a longest edge or percentage. Smaller images are not enlarged.
-3. **Destination and preview** — Review the copy folder and filenames before converting.
+1. **Format and size** — Choose the output format and proportional size. Lossy formats offer quality settings; a compression preset is also available.
+2. **Watermark and destination** — Open watermark settings or choose the folder for copies.
+3. **Save preview** — Compare current and output names before converting. Originals stay intact.
 
 ### How to
 
@@ -410,7 +417,7 @@ Rename extension options change casing or equivalent spellings such as .jpg/.jpe
 
 ### Saving copies and macOS sharing
 
-Original files and classifications remain intact; new copies do not inherit classifications. Output collisions get a numeric suffix. Animation and multipage inputs save only the first frame. Completed files remain after cancellation, and the result shows saved, failed and unprocessed counts. Available sharing services and limits depend on macOS. To share the current edits, export copies and share from the result.
+Original files and classifications remain intact; new copies do not inherit classifications. Output collisions get a numeric suffix. Batch image conversion saves only the first frame of animated or multipage inputs and is unavailable when a video is selected. Use Frames & Clips… to keep an animation or save a video clip. Completed batch files remain after cancellation; the result shows saved, failed and unprocessed counts. Share Files… uses native macOS sharing. Export copies first to share current edits.
 
 ### Good to know
 
@@ -420,9 +427,129 @@ Original files and classifications remain intact; new copies do not inherit clas
 
 ---
 
+<a name="watermark"></a>
+
+## 11. Add text, EXIF and logo watermarks
+
+Place text, a signature, selected capture information and a logo on copies of one or more selected photos. Original files and their classifications stay intact.
+
+![Combine text, EXIF and a logo, drag the preview watermark and choose whether to extend the canvas.](figures/watermark.png)
+
+**Screen 09.** Combine text, EXIF and a logo, drag the preview watermark and choose whether to extend the canvas.
+
+1. **Text, font and EXIF** — Choose text, font and per-photo EXIF. Adding fields keeps the text size.
+2. **Logo and placement** — Choose a logo and adjust size, margin and opacity with sliders or numbers.
+3. **First photo preview** — Drag the watermark; its outline is not saved. Moving outside the photo asks about canvas extension.
+
+### How to
+
+1. Select photos and choose Add Watermark… from the Image, selection actions or context menu. Map actions target the named area or pin. The editing panel’s Add Watermark… targets only the current photo.
+2. Enter text or a signature and click the font name to choose a font in the macOS font panel. Select EXIF fields to draw on the photo. Choose Image… adds a logo or signature image, such as a transparent PNG.
+3. Choose one of nine positions or drag the watermark in the preview. Set size, margin and opacity with sliders or percentages such as 25.5; choose white/black text and shadow/background. Placement outside the photo asks about extending the canvas. Apply Settings, then choose format, quality, resizing and folder to start conversion.
+
+### Capture information and stable text size
+
+EXIF draws each original’s capture date, manufacturer, model, lens, shutter speed, aperture, ISO, focal length and filename. Missing or unreadable capture values are omitted. Adding EXIF adds rows or wrapping without shrinking the text. To change embedded metadata, use the metadata editor in Image Information.
+
+### Drag placement and canvas extension
+
+Text and logo size follow photo width before expansion; logo proportions stay intact. Margins use the short edge only at preset positions; dragging sets a custom center. Relative position, size and expansion consent apply to the selection, adding only each photo’s necessary edges without scaling it. Extra space is transparent with alpha, white in JPEG. Keep inside image only moves outside placement inward. Oversized content offers Extend canvas, Shrink watermark to fit or Cancel. Cancel keeps current settings. Without canvas extension, content that does not fit prevents saving until resolved. Returning to the original canvas also checks for oversized content.
+
+### Copies, preview and remembered settings
+
+Watermarks follow edits, crop, rotation and output resizing. The first photo’s scaled preview may differ slightly in final placement due to pixel rounding; other photos may differ in size and EXIF. Originals and classifications stay intact; share completed copies through macOS. Design and custom placement are remembered, but enable the watermark for each new conversion. Canvas consent resets for each new batch; drag outside again to confirm it. Keep the logo source at the same path; unreadable files show an error. Videos are excluded; animated or multipage images save their first frame as a still.
+
+### Good to know
+
+- Text allows 2,000 characters and 20 lines; logos use the first frame of an ImageIO-readable image. Size is 2–90%, margin 0–20%, opacity 0–100%. Out-of-range numbers are clamped; invalid input keeps the last valid value. Expanded final output is limited to 64 MP and 32,768 px per side; move inward or reduce size if exceeded. Watermarks do not appear on originals in the viewer.
+
+[Back to top](#top)
+
+---
+
+<a name="video"></a>
+
+## 12. Play videos and save frames or clips
+
+Turn on Show Videos to include videos in folders, then open Frames & Clips… to inspect frames, extract a PNG, or save a shorter or smaller copy. The original stays intact.
+
+![Frames & Clips provides video playback, frame inspection, and clip export.](figures/video.png)
+
+**Screen 10.** Frames & Clips provides video playback, frame inspection, and clip export.
+
+1. **Video player** — Playback starts paused. Play, pause, and listen to available audio using the player.
+2. **Frame and time controls** — Step through supported frames or seek by time, then extract the current frame as PNG.
+3. **Range and quality** — Set start and end times, choose MP4/MOV and quality, or use the 720p size-reduction preset.
+
+### How to
+
+1. Turn on Show Videos above the list, in the menu, or in Settings → General. It is off by default and remembers your choice; GIFs remain visible either way. Opening a video directly turns it on. Playback starts paused; press Play to hear available audio.
+2. Open a video in Viewer and choose Frames & Clips…. Use Previous Frame and Next Frame where the file supports stepping, or seek with Playback Position. Choose Extract Current Frame as PNG… to save the displayed moment.
+3. Under Range to Save, use Set Start Here / Set End Here or enter Start (s) and End (s). Choose MP4 or MOV and Export Quality, then Save Clip Copy…. Full Range selects the entire video; Reduce Size Preset selects MP4 and Up to 720p.
+
+### Built-in macOS support
+
+MP4, M4V, MOV, MPG/MPEG/M2V, AVI, 3GP/3G2, and MTS/M2TS/TS are candidates. Playback and export depend on the actual codecs and macOS support, checked when the file is opened. No external codec package is required. WebM, MKV, and videos inside ZIP archives are excluded. DRM-protected videos cannot be exported.
+
+### Frames, ranges, and quality
+
+Stepping uses real media frames where available. Variable-frame-rate video has no guessed exact frame count. Clip ranges include the start and exclude the end; saved boundaries follow media samples. MP4/MOV copies use H.264 video and AAC for available audio. Quality presets preserve proportions without enlarging smaller sources. A smaller file or a particular byte count is not guaranteed. PNG extraction saves the source frame at its original resolution; Export Quality affects clip copies only.
+
+### Video and photo tools
+
+Photo adjustments, AI Upscaling, wallpaper, and batch image export do not apply to videos. Photo Album is disabled while the visible list includes a video; hiding videos allows an eligible photo list to play. Image Comparison stays image-only, and video GPS is not read. Tags, renaming, and sharing selected originals remain available.
+
+### Good to know
+
+- Choose a new output name: the original and existing output files are protected. Cancel removes incomplete output. After a successful save, use Show in Finder or Share Files… to share the completed copy through macOS.
+
+[Back to top](#top)
+
+---
+
+<a name="animation"></a>
+
+## 13. Extract and resize animated images
+
+Frames & Clips… works with animated GIF, APNG, and WebP that macOS ImageIO can decode. Extract one frame as PNG or save a selected frame range as a GIF or APNG copy.
+
+![Frames & Clips previews an animation and saves a frame or a resized animated copy.](figures/animation.png)
+
+**Screen 11.** Frames & Clips previews an animation and saves a frame or a resized animated copy.
+
+1. **Animation preview** — Inspect the source animation; photo-editing adjustments are not included.
+2. **Frame controls** — Play or step through frames, read the frame number, and extract a PNG.
+3. **Range and resize** — Choose inclusive frame numbers, output format, proportional size, and how many frames to keep.
+
+### How to
+
+1. Open an animated GIF, APNG, or WebP and choose Frames & Clips…. Use Play / Pause, Previous Frame, Next Frame, or Playback Position to inspect the animation. Show Videos does not hide GIFs.
+2. Choose Extract Current Frame as PNG… for a still image. To save an animation, enter First Frame and Last Frame under Range to Save, or use Set Start Here / Set End Here. Frame numbers start at 1 and both ends are included; Full Range selects every frame.
+3. Choose GIF or APNG in Format. Set Image Size to Original Size, Longest Edge (px), or Percentage (%), then choose Keep Frames. Review the range and use Save Clip Copy… to save a separate file.
+
+### Size and frame selection
+
+Resize proportionally by longest edge or 1–100%; smaller sources are not enlarged. Under Keep Frames, choose All Frames, 1 in 2 Frames, 1 in 3 Frames, or 1 in 4 Frames. Dropped frames add their time to retained frames so the selected range keeps its duration. Reduce Size Preset selects 50% size and 1 in 2 Frames.
+
+### Formats and image appearance
+
+GIF, APNG, and WebP input support depends on ImageIO in macOS. Animation copies use an available GIF or APNG encoder; WebP is an input format here. GIF has limited colors and transparency, so it can change the result. Photo-editing adjustments are not applied. Size reduction does not guarantee fewer bytes or a target file size. PNG extraction saves the source frame at its original resolution; Image Size and Keep Frames affect animated copies only.
+
+### Save and share a copy
+
+The source and existing output files cannot be overwritten. Choose a new name for each result. Cancel removes incomplete output. After saving, Show in Finder reveals the file and Share Files… opens native macOS sharing for the completed copy. New copies do not inherit the source classifications.
+
+### Good to know
+
+- Batch Format, Resize & Compress… saves only the first frame of animated inputs. Use Frames & Clips… when the output should stay animated, and check playback, colors, and transparency in the saved copy.
+
+[Back to top](#top)
+
+---
+
 <a name="quality"></a>
 
-## 11. Understand AI enlargement, HDR, and loading
+## 14. Understand AI enlargement, HDR, and loading
 
 High-Quality Zoom changes display interpolation. AI Upscaling creates a larger image you can save. HDR output is a display preference, not a label that proves a photo is HDR.
 
@@ -450,13 +577,13 @@ Reading and writing support depend on the running macOS. The app adds QOI and co
 
 <a name="slideshow"></a>
 
-## 12. Play a Photo Album or set wallpaper
+## 15. Play a Photo Album or set wallpaper
 
 Photo Album automatically advances through the current list in a focused single-image view. Wallpaper uses a separate copy prepared for the chosen displays.
 
 ### How to
 
-1. Open a list with at least two photos. Choose Navigate → Photo Album → Play Photo Album or press ⌃⌥P.
+1. Open a list with at least two photos and no videos. If videos are included, turn off Show Videos first. Choose Navigate → Photo Album → Play Photo Album or press ⌃⌥P.
 2. Use the playback controls to pause. Choose an interval of 1–300 seconds and whether to repeat, either from the time control or Settings → General → Photo Album.
 3. To set wallpaper, return to the regular viewer and choose Image → Set Current Image as Wallpaper… or press ⌃⌥W. Select the current or all connected displays, Fill or Fit, and whether to apply current adjustments; then apply.
 
@@ -470,11 +597,11 @@ Playback pauses when leaving focus mode, switching to another app, sleeping, or 
 
 ### Wallpaper copies
 
-The app creates a PNG without altering the source. Animated input uses the first frame and HDR is prepared as SDR. Copies exclude EXIF/GPS, are sized for the display up to 8192 pixels, and remain in the app's Application Support/Wallpapers folder. Other desktop Spaces follow macOS behavior. Previous copies are not automatically deleted because another Space may still use them.
+The app creates a PNG without altering the source. Animated input uses the first frame and HDR is prepared as SDR. Copies exclude EXIF/GPS, are sized for the display up to 8192 pixels, and remain in the app's Application Support/Wallpapers folder. Other desktop Spaces follow macOS behavior. Previous copies are not automatically deleted because another Space may still use them. Videos cannot be set as wallpaper.
 
 ### Good to know
 
-- If playback is unavailable, check that the current filtered list contains at least two photos and that Tagging, Image Comparison, or another operation is not active.
+- If playback is unavailable, check that the current filtered list contains at least two photos and no videos, and that Tagging, Image Comparison, or another operation is not active. Hiding videos makes an otherwise eligible photo list available again.
 
 [Back to top](#top)
 
@@ -482,13 +609,13 @@ The app creates a PNG without altering the source. Animated input uses the first
 
 <a name="settings"></a>
 
-## 13. Make the app work your way
+## 16. Make the app work your way
 
 Settings groups everyday viewing choices, custom shortcuts, tag assignments, and default file associations. Many viewing choices return automatically at the next launch.
 
 ![Settings keeps the main preferences in four tabs.](figures/settings.png)
 
-**Screen 09.** Settings keeps the main preferences in four tabs.
+**Screen 12.** Settings keeps the main preferences in four tabs.
 
 1. **Settings tabs** — General, Shortcuts, Photo Tags, and File Associations each cover a different task.
 2. **Viewing preferences** — Set display, thumbnail, filename, navigation, and loading choices.
@@ -496,7 +623,7 @@ Settings groups everyday viewing choices, custom shortcuts, tag assignments, and
 
 ### How to
 
-1. Open 알맹Re → Settings…. In General, choose HDR/EDR output, thumbnail position, filename size, high-quality zoom, folder-tree visibility, and whether navigation wraps.
+1. Open 알맹Re → Settings…. In General, choose HDR/EDR output, thumbnail position, filename size, high-quality zoom, folder-tree visibility, whether navigation wraps, and Show Videos.
 2. Use Photo Tags to save shared names and colors, and Shortcuts to choose keys and modifier combinations. Hover over controls for explanations.
 3. For Finder to open selected formats with this app, place 알맹Re.app in a stable location such as Applications, open File Associations, select only the desired format groups, and apply.
 
@@ -506,7 +633,7 @@ The interface follows the language assigned to the app by macOS. Change it in Sy
 
 ### Remembered preferences
 
-Thumbnail size, high-quality zoom, filename display, loading preferences, favorites, tag settings, and custom keys are retained. The last collection and viewing position can be restored if the files remain accessible. Magnification-quality comparison starts off after relaunch. Visual editing adjustments and AI results must be exported separately.
+Thumbnail size, high-quality zoom, filename display, loading preferences, favorites, tag settings, and custom keys are retained. Show Videos is off by default and remembers your choice; GIF visibility is unchanged. The last collection and viewing position can be restored if files remain accessible. Magnification-quality comparison starts off after relaunch. Visual editing adjustments and AI results must be exported separately.
 
 ### File associations
 
@@ -514,7 +641,7 @@ Only the checked format groups are changed. macOS may ask for confirmation. Movi
 
 ### Good to know
 
-- General also lists the native formats available on your Mac and offers Clear Image Cache. Choose a slower loading mode if you want less background work while using other apps.
+- General lists the native formats available on your Mac and offers Clear Image Cache. Video playback uses built-in macOS codecs and checks each file when opened; no external codec installation is required. Choose a slower loading mode for less background work.
 
 [Back to top](#top)
 
@@ -522,13 +649,13 @@ Only the checked format groups are changed. macOS may ask for confirmation. Movi
 
 <a name="shortcuts"></a>
 
-## 14. Shortcuts and quick troubleshooting
+## 17. Shortcuts and quick troubleshooting
 
 The reference that follows lists the app's default action keys and fixed contextual keys. ⌘ means Command, ⌥ Option, ⌃ Control, and ⇧ Shift.
 
 ![The Shortcuts tab shows configurable actions and conflict feedback.](figures/shortcuts.png)
 
-**Screen 10.** The Shortcuts tab shows configurable actions and conflict feedback.
+**Screen 13.** The Shortcuts tab shows configurable actions and conflict feedback.
 
 1. **Actions** — Hover over an action name to learn where and how it works.
 2. **Keys and modifiers** — Choose the key, then toggle Control, Option, Shift, or Command.

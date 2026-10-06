@@ -1,4 +1,4 @@
-<!-- almeng-guide-source-sha256: fd70cb99938fe933ac8ea14cf562ba9a167f54665bc40b880b8578d25c2fd00d -->
+<!-- almeng-guide-source-sha256: df48dce85367b54f19a2c1bccb01464cd4dcaa1b8be15e8f771002b0c0c16e79 -->
 
 <a name="top"></a>
 
@@ -10,9 +10,9 @@
 
 **Abre, recorre, compara, etiqueta y edita tus imágenes en el Mac**
 
-Una guía práctica de la versión de desarrollo 0.12 actual. Empieza por abrir una carpeta de imágenes y consulta después el capítulo correspondiente a lo que quieras hacer. Los nombres de los menús siguen la interfaz en español de la aplicación.
+Una guía práctica de la versión de desarrollo 0.13.1 actual. Empieza por abrir una carpeta de imágenes y consulta después el capítulo correspondiente a lo que quieras hacer. Los nombres de los menús siguen la interfaz en español de la aplicación.
 
-Versión 0.12.0 · A fecha de 2026-10-05
+Versión 0.13.1 · A fecha de 2026-10-06
 
 > Las capturas muestran la aplicación real con la interfaz en coreano e imágenes sintéticas de demostración. Las anotaciones numeradas y las explicaciones están traducidas al español; los píxeles de las capturas no se modifican. No se utiliza ninguna colección personal de fotos.
 
@@ -28,10 +28,13 @@ Versión 0.12.0 · A fecha de 2026-10-05
 - [8. Consultar información y metadatos de la imagen](#information)
 - [9. Editar una imagen y exportar una copia](#editing)
 - [10. Renombrar, redimensionar, convertir y compartir por lotes](#batch)
-- [11. Entender la ampliación con IA, el HDR y la carga](#quality)
-- [12. Reproducir un álbum o establecer el fondo de pantalla](#slideshow)
-- [13. Adaptar la aplicación a tu forma de trabajar](#settings)
-- [14. Atajos y solución rápida de problemas](#shortcuts)
+- [11. Añadir marcas de agua con texto, EXIF y logo](#watermark)
+- [12. Reproducir vídeos, extraer fotogramas y guardar clips](#video)
+- [13. Recorrer y guardar los fotogramas de una animación](#animation)
+- [14. Entender la ampliación con IA, el HDR y la carga](#quality)
+- [15. Reproducir un álbum o establecer el fondo de pantalla](#slideshow)
+- [16. Adaptar la aplicación a tu forma de trabajar](#settings)
+- [17. Atajos y solución rápida de problemas](#shortcuts)
 - [Atajos de un vistazo](#shortcut-reference)
 
 ---
@@ -45,7 +48,7 @@ Usa Abrir… para cualquier tipo de entrada. Una foto, una carpeta o un archivo 
 ### Cómo hacerlo
 
 1. Inicia 알맹Re en macOS 14 o posterior. Elige Abrir… en la pantalla de inicio, la barra de herramientas o el menú Archivo, o pulsa ⌘O.
-2. Elige una carpeta para recorrer sus imágenes. Elige una sola imagen para empezar por ella y continuar con las demás de la misma carpeta. Si seleccionas varias imágenes, solo se abrirán las seleccionadas.
+2. Elige una carpeta para recorrer sus imágenes. Elige una sola imagen para empezar por ella y continuar con las demás de la misma carpeta. Si seleccionas varias imágenes, solo se abrirán las seleccionadas. Los vídeos están ocultos de forma predeterminada: activa Mostrar vídeos encima de la lista para incluirlos. Esta preferencia se recuerda; abrir directamente un vídeo compatible la activa automáticamente y no cambia la visibilidad de los GIF.
 3. Elige un archivo ZIP para ver las imágenes compatibles que contiene, incluidas las de sus subcarpetas. También puedes abrir archivos desde Finder o arrastrar imágenes y carpetas a la aplicación.
 
 ### Carpetas y favoritas
@@ -54,7 +57,7 @@ El Árbol de carpetas se despliega según sea necesario. Haz clic en el nombre d
 
 ### Los ZIP son de solo lectura
 
-Las imágenes se extraen en una carpeta temporal mientras el archivo está abierto. Exporta una copia antes de renombrarlas o editar sus metadatos de origen. La aplicación no reescribe el ZIP. Admite archivos sin compresión o con Deflate; rechaza los cifrados y otros métodos de compresión. Los límites son 2 GiB por archivo ZIP, 10 000 entradas, 256 MiB por entrada extraída y 1 GiB de datos extraídos en total.
+Las imágenes se extraen en una carpeta temporal mientras el archivo está abierto. Exporta una copia antes de renombrarlas o editar sus metadatos de origen. La aplicación no reescribe el ZIP. Admite archivos sin compresión o con Deflate; rechaza los cifrados y otros métodos de compresión. Los límites son 2 GiB por archivo ZIP, 10 000 entradas, 256 MiB por entrada extraída y 1 GiB de datos extraídos en total. No se admiten vídeos dentro de archivos ZIP.
 
 ### Retomar donde lo dejaste
 
@@ -119,7 +122,7 @@ Todo a la vista distribuye la colección actual en una cuadrícula de miniaturas
 **Pantalla 02.** Todo a la vista combina la cuadrícula con la búsqueda y los controles de selección y tamaño.
 
 1. **Cuadrícula de miniaturas** — Haz clic, selecciona un intervalo o arrastra por las tarjetas; haz doble clic para abrir una foto.
-2. **Búsqueda y filtros** — Reduce la colección abierta sin modificar los archivos.
+2. **Búsqueda, orden y filtros** — Busca, ordena y filtra la lista por formato, etiqueta o visibilidad de vídeos sin modificar los archivos.
 3. **Tamaño y selección** — Ajusta el tamaño de las vistas previas y utiliza las acciones de las imágenes seleccionadas para trabajar por lotes.
 
 ### Cómo hacerlo
@@ -134,11 +137,15 @@ Mantén Mayús al empezar el rectángulo para añadir a la selección existente.
 
 ### Ordenar la lista actual
 
-Ordena por nombre, fecha de modificación, fecha de creación, tamaño del archivo o dirección GPS. El orden por nombre coloca 2 antes que 10. El orden GPS lee los metadatos de ubicación y sitúa al final las imágenes sin GPS. La búsqueda y las restricciones de formato, etiquetas y mapa se combinan; ninguna modifica los originales.
+Los grupos Nombre y archivo, Dimensiones y fecha de captura, Cámara y color y Ubicación reúnen nombre, fechas del archivo, tamaño, GPS, anchura, altura, fecha de captura, tipo, obturación, fabricante, modelo, apertura y espacio de color. Los nombres siguen el orden numérico natural; la obturación compara la duración de exposición y la apertura, el número f. Los valores ausentes van al final en ambos sentidos. El tipo usa la extensión, agrupando variantes JPEG/TIFF. Los archivos no cambian.
 
 ### Números y tamaño de vista previa
 
 El control # muestra u oculta los números de las miniaturas. Los números grandes se colocan fuera de las fotos pequeñas para no taparlas. El tamaño se recuerda; su intervalo es de 44,8 a 665,6 puntos, aunque cada tarjeta queda limitada por el ancho de la ventana.
+
+### Límites del orden por datos de captura
+
+Anchura y altura son los píxeles originales con la orientación del archivo, antes de los ajustes. La fecha procede de EXIF o del vídeo, nunca de la creación del archivo. La hora EXIF sin zona horaria se interpreta como UTC al ordenar. Los vídeos usan dimensiones, fechas, fabricante, modelo y color disponibles; obturación y apertura quedan desconocidas. Los datos se leen solo al ordenar por ellos y se reutilizan: la primera ordenación puede tardar.
 
 ### Conviene saber
 
@@ -158,7 +165,7 @@ Comparación de imágenes conserva dos colecciones independientes, A y B, lado a
 
 **Pantalla 03.** Dos colecciones en Comparación de imágenes.
 
-1. **Paneles A y B** — Cada panel tiene su propia colección y su control Abrir….
+1. **Paneles A y B** — Cada panel tiene su colección y Abrir…, con nombre de carpeta o alias. Nombres de comparación… permite definir alias.
 2. **Comportamiento de la comparación** — Elige el emparejamiento, el destino de navegación, la repetición del lado corto y el zoom vinculado.
 3. **Bloqueos y miniaturas** — Fija un lado o elige otra imagen en la tira de miniaturas de ese panel.
 
@@ -166,11 +173,11 @@ Comparación de imágenes conserva dos colecciones independientes, A y B, lado a
 
 1. Elige Comparación de imágenes o pulsa ⌃⌥C. Usa Elegir carpetas para comparar… para seleccionar A y B en ese orden, o el botón Abrir… de cada panel.
 2. Usa Orden de la lista para listas independientes. Elige Nombres coincidentes para emparejar nombres sin extensión: 001.jpg coincide con 001.png. Cuando falta una pareja, su lado se muestra vacío.
-3. En Navegación de imágenes, elige Solo A, Ambos o Solo B. Usa las flechas comunes o las miniaturas del panel para avanzar. Activa Vincular zoom y desplazamiento para examinar posiciones relativas correspondientes.
+3. En Navegación de imágenes, elige un lado por su nombre mostrado o Ambos. Avanza con las flechas comunes o las miniaturas. Activa Vincular zoom y desplazamiento para examinar posiciones relativas correspondientes.
 
 ### Navegación y repetición
 
-Elegir Solo A o Solo B cambia a Orden de la lista. Nombres coincidentes restaura la navegación por parejas. Con Ambos, Repetir el lado más corto repite la lista corta mientras avanza la larga; si se desactiva, la corta permanece en su última imagen. La repetición funciona en Orden de la lista.
+Elegir un lado cambia a Orden de la lista. Nombres coincidentes restaura la navegación por parejas. Con Ambos, Repetir el lado más corto repite la lista corta mientras avanza la larga; si se desactiva, la corta permanece en su última imagen. La repetición funciona en Orden de la lista.
 
 ### Bloqueos
 
@@ -178,7 +185,7 @@ Bloquear fija la imagen, el zoom y la posición de un panel. Bloquea B para reco
 
 ### Originales y estado guardado
 
-La comparación muestra los originales sin los ajustes de edición del visor normal. Sal de ella para editar, trabajar por lotes o configurar el fondo de pantalla. Esc vuelve a la vista anterior. Se recuerdan la disposición, la vinculación, las preferencias de navegación y las últimas entradas y posiciones A/B.
+La comparación muestra originales sin ajustes. Sal para editar, trabajar por lotes o cambiar el fondo; Esc vuelve a la vista anterior. Se recuerdan disposición, vinculación, navegación y últimas entradas/posiciones A/B. Nombres de comparación… edita alias de hasta 80 caracteres. Déjalos vacíos o pulsa Usar nombres automáticos para usar nombres de carpeta/ZIP; Guardar aplica los cambios y Cancelar conserva los nombres actuales. La misma carpeta/ZIP o ubicaciones mezcladas usan A/B; carpetas distintas de igual nombre añaden (A)/(B). No se renombran carpetas. Los alias se restauran al reiniciar y solo se borran en el panel que recibe entradas nuevas. Reabrir las mismas entradas los conserva. Coloca el puntero sobre un nombre abreviado para verlo completo.
 
 ### Conviene saber
 
@@ -350,9 +357,9 @@ Edición de imagen permite previsualizar cambios sin sobrescribir el original. E
 
 **Pantalla 07.** El panel de edición junto a la vista previa de la imagen actual.
 
-1. **Controles de edición** — Recorta, gira, voltea y ajusta el tono, el color y el detalle.
+1. **Presencia y estilos de película** — Abre Presencia para ajustar la imagen o elige un estilo de película y su intensidad.
 2. **Vista previa de la imagen** — Examina el resultado actual; usa Tamaño real para ajustar detalles.
-3. **Exportar — debajo del panel** — Desplázate hacia abajo en el panel de edición o pulsa ⌘E para guardar una copia antes de cerrar la aplicación.
+3. **Copias y marcas de agua** — Elige formato y calidad para exportar una copia. Añadir marca de agua… usa solo la foto actual.
 
 ### Cómo hacerlo
 
@@ -390,31 +397,151 @@ Usa los archivos seleccionados en el Visor, Todo a la vista, los resultados filt
 
 **Pantalla 08.** La ventana de conversión por lotes, los ajustes de tamaño y la vista previa de los archivos.
 
-1. **Formato y calidad** — Elige la codificación de salida y su calidad cuando el formato lo permita.
-2. **Reducción proporcional** — Conserva el tamaño o fija el lado más largo o un porcentaje; Reducir peso propone JPEG, 1920 píxeles y calidad del 75 %.
-3. **Destino y vista previa** — Elige la carpeta, revisa los nombres y convierte. Se conservan los originales.
+1. **Formato y tamaño** — Elige formato y tamaño proporcional. Los formatos con pérdida permiten ajustar calidad; también hay un ajuste para reducir peso.
+2. **Marca de agua y carpeta** — Abre los ajustes de marca de agua o elige la carpeta para las copias.
+3. **Vista previa de archivos** — Compara los nombres actuales y de salida antes de convertir. Los originales se conservan.
 
 ### Cómo hacerlo
 
-1. Selecciona imágenes con ⌘ + clic, ⇧ + clic o ⌘A. En Todo a la vista también puedes arrastrar un rectángulo de selección. Usa el menú de selección, el menú contextual o Imagen; en el mapa, usa Fotos del área, Esta foto o Todas las fotos de este lugar.
-2. En Renombrar por lotes…, conserva o sustituye el nombre, o busca y reemplaza texto. Con Usar un nombre de clasificación, elige explícitamente una etiqueta: solo se renombran los archivos seleccionados que la tienen. Revisa la lista de antes y después.
-3. Abre Convertir, redimensionar y comprimir…, elige el formato, la calidad y Tamaño de imagen y luego la carpeta. Lado más largo o Porcentaje reduce proporcionalmente tras los ajustes y el recorte, sin ampliar imágenes pequeñas. Reducir peso establece JPEG, 1920 píxeles y calidad del 75 %.
+1. Selecciona con ⌘ + clic, ⇧ + clic o ⌘A; en Todo a la vista también puedes trazar un rectángulo. Abre el menú de selección, el menú contextual o Imagen; en el mapa, Fotos del área, Esta foto o Todas las fotos de este lugar.
+2. En Renombrar por lotes…, conserva o sustituye el nombre, o busca y reemplaza texto. Con Usar un nombre de clasificación, elige una etiqueta: solo cambian los seleccionados que la tienen. Comprueba el antes y después.
+3. Abre Convertir, redimensionar y comprimir…: elige formato, calidad, Tamaño de imagen y carpeta. Lado más largo o Porcentaje reduce proporcionalmente tras ajustes y recorte, sin ampliar imágenes pequeñas. Reducir peso establece JPEG, 1920 píxeles y calidad del 75 %.
 
 ### Numeración y validación de nombres
 
-El modo de clasificación crea Subida01, Subida02… sin separador. Para 1–99 archivos coincidentes usa dos dígitos; a partir de 100 usa tres, comenzando en 001, y aumenta los dígitos según sea necesario. Sigue el orden de la lista y conserva la extensión. Los otros modos permiten elegir inicio, incremento, dígitos y separador. Los nombres inválidos o repetidos impiden el cambio. No se renombran imágenes dentro de ZIP.
+La clasificación crea Subida01, Subida02… sin separador, siguiendo la lista y conservando la extensión: dos dígitos para 1–99 archivos coincidentes, tres desde 100 (001…) y más si hacen falta. Los otros modos ajustan inicio, incremento, dígitos y separador. Nombres inválidos o repetidos bloquean el cambio; las imágenes dentro de ZIP no se renombran.
 
 ### Extensión, formato y peso
 
-Renombrar una extensión normaliza mayúsculas y variantes del mismo formato, como .jpg/.jpeg o .tif/.tiff. Pasar de HEIC a JPEG exige convertir para cambiar la codificación. Reducir el peso depende del contenido, formato, calidad y dimensiones; no garantiza un número exacto de bytes y puede producir un archivo más grande.
+Renombrar extensiones normaliza mayúsculas y variantes del mismo formato (.jpg/.jpeg, .tif/.tiff). HEIC a JPEG requiere convertir la codificación. El peso depende del contenido, formato, calidad y dimensiones: no garantiza bytes exactos y puede aumentar.
 
 ### Copias convertidas y compartir con macOS
 
-La conversión aplica los ajustes y preserva los originales y sus etiquetas; las copias son independientes. Si un nombre ya existe, se añade un número. Las animaciones y las imágenes de varias páginas guardan solo su primer fotograma. Detenerla conserva los archivos terminados y muestra los guardados, fallidos y no procesados. Compartir archivos… envía los archivos originales, sin aplicar los ajustes de vista previa. Para enviar copias editadas o reducidas, usa Compartir archivos terminados… tras convertir, incluso si solo se completó parte del lote.
+Convertir aplica los ajustes, preserva originales y etiquetas y crea copias independientes; los nombres existentes reciben un número. Animaciones e imágenes multipágina guardan solo el primer fotograma. Detener conserva los archivos terminados e indica los guardados, fallidos y no procesados. Compartir archivos… envía originales sin ajustes de vista previa; Compartir archivos terminados… envía copias editadas o reducidas, incluso tras un lote parcial. Se excluyen vídeos de esta conversión: Fotogramas y clips… extrae sus PNG o guarda clips. Esta opción también conserva varios fotogramas de animación en GIF/APNG (capítulo 13).
 
 ### Conviene saber
 
-- Filtra por búsqueda, formato, etiquetas o mapa antes de seleccionar todo. Revisa el número y la lista antes de renombrar originales. Los servicios disponibles para compartir, como AirDrop, dependen de macOS y de su configuración.
+- Antes de ⌘A, filtra por búsqueda, formato, etiquetas o mapa. Revisa número y lista antes de renombrar originales. Los servicios disponibles, incluido AirDrop, dependen de macOS y su configuración.
+
+[Volver arriba](#top)
+
+---
+
+<a name="watermark"></a>
+
+## 11. Añadir marcas de agua con texto, EXIF y logo
+
+Añade texto, firma, EXIF y logo a copias de las fotos seleccionadas, sin cambiar originales ni etiquetas.
+
+![Combina texto, EXIF y logo, arrastra la marca en la vista previa y elige si ampliar el lienzo.](figures/watermark.png)
+
+**Pantalla 09.** Combina texto, EXIF y logo, arrastra la marca en la vista previa y elige si ampliar el lienzo.
+
+1. **Texto, fuente y EXIF** — Elige texto, fuente y EXIF de cada foto. Añadir campos conserva el tamaño del texto.
+2. **Logo y posición** — Elige un logo y ajusta tamaño, margen y opacidad con deslizadores o cifras.
+3. **Vista previa de la primera foto** — Arrastra la marca; el contorno no se guarda. Fuera de la foto se pide confirmar la ampliación.
+
+### Cómo hacerlo
+
+1. Selecciona fotos y Añadir marca de agua… en Imagen, acciones de selección o menú contextual. En el mapa se aplica al área o marcador indicado; desde el panel de edición, solo a la foto actual.
+2. Escribe texto o firma. Pulsa el nombre de la fuente para elegir una instalada en el panel de macOS. Selecciona campos EXIF; Elegir imagen… añade un logo o firma, incluido PNG transparente.
+3. Elige una de nueve posiciones o arrastra la marca. Ajusta tamaño, margen y opacidad con deslizadores o números (25,5 %), texto blanco/negro y sombra/fondo. Fuera de la foto, confirma la ampliación del lienzo. Pulsa Aplicar ajustes, elige formato, calidad, reducción y carpeta e Iniciar conversión.
+
+### Datos de captura y tamaño de texto estable
+
+EXIF dibuja los datos de cada foto: fecha de captura, fabricante, modelo, objetivo, obturación, apertura, ISO, distancia focal y nombre. Omite valores ausentes o ilegibles. Añadir campos añade líneas o saltos sin reducir el texto. Modifica los metadatos integrados con su editor en Información de la imagen.
+
+### Arrastrar y ampliar el lienzo
+
+Texto y logo siguen la anchura previa a la ampliación; el logo mantiene su proporción. El margen usa el lado corto en posiciones predefinidas; arrastrar fija un centro personalizado. Posición, tamaño relativos y permiso de ampliación valen para la selección: solo se añaden bordes necesarios, sin redimensionar fotos. Lo añadido es transparente con alfa, blanco en JPEG. Mantener dentro de la imagen mueve la marca hacia dentro. Si el contenido es excesivo: Ampliar lienzo, Reducir marca para ajustar o Cancelar, que conserva los ajustes. Sin ampliar, el contenido debe caber antes de guardar. Volver al lienzo original también comprueba el tamaño.
+
+### Copias, vista previa y ajustes recordados
+
+La marca sigue ajustes, recorte, rotación y reducción. La vista previa reducida de la primera foto puede desplazar ligeramente la posición por redondeo; dimensiones y EXIF varían entre fotos. Originales y etiquetas se conservan; comparte copias terminadas por macOS. Diseño y posición se recuerdan, pero activa la marca en cada conversión. El permiso de ampliación se reinicia por lote; arrastrar fuera pide confirmarlo otra vez. Mantén el logo en la misma ruta; se avisa si no se lee. Vídeos excluidos; animaciones e imágenes multipágina guardan su primer fotograma como imagen fija.
+
+### Conviene saber
+
+- Texto: 2000 caracteres y 20 líneas; logo: primer fotograma de una imagen legible por ImageIO. Tamaño: 2–90 %, margen: 0–20 %, opacidad: 0–100 %. Los números fuera de rango se limitan; entradas inválidas conservan el último valor válido. La salida ampliada se limita a 64 MP y 32.768 px por lado; si se supera, acerca o reduce la marca. No aparece en el original del Visor.
+
+[Volver arriba](#top)
+
+---
+
+<a name="video"></a>
+
+## 12. Reproducir vídeos, extraer fotogramas y guardar clips
+
+Los vídeos están ocultos de forma predeterminada. Activa Mostrar vídeos para verlos junto a las imágenes y abre Fotogramas y clips… para extraer un PNG o guardar un intervalo como una copia independiente.
+
+![La ventana Fotogramas y clips para un vídeo, con el reproductor y los ajustes de exportación.](figures/video.png)
+
+**Pantalla 10.** La ventana Fotogramas y clips para un vídeo, con el reproductor y los ajustes de exportación.
+
+1. **Reproductor de vídeo** — Reproduce o pausa el vídeo para comprobar la imagen y el sonido.
+2. **Fotogramas y posición** — Avanza por fotogramas cuando sea compatible o busca un instante, y extrae el fotograma actual como PNG.
+3. **Intervalo y calidad** — Fija el inicio incluido, el final excluido, el contenedor y el ajuste antes de guardar una copia.
+
+### Cómo hacerlo
+
+1. Activa Mostrar vídeos encima de la lista. La aplicación recuerda esta preferencia, que no afecta a los GIF. Abrir directamente un vídeo compatible activa la opción de forma automática.
+2. Los vídeos aparecen inicialmente en pausa en el visor; el sonido solo empieza cuando inicias la reproducción. En Fotogramas y clips…, usa la posición de reproducción y Fotograma anterior / Fotograma siguiente cuando el contenido permita avanzar de ese modo. El avance sigue los fotogramas reales; no se presenta un número de fotograma exacto calculado a partir de la tasa nominal de un vídeo con tasa variable.
+3. Usa Extraer el fotograma actual como PNG… para guardar la imagen mostrada. Para un clip, fija Inicio (s) y Final (s), si lo deseas con Fijar el inicio aquí / Fijar el final aquí; elige MP4 o MOV y la calidad, y usa Guardar una copia del clip….
+
+### Formatos disponibles en este Mac
+
+La compatibilidad depende de los contenedores y códecs que la versión instalada de macOS pueda decodificar realmente: pueden funcionar MP4, MOV y otros formatos nativos sin instalar códecs externos. La extensión por sí sola no garantiza la reproducción. No se admiten WebM, MKV ni vídeos dentro de ZIP. No se pueden guardar fotogramas ni clips de vídeos protegidos por DRM. El mapa no usa los datos GPS de los vídeos.
+
+### Intervalo y calidad de la copia
+
+Se incluye el inicio y se excluye el final; los límites guardados se ajustan a las muestras del contenido. El clip se vuelve a codificar en H.264/AAC dentro de un contenedor MP4 o MOV y se conserva el archivo original. Ajuste para reducir el tamaño selecciona MP4 y un máximo de 720p. Los ajustes de calidad y resolución no amplían vídeos pequeños ni garantizan un archivo más pequeño: el resultado puede ocupar más espacio. La extracción PNG conserva la resolución del fotograma original; la calidad elegida solo se aplica a las copias de clips.
+
+### Funciones reservadas para imágenes
+
+Los ajustes de fotos, la ampliación con IA, el fondo de pantalla y la conversión de imágenes por lotes no se aplican a vídeos. Comparación de imágenes solo admite imágenes. No se puede iniciar el álbum si la lista mostrada contiene un vídeo; desactiva Mostrar vídeos para reproducir un pase de diapositivas solo con imágenes. Los vídeos siguen admitiendo etiquetas, cambios de nombre y el uso compartido de los originales seleccionados. Las nuevas copias no heredan las etiquetas del original.
+
+### Conviene saber
+
+- Elige un nombre nuevo: no se sobrescriben el original ni los archivos existentes. Cancelar elimina la copia incompleta. Los resultados guardados correctamente se pueden compartir con las opciones de macOS.
+
+[Volver arriba](#top)
+
+---
+
+<a name="animation"></a>
+
+## 13. Recorrer y guardar los fotogramas de una animación
+
+Fotogramas y clips… permite recorrer animaciones GIF, APNG y WebP que este Mac pueda decodificar, extraer un PNG y guardar un intervalo como GIF o APNG.
+
+![La ventana Fotogramas y clips para una animación, con la vista previa, los fotogramas y las dimensiones de salida.](figures/animation.png)
+
+**Pantalla 11.** La ventana Fotogramas y clips para una animación, con la vista previa, los fotogramas y las dimensiones de salida.
+
+1. **Vista previa de la animación** — Comprueba el fotograma mostrado y el movimiento antes de guardar.
+2. **Navegación por fotogramas** — Avanza o retrocede un fotograma y extrae el actual como PNG.
+3. **Intervalo y dimensiones** — Elige un intervalo con ambos límites incluidos, GIF o APNG, el tamaño y los fotogramas que se conservarán.
+
+### Cómo hacerlo
+
+1. Abre una animación compatible y elige Fotogramas y clips…. Los GIF se muestran aunque Mostrar vídeos esté desactivado. Comprueba la vista previa y usa Reproducir / Pausar o los controles de fotograma anterior y siguiente.
+2. Usa Extraer el fotograma actual como PNG… para obtener una imagen fija. Para guardar un intervalo animado, indica Primer fotograma y Último fotograma: la numeración empieza en 1 y se incluyen ambos límites.
+3. Elige GIF o APNG entre los formatos disponibles en este Mac. Ajusta el tamaño y los Fotogramas que se conservarán; después usa Guardar una copia del clip… para crear un archivo nuevo.
+
+### Fotogramas conservados y duración
+
+Puedes conservar todos los fotogramas o 1 de cada 2, 3 o 4 dentro del intervalo elegido. La duración de los fotogramas omitidos se añade a la de un fotograma conservado para mantener la duración total del intervalo en lugar de acelerar la animación.
+
+### Dimensiones y reducción de tamaño
+
+Conserva el Tamaño original, fija el Lado más largo en píxeles o usa un Porcentaje del 1 al 100 %. Se mantiene la proporción y no se amplían imágenes pequeñas. Ajuste para reducir el tamaño establece el 50 % y 1 de cada 2 fotogramas. El tamaño del archivo depende del contenido y del formato; no se garantiza una reducción. La extracción PNG conserva la resolución del fotograma original; los ajustes de tamaño y de fotogramas conservados solo se aplican a las copias animadas.
+
+### Formatos y aspecto
+
+La lectura de GIF, APNG y WebP y los formatos de salida ofrecidos dependen de lo que este Mac pueda decodificar y codificar. Las copias animadas se guardan como GIF o APNG. GIF limita los colores y la transparencia, por lo que el aspecto puede cambiar. Los ajustes actuales de edición de fotos no se aplican ni al fotograma extraído ni a la copia animada.
+
+### Conviene saber
+
+- Se conserva el original y se rechazan los nombres de archivos ya existentes. Cancelar elimina el resultado incompleto. Tras guardar correctamente, puedes compartir la copia terminada mediante las opciones de macOS. Las nuevas copias no heredan las etiquetas del original.
 
 [Volver arriba](#top)
 
@@ -422,7 +549,7 @@ La conversión aplica los ajustes y preserva los originales y sus etiquetas; las
 
 <a name="quality"></a>
 
-## 11. Entender la ampliación con IA, el HDR y la carga
+## 14. Entender la ampliación con IA, el HDR y la carga
 
 Ampliación de alta calidad cambia la interpolación de pantalla. Ampliación con IA crea una imagen mayor que puedes guardar. La salida HDR es una preferencia de visualización, no una prueba de que la foto sea HDR.
 
@@ -450,13 +577,13 @@ Los formatos que se pueden leer y escribir dependen del macOS en uso. La aplicac
 
 <a name="slideshow"></a>
 
-## 12. Reproducir un álbum o establecer el fondo de pantalla
+## 15. Reproducir un álbum o establecer el fondo de pantalla
 
 Álbum de fotos avanza automáticamente por la lista actual, una imagen cada vez en modo de concentración. El fondo de pantalla usa una copia aparte preparada para las pantallas elegidas.
 
 ### Cómo hacerlo
 
-1. Abre una lista con al menos dos fotos. Elige Navegación → Álbum de fotos → Reproducir álbum o pulsa ⌃⌥P.
+1. Abre una lista con al menos dos fotos. Elige Navegación → Álbum de fotos → Reproducir álbum o pulsa ⌃⌥P. La lista debe contener solo imágenes: si aparece algún vídeo, desactiva Mostrar vídeos antes de iniciar el álbum.
 2. Usa los controles de reproducción para pausar. Elige un intervalo de 1 a 300 segundos y si se repetirá, desde el control de tiempo o Ajustes → General → Álbum de fotos.
 3. Para establecer el fondo, vuelve al visor normal y elige Imagen → Usar la imagen actual como fondo de pantalla… o pulsa ⌃⌥W. Selecciona la pantalla actual o todas las conectadas, Llenar la pantalla o Mostrar la foto completa, y si se aplicarán los ajustes actuales; después aplica.
 
@@ -470,11 +597,11 @@ La reproducción se pausa al salir del modo de concentración, cambiar de aplica
 
 ### Copias para el fondo
 
-La aplicación crea un PNG sin alterar el original. Usa el primer fotograma de las animaciones y prepara el HDR como SDR. Las copias excluyen EXIF/GPS, se adaptan a la pantalla hasta 8192 píxeles y permanecen en la carpeta Application Support/Wallpapers de la aplicación. Los otros espacios de escritorio siguen el comportamiento de macOS. Las copias antiguas no se eliminan automáticamente porque otro espacio puede seguir usándolas.
+La aplicación crea un PNG sin alterar el original. Usa el primer fotograma de las animaciones y prepara el HDR como SDR. Las copias excluyen EXIF/GPS, se adaptan a la pantalla hasta 8192 píxeles y permanecen en la carpeta Application Support/Wallpapers de la aplicación. Los otros espacios de escritorio siguen el comportamiento de macOS. Las copias antiguas no se eliminan automáticamente porque otro espacio puede seguir usándolas. Los vídeos no se pueden usar como origen para el fondo de pantalla.
 
 ### Conviene saber
 
-- Si la reproducción no está disponible, comprueba que la lista filtrada tenga al menos dos fotos y que no estén activos el etiquetado, la Comparación de imágenes u otra operación.
+- Si la reproducción no está disponible, comprueba que la lista filtrada tenga al menos dos fotos y que no estén activos el etiquetado, la Comparación de imágenes u otra operación. La lista debe contener solo imágenes: si aparece algún vídeo, desactiva Mostrar vídeos antes de iniciar el álbum.
 
 [Volver arriba](#top)
 
@@ -482,13 +609,13 @@ La aplicación crea un PNG sin alterar el original. Usa el primer fotograma de l
 
 <a name="settings"></a>
 
-## 13. Adaptar la aplicación a tu forma de trabajar
+## 16. Adaptar la aplicación a tu forma de trabajar
 
 Ajustes reúne las opciones de visualización, los atajos personalizados, las etiquetas y las asociaciones de archivos. Muchas preferencias se recuperan automáticamente al volver a iniciar.
 
 ![Ajustes agrupa las preferencias principales en cuatro pestañas.](figures/settings.png)
 
-**Pantalla 09.** Ajustes agrupa las preferencias principales en cuatro pestañas.
+**Pantalla 12.** Ajustes agrupa las preferencias principales en cuatro pestañas.
 
 1. **Pestañas de Ajustes** — General, Atajos, Etiquetas de fotos y Asociaciones de archivos cubren tareas distintas.
 2. **Preferencias de visualización** — Configura pantalla, miniaturas, nombres de archivo, navegación y carga.
@@ -506,7 +633,7 @@ La interfaz sigue el idioma que macOS asigna a la aplicación. Cámbialo en Ajus
 
 ### Preferencias recordadas
 
-Se conservan el tamaño de las miniaturas, la ampliación de alta calidad, los nombres de archivo, las preferencias de carga, los favoritos, las etiquetas y los atajos. La última colección y posición pueden restaurarse si los archivos siguen accesibles. La comparación de calidad de ampliación empieza desactivada tras reiniciar. Los ajustes visuales y resultados de IA deben exportarse aparte.
+Se conservan el tamaño de las miniaturas, la ampliación de alta calidad, los nombres de archivo, las preferencias de carga, los favoritos, las etiquetas y los atajos. La última colección y posición pueden restaurarse si los archivos siguen accesibles. La comparación de calidad de ampliación empieza desactivada tras reiniciar. Los ajustes visuales y resultados de IA deben exportarse aparte. También se recuerda la opción Mostrar vídeos situada encima de la lista; está desactivada de forma predeterminada y no afecta a los GIF.
 
 ### Asociaciones de archivos
 
@@ -522,13 +649,13 @@ Solo se modifican los grupos de formatos marcados. macOS puede pedir confirmaci�
 
 <a name="shortcuts"></a>
 
-## 14. Atajos y solución rápida de problemas
+## 17. Atajos y solución rápida de problemas
 
 La referencia siguiente enumera las teclas de acción predeterminadas y las contextuales fijas. ⌘ significa Comando, ⌥ Opción, ⌃ Control y ⇧ Mayús.
 
 ![La pestaña Atajos muestra las acciones configurables y los conflictos.](figures/shortcuts.png)
 
-**Pantalla 10.** La pestaña Atajos muestra las acciones configurables y los conflictos.
+**Pantalla 13.** La pestaña Atajos muestra las acciones configurables y los conflictos.
 
 1. **Acciones** — Sitúa el puntero sobre el nombre de una acción para saber dónde y cómo funciona.
 2. **Teclas y modificadores** — Elige la tecla y activa Control, Opción, Mayús o Comando.
