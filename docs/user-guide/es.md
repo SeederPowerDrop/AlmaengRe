@@ -1,4 +1,4 @@
-<!-- almeng-guide-source-sha256: df48dce85367b54f19a2c1bccb01464cd4dcaa1b8be15e8f771002b0c0c16e79 -->
+<!-- almeng-guide-source-sha256: 3667fcb5c0f6d3c7ea30773f73b751a7a4123ae37b29c5db5c840043eb5e1ee7 -->
 
 <a name="top"></a>
 
@@ -12,7 +12,7 @@
 
 Una guía práctica de la versión de desarrollo 0.13.1 actual. Empieza por abrir una carpeta de imágenes y consulta después el capítulo correspondiente a lo que quieras hacer. Los nombres de los menús siguen la interfaz en español de la aplicación.
 
-Versión 0.13.1 · A fecha de 2026-10-06
+Versión 0.13.1 · A fecha de 2026-10-07
 
 > Las capturas muestran la aplicación real con la interfaz en coreano e imágenes sintéticas de demostración. Las anotaciones numeradas y las explicaciones están traducidas al español; los píxeles de las capturas no se modifican. No se utiliza ninguna colección personal de fotos.
 
@@ -82,7 +82,7 @@ El Visor muestra entre una y diez imágenes a la vez. Amplía para examinar deta
 **Pantalla 01.** El Visor principal, con los controles de visualización alrededor de la imagen.
 
 1. **Modos de vista** — Cambia entre Visor, Todo a la vista, Vista de mapa y Comparación de imágenes.
-2. **Buscar y organizar** — Busca nombres de archivo y usa los controles de formato, etiquetas y orden de la colección abierta.
+2. **Búsqueda, filtros y selección del mapa** — Busca, ordena y filtra la lista. La franja azul muestra el número de áreas y fotos, con Volver al mapa y Quitar área del mapa.
 3. **Controles de visualización** — Recorre las imágenes, ajusta el zoom, cambia cuántas se muestran y elige el método de desplazamiento.
 
 ### Cómo hacerlo
@@ -97,7 +97,7 @@ En el visor normal, ←/→ avanza el número de imágenes configurado por vista
 
 ### Controles de desplazamiento
 
-Elige arrastrar con el botón izquierdo, Espacio + botón izquierdo, botón derecho, botón central o dos dedos en el trackpad. Los atajos ⌃⌥1–5 seleccionan un método; no mueven la foto por sí mismos. Los gestos horizontales cambian de imagen cuando no se están usando para desplazar la foto ampliada.
+Elige arrastrar con el botón izquierdo, Espacio + botón izquierdo, botón derecho, botón central o dos dedos en el trackpad. Los atajos ⌃⌥1–5 seleccionan un método; no mueven la foto por sí mismos. Los gestos horizontales cambian de imagen cuando no se están usando para desplazar la foto ampliada. El desplazamiento solo permite un pequeño margen en los bordes, incluso al arrastrar, para no perder la foto en un gran espacio vacío. Los ejes menores que el panel permanecen centrados; al cambiar el zoom o el tamaño de la ventana se reajustan los límites. Esto también se aplica al ver varias imágenes y al comparar la calidad de ampliación.
 
 ### Controles del modo de concentración
 
@@ -122,14 +122,14 @@ Todo a la vista distribuye la colección actual en una cuadrícula de miniaturas
 **Pantalla 02.** Todo a la vista combina la cuadrícula con la búsqueda y los controles de selección y tamaño.
 
 1. **Cuadrícula de miniaturas** — Haz clic, selecciona un intervalo o arrastra por las tarjetas; haz doble clic para abrir una foto.
-2. **Búsqueda, orden y filtros** — Busca, ordena y filtra la lista por formato, etiqueta o visibilidad de vídeos sin modificar los archivos.
+2. **Búsqueda, filtros y selección del mapa** — Busca, ordena y filtra la lista. La franja azul muestra el número de áreas y fotos, con Volver al mapa y Quitar área del mapa.
 3. **Tamaño y selección** — Ajusta el tamaño de las vistas previas y utiliza las acciones de las imágenes seleccionadas para trabajar por lotes.
 
 ### Cómo hacerlo
 
 1. Elige Todo a la vista o pulsa G. Ajusta el tamaño de las miniaturas para ver más imágenes o vistas previas mayores. Haz doble clic en una miniatura para abrirla en el Visor.
 2. Escribe en Buscar nombres de archivo. La búsqueda ignora mayúsculas y minúsculas; todos los términos separados por espacios deben aparecer en el nombre. Elige uno o varios formatos, o Todos los formatos para quitar ese filtro.
-3. Haz clic para seleccionar, ⌘ + clic para añadir o quitar una imagen y ⇧ + clic para seleccionar un intervalo. Arrastra un rectángulo desde una imagen o un espacio vacío para seleccionar las tarjetas que toque.
+3. Haz clic para seleccionar, ⌘ + clic para añadir o quitar una imagen y ⇧ + clic para seleccionar un intervalo. Arrastra un rectángulo desde una imagen o un espacio vacío para seleccionar las tarjetas que toque. ←/→ mueve la selección una tarjeta; ↑/↓ una fila de la cuadrícula actual. También funciona en las listas filtradas por áreas del mapa. Los atajos personalizados tienen prioridad. En modo de etiquetado, las cuatro flechas avanzan una imagen cada vez.
 
 ### Atajos de selección
 
@@ -173,7 +173,7 @@ Comparación de imágenes conserva dos colecciones independientes, A y B, lado a
 
 1. Elige Comparación de imágenes o pulsa ⌃⌥C. Usa Elegir carpetas para comparar… para seleccionar A y B en ese orden, o el botón Abrir… de cada panel.
 2. Usa Orden de la lista para listas independientes. Elige Nombres coincidentes para emparejar nombres sin extensión: 001.jpg coincide con 001.png. Cuando falta una pareja, su lado se muestra vacío.
-3. En Navegación de imágenes, elige un lado por su nombre mostrado o Ambos. Avanza con las flechas comunes o las miniaturas. Activa Vincular zoom y desplazamiento para examinar posiciones relativas correspondientes.
+3. En Navegación de imágenes, elige un lado por su nombre mostrado o Ambos. Avanza con las flechas comunes o las miniaturas. Activa Vincular zoom y desplazamiento para examinar posiciones relativas correspondientes. Cada panel también limita el desplazamiento a un pequeño margen, centra los ejes menores que el panel y reajusta los límites al cambiar el zoom o el tamaño de la ventana.
 
 ### Navegación y repetición
 
@@ -301,11 +301,11 @@ Una foto dentro de cualquiera de las áreas seleccionadas se incluye una sola ve
 
 ### Conservar la colección seleccionada
 
-Abrir la selección en el Visor o Todo a la vista mantiene la restricción geográfica y los filtros de nombre, formato y etiquetas. En la vista previa de un lugar, Esta foto actúa sobre la imagen actual y Todas las fotos de este lugar sobre el grupo. Quitar área del mapa vuelve a la lista sin restricción geográfica, incluidas las fotos sin GPS; abrir una foto fuera del área elimina esa restricción.
+Una franja azul «Solo fotos seleccionadas en el mapa» sobre el Visor y Todo a la vista indica el número de áreas y fotos mostradas. Sigue visible en modo de concentración y cuando no hay resultados. Abrir la selección en el Visor o Todo a la vista mantiene la restricción geográfica y los filtros de nombre, formato y etiquetas. En la vista previa de un lugar, Esta foto actúa sobre la imagen actual y Todas las fotos de este lugar sobre el grupo. Quitar área del mapa vuelve a la lista sin restricción geográfica, incluidas las fotos sin GPS; abrir una foto fuera del área elimina esa restricción.
 
 ### Carga y estado guardado
 
-Los fondos del mapa necesitan conexión a Internet. Las fotos sin GPS no aparecen como miniaturas del mapa. Leer las ubicaciones de una colección grande puede tardar. Las áreas se restauran con la última sesión; abrir una carpeta nueva borra la selección anterior.
+Tras cambiar de modo, Volver al mapa o Vista de mapa recupera la última posición y el zoom. Al reiniciar, el mapa encuadra las áreas restauradas sin recuperar la posición exacta. Abrir otra carpeta restablece las áreas y la posición. El fondo del mapa necesita Internet. Las fotos sin GPS no aparecen; leer las ubicaciones de una colección grande puede tardar.
 
 ### Conviene saber
 
@@ -641,7 +641,7 @@ Solo se modifican los grupos de formatos marcados. macOS puede pedir confirmaci�
 
 ### Conviene saber
 
-- General también enumera los formatos nativos disponibles en tu Mac y ofrece Vaciar caché de imágenes. Elige un modo de carga más lento para reducir el trabajo en segundo plano mientras usas otras aplicaciones.
+- General también enumera los formatos nativos disponibles en tu Mac y ofrece Vaciar caché de imágenes. Elige un modo de carga más lento para reducir el trabajo en segundo plano mientras usas otras aplicaciones. Las miniaturas RAW usan las vistas previas integradas cuando están disponibles. Las miniaturas de tamaño suficiente se reutilizan al cambiar de modo de vista. La velocidad de la primera visualización depende del archivo y del Mac.
 
 [Volver arriba](#top)
 
@@ -693,7 +693,8 @@ Espacio activa el modo de concentración solo cuando ninguna acción personaliza
 
 | Teclas | Acción | Cuándo se aplica |
 | --- | --- | --- |
-| ← / → | Imagen o página anterior / siguiente | Configurable. El Visor avanza por el número de imágenes por pantalla; la comparación sigue Solo A / Ambos / Solo B. |
+| ← / → | Imagen o página anterior / siguiente | Configurable. El Visor avanza por el número de imágenes por pantalla; la comparación sigue Solo A / Ambos / Solo B. Todo a la vista avanza una imagen cada vez. |
+| ↑ / ↓ | Subir / bajar una fila en Todo a la vista | Avanza una fila de la cuadrícula normal de Todo a la vista. Los atajos personalizados tienen prioridad; el modo de etiquetado avanza una imagen. |
 | ⌥← / ⌥→ | Página anterior / siguiente del visor | Teclas contextuales fijas cuando el Visor muestra varias imágenes, también durante el etiquetado; los atajos personalizados del visor tienen prioridad. |
 | = / − | Ampliar / reducir | Configurable; se aplica al visor normal o a la vista comparativa activa. |
 | 0 / 1 | Ajustar a la ventana / Tamaño real | Configurable. La tecla 1 sola aplica una etiqueta durante el etiquetado. |

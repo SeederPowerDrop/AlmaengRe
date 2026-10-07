@@ -1,4 +1,4 @@
-<!-- almeng-guide-source-sha256: 509528e050d862ac266ff1e258ad123604d7663fe06f4174aa0a377adb34e144 -->
+<!-- almeng-guide-source-sha256: 4699b5956b9c3dba687572d365cf38e4563fcbbd1978ac1ca15ed5a66fcdc8ba -->
 
 <a name="top"></a>
 
@@ -12,7 +12,7 @@
 
 Un guide pratique de la version de développement 0.13.1 actuelle. Commencez par ouvrir un dossier d’images, puis consultez le chapitre correspondant à votre tâche. Les noms de menus de ce guide reprennent ceux de l’interface française.
 
-Version 0.13.1 · Au 2026-10-06
+Version 0.13.1 · Au 2026-10-07
 
 > Les captures montrent l’application réelle avec une interface coréenne et des images de démonstration synthétiques. Les annotations numérotées et les explications sont traduites en français ; les pixels des captures restent inchangés. Aucune collection de photos personnelle n’est utilisée.
 
@@ -82,7 +82,7 @@ La Visionneuse affiche de une à dix images à la fois. Agrandissez les détails
 **Écran 01.** La Visionneuse principale, avec ses commandes autour de l’image.
 
 1. **Modes d’affichage** — Passez entre Visionneuse, Tout voir, Vue carte et Comparaison d’images.
-2. **Rechercher et organiser** — Recherchez des noms de fichiers et utilisez les commandes de format, d’étiquettes et de tri de la collection ouverte.
+2. **Recherche, filtres et sélection sur la carte** — Recherchez, triez et filtrez la liste. Le bandeau bleu indique le nombre de zones et de photos, avec Retour à la carte et Effacer la zone de carte.
 3. **Commandes d’affichage** — Parcourez les images, réglez le zoom, changez le nombre affiché et choisissez une méthode de déplacement.
 
 ### Marche à suivre
@@ -97,7 +97,7 @@ Dans la visionneuse normale, ←/→ avance du nombre d’images défini par vue
 
 ### Commandes de déplacement
 
-Choisissez le glissement avec le bouton gauche, Espace + bouton gauche, le bouton droit, le bouton central ou le déplacement à deux doigts. Les raccourcis ⌃⌥1–5 sélectionnent une méthode ; ils ne déplacent pas la photo eux-mêmes. Les balayages horizontaux changent d’image lorsque le geste n’est pas utilisé pour déplacer la photo.
+Choisissez le glissement avec le bouton gauche, Espace + bouton gauche, le bouton droit, le bouton central ou le déplacement à deux doigts. Les raccourcis ⌃⌥1–5 sélectionnent une méthode ; ils ne déplacent pas la photo eux-mêmes. Les balayages horizontaux changent d’image lorsque le geste n’est pas utilisé pour déplacer la photo. Le déplacement ne laisse qu’une petite marge aux bords, même pendant un glissement, pour éviter de perdre la photo dans un grand espace vide. Tout axe plus petit que le volet reste centré ; changer le zoom ou la taille de la fenêtre réajuste les limites. Ces règles s’appliquent aussi à l’affichage de plusieurs images et à la comparaison de qualité du zoom.
 
 ### Commandes du mode concentration
 
@@ -122,14 +122,14 @@ Tout voir présente la collection actuelle sous forme de grille de vignettes. Ut
 **Écran 02.** Tout voir réunit la grille de vignettes, la recherche et les commandes de sélection et de taille.
 
 1. **Grille de vignettes** — Cliquez, sélectionnez une plage ou faites glisser sur les cartes ; double-cliquez pour ouvrir une photo.
-2. **Recherche, tri et filtres** — Recherchez, triez et filtrez la liste par format, étiquette ou affichage des vidéos, sans modifier les fichiers.
+2. **Recherche, filtres et sélection sur la carte** — Recherchez, triez et filtrez la liste. Le bandeau bleu indique le nombre de zones et de photos, avec Retour à la carte et Effacer la zone de carte.
 3. **Taille et sélection** — Réglez la taille des aperçus et utilisez les actions sur les images sélectionnées pour les opérations par lot.
 
 ### Marche à suivre
 
 1. Choisissez Tout voir ou appuyez sur G. Réglez la taille des vignettes pour afficher plus d’images ou des aperçus plus grands. Double-cliquez sur une vignette pour l’ouvrir dans la Visionneuse.
 2. Saisissez du texte dans Rechercher un nom de fichier. La recherche ignore les majuscules ; chaque terme séparé par une espace doit apparaître dans le nom. Choisissez un ou plusieurs formats, ou Tous les formats pour effacer ce filtre.
-3. Cliquez pour sélectionner, utilisez ⌘ + clic pour ajouter ou retirer une image, et ⇧ + clic pour sélectionner une plage. Faites glisser un rectangle depuis une image ou une zone vide pour sélectionner les cartes qu’il touche.
+3. Cliquez pour sélectionner, utilisez ⌘ + clic pour ajouter ou retirer une image, et ⇧ + clic pour sélectionner une plage. Faites glisser un rectangle depuis une image ou une zone vide pour sélectionner les cartes qu’il touche. ←/→ déplace la sélection d’une vignette ; ↑/↓ d’une ligne de la grille actuelle. Cela fonctionne aussi avec une liste limitée aux zones de la carte. Les raccourcis personnalisés ont la priorité. En mode marquage, les quatre flèches déplacent la sélection d’une image à la fois.
 
 ### Raccourcis de sélection
 
@@ -173,7 +173,7 @@ La Comparaison d’images conserve deux collections indépendantes, A et B, côt
 
 1. Choisissez Comparaison d’images ou appuyez sur ⌃⌥C. Utilisez Choisir les dossiers à comparer… pour sélectionner A puis B, ou le bouton Ouvrir… de chaque volet.
 2. Utilisez Ordre de la liste pour des listes indépendantes. Choisissez Noms identiques pour associer les noms sans leur extension : 001.jpg correspond à 001.png. Les correspondances absentes apparaissent comme des cases vides.
-3. Sous Navigation des images, choisissez un côté par son nom affiché ou Les deux. Avancez avec les flèches communes ou les vignettes. Activez Lier zoom et déplacement pour examiner les mêmes positions relatives.
+3. Sous Navigation des images, choisissez un côté par son nom affiché ou Les deux. Avancez avec les flèches communes ou les vignettes. Activez Lier zoom et déplacement pour examiner les mêmes positions relatives. Chaque volet limite aussi le déplacement à une petite marge aux bords, centre les axes plus petits que le volet et réajuste les limites si le zoom ou la taille de la fenêtre change.
 
 ### Navigation et répétition
 
@@ -301,11 +301,11 @@ Une photo située dans au moins une zone sélectionnée est incluse une seule fo
 
 ### Conserver la sélection
 
-Ouvrir la sélection dans la Visionneuse ou Tout voir conserve la restriction géographique et les filtres de nom, format et étiquettes. Dans l’aperçu d’un lieu, Cette photo traite l’image courante et Toutes les photos de ce lieu traite le groupe. Effacer la zone de carte retrouve la liste sans restriction géographique, y compris les photos sans GPS ; ouvrir une photo hors zone supprime cette restriction.
+Un bandeau bleu « Photos sélectionnées sur la carte uniquement » au-dessus de la Visionneuse et de Tout voir indique le nombre de zones et de photos affichées. Il reste visible en mode concentration et si le résultat est vide. Ouvrir la sélection dans la Visionneuse ou Tout voir conserve la restriction géographique et les filtres de nom, format et étiquettes. Dans l’aperçu d’un lieu, Cette photo traite l’image courante et Toutes les photos de ce lieu traite le groupe. Effacer la zone de carte retrouve la liste sans restriction géographique, y compris les photos sans GPS ; ouvrir une photo hors zone supprime cette restriction.
 
 ### Chargement et état mémorisé
 
-Le fond de carte nécessite une connexion Internet. Les photos sans GPS ne figurent pas parmi les vignettes de la carte. Lire les positions peut prendre du temps dans une grande collection. Les zones sont restaurées avec la dernière session ; ouvrir un nouveau dossier efface les zones sélectionnées précédemment.
+Après un changement de mode, Retour à la carte ou Vue carte retrouve la dernière position et le zoom. Au redémarrage, la carte cadre les zones restaurées sans retrouver la position exacte. Ouvrir un nouveau dossier réinitialise les zones et la position. Le fond de carte nécessite Internet. Les photos sans GPS sont absentes ; la lecture des lieux peut prendre du temps dans une grande collection.
 
 ### Bon à savoir
 
@@ -641,7 +641,7 @@ Seuls les groupes de formats cochés sont modifiés. macOS peut demander confirm
 
 ### Bon à savoir
 
-- Général répertorie aussi les formats natifs disponibles sur votre Mac et propose Vider le cache d’images. Choisissez un mode de chargement plus lent pour réduire le travail en arrière-plan pendant l’utilisation d’autres applications.
+- Général répertorie aussi les formats natifs disponibles sur votre Mac et propose Vider le cache d’images. Choisissez un mode de chargement plus lent pour réduire le travail en arrière-plan pendant l’utilisation d’autres applications. Les vignettes RAW utilisent les aperçus intégrés lorsqu’ils sont disponibles. Les vignettes de taille suffisante sont réutilisées entre les modes de vue. La vitesse du premier affichage dépend du fichier et du Mac.
 
 [Retour en haut](#top)
 
@@ -693,7 +693,8 @@ Espace sert au mode concentration uniquement si aucune action personnalisée n�
 
 | Touches | Action | Conditions d’utilisation |
 | --- | --- | --- |
-| ← / → | Image ou page précédente / suivante | Configurable. La Visionneuse avance par le nombre d’images par vue ; la comparaison suit A seul / Les deux / B seul. |
+| ← / → | Image ou page précédente / suivante | Configurable. La Visionneuse avance par le nombre d’images par vue ; la comparaison suit A seul / Les deux / B seul. Tout voir avance d’une image à la fois. |
+| ↑ / ↓ | Monter / descendre d’une ligne dans Tout voir | Déplace la sélection d’une ligne dans la grille normale de Tout voir. Les raccourcis personnalisés ont la priorité ; le mode marquage avance d’une image. |
 | ⌥← / ⌥→ | Page précédente / suivante de la visionneuse | Touches contextuelles fixes lorsque plusieurs images sont affichées, y compris pendant le marquage ; les raccourcis personnalisés de la visionneuse sont prioritaires. |
 | = / − | Zoom avant / arrière | Configurable ; concerne la visionneuse normale ou le volet de comparaison actif. |
 | 0 / 1 | Adapter à la fenêtre / Taille réelle | Configurable. La touche 1 seule sert d’étiquette pendant le marquage. |

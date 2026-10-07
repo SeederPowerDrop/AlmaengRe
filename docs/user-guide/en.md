@@ -1,4 +1,4 @@
-<!-- almeng-guide-source-sha256: 2b1f29a9ca1232c78bc89ef17c4af3af7f34fc1d4065182a472bd8a8f95571dc -->
+<!-- almeng-guide-source-sha256: 061d375be8db6a759c1cdc918b17a09dc847b5840b48b35462246b22915cdbe8 -->
 
 <a name="top"></a>
 
@@ -12,7 +12,7 @@
 
 A practical guide to the current 0.13.1 development version. Start with a folder of images, then use the chapters as a reference for the task in front of you. Menu names in this guide follow the app's English interface.
 
-Version 0.13.1 · As of 2026-10-06
+Version 0.13.1 · As of 2026-10-07
 
 > Screenshots show the real app with a Korean interface and synthetic demonstration media. Numbered annotations and explanations are translated into this guide's language; the screenshot pixels remain unchanged. No personal photo or video collection is used.
 
@@ -82,7 +82,7 @@ Viewer can show one to ten images at a time. Zoom in to inspect details or hide 
 **Screen 01.** The main Viewer, with the viewing controls surrounding the image.
 
 1. **View modes** — Switch between Viewer, All at Once, Map View, and Image Comparison.
-2. **Find and organize** — Search filenames and use format, tag, and sort controls for the open collection.
+2. **Search, filters and map selection** — Search, sort and filter the current list. The blue map banner shows area and photo counts, with Back to map and Clear Map Area buttons.
 3. **Viewing controls** — Move through images, set zoom, change the number displayed, and choose the pan method.
 
 ### How to
@@ -97,7 +97,7 @@ In the regular viewer, ←/→ advances by the configured number of images per s
 
 ### Pan controls
 
-Choose left drag, Space + left drag, right drag, middle drag, or two-finger trackpad movement. The ⌃⌥1–5 shortcuts select a pan method; they do not move the photo by themselves. Horizontal swipes navigate when the gesture is not being used to pan.
+Choose left drag, Space + left drag, right drag, middle drag, or two-finger trackpad movement. The ⌃⌥1–5 shortcuts select a pan method; they do not move the photo by themselves. Horizontal swipes navigate when the gesture is not being used to pan. Panning allows only a small margin at the image edges, including during a drag, so photos cannot be pushed into a large empty space. Any axis smaller than its viewing pane stays centered; resizing the window or changing zoom readjusts the limits. The same rules apply to multiple-image viewing and zoom-quality comparison.
 
 ### Focus controls
 
@@ -122,14 +122,14 @@ All at Once spreads the current collection into a thumbnail grid. Use it to scan
 **Screen 02.** All at Once combines the thumbnail grid with search, selection, and size controls.
 
 1. **Thumbnail grid** — Click, range-select, or drag across cards; double-click to open a photo.
-2. **Search, sorting and filters** — Search and sort the current list, or adjust format, classification and video filters without changing files.
+2. **Search, filters and map selection** — Search, sort and filter the current list. The blue map banner shows area and photo counts, with Back to map and Clear Map Area buttons.
 3. **Size and selection** — Adjust preview size and use the selected-image actions for batch work.
 
 ### How to
 
 1. Choose All at Once or press G. Adjust the thumbnail-size slider to see more images or larger previews. Double-click a thumbnail to open it in Viewer.
 2. Type in Search Filenames. Search ignores letter case; every space-separated term must appear in the filename. Choose one or more formats, or All Formats to clear that filter.
-3. Click to select, ⌘-click to add or remove an image, and ⇧-click to select a range. Drag a rectangle from an image or empty space to select intersecting cards.
+3. Click to select, ⌘-click to add or remove an image, and ⇧-click to select a range. Drag a rectangle from an image or empty space to select intersecting cards. ←/→ moves one card at a time; ↑/↓ moves one row in the current grid. This also works in a list restricted to selected map areas. Custom shortcuts take priority. In Tagging mode, all four arrows move one image at a time.
 
 ### Selection shortcuts
 
@@ -173,7 +173,7 @@ Image Comparison keeps independent A and B collections side by side or above and
 
 1. Choose Image Comparison or press ⌃⌥C. Use Choose Folders to Compare… to select A and B in sequence, or use each pane's Open… button.
 2. Use List Order for independent lists. Choose Matching Names to pair filenames without their extensions: 001.jpg matches 001.png. Missing partners stay visible as empty comparison rows.
-3. Under Image Navigation, choose one side by its displayed name or Both. Use the common arrows or pane thumbnails to move. Turn Link Zoom and Pan on to inspect corresponding relative positions.
+3. Under Image Navigation, choose one side by its displayed name or Both. Use the common arrows or pane thumbnails to move. Turn Link Zoom and Pan on to inspect corresponding relative positions. Each pane also limits panning to a small edge margin, centers any axis smaller than the pane, and readjusts the limits when zoom or window size changes.
 
 ### Navigation and looping
 
@@ -301,11 +301,11 @@ A photo in any selected area is included once, even where areas overlap. Select 
 
 ### Keep the selected collection
 
-Opening the selection in Viewer or All at Once keeps the map restriction active. Filename, format, and tag filters also apply. Clear Map Area returns to the non-geographic filtered list, including images without GPS. Opening a map photo outside the selection clears only the geographic restriction.
+A blue “Showing only photos selected on the map” banner above Viewer and All at Once shows the area and displayed-photo counts. It remains in focus mode and when the results are empty. Opening the selection in Viewer or All at Once keeps the map restriction active. Filename, format, and tag filters also apply. Clear Map Area returns to the non-geographic filtered list, including images without GPS. Opening a map photo outside the selection clears only the geographic restriction.
 
 ### Loading and saved state
 
-Map backgrounds need an internet connection. Photos without GPS do not appear as map thumbnails. Location reads may take time in a large collection. Areas are restored with the last session; opening a new folder clears the previous area's selection. Video GPS is not read, so videos do not appear as location thumbnails.
+After switching viewing modes, Back to map or Map View returns to the last map position and zoom. After relaunch, the map fits the restored selection instead of restoring the exact position. Opening a new folder resets the areas and map position. Map backgrounds need internet access. Photos without GPS are absent; reading locations in large collections may take time. Video GPS is not read.
 
 ### Good to know
 
@@ -641,7 +641,7 @@ Only the checked format groups are changed. macOS may ask for confirmation. Movi
 
 ### Good to know
 
-- General lists the native formats available on your Mac and offers Clear Image Cache. Video playback uses built-in macOS codecs and checks each file when opened; no external codec installation is required. Choose a slower loading mode for less background work.
+- General lists the native formats available on your Mac and offers Clear Image Cache. Video playback uses built-in macOS codecs and checks each file when opened; no external codec installation is required. Choose a slower loading mode for less background work. RAW thumbnails use embedded previews when available; thumbnails large enough for the current view are reused across viewing modes. Initial display speed depends on the file and your Mac.
 
 [Back to top](#top)
 
@@ -693,7 +693,8 @@ Space is a focus gesture only when no custom action uses plain Space and you are
 
 | Keys | Action | When it applies |
 | --- | --- | --- |
-| ← / → | Previous / next image or page | Configurable. Viewer moves by images per screen; comparison follows A Only / Both / B Only. |
+| ← / → | Previous / next image or page | Configurable. Viewer moves by images per screen; comparison follows A Only / Both / B Only. All at Once moves one image at a time. |
+| ↑ / ↓ | Move up / down a row in All at Once | Moves one row in the regular All at Once grid. Custom shortcuts take priority; Tagging mode moves one image at a time. |
 | ⌥← / ⌥→ | Previous / next viewer page | Fixed contextual keys when Viewer shows multiple images, including during Tagging; custom viewer assignments take priority. |
 | = / − | Zoom in / out | Configurable; applies to the regular viewer or active comparison view. |
 | 0 / 1 | Fit to Window / Actual Size | Configurable. Plain 1 is a tag key while Tagging is active. |

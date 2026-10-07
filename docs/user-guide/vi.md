@@ -1,4 +1,4 @@
-<!-- almeng-guide-source-sha256: bea7524c51ee011a611aa8df5858af7d027dba4dd7a314b01c46590a8ad01fa2 -->
+<!-- almeng-guide-source-sha256: 49e8658213f4be6c344288665a7aece9a45fcff51069fdb26ffb14918b6a53b0 -->
 
 <a name="top"></a>
 
@@ -12,7 +12,7 @@
 
 Hướng dẫn thực hành cho phiên bản phát triển 0.13.1 hiện tại. Hãy bắt đầu bằng một thư mục ảnh, rồi tra cứu chương phù hợp với việc bạn muốn làm. Tên menu trong hướng dẫn theo giao diện tiếng Việt của ứng dụng.
 
-Phiên bản 0.13.1 · Tính đến 2026-10-06
+Phiên bản 0.13.1 · Tính đến 2026-10-07
 
 > Ảnh chụp màn hình lấy từ ứng dụng thật với giao diện tiếng Hàn và ảnh minh họa được tạo riêng. Các chú thích đánh số và phần giải thích được dịch sang ngôn ngữ của hướng dẫn; nội dung ảnh chụp màn hình giữ nguyên. Không sử dụng bộ sưu tập ảnh cá nhân.
 
@@ -82,7 +82,7 @@ Trình xem có thể hiển thị từ một đến mười ảnh cùng lúc. Ph
 **Màn hình 01.** Trình xem chính với các điều khiển bao quanh ảnh.
 
 1. **Chế độ xem** — Chuyển giữa Trình xem, Xem tất cả, Xem bản đồ và So sánh ảnh.
-2. **Tìm và sắp xếp** — Tìm theo tên tệp, lọc định dạng, lọc nhãn và sắp xếp bộ ảnh đang mở.
+2. **Tìm kiếm, lọc và vùng chọn bản đồ** — Tìm, sắp xếp và lọc danh sách hiện tại. Thanh màu xanh cho biết số vùng và số ảnh, với các nút Quay lại bản đồ và Xóa vùng bản đồ.
 3. **Điều khiển xem** — Chuyển ảnh, đặt mức thu phóng, đổi số ảnh hiển thị và chọn cách di chuyển ảnh.
 
 ### Các bước thực hiện
@@ -97,7 +97,7 @@ Trong trình xem thông thường, ←/→ chuyển theo số ảnh đã đặt 
 
 ### Điều khiển di chuyển ảnh
 
-Chọn kéo bằng nút trái, Space + kéo bằng nút trái, kéo bằng nút phải, nút giữa hoặc di chuyển bằng hai ngón tay trên bàn di chuột. Các phím ⌃⌥1–5 chọn cách di chuyển, không tự làm ảnh dịch chuyển. Vuốt ngang chuyển ảnh khi cử chỉ đó không được dùng để di chuyển ảnh phóng to.
+Chọn kéo bằng nút trái, Space + kéo bằng nút trái, kéo bằng nút phải, nút giữa hoặc di chuyển bằng hai ngón tay trên bàn di chuột. Các phím ⌃⌥1–5 chọn cách di chuyển, không tự làm ảnh dịch chuyển. Vuốt ngang chuyển ảnh khi cử chỉ đó không được dùng để di chuyển ảnh phóng to. Khi di chuyển, kể cả lúc đang kéo, chỉ cho phép một khoảng nhỏ ở mép ảnh để ảnh không bị đẩy vào vùng trống lớn. Trục nhỏ hơn khung xem luôn được căn giữa; đổi mức thu phóng hoặc kích thước cửa sổ sẽ điều chỉnh lại giới hạn. Quy tắc này cũng áp dụng khi xem nhiều ảnh và so sánh chất lượng phóng to.
 
 ### Điều khiển trong chế độ tập trung
 
@@ -122,14 +122,14 @@ Xem tất cả trải bộ ảnh hiện tại thành lưới ảnh thu nhỏ. D�
 **Màn hình 02.** Xem tất cả kết hợp lưới ảnh thu nhỏ với tìm kiếm, lựa chọn và điều chỉnh kích thước.
 
 1. **Lưới ảnh thu nhỏ** — Bấm, chọn theo khoảng hoặc kéo qua các thẻ; bấm đúp để mở ảnh.
-2. **Tìm kiếm, sắp xếp và lọc** — Tìm, sắp xếp và lọc danh sách theo định dạng, nhãn hoặc hiển thị video mà không đổi tệp.
+2. **Tìm kiếm, lọc và vùng chọn bản đồ** — Tìm, sắp xếp và lọc danh sách hiện tại. Thanh màu xanh cho biết số vùng và số ảnh, với các nút Quay lại bản đồ và Xóa vùng bản đồ.
 3. **Kích thước và lựa chọn** — Điều chỉnh ảnh xem trước và dùng các thao tác dành cho ảnh đã chọn để xử lý hàng loạt.
 
 ### Các bước thực hiện
 
 1. Chọn Xem tất cả hoặc nhấn G. Điều chỉnh thanh kích thước ảnh thu nhỏ để thấy nhiều ảnh hơn hoặc ảnh xem trước lớn hơn. Bấm đúp ảnh thu nhỏ để mở trong Trình xem.
 2. Nhập vào Tìm theo tên tệp. Tìm kiếm không phân biệt chữ hoa/thường; mọi từ ngăn bằng dấu cách đều phải xuất hiện trong tên tệp. Chọn một hay nhiều định dạng, hoặc Tất cả định dạng để bỏ bộ lọc đó.
-3. Bấm để chọn, ⌘-bấm để thêm hoặc bỏ một ảnh và ⇧-bấm để chọn một khoảng. Kéo hình chữ nhật từ ảnh hoặc vùng trống để chọn các thẻ giao với vùng đó.
+3. Bấm để chọn, ⌘-bấm để thêm hoặc bỏ một ảnh và ⇧-bấm để chọn một khoảng. Kéo hình chữ nhật từ ảnh hoặc vùng trống để chọn các thẻ giao với vùng đó. ←/→ di chuyển từng thẻ; ↑/↓ di chuyển từng hàng của lưới hiện tại. Cách này cũng hoạt động khi danh sách được lọc theo vùng bản đồ. Phím tắt tùy chỉnh được ưu tiên. Trong chế độ phân loại, cả bốn phím mũi tên đều di chuyển từng ảnh.
 
 ### Phím hỗ trợ chọn ảnh
 
@@ -173,7 +173,7 @@ So sánh ảnh giữ hai bộ A và B độc lập, đặt cạnh nhau hoặc tr
 
 1. Chọn So sánh ảnh hoặc nhấn ⌃⌥C. Dùng Chọn thư mục để so sánh… để lần lượt chọn A và B, hoặc dùng nút Mở… của từng khung.
 2. Dùng Thứ tự danh sách để xem hai danh sách độc lập. Chọn Tên tệp trùng khớp để ghép tên không tính phần mở rộng: 001.jpg khớp với 001.png. Ảnh thiếu cặp vẫn có hàng so sánh với một bên trống.
-3. Trong Chuyển ảnh, chọn một bên theo tên hiển thị hoặc Cả hai. Dùng mũi tên chung hoặc ảnh thu nhỏ để chuyển. Bật Liên kết phóng to và di chuyển để xem các vị trí tương đối tương ứng.
+3. Trong Chuyển ảnh, chọn một bên theo tên hiển thị hoặc Cả hai. Dùng mũi tên chung hoặc ảnh thu nhỏ để chuyển. Bật Liên kết phóng to và di chuyển để xem các vị trí tương đối tương ứng. Mỗi khung cũng chỉ cho phép một khoảng nhỏ ở mép, căn giữa trục nhỏ hơn khung và điều chỉnh lại giới hạn khi đổi mức thu phóng hoặc kích thước cửa sổ.
 
 ### Chuyển ảnh và lặp
 
@@ -301,11 +301,11 @@ Xem bản đồ đặt các ảnh có siêu dữ liệu GPS lên bản đồ. K�
 
 ### Giữ bộ ảnh đã chọn
 
-Mở lựa chọn trong Trình xem hoặc Xem tất cả vẫn giữ giới hạn bản đồ. Các bộ lọc tên tệp, định dạng và nhãn cũng áp dụng. Xóa vùng bản đồ trở về danh sách lọc không giới hạn vị trí, gồm cả ảnh không có GPS. Mở một ảnh trên bản đồ nằm ngoài vùng chọn chỉ bỏ giới hạn địa lý.
+Thanh màu xanh “Chỉ hiển thị ảnh đã chọn trên bản đồ” phía trên Trình xem và Xem tất cả cho biết số vùng và số ảnh hiển thị. Thanh vẫn hiện trong chế độ tập trung và khi không có kết quả. Mở lựa chọn trong Trình xem hoặc Xem tất cả vẫn giữ giới hạn bản đồ. Các bộ lọc tên tệp, định dạng và nhãn cũng áp dụng. Xóa vùng bản đồ trở về danh sách lọc không giới hạn vị trí, gồm cả ảnh không có GPS. Mở một ảnh trên bản đồ nằm ngoài vùng chọn chỉ bỏ giới hạn địa lý.
 
 ### Tải và lưu trạng thái
 
-Nền bản đồ cần kết nối internet. Ảnh không có GPS không xuất hiện dưới dạng ảnh thu nhỏ trên bản đồ. Đọc vị trí của bộ ảnh lớn có thể mất thời gian. Các vùng được khôi phục cùng phiên trước; mở thư mục mới sẽ xóa lựa chọn vùng cũ.
+Sau khi đổi chế độ xem, Quay lại bản đồ hoặc Xem bản đồ khôi phục vị trí và mức thu phóng cuối. Khi khởi động lại ứng dụng, bản đồ căn theo vùng chọn được khôi phục thay vì vị trí chính xác. Mở thư mục mới đặt lại vùng chọn và vị trí bản đồ. Nền bản đồ cần internet. Ảnh không có GPS không xuất hiện; đọc vị trí của bộ ảnh lớn có thể mất thời gian.
 
 ### Điều cần biết
 
@@ -641,7 +641,7 @@ Chỉ các nhóm định dạng được đánh dấu mới thay đổi. macOS c
 
 ### Điều cần biết
 
-- Chung cũng liệt kê các định dạng gốc có trên Mac và có Xóa bộ nhớ đệm ảnh. Chọn chế độ tải chậm hơn nếu muốn giảm công việc nền khi dùng ứng dụng khác.
+- Chung cũng liệt kê các định dạng gốc có trên Mac và có Xóa bộ nhớ đệm ảnh. Chọn chế độ tải chậm hơn nếu muốn giảm công việc nền khi dùng ứng dụng khác. Ảnh thu nhỏ RAW ưu tiên bản xem trước nhúng nếu có; ảnh thu nhỏ đủ lớn được dùng lại khi chuyển chế độ xem. Tốc độ hiển thị lần đầu tùy thuộc vào tệp và máy Mac.
 
 [Về đầu trang](#top)
 
@@ -693,7 +693,8 @@ Space chỉ đổi chế độ tập trung khi không có thao tác riêng dùng
 
 | Phím | Thao tác | Điều kiện sử dụng |
 | --- | --- | --- |
-| ← / → | Ảnh hoặc trang trước / tiếp theo | Có thể gán lại. Trình xem chuyển theo số ảnh mỗi màn hình; so sánh theo Chỉ A / Cả hai / Chỉ B. |
+| ← / → | Ảnh hoặc trang trước / tiếp theo | Có thể gán lại. Trình xem chuyển theo số ảnh mỗi màn hình; so sánh theo Chỉ A / Cả hai / Chỉ B. Xem tất cả di chuyển từng ảnh. |
+| ↑ / ↓ | Lên / xuống một hàng trong Xem tất cả | Di chuyển một hàng trong lưới Xem tất cả thông thường. Phím tắt tùy chỉnh được ưu tiên; chế độ phân loại di chuyển từng ảnh. |
 | ⌥← / ⌥→ | Trang trước / tiếp theo trong trình xem | Phím theo ngữ cảnh cố định khi Trình xem hiển thị nhiều ảnh, kể cả lúc Phân loại; tổ hợp riêng cho trình xem được ưu tiên. |
 | = / − | Phóng to / thu nhỏ | Có thể gán lại; áp dụng cho trình xem thông thường hoặc khung so sánh đang hoạt động. |
 | 0 / 1 | Vừa cửa sổ / Kích thước thực | Có thể gán lại. Phím 1 đơn là phím nhãn khi Phân loại bật. |
