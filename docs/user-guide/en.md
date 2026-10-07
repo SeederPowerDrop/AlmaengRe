@@ -1,4 +1,4 @@
-<!-- almeng-guide-source-sha256: 061d375be8db6a759c1cdc918b17a09dc847b5840b48b35462246b22915cdbe8 -->
+<!-- almeng-guide-source-sha256: 1e4a39ed014c1564966f7a27323ce6c6d7819fc91423591bd5f2067747151bc7 -->
 
 <a name="top"></a>
 
@@ -165,27 +165,27 @@ Image Comparison keeps independent A and B collections side by side or above and
 
 **Screen 03.** Two collections in Image Comparison.
 
-1. **A and B panes** — Each pane has its own collection and Open… control, labeled by folder name or alias. Use Comparison Names… to set aliases.
+1. **A and B panes** — Below each pane’s name, check the selected tag keys, conditions, and photo count. With Untagged Photos off and no tags selected, all photos are shown; A/B may overlap. For empty results, check tags and shared search, format, and map filters. Clear removes only that pane’s tag filter.
 2. **Comparison behavior** — Choose matching, the navigation target, shorter-side looping, and linked zoom.
 3. **Locks and thumbnails** — Freeze one side or choose another image from that pane's thumbnail strip.
 
 ### How to
 
-1. Choose Image Comparison or press ⌃⌥C. Use Choose Folders to Compare… to select A and B in sequence, or use each pane's Open… button.
-2. Use List Order for independent lists. Choose Matching Names to pair filenames without their extensions: 001.jpg matches 001.png. Missing partners stay visible as empty comparison rows.
+1. Compare Current Photos by Tag opens the current source list in A/B, keeping search, format, and map filters. Only A inherits the regular tag filter; B starts with all photos. For other folders, use Image Comparison (⌃⌥C), Choose Folders to Compare… or each pane’s Open….
+2. Use the tag button below each pane’s name to select several of the existing 12 tags, such as 1·F for A and 3·Q·S for B. Any selected tag (OR) is the default; All selected tags (AND) and Untagged Photos are also available.
 3. Under Image Navigation, choose one side by its displayed name or Both. Use the common arrows or pane thumbnails to move. Turn Link Zoom and Pan on to inspect corresponding relative positions. Each pane also limits panning to a small edge margin, centers any axis smaller than the pane, and readjusts the limits when zoom or window size changes.
 
 ### Navigation and looping
 
-Choosing one side switches to List Order. Matching Names returns to paired navigation. Under Both, Loop Shorter Side repeats the shorter list while the longer one advances; when off, the shorter list stays on its last image. Looping is for List Order.
+Browse filtered results in List Order or pair them with Matching Names: 001.jpg matches 001.png, and missing partners leave an empty side. Choosing one navigation target switches to List Order; Matching Names moves pairs. Under Both, Loop Shorter Side repeats the shorter list from the start; when off, it stays on its last image. Looping uses List Order.
 
 ### Locks
 
-Lock freezes a pane's image, zoom, and pan position. Lock B to navigate A; lock A to navigate B. Unlocking both returns navigation to Both, and locking both stops navigation. A locked pane's thumbnails can still be inspected and scrolled.
+Lock fixes a pane’s image, zoom, and position and prevents tag-filter changes. Lock B to navigate A, or A to navigate B. Unlocking both restores Both; locking both stops navigation. Locked thumbnails remain viewable and scrollable.
 
 ### Originals and saved state
 
-Comparison shows originals without viewer edits. Exit for editing, batch work or wallpaper; Esc returns to the preceding view. Layout, linking, navigation, and the last A/B inputs and positions are remembered. Comparison Names… edits aliases up to 80 characters. Blank fields or Use Automatic Names select folder/ZIP names; Save applies changes, Cancel keeps current names. The same folder/ZIP or mixed locations use A/B; distinct folders with matching names add (A)/(B). Aliases do not rename folders, survive restart, and reset only for the pane receiving new inputs. Reopening the same inputs keeps them. Hover over a shortened name to read it fully. Comparison excludes videos even when Show Videos is on.
+Comparison shows unedited originals and excludes videos. Exit for editing, batch work or wallpaper; Esc returns to the previous view. Layout, linking, navigation, last A/B inputs, positions, and pane tag filters are restored. Filters remain when opening other inputs. Comparison Names… sets aliases up to 80 characters. Blank fields or Use Automatic Names use folder/ZIP names; Save applies, Cancel keeps current names. The same folder/ZIP or mixed locations use A/B; distinct folders with matching names add (A)/(B). Aliases do not rename folders, survive restart and reopening the same inputs, and reset only for new inputs in that pane. Hover over shortened names to read them fully.
 
 ### Good to know
 
@@ -213,11 +213,11 @@ Tagging lets you attach several personal labels to a photo while browsing. Tags 
 
 1. Open photos and click Tagging, use the Photo Tags menu, or press ⌘⇧M. In Image Comparison, tags apply to the active pane's photo.
 2. Browse with ← and →. Press the physical 1–4, QWER, or ASDF keys to toggle their tags. Press a key again to remove that tag; several tags can coexist.
-3. Exit Tagging with ⌘⇧M, Esc, or the panel's close button. Use the Tags filter to show Any selected tag, All selected tags, or Untagged Photos.
+3. Exit Tagging with ⌘⇧M, Esc, or the panel's close button. Use the Tags filter to show Any selected tag, All selected tags, or Untagged Photos. In Image Comparison, use the tag button below each pane’s name to set its filter independently.
 
 ### Keep a steady browsing rhythm
 
-Applying a tag does not automatically advance. While Tagging is active, the filtered list stays in place so several keypresses affect the same image. Filter results refresh when you leave Tagging. Plain arrow keys move a single photo in this mode.
+Applying a tag does not automatically advance. While Tagging is active, the filtered list stays in place so several keypresses affect the same image. Filter results refresh when you leave Tagging. Plain arrow keys move a single photo in this mode. Comparison also defers automatic updates, but changing a tag filter explicitly takes effect immediately.
 
 ### What the keys mean
 
@@ -629,7 +629,7 @@ Settings groups everyday viewing choices, custom shortcuts, tag assignments, and
 
 ### Language
 
-The interface follows the language assigned to the app by macOS. Change it in System Settings → General → Language & Region → Applications. The app supports Korean, English, Simplified Chinese, Japanese, French, Spanish, Arabic, and Vietnamese; this guide set covers seven languages.
+The interface follows the language assigned to the app by macOS. Change it in System Settings → General → Language & Region → Applications, then relaunch the app. Supported languages are Korean, English, Japanese, Simplified Chinese, Vietnamese, Spanish, French, German, Russian and Arabic. Basic Usage follows the app language. Detailed guides cover seven languages; German, Russian and Arabic open the English guide.
 
 ### Remembered preferences
 

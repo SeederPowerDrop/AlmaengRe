@@ -1,4 +1,4 @@
-<!-- almeng-guide-source-sha256: 49e8658213f4be6c344288665a7aece9a45fcff51069fdb26ffb14918b6a53b0 -->
+<!-- almeng-guide-source-sha256: 06550b48cbd902f4422945a5b60b1021be4ef5c52d1db32ee0e1085430689df3 -->
 
 <a name="top"></a>
 
@@ -165,27 +165,27 @@ So sánh ảnh giữ hai bộ A và B độc lập, đặt cạnh nhau hoặc tr
 
 **Màn hình 03.** Hai bộ ảnh trong So sánh ảnh.
 
-1. **Khung A và B** — Mỗi khung có bộ ảnh và Mở… riêng, hiển thị tên thư mục hoặc tên riêng. Tên so sánh… dùng để đặt tên.
+1. **Khung A và B** — Dưới tên mỗi khung, xem phím nhãn đã chọn, điều kiện và số ảnh. Khi tắt Ảnh chưa gắn nhãn và không chọn nhãn nào, mọi ảnh đều được hiển thị; A/B có thể trùng ảnh. Nếu kết quả trống, kiểm tra nhãn và bộ lọc chung về tìm kiếm, định dạng, bản đồ. Xóa chỉ bỏ bộ lọc nhãn của khung đó.
 2. **Cách so sánh** — Chọn cách ghép ảnh, bên cần chuyển, lặp bên ít ảnh hơn và liên kết thu phóng.
 3. **Khóa và ảnh thu nhỏ** — Cố định một bên hoặc chọn ảnh khác từ dải ảnh thu nhỏ của bên đó.
 
 ### Các bước thực hiện
 
-1. Chọn So sánh ảnh hoặc nhấn ⌃⌥C. Dùng Chọn thư mục để so sánh… để lần lượt chọn A và B, hoặc dùng nút Mở… của từng khung.
-2. Dùng Thứ tự danh sách để xem hai danh sách độc lập. Chọn Tên tệp trùng khớp để ghép tên không tính phần mở rộng: 001.jpg khớp với 001.png. Ảnh thiếu cặp vẫn có hàng so sánh với một bên trống.
+1. So sánh ảnh hiện tại theo nhãn mở danh sách gốc trong A/B, giữ bộ lọc tìm kiếm, định dạng và vùng bản đồ. Chỉ A nhận bộ lọc nhãn thông thường; B bắt đầu với tất cả ảnh. Với thư mục khác, dùng So sánh ảnh (⌃⌥C), Chọn thư mục để so sánh… hoặc Mở… của từng khung.
+2. Dùng nút nhãn dưới tên mỗi khung để chọn nhiều nhãn trong 12 nhãn hiện có, chẳng hạn A chọn 1·F, B chọn 3·Q·S. Mặc định là Có bất kỳ nhãn đã chọn nào (OR); cũng có thể dùng Có tất cả nhãn đã chọn (AND) hoặc Ảnh chưa gắn nhãn.
 3. Trong Chuyển ảnh, chọn một bên theo tên hiển thị hoặc Cả hai. Dùng mũi tên chung hoặc ảnh thu nhỏ để chuyển. Bật Liên kết phóng to và di chuyển để xem các vị trí tương đối tương ứng. Mỗi khung cũng chỉ cho phép một khoảng nhỏ ở mép, căn giữa trục nhỏ hơn khung và điều chỉnh lại giới hạn khi đổi mức thu phóng hoặc kích thước cửa sổ.
 
 ### Chuyển ảnh và lặp
 
-Chọn một bên sẽ chuyển sang Thứ tự danh sách. Tên tệp trùng khớp trở lại cách chuyển theo cặp. Khi chọn Cả hai, Lặp bên ít ảnh hơn lặp danh sách ngắn trong lúc danh sách dài tiếp tục; khi tắt, danh sách ngắn giữ ảnh cuối. Chức năng lặp dùng cho Thứ tự danh sách.
+Duyệt kết quả đã lọc theo Thứ tự danh sách hoặc ghép bằng Tên tệp trùng khớp: 001.jpg khớp với 001.png; thiếu ảnh ghép sẽ để trống một bên. Chọn một bên sẽ về Thứ tự danh sách; Tên tệp trùng khớp chuyển theo cặp. Khi chọn Cả hai, Lặp bên ít ảnh hơn lặp danh sách ngắn từ đầu; khi tắt, giữ ảnh cuối. Lặp dùng cho Thứ tự danh sách.
 
 ### Khóa
 
-Khóa cố định ảnh, mức thu phóng và vị trí di chuyển của một khung. Khóa B để duyệt A; khóa A để duyệt B. Mở khóa cả hai sẽ đưa đối tượng chuyển về Cả hai; khóa cả hai sẽ dừng chuyển ảnh. Vẫn có thể xem và cuộn dải ảnh thu nhỏ trong khung bị khóa.
+Khóa giữ ảnh, mức thu phóng và vị trí của khung, đồng thời ngăn đổi bộ lọc nhãn. Khóa B để duyệt A, hoặc A để duyệt B. Mở khóa cả hai khôi phục Cả hai; khóa cả hai dừng chuyển ảnh. Vẫn có thể xem và cuộn ảnh thu nhỏ của khung bị khóa.
 
 ### Ảnh gốc và trạng thái đã lưu
 
-So sánh hiển thị ảnh gốc, không áp dụng chỉnh sửa. Thoát để chỉnh sửa, xử lý hàng loạt hoặc đặt hình nền; Esc về chế độ trước. Bố trí, liên kết, chuyển ảnh và đầu vào/vị trí A/B cuối được ghi nhớ. Tên so sánh… cho đặt tên riêng tối đa 80 ký tự. Để trống hoặc chọn Dùng tên tự động để dùng tên thư mục/ZIP; Lưu mới áp dụng, Hủy giữ tên hiện tại. Cùng thư mục/ZIP hoặc danh sách trộn nhiều vị trí dùng A/B; thư mục khác nhau trùng tên thêm (A)/(B). Không đổi tên thư mục thật. Tên riêng khôi phục khi mở lại ứng dụng và chỉ đặt lại ở khung nhận đầu vào mới. Mở lại cùng đầu vào sẽ giữ tên. Trỏ vào tên rút gọn để xem đầy đủ.
+So sánh hiển thị ảnh gốc chưa chỉnh sửa, không gồm video. Thoát để chỉnh sửa, xử lý hàng loạt hoặc đặt hình nền; Esc về chế độ trước. Bố trí, liên kết, chuyển ảnh, đầu vào/vị trí A/B và bộ lọc nhãn được khôi phục. Bộ lọc vẫn giữ khi mở đầu vào khác. Tên so sánh… đặt tên riêng tối đa 80 ký tự. Để trống hoặc Dùng tên tự động dùng tên thư mục/ZIP; Lưu áp dụng, Hủy giữ nguyên. Cùng thư mục/ZIP hay danh sách trộn dùng A/B; thư mục khác nhau trùng tên thêm (A)/(B). Tên riêng không đổi tên thư mục, vẫn giữ khi khởi động lại hoặc mở cùng đầu vào, chỉ đặt lại với đầu vào mới của khung đó. Trỏ vào tên rút gọn để đọc đầy đủ.
 
 ### Điều cần biết
 
@@ -213,11 +213,11 @@ Phân loại cho phép gắn nhiều nhãn riêng cho ảnh trong lúc duyệt. 
 
 1. Mở ảnh rồi bấm Phân loại, dùng menu Nhãn ảnh hoặc nhấn ⌘⇧M. Trong So sánh ảnh, nhãn áp dụng cho ảnh ở khung đang hoạt động.
 2. Duyệt bằng ← và →. Nhấn các vị trí phím 1–4, QWER hoặc ASDF để bật/tắt nhãn tương ứng. Nhấn lại để bỏ nhãn; một ảnh có thể có nhiều nhãn.
-3. Thoát Phân loại bằng ⌘⇧M, Esc hoặc nút đóng của bảng. Dùng bộ lọc Nhãn để xem Có bất kỳ nhãn đã chọn nào, Có tất cả nhãn đã chọn hoặc Ảnh chưa gắn nhãn.
+3. Thoát Phân loại bằng ⌘⇧M, Esc hoặc nút đóng của bảng. Dùng bộ lọc Nhãn để xem Có bất kỳ nhãn đã chọn nào, Có tất cả nhãn đã chọn hoặc Ảnh chưa gắn nhãn. Trong So sánh ảnh, dùng nút nhãn dưới tên mỗi khung để đặt bộ lọc riêng.
 
 ### Giữ nhịp duyệt ổn định
 
-Gắn nhãn không tự chuyển sang ảnh tiếp theo. Trong chế độ Phân loại, danh sách đã lọc giữ nguyên để nhiều lần nhấn phím cùng tác động lên một ảnh. Kết quả lọc cập nhật khi thoát Phân loại. Trong chế độ này, phím mũi tên đơn chuyển từng ảnh.
+Gắn nhãn không tự chuyển sang ảnh tiếp theo. Trong chế độ Phân loại, danh sách đã lọc giữ nguyên để nhiều lần nhấn phím cùng tác động lên một ảnh. Kết quả lọc cập nhật khi thoát Phân loại. Trong chế độ này, phím mũi tên đơn chuyển từng ảnh. So sánh cũng hoãn cập nhật tự động, nhưng đổi bộ lọc nhãn trực tiếp sẽ áp dụng ngay.
 
 ### Ý nghĩa của các phím
 
@@ -629,7 +629,7 @@ Cài đặt tập hợp các lựa chọn xem thường ngày, phím tắt riên
 
 ### Ngôn ngữ
 
-Giao diện theo ngôn ngữ mà macOS gán cho ứng dụng. Đổi trong Cài đặt hệ thống → Cài đặt chung → Ngôn ngữ & Vùng → Ứng dụng. Ứng dụng hỗ trợ tiếng Hàn, Anh, Trung giản thể, Nhật, Pháp, Tây Ban Nha, Ả Rập và Việt; bộ hướng dẫn này gồm bảy ngôn ngữ.
+Giao diện dùng ngôn ngữ mà macOS chỉ định cho ứng dụng. Đổi tại Cài đặt hệ thống → Cài đặt chung → Ngôn ngữ & Vùng → Ứng dụng, rồi khởi động lại ứng dụng. Hỗ trợ tiếng Hàn, Anh, Nhật, Trung giản thể, Việt, Tây Ban Nha, Pháp, Đức, Nga và Ả Rập. Hướng dẫn cơ bản dùng cùng ngôn ngữ với ứng dụng. Hướng dẫn chi tiết có bảy ngôn ngữ; giao diện tiếng Đức, Nga và Ả Rập sẽ mở bản tiếng Anh.
 
 ### Các tùy chọn được ghi nhớ
 

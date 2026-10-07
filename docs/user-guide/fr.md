@@ -1,4 +1,4 @@
-<!-- almeng-guide-source-sha256: 4699b5956b9c3dba687572d365cf38e4563fcbbd1978ac1ca15ed5a66fcdc8ba -->
+<!-- almeng-guide-source-sha256: 53004da782d3e180f7113419402370b092613bc739df406c0896cd34c4682f8d -->
 
 <a name="top"></a>
 
@@ -165,27 +165,27 @@ La Comparaison d’images conserve deux collections indépendantes, A et B, côt
 
 **Écran 03.** Deux collections dans la Comparaison d’images.
 
-1. **Volets A et B** — Chaque volet a sa collection et Ouvrir…, sous le nom du dossier ou un alias. Noms de comparaison… définit les alias.
+1. **Volets A et B** — Sous chaque nom, vérifiez les touches d’étiquettes sélectionnées, les critères et le nombre de photos. Si Photos sans étiquette est désactivé et qu’aucune étiquette n’est sélectionnée, toutes les photos s’affichent ; A/B peuvent se recouper. Si le résultat est vide, vérifiez les étiquettes et les filtres communs de recherche, format et carte. Effacer retire uniquement le filtre d’étiquettes de ce volet.
 2. **Comportement de la comparaison** — Choisissez la méthode d’association, la cible de navigation, la répétition du côté le plus court et la liaison du zoom.
 3. **Verrous et vignettes** — Figez un côté ou choisissez une autre image dans sa bande de vignettes.
 
 ### Marche à suivre
 
-1. Choisissez Comparaison d’images ou appuyez sur ⌃⌥C. Utilisez Choisir les dossiers à comparer… pour sélectionner A puis B, ou le bouton Ouvrir… de chaque volet.
-2. Utilisez Ordre de la liste pour des listes indépendantes. Choisissez Noms identiques pour associer les noms sans leur extension : 001.jpg correspond à 001.png. Les correspondances absentes apparaissent comme des cases vides.
+1. Comparer les photos actuelles par étiquette ouvre la liste source dans A/B en gardant recherche, format et zone cartographique. Seul A reprend le filtre d’étiquettes habituel ; B commence avec toutes les photos. Pour d’autres dossiers, utilisez Comparaison d’images (⌃⌥C), Choisir les dossiers à comparer… ou Ouvrir… dans chaque volet.
+2. Le bouton d’étiquettes sous le nom de chaque volet permet de sélectionner plusieurs des 12 étiquettes, par exemple 1·F pour A et 3·Q·S pour B. Au moins une étiquette choisie (OR) est le réglage initial ; Toutes les étiquettes choisies (AND) et Photos sans étiquette sont aussi proposés.
 3. Sous Navigation des images, choisissez un côté par son nom affiché ou Les deux. Avancez avec les flèches communes ou les vignettes. Activez Lier zoom et déplacement pour examiner les mêmes positions relatives. Chaque volet limite aussi le déplacement à une petite marge aux bords, centre les axes plus petits que le volet et réajuste les limites si le zoom ou la taille de la fenêtre change.
 
 ### Navigation et répétition
 
-Choisir un côté passe à Ordre de la liste. Noms identiques rétablit la navigation par paires. Avec Les deux, Boucler le côté le plus court répète la liste la plus courte pendant que la plus longue avance ; sinon, la plus courte conserve sa dernière image. Cette répétition concerne Ordre de la liste.
+Parcourez les résultats filtrés dans Ordre de la liste ou associez-les avec Noms identiques : 001.jpg correspond à 001.png ; une image absente laisse un côté vide. Choisir un seul côté passe à Ordre de la liste ; Noms identiques parcourt les paires. Avec Les deux, Boucler le côté le plus court recommence la liste courte ; sinon, elle garde sa dernière image. La répétition utilise Ordre de la liste.
 
 ### Verrouillage
 
-Verrouiller fige l’image, le zoom et la position d’un volet. Verrouillez B pour parcourir A, ou A pour parcourir B. Déverrouiller les deux rétablit la navigation Les deux ; verrouiller les deux arrête la navigation. Les vignettes d’un volet verrouillé restent consultables et défilables.
+Le verrou fixe l’image, le zoom et la position du volet et interdit de changer son filtre d’étiquettes. Verrouillez B pour parcourir A, ou A pour parcourir B. Déverrouiller les deux rétablit Les deux ; verrouiller les deux arrête la navigation. Les vignettes verrouillées restent consultables et défilables.
 
 ### Originaux et état mémorisé
 
-La comparaison montre les originaux sans retouches. Quittez-la pour retoucher, traiter par lot ou définir un fond d’écran ; Esc revient à la vue précédente. Disposition, liaison, navigation et dernières entrées/positions A/B sont mémorisées. Noms de comparaison… édite des alias de 80 caractères maximum. Laisser vide ou choisir Noms automatiques sélectionne les noms de dossier/ZIP ; Enregistrer applique, Annuler garde les noms actuels. Un même dossier/ZIP ou des lieux mélangés utilisent A/B ; des dossiers distincts homonymes ajoutent (A)/(B). Les dossiers ne sont pas renommés. Les alias reviennent au redémarrage ; seules de nouvelles entrées dans un volet le réinitialisent. Rouvrir les mêmes entrées les conserve. Survolez un nom abrégé pour le lire entièrement.
+La comparaison affiche les originaux sans retouches et exclut les vidéos. Quittez-la pour retoucher, traiter par lot ou choisir un fond d’écran ; Esc revient à la vue précédente. Disposition, liaison, navigation, entrées/positions A/B et filtres d’étiquettes sont restaurés. Les filtres restent lors de nouvelles entrées. Noms de comparaison… définit des alias de 80 caractères maximum. Un champ vide ou Noms automatiques utilise le nom du dossier/ZIP ; Enregistrer applique, Annuler conserve. Un même dossier/ZIP ou une liste mixte utilise A/B ; des dossiers homonymes distincts ajoutent (A)/(B). Sans renommer les dossiers, les alias persistent au redémarrage et à la réouverture ; seules de nouvelles entrées dans le volet les réinitialisent. Survolez un nom abrégé pour le lire.
 
 ### Bon à savoir
 
@@ -213,11 +213,11 @@ Le marquage permet d’ajouter plusieurs étiquettes personnelles à une photo p
 
 1. Ouvrez des photos et cliquez sur Marquage, utilisez le menu Étiquettes des photos ou appuyez sur ⌘⇧M. En Comparaison d’images, les étiquettes concernent la photo du volet actif.
 2. Parcourez avec ← et →. Appuyez sur les touches physiques 1–4, QWER ou ASDF pour ajouter ou retirer leurs étiquettes. Une nouvelle pression retire l’étiquette ; plusieurs peuvent coexister.
-3. Quittez le marquage avec ⌘⇧M, Esc ou le bouton de fermeture du panneau. Utilisez le filtre Étiquettes pour afficher Au moins une étiquette choisie, Toutes les étiquettes choisies ou Photos sans étiquette.
+3. Quittez le marquage avec ⌘⇧M, Esc ou le bouton de fermeture du panneau. Utilisez le filtre Étiquettes pour afficher Au moins une étiquette choisie, Toutes les étiquettes choisies ou Photos sans étiquette. Dans Comparaison d’images, le bouton d’étiquettes sous le nom de chaque volet règle son filtre indépendamment.
 
 ### Garder un rythme régulier
 
-Ajouter une étiquette ne fait pas avancer automatiquement. Pendant le marquage, la liste filtrée reste en place afin que plusieurs touches concernent la même image. Les résultats sont actualisés à la sortie du mode. Les flèches seules avancent d’une photo à la fois dans ce mode.
+Ajouter une étiquette ne fait pas avancer automatiquement. Pendant le marquage, la liste filtrée reste en place afin que plusieurs touches concernent la même image. Les résultats sont actualisés à la sortie du mode. Les flèches seules avancent d’une photo à la fois dans ce mode. La comparaison diffère aussi les mises à jour automatiques, mais changer explicitement un filtre d’étiquettes s’applique immédiatement.
 
 ### Signification des touches
 
@@ -629,7 +629,7 @@ Les réglages réunissent l’affichage quotidien, les raccourcis personnalisés
 
 ### Langue
 
-L’interface suit la langue attribuée à l’application par macOS. Changez-la dans Réglages Système → Général → Langue et région → Applications. L’application prend en charge le coréen, l’anglais, le chinois simplifié, le japonais, le français, l’espagnol, l’arabe et le vietnamien ; cette collection de guides couvre sept langues.
+L’interface suit la langue attribuée à l’app par macOS. Modifiez-la dans Réglages Système → Général → Langue et région → Applications, puis relancez l’app. Langues prises en charge : coréen, anglais, japonais, chinois simplifié, vietnamien, espagnol, français, allemand, russe et arabe. L’aide de base suit la langue de l’app. Les guides détaillés existent en sept langues ; en allemand, russe ou arabe, le guide anglais s’ouvre.
 
 ### Préférences mémorisées
 

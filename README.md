@@ -10,7 +10,11 @@
 
 자세한 설명서는 [GitHub 사용설명서 모음](docs/user-guide/README.md)에서 보세요. **0.13.1 개발 버전 기준**으로 실제 앱 화면에 번호·화살표·강조 테두리를 표시하고, 기능별 17개 장과 기본 단축키 30행을 정리했습니다. 비교 폴더 이름·별칭, 워터마크, 촬영 정보 정렬, 영상·애니메이션 안내를 포함하며 PDF는 언어별 34쪽입니다. 2026-10-07 갱신에서는 지도 선택 범위·위치 복원, 몽땅보기 방향키와 사진 이동 범위 안내를 보완했습니다. 공통 화면은 한국어 UI이며 설명과 번호 안내는 각 언어로 번역되어 있습니다.
 
+**0.13.1 개발판**의 앱 UI와 앱 안 기본 사용법은 한국어·영어·일본어·중국어 간체·베트남어·스페인어·프랑스어·독일어·러시아어·아랍어의 **10개 언어**를 지원합니다. 상세 설명서와 PDF는 아래 **7개 언어**로 제공하며, 독일어·러시아어·아랍어 UI에서는 영어 상세 설명서를 엽니다.
+
 Open **Help → Basic Usage** for a short offline guide inside the app, or **Help → Detailed User Guide (GitHub)** for the illustrated manuals. These manuals describe the **0.13.1 development version**; older releases may not include every feature.
+
+The **0.13.1 development app** provides its interface and in-app Basic Usage in **10 languages**: Korean, English, Japanese, Simplified Chinese, Vietnamese, Spanish, French, German, Russian and Arabic. Detailed manuals and PDFs are available in the **seven languages** linked below; German, Russian and Arabic interfaces open the English detailed guide.
 
 [한국어](docs/user-guide/ko.md) · [English](docs/user-guide/en.md) · [日本語](docs/user-guide/ja.md) · [简体中文](docs/user-guide/zh-Hans.md) · [Français](docs/user-guide/fr.md) · [Español](docs/user-guide/es.md) · [Tiếng Việt](docs/user-guide/vi.md)
 

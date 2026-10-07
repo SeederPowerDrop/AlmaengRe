@@ -1,4 +1,4 @@
-<!-- almeng-guide-source-sha256: 3667fcb5c0f6d3c7ea30773f73b751a7a4123ae37b29c5db5c840043eb5e1ee7 -->
+<!-- almeng-guide-source-sha256: 74704cfb833082dfc5167ca053d339bf947f4fdd9c5cccd564c961cff936a6ec -->
 
 <a name="top"></a>
 
@@ -165,27 +165,27 @@ Comparación de imágenes conserva dos colecciones independientes, A y B, lado a
 
 **Pantalla 03.** Dos colecciones en Comparación de imágenes.
 
-1. **Paneles A y B** — Cada panel tiene su colección y Abrir…, con nombre de carpeta o alias. Nombres de comparación… permite definir alias.
+1. **Paneles A y B** — Bajo cada nombre, revisa las teclas de etiquetas seleccionadas, las condiciones y la cantidad de fotos. Con Fotos sin etiquetar desactivado y ninguna etiqueta seleccionada, se muestran todas las fotos; A/B pueden compartir fotos. Si no hay resultados, revisa las etiquetas y los filtros comunes de búsqueda, formato y mapa. Borrar elimina solo el filtro de etiquetas de ese panel.
 2. **Comportamiento de la comparación** — Elige el emparejamiento, el destino de navegación, la repetición del lado corto y el zoom vinculado.
 3. **Bloqueos y miniaturas** — Fija un lado o elige otra imagen en la tira de miniaturas de ese panel.
 
 ### Cómo hacerlo
 
-1. Elige Comparación de imágenes o pulsa ⌃⌥C. Usa Elegir carpetas para comparar… para seleccionar A y B en ese orden, o el botón Abrir… de cada panel.
-2. Usa Orden de la lista para listas independientes. Elige Nombres coincidentes para emparejar nombres sin extensión: 001.jpg coincide con 001.png. Cuando falta una pareja, su lado se muestra vacío.
+1. Comparar fotos actuales por etiquetas abre la lista de origen en A/B, conservando búsqueda, formato y zona del mapa. Solo A hereda el filtro de etiquetas habitual; B empieza con todas las fotos. Para otras carpetas, usa Comparación de imágenes (⌃⌥C), Elegir carpetas para comparar… o Abrir… de cada panel.
+2. Usa el botón de etiquetas bajo el nombre de cada panel para seleccionar varias de las 12 etiquetas, por ejemplo 1·F para A y 3·Q·S para B. El valor inicial es Cualquiera de las etiquetas elegidas (OR); también puedes usar Todas las etiquetas elegidas (AND) o Fotos sin etiquetar.
 3. En Navegación de imágenes, elige un lado por su nombre mostrado o Ambos. Avanza con las flechas comunes o las miniaturas. Activa Vincular zoom y desplazamiento para examinar posiciones relativas correspondientes. Cada panel también limita el desplazamiento a un pequeño margen, centra los ejes menores que el panel y reajusta los límites al cambiar el zoom o el tamaño de la ventana.
 
 ### Navegación y repetición
 
-Elegir un lado cambia a Orden de la lista. Nombres coincidentes restaura la navegación por parejas. Con Ambos, Repetir el lado más corto repite la lista corta mientras avanza la larga; si se desactiva, la corta permanece en su última imagen. La repetición funciona en Orden de la lista.
+Recorre los resultados filtrados con Orden de la lista o empareja con Nombres coincidentes: 001.jpg coincide con 001.png; una pareja ausente deja un lado vacío. Elegir un solo lado cambia a Orden de la lista; Nombres coincidentes recorre parejas. Con Ambos, Repetir el lado más corto reinicia la lista corta; si se desactiva, conserva la última foto. La repetición usa Orden de la lista.
 
 ### Bloqueos
 
-Bloquear fija la imagen, el zoom y la posición de un panel. Bloquea B para recorrer A y A para recorrer B. Desbloquear los dos devuelve la navegación a Ambos; bloquearlos detiene la navegación. Las miniaturas de un panel bloqueado se pueden seguir examinando y desplazando.
+Bloquear fija la imagen, el zoom y la posición del panel e impide cambiar su filtro de etiquetas. Bloquea B para recorrer A, o A para recorrer B. Desbloquear ambos restaura Ambos; bloquearlos detiene la navegación. Las miniaturas bloqueadas se pueden examinar y desplazar.
 
 ### Originales y estado guardado
 
-La comparación muestra originales sin ajustes. Sal para editar, trabajar por lotes o cambiar el fondo; Esc vuelve a la vista anterior. Se recuerdan disposición, vinculación, navegación y últimas entradas/posiciones A/B. Nombres de comparación… edita alias de hasta 80 caracteres. Déjalos vacíos o pulsa Usar nombres automáticos para usar nombres de carpeta/ZIP; Guardar aplica los cambios y Cancelar conserva los nombres actuales. La misma carpeta/ZIP o ubicaciones mezcladas usan A/B; carpetas distintas de igual nombre añaden (A)/(B). No se renombran carpetas. Los alias se restauran al reiniciar y solo se borran en el panel que recibe entradas nuevas. Reabrir las mismas entradas los conserva. Coloca el puntero sobre un nombre abreviado para verlo completo.
+La comparación muestra originales sin ajustes y excluye vídeos. Sal para editar, trabajar por lotes o cambiar el fondo; Esc vuelve a la vista anterior. Se restauran disposición, vinculación, navegación, entradas/posiciones A/B y filtros de etiquetas. Los filtros se mantienen al abrir otras entradas. Nombres de comparación… define alias de hasta 80 caracteres. En blanco o con Usar nombres automáticos se usa el nombre de carpeta/ZIP; Guardar aplica, Cancelar conserva. La misma carpeta/ZIP o listas mixtas usan A/B; carpetas homónimas distintas añaden (A)/(B). Los alias no renombran carpetas, persisten al reiniciar y reabrir las mismas entradas, y solo se borran para entradas nuevas de ese panel. Pasa el puntero por un nombre abreviado para leerlo.
 
 ### Conviene saber
 
@@ -213,11 +213,11 @@ El etiquetado permite asignar varias etiquetas personales a una foto mientras na
 
 1. Abre fotos y haz clic en Etiquetado, usa el menú Etiquetas de fotos o pulsa ⌘⇧M. En Comparación de imágenes, las etiquetas se aplican a la foto del panel activo.
 2. Recorre las fotos con ← y →. Pulsa las teclas físicas 1–4, QWER o ASDF para añadir o quitar sus etiquetas. Una segunda pulsación retira la etiqueta; varias pueden coexistir.
-3. Sal del etiquetado con ⌘⇧M, Esc o el botón de cierre del panel. Usa el filtro Etiquetas para mostrar Cualquiera de las etiquetas elegidas, Todas las etiquetas elegidas o Fotos sin etiquetar.
+3. Sal del etiquetado con ⌘⇧M, Esc o el botón de cierre del panel. Usa el filtro Etiquetas para mostrar Cualquiera de las etiquetas elegidas, Todas las etiquetas elegidas o Fotos sin etiquetar. En Comparación de imágenes, usa el botón de etiquetas bajo el nombre de cada panel para configurar su filtro por separado.
 
 ### Mantener un ritmo constante
 
-Añadir una etiqueta no avanza automáticamente. Mientras el etiquetado está activo, la lista filtrada permanece fija para que varias pulsaciones afecten a la misma foto. Los resultados se actualizan al salir del modo. Las flechas solas avanzan una foto cada vez.
+Añadir una etiqueta no avanza automáticamente. Mientras el etiquetado está activo, la lista filtrada permanece fija para que varias pulsaciones afecten a la misma foto. Los resultados se actualizan al salir del modo. Las flechas solas avanzan una foto cada vez. La comparación también aplaza las actualizaciones automáticas, pero cambiar explícitamente un filtro de etiquetas se aplica de inmediato.
 
 ### Qué significan las teclas
 
@@ -629,7 +629,7 @@ Ajustes reúne las opciones de visualización, los atajos personalizados, las et
 
 ### Idioma
 
-La interfaz sigue el idioma que macOS asigna a la aplicación. Cámbialo en Ajustes del Sistema → General → Idioma y región → Aplicaciones. La aplicación admite coreano, inglés, chino simplificado, japonés, francés, español, árabe y vietnamita; esta colección de guías cubre siete idiomas.
+La interfaz usa el idioma asignado a la app por macOS. Cámbialo en Ajustes del Sistema → General → Idioma y región → Aplicaciones y reinicia la app. Admite coreano, inglés, japonés, chino simplificado, vietnamita, español, francés, alemán, ruso y árabe. La ayuda básica usa el idioma de la app. La guía detallada está disponible en siete idiomas; las interfaces en alemán, ruso y árabe abren la guía en inglés.
 
 ### Preferencias recordadas
 
