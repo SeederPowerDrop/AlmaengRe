@@ -1,4 +1,4 @@
-<!-- almeng-guide-source-sha256: 6ebad04f149aefaa803d9324ebf7a11de01f712d1fb68a37c64b26db184e8fc7 -->
+<!-- almeng-guide-source-sha256: 4f7b03d978ca41fadb62eaff2b64ead2894b54094cbd6c79ebfb8dfe0d317334 -->
 
 <a name="top"></a>
 
@@ -12,7 +12,7 @@
 
 A practical guide to the current 0.13.1 development version. Start with a folder of images, then use the chapters as a reference for the task in front of you. Menu names in this guide follow the app's English interface.
 
-Version 0.13.1 · As of 2026-10-09
+Version 0.13.1 · As of 2026-10-10
 
 > Screenshots show the real app with a Korean interface and synthetic demonstration media. Numbered annotations and explanations are translated into this guide's language; the screenshot pixels remain unchanged. No personal photo or video collection is used.
 
@@ -102,7 +102,7 @@ Viewer can show one to ten images at a time. Zoom in to inspect details or hide 
 
 ### Moving through several images
 
-In the regular viewer, ←/→ moves a full page; with Tagging ON, it moves one item. With multiple items displayed, ↑/↓ selects the row above or below within the current page and stops at its first and last rows. A short last row selects the nearest available card. ⌥←/⌥→ moves a full page, including while tagging.
+In Viewer, ←/→ moves the configured number of items per page with Tagging ON or OFF. With multiple items displayed, ↑/↓ selects the row above or below within the current page and stops at its first and last rows. A short last row selects the nearest available card. ⌥←/⌥→ moves a full page, including while tagging.
 
 ### Pan controls
 
@@ -176,7 +176,7 @@ Image Comparison keeps independent A and B collections side by side or above and
 
 1. **A and B panes** — Below each pane’s name, check the selected tag keys, conditions, and photo count. With Untagged Photos off and no tags selected, all photos are shown; A/B may overlap. For empty results, check tags and shared search, format, and map filters. Clear removes only that pane’s tag filter.
 2. **Comparison behavior** — Choose matching, the navigation target, shorter-side looping, and linked zoom.
-3. **Locks and thumbnails** — Freeze one side or choose another image from that pane's thumbnail strip.
+3. **Apply Tags** — With ON, choose A Only, B Only, or Both for tag keys and bottom buttons, independently of navigation. A − means only some photos are tagged.
 
 ### How to
 
@@ -188,9 +188,9 @@ Image Comparison keeps independent A and B collections side by side or above and
 
 Browse filtered results in List Order or pair them with Matching Names: 001.jpg matches 001.png, and missing partners leave an empty side. Choosing one navigation target switches to List Order; Matching Names moves pairs. Under Both, Loop Shorter Side repeats the shorter list from the start; when off, it stays on its last image. Looping uses List Order.
 
-### Locks
+### Tagging targets and locks
 
-Lock fixes a pane’s image, zoom, and position and prevents tag-filter changes. Lock B to navigate A, or A to navigate B. Unlocking both restores Both; locking both stops navigation. Locked thumbnails remain viewable and scrollable.
+With Tagging ON, Apply Tags chooses A Only, B Only, or Both for keys and bottom buttons. It is independent of the active pane and navigation, starts at A Only, and keeps your choice during the session. Both shows − for mixed marks: press to add to both, or remove from both if both are marked. The same photo is processed once. All target photos must be displayed; Both is unavailable if either side is empty or loading. Locked photos can still be tagged. Lock fixes the image, zoom, position, and tag filter. Lock B to navigate A, or A to navigate B. Unlock both to restore Both navigation; lock both to stop it. Locked thumbnails remain viewable and scrollable.
 
 ### Originals and saved state
 
@@ -220,13 +220,13 @@ Apply several personal labels while browsing photos and videos. Tags can change 
 
 ### How to
 
-1. Use Tagging ON/OFF, the Photo Tags menu, or ⌘⇧M. Turning it ON ends search entry. Keyboard tags affect the current item, or the active pane’s photo in Image Comparison.
+1. Use Tagging ON/OFF, the Photo Tags menu, or ⌘⇧M. Turning ON ends search entry. Keys affect the current item; in comparison, they follow A Only, B Only, or Both under Apply Tags.
 2. With ON, toggle tags with the physical 1–4, QWER, ASDF keys or bottom buttons. Each card’s Tags menu in Viewer or All at Once changes only its photo or video; it neither changes selection nor tags a multiple selection.
 3. In ordinary viewing, turn OFF with ⌘⇧M, Esc, or the panel close button. The Tags filter shows Any selected tag, All selected tags, or Untagged Photos. In Image Comparison, set each filter below its pane’s name.
 
 ### Keep a steady browsing rhythm
 
-Tagging never advances automatically. While ON, the list stays stable and ordinary Viewer ←/→ moves one item at a time. Turning OFF refreshes results. Comparison also defers automatic updates, but explicit filter changes apply immediately. In Viewer, tagging waits until the requested photo or video preview is displayed.
+Tagging never advances automatically. While ON, the list stays stable and Viewer ←/→ keys move a full page at a time. Turning OFF refreshes results. Comparison also defers automatic updates, but explicit filter changes apply immediately. In Viewer, tagging waits until the requested photo or video preview is displayed.
 
 ### What the keys mean
 
@@ -737,7 +737,7 @@ Space is a focus gesture only when no custom action uses plain Space and you are
 
 | Keys | Action | When it applies |
 | --- | --- | --- |
-| ← / → | Previous / next image or page | Configurable. Regular Viewer moves a full page; Tagging ON and All at Once move one item. Comparison follows A Only / Both / B Only. |
+| ← / → | Previous / next image or page | Configurable. With Tagging ON or OFF, Viewer moves a full page and All at Once moves one item. Comparison follows A Only / Both / B Only. |
 | ↑ / ↓ | Select the row above / below | Works in All at Once and multiple-item Viewer with Tagging ON or OFF. Viewer stays within the current page. Stops at row boundaries; custom shortcuts take priority with Tagging OFF. |
 | ⌥← / ⌥→ | Previous / next viewer page | Fixed contextual keys when Viewer shows multiple images, including during Tagging; custom viewer assignments take priority. |
 | = / − | Zoom in / out | Configurable; applies to the regular viewer or active comparison view. |
@@ -763,8 +763,8 @@ Space is a focus gesture only when no custom action uses plain Space and you are
 | ⌥← / ⌥→ | Previous / next in A only | Configurable comparison action; A is left or top. A locked pane stays fixed. |
 | ⇧⌥← / ⇧⌥→ | Previous / next in B only | Configurable comparison action; B is right or bottom. A locked pane stays fixed. |
 | ⌘⇧M | Toggle Tagging mode | Fixed app-menu shortcut. |
-| 1 2 3 4 · Q W E R · A S D F | Toggle twelve tags on photos and videos | Fixed physical keys; current item only with Tagging ON. In full screen they affect that video. They never delete or upload files. |
-| ← / → · ↑ / ↓ | Move between items / rows while tagging | ←/→ moves one item; grid ↑/↓ moves one row. In single-item Viewer and Image Comparison, ↑/↓ moves to the previous or next item. |
+| 1 2 3 4 · Q W E R · A S D F | Toggle twelve tags on photos and videos | Fixed physical keys with Tagging ON. Affect the current item, the Apply Tags target in comparison, or that video in full screen. Never delete or upload files. |
+| ← / → · ↑ / ↓ | Move between pages / items / rows while tagging | ←/→ moves a full page in Viewer or one item in All at Once; grid ↑/↓ moves one row. In single-item Viewer and Image Comparison, ↑/↓ moves to the previous or next item. Comparison follows navigation settings independently of Apply Tags. |
 | ⌘A | Select all images in the current list | Fixed selection shortcut outside Image Comparison; text fields retain normal text selection. |
 | Esc | Cancel the current gesture or leave the active mode | Fixed. Exits Tagging, comparison, zoom-quality comparison, or focus; regular Viewer returns to All at Once. Also cancels area-selection gestures. |
 

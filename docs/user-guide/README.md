@@ -4,7 +4,7 @@
 
 Detailed guides to opening, comparing, tagging, mapping, and editing images. The app’s Help menu contains a short getting-started guide.
 
-개발판 / Development version 0.13.1 · 기준일 / Reviewed 2026-10-09
+개발판 / Development version 0.13.1 · 기준일 / Reviewed 2026-10-10
 
 이 문서는 0.13.1 개발판을 기준으로 합니다. 현재 공개된 이전 버전에는 일부 기능이나 메뉴가 없을 수 있습니다.
 

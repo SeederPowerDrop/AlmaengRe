@@ -1,4 +1,4 @@
-<!-- almeng-guide-source-sha256: 3466de06f2ee465a229033f6d1ea1bbff10289b647c5d5babc03a109120e60c4 -->
+<!-- almeng-guide-source-sha256: 891806cb6a2e1c659479f80bc1fa08c30fc7ab007d41be4d397ad56c6dcce71a -->
 
 <a name="top"></a>
 
@@ -12,7 +12,7 @@
 
 Un guide pratique de la version de développement 0.13.1 actuelle. Commencez par ouvrir un dossier d’images, puis consultez le chapitre correspondant à votre tâche. Les noms de menus de ce guide reprennent ceux de l’interface française.
 
-Version 0.13.1 · Au 2026-10-09
+Version 0.13.1 · Au 2026-10-10
 
 > Les captures montrent l’application réelle avec une interface coréenne et des images de démonstration synthétiques. Les annotations numérotées et les explications sont traduites en français ; les pixels des captures restent inchangés. Aucune collection de photos personnelle n’est utilisée.
 
@@ -102,7 +102,7 @@ La Visionneuse affiche de une à dix images à la fois. Agrandissez les détails
 
 ### Parcourir plusieurs images
 
-Dans la Visionneuse, ←/→ avance d’une page, ou d’un élément avec Marquage ON. Avec plusieurs éléments, ↑/↓ sélectionne la ligne au-dessus ou en dessous dans la page actuelle, sans dépasser la première ni la dernière ligne. Une dernière ligne incomplète sélectionne la carte disponible la plus proche. ⌥←/⌥→ change toujours de page, même pendant le marquage.
+Dans la Visionneuse, ←/→ avance du nombre d’éléments défini par page, avec Marquage ON ou OFF. Avec plusieurs éléments, ↑/↓ sélectionne la ligne au-dessus ou en dessous dans la page actuelle, sans dépasser la première ni la dernière ligne. Une dernière ligne incomplète sélectionne la carte disponible la plus proche. ⌥←/⌥→ change toujours de page, même pendant le marquage.
 
 ### Commandes de déplacement
 
@@ -176,21 +176,21 @@ La Comparaison d’images conserve deux collections indépendantes, A et B, côt
 
 1. **Volets A et B** — Sous chaque nom, vérifiez les touches d’étiquettes sélectionnées, les critères et le nombre de photos. Si Photos sans étiquette est désactivé et qu’aucune étiquette n’est sélectionnée, toutes les photos s’affichent ; A/B peuvent se recouper. Si le résultat est vide, vérifiez les étiquettes et les filtres communs de recherche, format et carte. Effacer retire uniquement le filtre d’étiquettes de ce volet.
 2. **Comportement de la comparaison** — Choisissez la méthode d’association, la cible de navigation, la répétition du côté le plus court et la liaison du zoom.
-3. **Verrous et vignettes** — Figez un côté ou choisissez une autre image dans sa bande de vignettes.
+3. **Appliquer à** — Sur ON, choisissez A seul, B seul ou Les deux pour les touches et boutons du bas, indépendamment de la navigation. − indique que seules certaines photos sont marquées.
 
 ### Marche à suivre
 
 1. Comparer les photos actuelles par étiquette ouvre la liste source dans A/B en gardant recherche, format et zone cartographique. Seul A reprend le filtre d’étiquettes habituel ; B commence avec toutes les photos. Pour d’autres dossiers, utilisez Comparaison d’images (⌃⌥C), Choisir les dossiers à comparer… ou Ouvrir… dans chaque volet.
 2. Le bouton d’étiquettes sous le nom de chaque volet permet de sélectionner plusieurs des 12 étiquettes, par exemple 1·F pour A et 3·Q·S pour B. Au moins une étiquette choisie (OR) est le réglage initial ; Toutes les étiquettes choisies (AND) et Photos sans étiquette sont aussi proposés.
-3. Sous Navigation des images, choisissez un côté par son nom affiché ou Les deux. Avancez avec les flèches communes ou les vignettes. Activez Lier zoom et déplacement pour examiner les mêmes positions relatives. Chaque volet limite aussi le déplacement à une petite marge aux bords, centre les axes plus petits que le volet et réajuste les limites si le zoom ou la taille de la fenêtre change.
+3. Dans Navigation des images, choisissez un côté nommé ou Les deux ; avancez par flèches communes ou vignettes. Lier zoom et déplacement synchronise les positions relatives. Les axes trop petits restent centrés ; le déplacement garde une petite marge et s’adapte au zoom et à la fenêtre.
 
 ### Navigation et répétition
 
 Parcourez les résultats filtrés dans Ordre de la liste ou associez-les avec Noms identiques : 001.jpg correspond à 001.png ; une image absente laisse un côté vide. Choisir un seul côté passe à Ordre de la liste ; Noms identiques parcourt les paires. Avec Les deux, Boucler le côté le plus court recommence la liste courte ; sinon, elle garde sa dernière image. La répétition utilise Ordre de la liste.
 
-### Verrouillage
+### Cible du marquage et verrous
 
-Le verrou fixe l’image, le zoom et la position du volet et interdit de changer son filtre d’étiquettes. Verrouillez B pour parcourir A, ou A pour parcourir B. Déverrouiller les deux rétablit Les deux ; verrouiller les deux arrête la navigation. Les vignettes verrouillées restent consultables et défilables.
+Sur ON, Appliquer à choisit A seul, B seul ou Les deux pour les touches et boutons du bas, indépendamment du volet actif et de la navigation. A seul est le défaut ; le choix dure la session. Avec Les deux, − indique une marque partielle : appuyer marque les deux, ou retire une marque commune. Une photo présente deux fois n’est traitée qu’une fois. Toutes les cibles doivent être affichées ; un côté vide ou en chargement désactive Les deux. Les photos verrouillées restent classables. Le verrou fixe photo, zoom, position et filtre. B verrouillé fait parcourir A, et inversement ; la navigation s’arrête avec deux verrous, revient à « Les deux » sans verrou. Les vignettes verrouillées restent consultables et défilables.
 
 ### Originaux et état mémorisé
 
@@ -220,13 +220,13 @@ Ajoutez plusieurs étiquettes aux photos et vidéos pendant la navigation. Seul 
 
 ### Marche à suivre
 
-1. Utilisez Marquage ON/OFF, Étiquettes des photos ou ⌘⇧M. ON termine la saisie de recherche. Les touches visent l’élément actuel, ou la photo du volet actif en Comparaison d’images.
+1. Utilisez Marquage ON/OFF, Étiquettes des photos ou ⌘⇧M. ON termine la saisie de recherche. Les touches visent l’élément actuel ; en comparaison, elles suivent A seul, B seul ou Les deux sous Appliquer à.
 2. Sur ON, utilisez les touches physiques 1–4, QWER, ASDF ou les boutons inférieurs. Dans Visionneuse et Tout voir, le menu de chaque vignette ne modifie que sa photo ou vidéo, sans changer la sélection ni traiter toute une sélection multiple.
 3. En vue ordinaire, passez sur OFF avec ⌘⇧M, Esc ou la fermeture du panneau. Le filtre Étiquettes propose Au moins une étiquette choisie, Toutes les étiquettes choisies ou Photos sans étiquette. En comparaison, réglez chaque filtre sous le nom du volet.
 
 ### Garder un rythme régulier
 
-Aucune avance automatique après marquage. Sur ON, la liste reste stable et ←/→ dans la Visionneuse avance d’un élément. OFF actualise les résultats. La comparaison diffère aussi l’actualisation, sauf changement explicite du filtre. Dans Visionneuse, le marquage attend l’affichage de la photo ou de l’aperçu vidéo demandé.
+Aucune avance automatique après marquage. Sur ON, la liste reste stable et ←/→ dans la Visionneuse avance d’une page. OFF actualise les résultats. La comparaison diffère aussi l’actualisation, sauf changement explicite du filtre. Dans Visionneuse, le marquage attend l’affichage de la photo ou de l’aperçu vidéo demandé.
 
 ### Signification des touches
 
@@ -737,8 +737,8 @@ Espace sert au mode concentration uniquement si aucune action personnalisée n�
 
 | Touches | Action | Conditions d’utilisation |
 | --- | --- | --- |
-| ← / → | Image ou page précédente / suivante | Configurable. La Visionneuse normale avance d’une page ; Marquage ON et Tout voir, d’un élément. La comparaison suit A seul / Les deux / B seul. |
-| ↑ / ↓ | Sélectionner la ligne au-dessus / en dessous | Dans Tout voir et la Visionneuse à plusieurs éléments, avec Marquage ON ou OFF. La Visionneuse reste dans la page actuelle. Arrêt aux lignes extrêmes ; raccourcis personnalisés prioritaires sur OFF. |
+| ← / → | Image ou page précédente / suivante | Configurable. Avec Marquage ON ou OFF, la Visionneuse avance d’une page et Tout voir d’un élément. La comparaison suit A seul / Les deux / B seul. |
+| ↑ / ↓ | Sélectionner la ligne au-dessus / en dessous | Tout voir et Visionneuse multiple, Marquage ON/OFF : une ligne ; arrêt aux bords. Visionneuse limitée à la page actuelle. Sur OFF, priorité aux raccourcis personnalisés. |
 | ⌥← / ⌥→ | Page précédente / suivante de la visionneuse | Touches contextuelles fixes lorsque plusieurs images sont affichées, y compris pendant le marquage ; les raccourcis personnalisés de la visionneuse sont prioritaires. |
 | = / − | Zoom avant / arrière | Configurable ; concerne la visionneuse normale ou le volet de comparaison actif. |
 | 0 / 1 | Adapter à la fenêtre / Taille réelle | Configurable. La touche 1 seule sert d’étiquette pendant le marquage. |
@@ -763,8 +763,8 @@ Espace sert au mode concentration uniquement si aucune action personnalisée n�
 | ⌥← / ⌥→ | Image précédente / suivante dans A uniquement | Action de comparaison configurable ; A est à gauche ou en haut. Un volet verrouillé reste fixe. |
 | ⇧⌥← / ⇧⌥→ | Image précédente / suivante dans B uniquement | Action de comparaison configurable ; B est à droite ou en bas. Un volet verrouillé reste fixe. |
 | ⌘⇧M | Activer/désactiver le mode marquage | Raccourci fixe du menu de l’application. |
-| 1 2 3 4 · Q W E R · A S D F | Ajouter/retirer les douze étiquettes de photos et vidéos | Touches physiques fixes, élément actuel seulement avec Marquage ON ; en plein écran, la vidéo affichée. Aucune suppression ni aucun téléversement. |
-| ← / → · ↑ / ↓ | Parcourir les éléments / lignes pendant le marquage | ←/→ avance d’un élément ; ↑/↓ d’une ligne dans la grille. Dans la Visionneuse à un élément et la Comparaison d’images, ↑/↓ passe à l’élément précédent ou suivant. |
+| 1 2 3 4 · Q W E R · A S D F | Ajouter/retirer les douze étiquettes de photos et vidéos | Touches physiques fixes avec Marquage ON. Visent l’élément actuel, la cible Appliquer à en comparaison, ou la vidéo en plein écran. Ne suppriment ni ne téléversent de fichiers. |
+| ← / → · ↑ / ↓ | Naviguer pendant le marquage | ←/→ : une page dans Visionneuse, un élément dans Tout voir. ↑/↓ : une ligne dans la grille, un élément en vue unique ou en comparaison. En comparaison, la cible de navigation reste indépendante d’Appliquer à. |
 | ⌘A | Sélectionner toutes les images de la liste actuelle | Raccourci fixe de sélection hors Comparaison d’images ; les champs de texte conservent leur sélection de texte habituelle. |
 | Esc | Annuler le geste ou quitter le mode actif | Fixe. Quitte le marquage, la comparaison, la comparaison de qualité du zoom ou le mode concentration ; la Visionneuse normale revient à Tout voir. Annule aussi les gestes de sélection de zone. |
 

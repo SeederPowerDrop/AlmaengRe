@@ -1,4 +1,4 @@
-<!-- almeng-guide-source-sha256: 9634608eeda777b75828552e0adad7b9906fc7385a9ee8134603944086287129 -->
+<!-- almeng-guide-source-sha256: 5afbac4a96b651a11a92db51edcc751d5bc1824a386d907d8379b848612f044e -->
 
 <a name="top"></a>
 
@@ -12,7 +12,7 @@
 
 Una guía práctica de la versión de desarrollo 0.13.1 actual. Empieza por abrir una carpeta de imágenes y consulta después el capítulo correspondiente a lo que quieras hacer. Los nombres de los menús siguen la interfaz en español de la aplicación.
 
-Versión 0.13.1 · A fecha de 2026-10-09
+Versión 0.13.1 · A fecha de 2026-10-10
 
 > Las capturas muestran la aplicación real con la interfaz en coreano e imágenes sintéticas de demostración. Las anotaciones numeradas y las explicaciones están traducidas al español; los píxeles de las capturas no se modifican. No se utiliza ninguna colección personal de fotos.
 
@@ -102,7 +102,7 @@ El Visor muestra entre una y diez imágenes a la vez. Amplía para examinar deta
 
 ### Avanzar por varias imágenes
 
-En el Visor normal, ←/→ avanza una página; con Etiquetado ON, un elemento. Al mostrar varios elementos, ↑/↓ selecciona la fila superior o inferior de la página actual y se detiene en la primera y la última. Si la última fila está incompleta, selecciona la tarjeta disponible más cercana. ⌥←/⌥→ siempre cambia de página, incluso al etiquetar.
+En el Visor, ←/→ avanza el número de elementos configurado por página, con Etiquetado ON u OFF. Al mostrar varios elementos, ↑/↓ selecciona la fila superior o inferior de la página actual y se detiene en la primera y la última. Si la última fila está incompleta, selecciona la tarjeta disponible más cercana. ⌥←/⌥→ siempre cambia de página, incluso al etiquetar.
 
 ### Controles de desplazamiento
 
@@ -176,21 +176,21 @@ Comparación de imágenes conserva dos colecciones independientes, A y B, lado a
 
 1. **Paneles A y B** — Bajo cada nombre, revisa las teclas de etiquetas seleccionadas, las condiciones y la cantidad de fotos. Con Fotos sin etiquetar desactivado y ninguna etiqueta seleccionada, se muestran todas las fotos; A/B pueden compartir fotos. Si no hay resultados, revisa las etiquetas y los filtros comunes de búsqueda, formato y mapa. Borrar elimina solo el filtro de etiquetas de ese panel.
 2. **Comportamiento de la comparación** — Elige el emparejamiento, el destino de navegación, la repetición del lado corto y el zoom vinculado.
-3. **Bloqueos y miniaturas** — Fija un lado o elige otra imagen en la tira de miniaturas de ese panel.
+3. **Aplicar etiquetas** — Con ON, elige Solo A, Solo B o Ambos para las teclas y botones inferiores, independientemente de la navegación. − indica que solo algunas fotos tienen la etiqueta.
 
 ### Cómo hacerlo
 
 1. Comparar fotos actuales por etiquetas abre la lista de origen en A/B, conservando búsqueda, formato y zona del mapa. Solo A hereda el filtro de etiquetas habitual; B empieza con todas las fotos. Para otras carpetas, usa Comparación de imágenes (⌃⌥C), Elegir carpetas para comparar… o Abrir… de cada panel.
 2. Usa el botón de etiquetas bajo el nombre de cada panel para seleccionar varias de las 12 etiquetas, por ejemplo 1·F para A y 3·Q·S para B. El valor inicial es Cualquiera de las etiquetas elegidas (OR); también puedes usar Todas las etiquetas elegidas (AND) o Fotos sin etiquetar.
-3. En Navegación de imágenes, elige un lado por su nombre mostrado o Ambos. Avanza con las flechas comunes o las miniaturas. Activa Vincular zoom y desplazamiento para examinar posiciones relativas correspondientes. Cada panel también limita el desplazamiento a un pequeño margen, centra los ejes menores que el panel y reajusta los límites al cambiar el zoom o el tamaño de la ventana.
+3. En Navegación de imágenes, elige un lado por nombre o Ambos; usa flechas comunes o miniaturas. Vincular zoom y desplazamiento sincroniza posiciones relativas. Los ejes menores quedan centrados; el movimiento mantiene un margen y se ajusta al zoom y tamaño de ventana.
 
 ### Navegación y repetición
 
 Recorre los resultados filtrados con Orden de la lista o empareja con Nombres coincidentes: 001.jpg coincide con 001.png; una pareja ausente deja un lado vacío. Elegir un solo lado cambia a Orden de la lista; Nombres coincidentes recorre parejas. Con Ambos, Repetir el lado más corto reinicia la lista corta; si se desactiva, conserva la última foto. La repetición usa Orden de la lista.
 
-### Bloqueos
+### Destino de etiquetas y bloqueos
 
-Bloquear fija la imagen, el zoom y la posición del panel e impide cambiar su filtro de etiquetas. Bloquea B para recorrer A, o A para recorrer B. Desbloquear ambos restaura Ambos; bloquearlos detiene la navegación. Las miniaturas bloqueadas se pueden examinar y desplazar.
+Con ON, Aplicar etiquetas elige Solo A, Solo B o Ambos para teclas y botones inferiores, independientemente del panel activo y la navegación. Empieza en Solo A y conserva la elección durante la sesión. En Ambos, − indica una etiqueta parcial: pulsa para añadirla a ambas fotos, o quitarla si ambas la tienen. La misma foto se procesa una vez. Todas las fotos de destino deben mostrarse; un lado vacío o cargando desactiva Ambos. Las fotos bloqueadas admiten etiquetas. Bloquear fija foto, zoom, posición y filtro. B bloqueado permite recorrer A y viceversa; con ambos bloqueados se detiene la navegación; sin bloqueos vuelve a Ambos. Las miniaturas bloqueadas se pueden examinar y desplazar.
 
 ### Originales y estado guardado
 
@@ -220,13 +220,13 @@ Añade varias etiquetas a fotos y vídeos mientras navegas. Solo Etiquetado ON p
 
 ### Cómo hacerlo
 
-1. Usa Etiquetado ON/OFF, Etiquetas de fotos o ⌘⇧M. ON termina la entrada de búsqueda. Las teclas afectan al elemento actual o a la foto del panel activo en Comparación de imágenes.
+1. Usa Etiquetado ON/OFF, Etiquetas de fotos o ⌘⇧M. ON termina la entrada de búsqueda. Las teclas afectan al elemento actual; en comparación, siguen Solo A, Solo B o Ambos en Aplicar etiquetas.
 2. Con ON, usa las teclas físicas 1–4, QWER, ASDF o los botones inferiores. En Visor y Todo a la vista, el menú de cada tarjeta solo cambia su foto o vídeo; no cambia la selección ni aplica etiquetas a toda una selección múltiple.
 3. En la vista normal, pasa a OFF con ⌘⇧M, Esc o cerrando el panel. El filtro Etiquetas muestra Cualquiera de las etiquetas elegidas, Todas las etiquetas elegidas o Fotos sin etiquetar. En comparación, ajusta cada filtro bajo el nombre del panel.
 
 ### Mantener un ritmo constante
 
-Etiquetar no avanza automáticamente. Con ON, la lista queda estable y ←/→ en el Visor avanza un elemento. OFF actualiza los resultados. La comparación también aplaza la actualización, salvo al cambiar el filtro explícitamente. En Visor, no se etiqueta hasta que aparezca la foto o vista previa de vídeo solicitada.
+Etiquetar no avanza automáticamente. Con ON, la lista queda estable y ←/→ en el Visor avanza una página. OFF actualiza los resultados. La comparación también aplaza la actualización, salvo al cambiar el filtro explícitamente. En Visor, no se etiqueta hasta que aparezca la foto o vista previa de vídeo solicitada.
 
 ### Qué significan las teclas
 
@@ -737,7 +737,7 @@ Espacio activa el modo de concentración solo cuando ninguna acción personaliza
 
 | Teclas | Acción | Cuándo se aplica |
 | --- | --- | --- |
-| ← / → | Imagen o página anterior / siguiente | Configurable. El Visor normal avanza una página; Etiquetado ON y Todo a la vista, un elemento. La comparación sigue Solo A / Ambos / Solo B. |
+| ← / → | Imagen o página anterior / siguiente | Configurable. Con Etiquetado ON u OFF, el Visor avanza una página y Todo a la vista un elemento. La comparación sigue Solo A / Ambos / Solo B. |
 | ↑ / ↓ | Seleccionar la fila superior / inferior | En Todo a la vista y el Visor con varios elementos, con Etiquetado ON u OFF. El Visor permanece en la página actual. Se detiene en las filas extremas; los atajos personalizados tienen prioridad con OFF. |
 | ⌥← / ⌥→ | Página anterior / siguiente del visor | Teclas contextuales fijas cuando el Visor muestra varias imágenes, también durante el etiquetado; los atajos personalizados del visor tienen prioridad. |
 | = / − | Ampliar / reducir | Configurable; se aplica al visor normal o a la vista comparativa activa. |
@@ -763,8 +763,8 @@ Espacio activa el modo de concentración solo cuando ninguna acción personaliza
 | ⌥← / ⌥→ | Imagen anterior / siguiente solo en A | Acción de comparación configurable; A está a la izquierda o arriba. Un panel bloqueado permanece fijo. |
 | ⇧⌥← / ⇧⌥→ | Imagen anterior / siguiente solo en B | Acción de comparación configurable; B está a la derecha o abajo. Un panel bloqueado permanece fijo. |
 | ⌘⇧M | Alternar el modo de etiquetado | Atajo fijo del menú de la aplicación. |
-| 1 2 3 4 · Q W E R · A S D F | Añadir/quitar las doce etiquetas de fotos y vídeos | Teclas físicas fijas; solo el elemento actual con Etiquetado ON. En pantalla completa, el vídeo mostrado. No eliminan ni suben archivos. |
-| ← / → · ↑ / ↓ | Recorrer elementos / filas al etiquetar | ←/→ avanza un elemento; ↑/↓ una fila de la cuadrícula. En el Visor con un elemento y en Comparación de imágenes, ↑/↓ pasa al elemento anterior o siguiente. |
+| 1 2 3 4 · Q W E R · A S D F | Añadir/quitar las doce etiquetas de fotos y vídeos | Teclas físicas fijas con Etiquetado ON. Afectan al elemento actual, al destino de Aplicar etiquetas en comparación o al vídeo en pantalla completa. No eliminan ni suben archivos. |
+| ← / → · ↑ / ↓ | Recorrer páginas / elementos / filas al etiquetar | ←/→ avanza una página en el Visor o un elemento en Todo a la vista; ↑/↓ una fila de la cuadrícula. En el Visor con un elemento y en Comparación de imágenes, ↑/↓ pasa al elemento anterior o siguiente. En comparación, la navegación es independiente de Aplicar etiquetas. |
 | ⌘A | Seleccionar todas las imágenes de la lista actual | Atajo fijo de selección fuera de Comparación de imágenes; los campos de texto mantienen la selección de texto habitual. |
 | Esc | Cancelar el gesto actual o salir del modo activo | Fijo. Sale del etiquetado, la comparación, la comparación de calidad de ampliación o la concentración; el Visor normal vuelve a Todo a la vista. También cancela gestos de selección de áreas. |
 

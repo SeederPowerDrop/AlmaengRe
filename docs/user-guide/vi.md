@@ -1,4 +1,4 @@
-<!-- almeng-guide-source-sha256: 6886926620709456aa8907a7b2734f8bf836123b51224723cf253b0b0119fa7d -->
+<!-- almeng-guide-source-sha256: 9ad0336ec7c87dc7d9724642c55ccfc227e2f07336711386ef1d14f94fd40248 -->
 
 <a name="top"></a>
 
@@ -12,7 +12,7 @@
 
 Hướng dẫn thực hành cho phiên bản phát triển 0.13.1 hiện tại. Hãy bắt đầu bằng một thư mục ảnh, rồi tra cứu chương phù hợp với việc bạn muốn làm. Tên menu trong hướng dẫn theo giao diện tiếng Việt của ứng dụng.
 
-Phiên bản 0.13.1 · Tính đến 2026-10-09
+Phiên bản 0.13.1 · Tính đến 2026-10-10
 
 > Ảnh chụp màn hình lấy từ ứng dụng thật với giao diện tiếng Hàn và ảnh minh họa được tạo riêng. Các chú thích đánh số và phần giải thích được dịch sang ngôn ngữ của hướng dẫn; nội dung ảnh chụp màn hình giữ nguyên. Không sử dụng bộ sưu tập ảnh cá nhân.
 
@@ -102,7 +102,7 @@ Trình xem có thể hiển thị từ một đến mười ảnh cùng lúc. Ph
 
 ### Chuyển nhiều ảnh cùng lúc
 
-Trong Trình xem thông thường, ←/→ chuyển cả trang; khi Phân loại ON, chuyển từng mục. Khi hiển thị nhiều mục, ↑/↓ chọn hàng trên hoặc dưới trong trang hiện tại và dừng ở hàng đầu, hàng cuối. Nếu hàng cuối không đầy, thẻ hiện có gần nhất được chọn. ⌥←/⌥→ luôn chuyển cả trang, kể cả khi phân loại.
+Trong Trình xem, ←/→ chuyển theo số mục đã đặt cho mỗi trang, với Phân loại ON hay OFF. Khi hiển thị nhiều mục, ↑/↓ chọn hàng trên hoặc dưới trong trang hiện tại và dừng ở hàng đầu, hàng cuối. Nếu hàng cuối không đầy, thẻ hiện có gần nhất được chọn. ⌥←/⌥→ luôn chuyển cả trang, kể cả khi phân loại.
 
 ### Điều khiển di chuyển ảnh
 
@@ -176,7 +176,7 @@ So sánh ảnh giữ hai bộ A và B độc lập, đặt cạnh nhau hoặc tr
 
 1. **Khung A và B** — Dưới tên mỗi khung, xem phím nhãn đã chọn, điều kiện và số ảnh. Khi tắt Ảnh chưa gắn nhãn và không chọn nhãn nào, mọi ảnh đều được hiển thị; A/B có thể trùng ảnh. Nếu kết quả trống, kiểm tra nhãn và bộ lọc chung về tìm kiếm, định dạng, bản đồ. Xóa chỉ bỏ bộ lọc nhãn của khung đó.
 2. **Cách so sánh** — Chọn cách ghép ảnh, bên cần chuyển, lặp bên ít ảnh hơn và liên kết thu phóng.
-3. **Khóa và ảnh thu nhỏ** — Cố định một bên hoặc chọn ảnh khác từ dải ảnh thu nhỏ của bên đó.
+3. **Áp dụng nhãn** — Khi ON, chọn Chỉ A, Chỉ B hoặc Cả hai cho phím và nút bên dưới, độc lập với đối tượng chuyển ảnh. − nghĩa là chỉ một số ảnh có nhãn.
 
 ### Các bước thực hiện
 
@@ -188,9 +188,9 @@ So sánh ảnh giữ hai bộ A và B độc lập, đặt cạnh nhau hoặc tr
 
 Duyệt kết quả đã lọc theo Thứ tự danh sách hoặc ghép bằng Tên tệp trùng khớp: 001.jpg khớp với 001.png; thiếu ảnh ghép sẽ để trống một bên. Chọn một bên sẽ về Thứ tự danh sách; Tên tệp trùng khớp chuyển theo cặp. Khi chọn Cả hai, Lặp bên ít ảnh hơn lặp danh sách ngắn từ đầu; khi tắt, giữ ảnh cuối. Lặp dùng cho Thứ tự danh sách.
 
-### Khóa
+### Đối tượng gắn nhãn và khóa
 
-Khóa giữ ảnh, mức thu phóng và vị trí của khung, đồng thời ngăn đổi bộ lọc nhãn. Khóa B để duyệt A, hoặc A để duyệt B. Mở khóa cả hai khôi phục Cả hai; khóa cả hai dừng chuyển ảnh. Vẫn có thể xem và cuộn ảnh thu nhỏ của khung bị khóa.
+Khi Phân loại ON, Áp dụng nhãn chọn Chỉ A, Chỉ B hoặc Cả hai cho phím và nút bên dưới. Lựa chọn độc lập với khung hoạt động và đối tượng chuyển ảnh, mặc định Chỉ A và giữ trong phiên chạy ứng dụng. Cả hai hiện − khi chỉ một số ảnh có nhãn: nhấn để gắn cho cả hai, hoặc bỏ ở cả hai nếu đều đã có. Cùng một ảnh chỉ xử lý một lần. Mọi ảnh đích phải thực sự hiển thị; Cả hai bị vô hiệu nếu một bên trống hoặc đang tải. Vẫn có thể gắn nhãn cho ảnh bị khóa. Khóa giữ ảnh, thu phóng, vị trí và bộ lọc. Khóa B để chuyển A, hoặc A để chuyển B. Mở khóa cả hai đưa đối tượng chuyển ảnh về Cả hai; khóa cả hai dừng chuyển. Vẫn có thể xem và cuộn ảnh thu nhỏ bị khóa.
 
 ### Ảnh gốc và trạng thái đã lưu
 
@@ -220,13 +220,13 @@ Gắn nhiều nhãn cho ảnh và video trong lúc duyệt. Chỉ Phân loại O
 
 ### Các bước thực hiện
 
-1. Dùng Phân loại ON/OFF, menu Nhãn ảnh hoặc ⌘⇧M. Bật ON kết thúc nhập tìm kiếm. Phím tác động lên mục hiện tại, hoặc ảnh trong khung hoạt động của So sánh ảnh.
+1. Dùng Phân loại ON/OFF, menu Nhãn ảnh hoặc ⌘⇧M. Bật ON kết thúc nhập tìm kiếm. Phím tác động lên mục hiện tại; trong so sánh, theo Chỉ A, Chỉ B hoặc Cả hai tại Áp dụng nhãn.
 2. Khi ON, dùng vị trí phím 1–4, QWER, ASDF hoặc các nút bên dưới. Trong Trình xem và Xem tất cả, menu Nhãn trên mỗi thẻ chỉ đổi ảnh hay video đó, không đổi lựa chọn hoặc áp dụng cho toàn bộ nhóm chọn.
 3. Ở chế độ xem thông thường, chuyển OFF bằng ⌘⇧M, Esc hoặc đóng bảng. Bộ lọc Nhãn hiển thị Có bất kỳ nhãn đã chọn nào, Có tất cả nhãn đã chọn hoặc Ảnh chưa gắn nhãn. Trong So sánh ảnh, đặt bộ lọc riêng dưới tên mỗi khung.
 
 ### Giữ nhịp duyệt ổn định
 
-Gắn nhãn không tự chuyển mục. Khi ON, danh sách giữ nguyên và ←/→ trong Trình xem chuyển từng mục; OFF cập nhật kết quả. So sánh cũng hoãn cập nhật tự động, trừ khi đổi bộ lọc trực tiếp. Trong Trình xem, chỉ gắn nhãn sau khi ảnh hoặc bản xem trước video yêu cầu đã hiển thị.
+Gắn nhãn không tự chuyển mục. Khi ON, danh sách giữ nguyên và ←/→ trong Trình xem chuyển cả trang; OFF cập nhật kết quả. So sánh cũng hoãn cập nhật tự động, trừ khi đổi bộ lọc trực tiếp. Trong Trình xem, chỉ gắn nhãn sau khi ảnh hoặc bản xem trước video yêu cầu đã hiển thị.
 
 ### Ý nghĩa của các phím
 
@@ -737,7 +737,7 @@ Space chỉ đổi chế độ tập trung khi không có thao tác riêng dùng
 
 | Phím | Thao tác | Điều kiện sử dụng |
 | --- | --- | --- |
-| ← / → | Ảnh hoặc trang trước / tiếp theo | Có thể gán lại. Trình xem thường chuyển cả trang; Phân loại ON và Xem tất cả chuyển từng mục. So sánh theo Chỉ A / Cả hai / Chỉ B. |
+| ← / → | Ảnh hoặc trang trước / tiếp theo | Có thể gán lại. Với Phân loại ON hay OFF, Trình xem chuyển cả trang và Xem tất cả chuyển từng mục. So sánh theo Chỉ A / Cả hai / Chỉ B. |
 | ↑ / ↓ | Chọn hàng phía trên / phía dưới | Trong Xem tất cả và Trình xem nhiều mục, với Phân loại ON hoặc OFF. Trình xem chỉ di chuyển trong trang hiện tại. Dừng ở hàng đầu và cuối; phím tắt tùy chỉnh được ưu tiên khi OFF. |
 | ⌥← / ⌥→ | Trang trước / tiếp theo trong trình xem | Phím theo ngữ cảnh cố định khi Trình xem hiển thị nhiều ảnh, kể cả lúc Phân loại; tổ hợp riêng cho trình xem được ưu tiên. |
 | = / − | Phóng to / thu nhỏ | Có thể gán lại; áp dụng cho trình xem thông thường hoặc khung so sánh đang hoạt động. |
@@ -763,8 +763,8 @@ Space chỉ đổi chế độ tập trung khi không có thao tác riêng dùng
 | ⌥← / ⌥→ | Ảnh trước / tiếp theo chỉ ở A | Thao tác so sánh có thể gán lại; A ở trái hoặc trên. Khung bị khóa giữ nguyên. |
 | ⇧⌥← / ⇧⌥→ | Ảnh trước / tiếp theo chỉ ở B | Thao tác so sánh có thể gán lại; B ở phải hoặc dưới. Khung bị khóa giữ nguyên. |
 | ⌘⇧M | Bật/tắt chế độ Phân loại | Phím tắt cố định của menu ứng dụng. |
-| 1 2 3 4 · Q W E R · A S D F | Bật/tắt mười hai nhãn cho ảnh và video | Vị trí phím cố định; chỉ mục hiện tại khi Phân loại ON. Toàn màn hình áp dụng cho video đang xem. Không xóa hay tải tệp lên mạng. |
-| ← / → · ↑ / ↓ | Chuyển mục / hàng khi phân loại | ←/→ chuyển từng mục; ↑/↓ chuyển từng hàng trong lưới. Trong Trình xem một mục và So sánh ảnh, ↑/↓ chuyển đến mục trước hoặc tiếp theo. |
+| 1 2 3 4 · Q W E R · A S D F | Bật/tắt mười hai nhãn cho ảnh và video | Phím vật lý cố định khi Phân loại ON. Áp dụng cho mục hiện tại, đối tượng Áp dụng nhãn khi so sánh hoặc video đó khi toàn màn hình. Không xóa hay tải tệp lên. |
+| ← / → · ↑ / ↓ | Chuyển trang / mục / hàng khi phân loại | ←/→ chuyển cả trang trong Trình xem hoặc từng mục trong Xem tất cả; ↑/↓ chuyển từng hàng trong lưới. Trong Trình xem một mục và So sánh ảnh, ↑/↓ chuyển đến mục trước hoặc tiếp theo. Khi so sánh, việc chuyển ảnh theo thiết lập điều hướng, độc lập với Áp dụng nhãn. |
 | ⌘A | Chọn mọi ảnh trong danh sách hiện tại | Phím chọn cố định khi ở ngoài So sánh ảnh; ô nhập chữ vẫn chọn văn bản như bình thường. |
 | Esc | Hủy cử chỉ hiện tại hoặc thoát chế độ đang dùng | Cố định. Thoát Phân loại, so sánh, so sánh chất lượng phóng to hoặc tập trung; Trình xem thông thường trở về Xem tất cả. Cũng hủy cử chỉ chọn vùng. |
 
