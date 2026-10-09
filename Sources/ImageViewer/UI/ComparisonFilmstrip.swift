@@ -38,7 +38,7 @@ struct ComparisonFilmstrip: View {
   }
 
   private func thumbnail(_ asset: ImageAsset, at index: Int) -> some View {
-    let isCurrent = pane.index == index
+    let isCurrent = pane.currentAsset?.id == asset.id
     return Button {
       comparison.jump(side, number: index + 1)
     } label: {

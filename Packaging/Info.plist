@@ -30,9 +30,9 @@
     <key>CFBundlePackageType</key>
     <string>APPL</string>
     <key>CFBundleShortVersionString</key>
-    <string>0.10.2</string>
+    <string>0.11.2</string>
     <key>CFBundleVersion</key>
-    <string>23</string>
+    <string>26</string>
     <key>LSMinimumSystemVersion</key>
     <string>14.0</string>
     <key>NSHighResolutionCapable</key>
@@ -41,6 +41,16 @@
     <true/>
     <key>CFBundleDocumentTypes</key>
     <array>
+        <dict>
+            <key>CFBundleTypeName</key>
+            <string>ZIP Image Archive</string>
+            <key>CFBundleTypeRole</key>
+            <string>Viewer</string>
+            <key>LSHandlerRank</key>
+            <string>Alternate</string>
+            <key>LSItemContentTypes</key>
+            <array><string>public.zip-archive</string></array>
+        </dict>
         <dict>
             <key>CFBundleTypeName</key>
             <string>Image</string>

@@ -4,6 +4,7 @@ import SwiftUI
 struct BottomControlBar: View {
   @ObservedObject var store: AppStore
   @ObservedObject var shortcuts: ShortcutStore
+  var onHideControls: (() -> Void)? = nil
 
   var body: some View {
     ViewThatFits(in: .horizontal) {
@@ -69,7 +70,17 @@ struct BottomControlBar: View {
     .buttonStyle(ViewerToolButtonStyle())
   }
 
-  private var returnButton: some View {
+  @ViewBuilder private var returnButton: some View {
+    if store.isFocusMode, let onHideControls {
+      Button(action: onHideControls) { Image(systemName: "xmark") }
+        .help("조작창 숨기기")
+        .accessibilityLabel("조작창 숨기기")
+    } else {
+      navigationReturnButton
+    }
+  }
+
+  private var navigationReturnButton: some View {
     Button {
       if store.comparisonLayout != .off { store.setComparisonLayout(.off) }
       else if store.isFocusMode { store.exitFocusMode() }

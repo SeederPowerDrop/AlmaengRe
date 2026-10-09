@@ -17,10 +17,29 @@ struct RootView: View {
         Group {
           if store.presentationMode == .folderComparison {
             FolderComparisonView(store: store, shortcuts: shortcuts, comparison: store.folderComparison)
-          } else if store.assets.isEmpty {
-            EmptyLibraryView(store: store)
           } else {
-            viewerWorkspace
+            VStack(spacing: 0) {
+              if !store.isFocusMode && (!store.allAssets.isEmpty || store.currentFolderURL != nil) {
+                LibraryControlsView(store: store)
+                  .padding(.horizontal, 16).padding(.vertical, 8)
+                Divider()
+              }
+              if store.assets.isEmpty {
+                if !store.allAssets.isEmpty {
+                  ContentUnavailableView {
+                    Label("검색 결과 없음", systemImage: "magnifyingglass")
+                  } description: {
+                    Text("검색어나 이미지 형식 필터를 바꿔 보세요.")
+                  } actions: {
+                    Button("검색·필터 초기화") { store.resetLibraryQuery() }
+                  }
+                } else {
+                  EmptyLibraryView(store: store)
+                }
+              } else {
+                viewerWorkspace
+              }
+            }
           }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -88,6 +107,16 @@ struct RootView: View {
         thumbnailPlacementMenu
 
         Button {
+          store.pauseSlideshow()
+          store.showsAIUpscaling = true
+        } label: {
+          Label("AI 확대", systemImage: "sparkles")
+        }
+        .labelStyle(.titleAndIcon)
+        .disabled(store.currentAsset == nil || store.isBatchBusy)
+        .help("AI로 2배 확대하고 사본으로 저장합니다.")
+
+        Button {
           store.toggleInspector(.information)
         } label: {
           Label("이미지 정보", systemImage: "info.circle")
@@ -124,11 +153,19 @@ struct RootView: View {
     .sheet(item: $store.wallpaperRequest) { request in
       WallpaperSettingsView(store: store, request: request)
     }
+    .sheet(isPresented: $store.showsAIUpscaling) {
+      AIUpscalingSheet(store: store.aiUpscaling, sourceURL: store.currentAsset?.url)
+    }
+    .task { await store.restoreLastSession() }
     .onChange(of: scenePhase) { _, phase in
-      if phase != .active { store.pauseSlideshow() }
+      if phase != .active { store.pauseSlideshow(); store.saveSessionNow() }
     }
     .onReceive(NotificationCenter.default.publisher(for: NSApplication.didResignActiveNotification)) { _ in
       store.pauseSlideshow()
+      store.saveSessionNow()
+    }
+    .onReceive(NotificationCenter.default.publisher(for: NSApplication.willTerminateNotification)) { _ in
+      store.saveSessionNow()
     }
     .onReceive(NSWorkspace.shared.notificationCenter.publisher(for: NSWorkspace.willSleepNotification)) { _ in
       store.pauseSlideshow()
@@ -247,25 +284,7 @@ struct RootView: View {
     .background {
       InputEventMonitor(
         onKeyDown: { event in
-          guard store.batchSheet == nil, !store.isBatchBusy,
-            store.wallpaperRequest == nil, !store.isSettingWallpaper else { return false }
-          if event.modifierFlags.intersection(.deviceIndependentFlagsMask) == .command,
-            event.charactersIgnoringModifiers?.lowercased() == "a"
-          {
-            store.selectAllAssets()
-            return true
-          }
-          // Esc는 사용자 설정과 무관하게 언제나 현재 보기에서 한 단계 돌아갑니다.
-          if event.keyCode == 53 {
-            return store.handleEscapeKey()
-          }
-          // Space+드래그 모드에서는 확대 중 Space를 팬 전용으로 예약합니다.
-          if event.keyCode == 49, store.canPan, store.panInteractionMode == .spacePrimaryDrag {
-            return true
-          }
-          guard let action = shortcuts.action(matching: event) else { return false }
-          store.perform(action)
-          return true
+          store.handleViewerKeyDown(event, shortcuts: shortcuts)
         },
         onPointerPan: { input, delta in
           store.handlePanInput(input, delta: delta)
@@ -273,7 +292,9 @@ struct RootView: View {
         onHorizontalSwipe: { delta in
           guard store.presentationMode == .viewer else { return }
           store.navigatePage(delta < 0 ? 1 : -1)
-        }
+        },
+        canHandleSpaceTap: { store.canToggleImageFocus && !shortcuts.hasPlainSpaceBinding },
+        onSpaceTap: { store.toggleImageFocus() }
       )
     }
   }

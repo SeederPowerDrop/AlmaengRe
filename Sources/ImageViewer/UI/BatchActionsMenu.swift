@@ -12,7 +12,7 @@ struct BatchActionsMenu: View {
       } label: {
         Label(L10n.text("이름 일괄 변경…"), systemImage: "pencil.line")
       }
-      .disabled(!store.canStartBatchOperation)
+      .disabled(!store.canStartBatchOperation || store.selectedAssets.contains(where: \.isReadOnly))
 
       Button {
         store.presentBatchExport()
@@ -60,7 +60,7 @@ struct BatchAssetContextMenu: View {
     } label: {
       Label(L10n.text("이름 일괄 변경…"), systemImage: "pencil.line")
     }
-    .disabled(store.isBatchBusy || store.isLoading)
+    .disabled(store.isBatchBusy || store.isLoading || isReadOnlySelection)
 
     Button {
       prepareSelection()
@@ -76,5 +76,12 @@ struct BatchAssetContextMenu: View {
     if !store.selectedURLs.contains(store.assets[index].url) {
       store.selectForBatch(index: index, modifiers: [])
     }
+  }
+
+  private var isReadOnlySelection: Bool {
+    guard store.assets.indices.contains(index) else { return true }
+    let asset = store.assets[index]
+    return asset.isReadOnly || (store.selectedURLs.contains(asset.url)
+      && store.selectedAssets.contains(where: \.isReadOnly))
   }
 }

@@ -1,0 +1,25 @@
+{
+  "model": "QuickSRNet Small 2x",
+  "scale": 2,
+  "input": [
+    1,
+    3,
+    128,
+    128
+  ],
+  "output": [
+    1,
+    3,
+    256,
+    256
+  ],
+  "checkpoint_url": "https://github.com/quic/aimet-model-zoo/releases/download/phase_2_january_artifacts/quicksrnet_small_2x_checkpoint_float32.pth.tar",
+  "checkpoint_sha256": "d95d70f1d2366cb9c28d99f8c7aa5bb07e1ffeaf5d7e30d9c66ab0fa28c6d0f8",
+  "model_sha256": "0ea55c7669a8663356100c6a2dd45c2efe5d753141e868ec69390486c8c0f43a",
+  "torch": "2.7.0",
+  "coremltools": "8.3.0",
+  "numpy": "1.26.4",
+  "cpu_pytorch_max_absolute_error": 0.0,
+  "cpu_pytorch_mean_absolute_error": 0.0,
+  "notes": "CPU parity checked on Apple Silicon; Intel hardware has not been exercised."
+}

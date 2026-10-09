@@ -1,4 +1,5 @@
 import Foundation
+import ImageIO
 
 enum ImageLibraryError: LocalizedError {
   case noImages(URL)
@@ -42,6 +43,7 @@ actor ImageLibrary {
     .isSymbolicLinkKey,
     .fileSizeKey,
     .contentModificationDateKey,
+    .creationDateKey,
   ]
 
   /// URL의 경로 힌트 대신 실제 파일 정보를 확인합니다. 여러 폴더는 바로 아래
@@ -69,6 +71,11 @@ actor ImageLibrary {
         return OpenedImageLibrary(assets: images, folderURL: first.url,
           focusedURL: nil, access: access)
       }
+      if first.url.pathExtension.lowercased() == "zip" {
+        let images = try RustImageEngine.openArchive(first.url)
+        guard !images.isEmpty else { throw ImageLibraryError.noImages(first.url) }
+        return OpenedImageLibrary(assets: images, folderURL: nil, focusedURL: nil, access: access)
+      }
       // Reject an unsupported selected file rather than opening unrelated neighboring photos.
       guard let selected = makeAsset(url: first.url) else { throw ImageLibraryError.noImages(first.url) }
       let parent = first.url.deletingLastPathComponent()
@@ -84,7 +91,7 @@ actor ImageLibrary {
         images = [selected]
       }
       if !images.contains(where: { $0.url.standardizedFileURL == selected.url.standardizedFileURL }) {
-        images = sorted(images + [selected])
+        images = try sorted(images + [selected])
       }
       return OpenedImageLibrary(assets: images, folderURL: parent,
         focusedURL: first.url, access: access)
@@ -99,6 +106,9 @@ actor ImageLibrary {
       if input.isDirectory {
         candidates = try directoryAssets(input.url)
         locations.insert(input.url.standardizedFileURL)
+      } else if input.url.pathExtension.lowercased() == "zip" {
+        candidates = try RustImageEngine.openArchive(input.url)
+        locations.insert(input.url.deletingLastPathComponent().standardizedFileURL)
       } else {
         guard let image = makeAsset(url: input.url) else { throw ImageLibraryError.noImages(input.url) }
         candidates = [image]
@@ -112,7 +122,7 @@ actor ImageLibrary {
       }
     }
     guard !images.isEmpty else { throw ImageLibraryError.noImages(first.url) }
-    return OpenedImageLibrary(assets: sorted(images),
+    return OpenedImageLibrary(assets: try sorted(images),
       folderURL: locations.count == 1 ? locations.first : nil,
       focusedURL: first.isDirectory ? nil : first.url, access: access)
   }
@@ -125,28 +135,41 @@ actor ImageLibrary {
 
   private func directoryAssets(_ folder: URL) throws -> [ImageAsset] {
     try Task.checkCancellation()
+    let assets = try RustImageEngine.scan(folder: folder)
+    try Task.checkCancellation()
+    return assets
+  }
 
-    let urls = try FileManager.default.contentsOfDirectory(
-      at: folder,
-      includingPropertiesForKeys: Array(resourceKeys),
-      options: [.skipsHiddenFiles, .skipsPackageDescendants]
-    )
-
-    var assets: [ImageAsset] = []
-    for url in urls {
+  /// GPS is read lazily only for location sorting. ImageIO handles EXIF variants and no
+  /// pixel decode occurs. Keep the scan actor off the UI thread and check between files.
+  func enrichLocations(_ assets: [ImageAsset]) async throws -> [ImageAsset] {
+    var result = assets
+    for index in result.indices {
       try Task.checkCancellation()
-      if let asset = makeAsset(url: url) { assets.append(asset) }
+      if result[index].location != nil { continue }
+      result[index].location = autoreleasepool {
+        guard let source = CGImageSourceCreateWithURL(result[index].url as CFURL,
+          [kCGImageSourceShouldCache: false] as CFDictionary),
+          let properties = CGImageSourceCopyPropertiesAtIndex(source, 0, nil) as? [CFString: Any],
+          let gps = properties[kCGImagePropertyGPSDictionary] as? [CFString: Any],
+          let latitude = (gps[kCGImagePropertyGPSLatitude] as? NSNumber)?.doubleValue,
+          let longitude = (gps[kCGImagePropertyGPSLongitude] as? NSNumber)?.doubleValue,
+          latitude.isFinite, longitude.isFinite, latitude >= 0, latitude <= 90,
+          longitude >= 0, longitude <= 180 else { return nil }
+        let latRef = (gps[kCGImagePropertyGPSLatitudeRef] as? String)?.uppercased()
+        let lonRef = (gps[kCGImagePropertyGPSLongitudeRef] as? String)?.uppercased()
+        guard ["N", "S"].contains(latRef ?? ""), ["E", "W"].contains(lonRef ?? "") else { return nil }
+        return ImageLocation(latitude: latRef == "S" ? -latitude : latitude,
+          longitude: lonRef == "W" ? -longitude : longitude)
+      }
     }
-    return sorted(assets)
+    return result
   }
 
   func assets(from urls: [URL]) throws -> [ImageAsset] {
     try Task.checkCancellation()
 
-    let assets = urls.compactMap(makeAsset)
-      .sorted { lhs, rhs in
-        lhs.filename.localizedStandardCompare(rhs.filename) == .orderedAscending
-      }
+    let assets = try sorted(urls.compactMap(makeAsset))
 
     guard !assets.isEmpty else {
       throw ImageLibraryError.noImages(urls.first ?? URL(fileURLWithPath: "/"))
@@ -155,11 +178,8 @@ actor ImageLibrary {
     return assets
   }
 
-  private func sorted(_ assets: [ImageAsset]) -> [ImageAsset] {
-    assets.sorted { lhs, rhs in
-      let order = lhs.filename.localizedStandardCompare(rhs.filename)
-      return order == .orderedSame ? lhs.url.path < rhs.url.path : order == .orderedAscending
-    }
+  private func sorted(_ assets: [ImageAsset]) throws -> [ImageAsset] {
+    try RustImageEngine.query(assets, options: LibraryQuery())
   }
 
   private func makeAsset(url: URL) -> ImageAsset? {
@@ -181,7 +201,8 @@ actor ImageLibrary {
       // the original URL (including /private path aliases and symlink filenames).
       url: url,
       byteCount: values?.fileSize.map(Int64.init),
-      modificationDate: values?.contentModificationDate
+      modificationDate: values?.contentModificationDate,
+      creationDate: values?.creationDate
     )
   }
 }

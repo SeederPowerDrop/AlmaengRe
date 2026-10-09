@@ -17,17 +17,44 @@ final class ApplicationDelegate: NSObject, NSApplicationDelegate {
   }
 }
 
+/// Space is a tap only until a pointer gesture or another key uses it. Waiting
+/// until key-up lets the same key remain a modifier for Space + drag panning.
+struct SpaceTapState {
+  private(set) var isPending = false
+  private var wasUsed = false
+
+  mutating func begin(isRepeat: Bool) {
+    guard !isRepeat else { return }
+    isPending = true
+    wasUsed = false
+  }
+
+  mutating func useForGesture() { if isPending { wasUsed = true } }
+
+  mutating func end() -> Bool {
+    let isTap = isPending && !wasUsed
+    reset()
+    return isTap
+  }
+
+  mutating func reset() { isPending = false; wasUsed = false }
+}
+
 /// 동적으로 바뀌는 단축키와 트랙패드·보조 마우스 입력을 AppKit 이벤트에서 받습니다.
 struct InputEventMonitor: NSViewRepresentable {
   let onKeyDown: @MainActor (NSEvent) -> Bool
   let onPointerPan: @MainActor (PanInputKind, CGSize) -> Bool
   let onHorizontalSwipe: @MainActor (CGFloat) -> Void
+  var canHandleSpaceTap: @MainActor () -> Bool = { false }
+  var onSpaceTap: @MainActor () -> Void = {}
 
   func makeCoordinator() -> Coordinator {
     Coordinator(
       onKeyDown: onKeyDown,
       onPointerPan: onPointerPan,
-      onHorizontalSwipe: onHorizontalSwipe
+      onHorizontalSwipe: onHorizontalSwipe,
+      canHandleSpaceTap: canHandleSpaceTap,
+      onSpaceTap: onSpaceTap
     )
   }
 
@@ -42,6 +69,8 @@ struct InputEventMonitor: NSViewRepresentable {
     context.coordinator.onKeyDown = onKeyDown
     context.coordinator.onPointerPan = onPointerPan
     context.coordinator.onHorizontalSwipe = onHorizontalSwipe
+    context.coordinator.canHandleSpaceTap = canHandleSpaceTap
+    context.coordinator.onSpaceTap = onSpaceTap
   }
 
   static func dismantleNSView(_ nsView: NSView, coordinator: Coordinator) {
@@ -55,44 +84,53 @@ struct InputEventMonitor: NSViewRepresentable {
     var onKeyDown: @MainActor (NSEvent) -> Bool
     var onPointerPan: @MainActor (PanInputKind, CGSize) -> Bool
     var onHorizontalSwipe: @MainActor (CGFloat) -> Void
+    var canHandleSpaceTap: @MainActor () -> Bool
+    var onSpaceTap: @MainActor () -> Void
     private var keyMonitor: Any?
     private var dragMonitor: Any?
     private var scrollMonitor: Any?
     private var accumulatedHorizontalDelta: CGFloat = 0
     private var swipeTriggered = false
     private var isSpacePressed = false
+    private var spaceTap = SpaceTapState()
+    private var resignObserver: NSObjectProtocol?
 
     init(
       onKeyDown: @escaping @MainActor (NSEvent) -> Bool,
       onPointerPan: @escaping @MainActor (PanInputKind, CGSize) -> Bool,
-      onHorizontalSwipe: @escaping @MainActor (CGFloat) -> Void
+      onHorizontalSwipe: @escaping @MainActor (CGFloat) -> Void,
+      canHandleSpaceTap: @escaping @MainActor () -> Bool = { false },
+      onSpaceTap: @escaping @MainActor () -> Void = {}
     ) {
       self.onKeyDown = onKeyDown
       self.onPointerPan = onPointerPan
       self.onHorizontalSwipe = onHorizontalSwipe
+      self.canHandleSpaceTap = canHandleSpaceTap
+      self.onSpaceTap = onSpaceTap
+      resignObserver = NotificationCenter.default.addObserver(
+        forName: NSWindow.didResignKeyNotification, object: nil, queue: .main
+      ) { [weak self] _ in
+        MainActor.assumeIsolated { self?.resetSpaceInput() }
+      }
 
       keyMonitor = NSEvent.addLocalMonitorForEvents(matching: [.keyDown, .keyUp]) {
         [weak self] event in
         guard let self else { return event }
         guard belongsToMonitoredWindow(event) else { return event }
 
-        if event.keyCode == 49 {
-          isSpacePressed = event.type == .keyDown
-        }
-        guard event.type == .keyDown else { return event }
-
-        // 설정의 Picker나 다른 텍스트 입력 중에는 일반 타이핑을 가로채지 않습니다.
-        if NSApp.keyWindow?.firstResponder is NSTextView {
-          return event
-        }
-        return self.onKeyDown(event) ? nil : event
+        let responder = NSApp.keyWindow?.firstResponder
+        return handleKey(event, isTextInput: responder is NSTextView,
+          isControl: responder is NSControl) ? nil : event
       }
 
       dragMonitor = NSEvent.addLocalMonitorForEvents(
-        matching: [.leftMouseDragged, .rightMouseDragged, .otherMouseDragged]
+        matching: [.leftMouseDown, .rightMouseDown, .otherMouseDown,
+          .leftMouseDragged, .rightMouseDragged, .otherMouseDragged]
       ) { [weak self] event in
-        guard let self else { return event }
-        guard contains(event) else { return event }
+        guard let self, belongsToMonitoredWindow(event) else { return event }
+        if isSpacePressed { spaceTap.useForGesture() }
+        guard [.leftMouseDragged, .rightMouseDragged, .otherMouseDragged].contains(event.type),
+          contains(event) else { return event }
         return observeDrag(event) ? nil : event
       }
 
@@ -100,11 +138,45 @@ struct InputEventMonitor: NSViewRepresentable {
         [weak self] event in
         guard let self else { return event }
         guard contains(event) else { return event }
+        if isSpacePressed { spaceTap.useForGesture() }
         return observeScroll(event) ? nil : event
       }
     }
 
+    func handleKey(_ event: NSEvent, isTextInput: Bool, isControl: Bool = false) -> Bool {
+      let plain = event.modifierFlags.intersection([.command, .option, .control, .shift]).isEmpty
+      if event.keyCode == 49 {
+        isSpacePressed = event.type == .keyDown
+        if isTextInput || isControl {
+          spaceTap.reset()
+          return false
+        }
+        if event.type == .keyUp {
+          let consumed = spaceTap.isPending
+          let tapped = spaceTap.end()
+          if tapped, plain, canHandleSpaceTap() { onSpaceTap() }
+          return consumed
+        }
+        if plain, canHandleSpaceTap() {
+          spaceTap.begin(isRepeat: event.isARepeat)
+          return true
+        }
+        spaceTap.reset()
+      } else if event.type == .keyDown {
+        spaceTap.useForGesture()
+      }
+      guard event.type == .keyDown, !isTextInput else { return false }
+      return onKeyDown(event)
+    }
+
+    private func resetSpaceInput() { isSpacePressed = false; spaceTap.reset() }
+
     func stopMonitoring() {
+      resetSpaceInput()
+      if let resignObserver {
+        NotificationCenter.default.removeObserver(resignObserver)
+        self.resignObserver = nil
+      }
       if let keyMonitor {
         NSEvent.removeMonitor(keyMonitor)
         self.keyMonitor = nil

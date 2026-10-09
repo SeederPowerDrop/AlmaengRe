@@ -25,6 +25,18 @@ final class AppStore: ObservableObject {
       slideshowPresentedAsset = nil
     }
   }
+  /// The complete source collection stays intact when search or format filters change.
+  @Published private(set) var allAssets: [ImageAsset] = []
+  @Published var libraryQuery = LibraryQuery() {
+    didSet {
+      guard oldValue != libraryQuery, !isApplyingSession else { return }
+      libraryQueryRevision &+= 1
+      applyLibraryQuery()
+    }
+  }
+  @Published private(set) var isFiltering = false
+  @Published private(set) var favoriteFolders: [FavoriteFolder] = []
+  @Published var showsAIUpscaling = false
   @Published private(set) var libraryRevision = UUID()
   @Published private(set) var currentFolderURL: URL?
   @Published var showsFolderTree: Bool {
@@ -55,6 +67,7 @@ final class AppStore: ObservableObject {
   @Published var presentationMode: PresentationMode = .viewer {
     didSet {
       guard oldValue != presentationMode else { return }
+      if !isApplyingSession { invalidateSessionRestore() }
       if presentationMode == .folderComparison {
         comparisonReturnMode = oldValue
         cancelLibraryLoad()
@@ -159,6 +172,7 @@ final class AppStore: ObservableObject {
   }
   @Published var statusMessage: String?
 
+  let aiUpscaling: AIUpscalingStore
   let pipeline: ImagePipeline
   let thumbnailPipeline: ThumbnailPipeline
   let loadingGovernor: ImageResourceGovernor
@@ -168,6 +182,19 @@ final class AppStore: ObservableObject {
   private var comparisonReturnMode: PresentationMode = .viewer
 
   private let preferences: UserDefaults
+  private let sessionPersistence: ViewerSessionPersistence
+  private var sessionSubscriptions: Set<AnyCancellable> = []
+  private var sessionSaveTask: Task<Void, Never>?
+  private var restoreGeneration = UUID()
+  private var didAttemptSessionRestore = false
+  private var isRestoringSession = false
+  private var isApplyingSession = false
+  private var sourceLocations: [SessionLocation] = []
+  private var queryTask: Task<Void, Never>?
+  private var queryGeneration = UUID()
+  private var libraryQueryRevision: UInt64 = 0
+  private var queryFocusID: String?
+  private var favoriteAccess: [UUID: ImageLibraryAccess] = [:]
   private let library = ImageLibrary()
   private let exporter: ImageExporter
   private let metadataWriter = ImageMetadataWriter()
@@ -202,6 +229,8 @@ final class AppStore: ObservableObject {
 
   init(defaults: UserDefaults = .standard, monitorsSystemResources: Bool = true) {
     preferences = defaults
+    sessionPersistence = ViewerSessionPersistence(defaults: defaults)
+    favoriteFolders = sessionPersistence.loadFavorites()
     showsFolderTree = defaults.bool(forKey: Self.folderTreeDefaultsKey)
     folderComparison = FolderComparisonStore(defaults: defaults)
     managesSlideshowDisplaySleep = monitorsSystemResources
@@ -229,6 +258,7 @@ final class AppStore: ObservableObject {
     self.loadingGovernor = loadingGovernor
     let pipeline = ImagePipeline(governor: loadingGovernor)
     self.pipeline = pipeline
+    aiUpscaling = AIUpscalingStore(pipeline: pipeline)
     wallpaperService = WallpaperService(pipeline: pipeline)
     thumbnailPipeline = ThumbnailPipeline(governor: loadingGovernor)
     exporter = ImageExporter(pipeline: pipeline)
@@ -250,6 +280,10 @@ final class AppStore: ObservableObject {
         Task { await loadingGovernor.update(snapshot) }
       }
     }
+    objectWillChange.sink { [weak self] in self?.scheduleSessionSave() }
+      .store(in: &sessionSubscriptions)
+    folderComparison.objectWillChange.sink { [weak self] in self?.scheduleSessionSave() }
+      .store(in: &sessionSubscriptions)
   }
 
   private func updateImageLoadingMode() {
@@ -278,7 +312,7 @@ final class AppStore: ObservableObject {
   var isBatchBusy: Bool { isRenaming || isBatchExporting }
 
   var canStartBatchOperation: Bool {
-    presentationMode != .folderComparison && !selectedURLs.isEmpty && !isLoading && !isBatchBusy && !isSavingMetadata && !isExporting
+    presentationMode != .folderComparison && !selectedAssets.isEmpty && !isLoading && !isFiltering && !isBatchBusy && !isSavingMetadata && !isExporting
       && batchSheet == nil && overviewSelectionSession == nil
       && wallpaperRequest == nil && !isSettingWallpaper
   }
@@ -349,7 +383,7 @@ final class AppStore: ObservableObject {
   }
 
   func presentBatchRename() {
-    guard canStartBatchOperation else { return }
+    guard canStartBatchOperation, !selectedAssets.contains(where: \.isReadOnly) else { return }
     batchSheet = .rename
   }
 
@@ -360,12 +394,16 @@ final class AppStore: ObservableObject {
 
   func renameSelectedFiles(using plan: BatchRenamePlan) async throws {
     guard !isBatchBusy, !isLoading, !isSavingMetadata, !isExporting else { return }
+    let targets = Set(plan.entries.map(\.sourceURL).map(\.standardizedFileURL))
+    guard !allAssets.contains(where: { $0.isReadOnly && targets.contains($0.url.standardizedFileURL) }) else {
+      throw LibraryAccessError.readOnlyArchive
+    }
     isRenaming = true
     prefetchTask?.cancel()
     metadataTask?.cancel()
     defer { isRenaming = false }
     // Standardization may change when a file stops existing, so capture keys before any move.
-    let sourceKeys = assets.map { (original: $0.url, canonical: $0.url.standardizedFileURL) }
+    let sourceKeys = allAssets.map { (original: $0.url, canonical: $0.url.standardizedFileURL) }
     let mapping: [URL: URL]
     do {
       let renamed = try await batchRenamer.apply(plan)
@@ -388,11 +426,17 @@ final class AppStore: ObservableObject {
     }
     selectedURLs = Set(selectedURLs.map { mapping[$0] ?? $0 })
     // Refresh only the open library so an explicit selection from several folders stays intact.
-    assets = assets.map { asset in
-      ImageAsset(url: mapping[asset.url] ?? asset.url,
-        byteCount: asset.byteCount, modificationDate: asset.modificationDate)
-    }.sorted { $0.filename.localizedStandardCompare($1.filename) == .orderedAscending }
+    allAssets = allAssets.map { asset in
+      mapping[asset.url].map { asset.replacingURL($0) } ?? asset
+    }
+    sourceLocations = sourceLocations.map { location in
+      mapping[location.url].map { SessionLocation(url: $0) } ?? location
+    }
+    let queried = try await queryAssets(allAssets, options: libraryQuery)
+    allAssets = queried.all
+    assets = queried.visible
     currentIndex = assets.firstIndex { $0.url == focusedURL } ?? 0
+    queryFocusID = currentAsset?.sessionID
     pageStartIndex = currentIndex
     selectionAnchor = currentIndex
     await pipeline.purgeCaches()
@@ -437,6 +481,7 @@ final class AppStore: ObservableObject {
   }
 
   var activeFolderName: String {
+    if let archive = currentAsset?.archiveOrigin?.archiveURL { return archive.lastPathComponent }
     let folder = currentFolderURL ?? currentAsset?.url.deletingLastPathComponent()
     return folder?.lastPathComponent ?? L10n.text("알맹Re")
   }
@@ -450,14 +495,15 @@ final class AppStore: ObservableObject {
   func openFolderFromTree(_ folder: URL) {
     guard canOpenFolderFromTree else { return }
     if presentationMode == .folderComparison {
-      folderComparison.pane(folderComparison.activeSide).load(folder)
+      invalidateSessionRestore()
+      folderComparison.open(urls: [folder], for: folderComparison.activeSide)
     } else {
       load(folder: folder, fromTree: true)
     }
   }
 
   var canEditCurrentEmbeddedMetadata: Bool {
-    ImageMetadataWriter.supportsEmbeddedMetadata(
+    currentAsset?.isReadOnly != true && ImageMetadataWriter.supportsEmbeddedMetadata(
       typeIdentifier: currentMetadata?.typeIdentifier
     )
   }
@@ -465,6 +511,7 @@ final class AppStore: ObservableObject {
   func chooseItems() {
     guard canOpenFolderFromTree else { return }
     if presentationMode == .folderComparison {
+      invalidateSessionRestore()
       folderComparison.chooseItems(for: folderComparison.activeSide)
       return
     }
@@ -480,6 +527,7 @@ final class AppStore: ObservableObject {
   func open(urls: [URL]) {
     guard !urls.isEmpty, canOpenFolderFromTree else { return }
     if presentationMode == .folderComparison {
+      invalidateSessionRestore()
       folderComparison.open(urls: urls, for: folderComparison.activeSide)
       return
     }
@@ -500,6 +548,7 @@ final class AppStore: ObservableObject {
   }
 
   private func focus(index: Int) {
+    queryFocusID = assets[index].sessionID
     let visibleRange = pageStartIndex..<min(assets.count, pageStartIndex + imagesPerPage)
     if !visibleRange.contains(index) {
       pageStartIndex = index
@@ -532,6 +581,7 @@ final class AppStore: ObservableObject {
     }
     pageStartIndex = target
     currentIndex = target
+    queryFocusID = assets[target].sessionID
     selectedURLs = [assets[target].url]
     selectionAnchor = target
     resetViewport()
@@ -687,6 +737,7 @@ final class AppStore: ObservableObject {
       throw ImageMetadataWriterError.noCurrentImage
     }
 
+    guard !asset.isReadOnly else { throw LibraryAccessError.readOnlyArchive }
     let sourceURL = asset.url
     let update = try draft.validated(for: sourceURL)
     let original = try originalDraft.validated(for: sourceURL)
@@ -712,22 +763,61 @@ final class AppStore: ObservableObject {
     let refreshedAssets = try await library.scan(
       folder: destinationURL.deletingLastPathComponent()
     )
-    guard
-      let refreshedIndex = refreshedAssets.firstIndex(where: {
-        $0.url.standardizedFileURL == destinationURL.standardizedFileURL
-      })
-    else {
+    guard refreshedAssets.contains(where: {
+      $0.url.standardizedFileURL == destinationURL.standardizedFileURL
+    }) else {
       throw ImageMetadataWriterError.sourceUnavailable(destinationURL)
     }
 
-    assets = refreshedAssets
-    pageStartIndex = refreshedIndex
-    currentIndex = refreshedIndex
+    let queried = try await queryAssets(refreshedAssets, options: libraryQuery)
+    allAssets = queried.all
+    assets = queried.visible
+    sourceLocations = sourceLocations.map { location in
+      location.url.standardizedFileURL == sourceURL.standardizedFileURL
+        ? SessionLocation(url: destinationURL) : location
+    }
+    let visibleIndex = assets.firstIndex { $0.url.standardizedFileURL == destinationURL.standardizedFileURL } ?? 0
+    pageStartIndex = visibleIndex
+    currentIndex = visibleIndex
+    queryFocusID = currentAsset?.sessionID
     selectedURLs = [destinationURL]
-    selectionAnchor = refreshedIndex
+    selectionAnchor = assets.isEmpty ? nil : visibleIndex
     refreshMetadata()
     prefetchAroundCurrentPosition()
     showStatus(L10n.format("%@ 정보 저장 완료", destinationURL.lastPathComponent))
+  }
+
+  /// Shared keyboard routing keeps explicit shortcuts ahead of convenience gestures.
+  func handleViewerKeyDown(_ event: NSEvent, shortcuts: ShortcutStore) -> Bool {
+    guard batchSheet == nil, !isBatchBusy, wallpaperRequest == nil,
+      !isSettingWallpaper, !showsAIUpscaling else { return false }
+    if event.modifierFlags.intersection(.deviceIndependentFlagsMask) == .command,
+      event.charactersIgnoringModifiers?.lowercased() == "a" {
+      selectAllAssets()
+      return true
+    }
+    if event.keyCode == 53 { return handleEscapeKey() }
+    if let action = shortcuts.action(matching: event) {
+      perform(action)
+      return true
+    }
+    return event.keyCode == 49 && canPan && panInteractionMode == .spacePrimaryDrag
+      && event.modifierFlags.intersection([.command, .option, .control, .shift]).isEmpty
+  }
+
+  var canToggleImageFocus: Bool {
+    presentationMode == .viewer && currentAsset != nil && !isLoading && !isFiltering
+      && batchSheet == nil && !isBatchBusy && !isExporting && !isSavingMetadata
+      && wallpaperRequest == nil && !isSettingWallpaper && !showsAIUpscaling && alert == nil
+  }
+
+  func toggleImageFocus(on asset: ImageAsset? = nil) {
+    guard canToggleImageFocus else { return }
+    if let asset, asset.id != currentAsset?.id {
+      guard assets.contains(where: { $0.id == asset.id }) else { return }
+      select(asset: asset)
+    }
+    toggleFocusMode()
   }
 
   func toggleFocusMode() {
@@ -987,6 +1077,240 @@ final class AppStore: ObservableObject {
     }
   }
 
+  // MARK: - Search, sorting and format selection
+
+  var hasLibraryQuery: Bool { libraryQuery != LibraryQuery() }
+
+  func resetLibraryQuery() { libraryQuery = LibraryQuery() }
+
+  private func cancelQuery() {
+    queryGeneration = UUID()
+    queryTask?.cancel()
+    queryTask = nil
+    isFiltering = false
+  }
+
+  private func queryAssets(_ source: [ImageAsset], options: LibraryQuery) async throws
+    -> (all: [ImageAsset], visible: [ImageAsset])
+  {
+    var enriched = source
+    switch options.sort {
+    case .northToSouth, .southToNorth, .eastToWest, .westToEast:
+      enriched = try await library.enrichLocations(source)
+    default: break
+    }
+    try Task.checkCancellation()
+    let inputs = enriched
+    let work = Task.detached(priority: .userInitiated) {
+      try Task.checkCancellation()
+      return try RustImageEngine.query(inputs, options: options)
+    }
+    let visible = try await withTaskCancellationHandler {
+      try await work.value
+    } onCancel: { work.cancel() }
+    try Task.checkCancellation()
+    return (enriched, visible)
+  }
+
+  private func applyLibraryQuery() {
+    cancelQuery()
+    // A pending open applies the latest options before committing its new collection.
+    guard !isLoading, !isRestoringSession else { return }
+    let generation = queryGeneration
+    let options = libraryQuery
+    let source = allAssets
+    isFiltering = true
+    queryTask = Task { [weak self] in
+      guard let self else { return }
+      do {
+        // Collapse a burst of keystrokes without starting metadata scans for each letter.
+        try await Task.sleep(for: .milliseconds(100))
+        let result = try await queryAssets(source, options: options)
+        guard !Task.isCancelled, queryGeneration == generation else { return }
+        let oldID = currentAsset?.sessionID
+        let previousFocus = queryFocusID ?? oldID
+        let previousSelected = selectedURLs
+        allAssets = result.all
+        assets = result.visible
+        currentIndex = assets.firstIndex { $0.sessionID == previousFocus } ?? 0
+        pageStartIndex = currentIndex
+        selectedURLs = previousSelected.intersection(Set(assets.map(\.url)))
+        selectionAnchor = assets.firstIndex { selectedURLs.contains($0.url) }
+        if currentAsset?.sessionID != oldID { resetViewport() }
+        isFiltering = false
+        refreshMetadata()
+        prefetchAroundCurrentPosition()
+      } catch is CancellationError {
+      } catch {
+        guard !Task.isCancelled, queryGeneration == generation else { return }
+        isFiltering = false
+        show(error: error, title: L10n.text("이미지 목록을 정리할 수 없음"))
+      }
+    }
+  }
+
+  // MARK: - Favorite folders
+
+  func isFavoriteFolder(_ url: URL) -> Bool {
+    favoriteFolders.contains { $0.location.url.standardizedFileURL == url.standardizedFileURL }
+  }
+
+  func toggleFavoriteFolder(_ url: URL) {
+    guard (try? url.resourceValues(forKeys: [.isDirectoryKey]).isDirectory) == true else { return }
+    if let index = favoriteFolders.firstIndex(where: {
+      $0.location.url.standardizedFileURL == url.standardizedFileURL
+    }) {
+      removeFavoriteFolder(favoriteFolders[index].id)
+    } else {
+      favoriteFolders.append(FavoriteFolder(location: SessionLocation(url: url)))
+      sessionPersistence.saveFavorites(favoriteFolders)
+    }
+  }
+
+  func removeFavoriteFolder(_ id: UUID) {
+    favoriteFolders.removeAll { $0.id == id }
+    favoriteAccess.removeValue(forKey: id)
+    sessionPersistence.saveFavorites(favoriteFolders)
+  }
+
+  func openFavoriteFolder(_ favorite: FavoriteFolder) {
+    guard canOpenFolderFromTree else { return }
+    do {
+      let url = try favorite.location.resolve()
+      let access = ImageLibraryAccess([url])
+      guard try url.resourceValues(forKeys: [.isDirectoryKey]).isDirectory == true else {
+        throw CocoaError(.fileNoSuchFile)
+      }
+      // Keep this grant alive through async directory reads and any retained comparison pane.
+      favoriteAccess[favorite.id] = access
+      if let index = favoriteFolders.firstIndex(where: { $0.id == favorite.id }) {
+        favoriteFolders[index].location = SessionLocation(url: url)
+        sessionPersistence.saveFavorites(favoriteFolders)
+      }
+      openFolderFromTree(url)
+    } catch {
+      show(error: error, title: L10n.text("즐겨찾는 폴더를 열 수 없음"))
+    }
+  }
+
+  // MARK: - Last session
+
+  private func invalidateSessionRestore() {
+    restoreGeneration = UUID()
+    folderComparison.cancelSessionRestore()
+  }
+
+  private func scheduleSessionSave() {
+    guard !isRestoringSession else { return }
+    sessionSaveTask?.cancel()
+    sessionSaveTask = Task { [weak self] in
+      do { try await Task.sleep(for: .milliseconds(500)) } catch { return }
+      self?.saveSessionNow()
+    }
+  }
+
+  func saveSessionNow() {
+    sessionSaveTask?.cancel()
+    sessionSaveTask = nil
+    guard !isRestoringSession, !isLoading, !isFiltering else { return }
+    let comparison = folderComparison.captureSession()
+    // Empty panes may briefly publish a background matching update at startup. They
+    // must not prevent an unrelated viewer session from being saved on close.
+    if comparison != nil {
+      guard !folderComparison.first.isLoading, !folderComparison.second.isLoading,
+        !folderComparison.first.isFiltering, !folderComparison.second.isFiltering,
+        !folderComparison.isMatching else { return }
+    }
+    guard !sourceLocations.isEmpty || comparison != nil else { return }
+    sessionPersistence.save(ViewerSession(
+      sources: sourceLocations,
+      selectedID: queryFocusID ?? currentAsset?.sessionID,
+      selectedIDs: Set(assets.filter { selectedURLs.contains($0.url) }.map(\.sessionID)),
+      presentationMode: presentationMode.rawValue,
+      returnMode: comparisonReturnMode.rawValue,
+      zoom: Double(zoom), panX: Double(panOffset.width), panY: Double(panOffset.height),
+      actualPixels: baseScaleMode == .actualPixels, imagesPerPage: imagesPerPage,
+      query: libraryQuery, comparison: comparison))
+  }
+
+  /// Explicit startup only: tests and newly constructed stores do not restore global state.
+  func restoreLastSession() async {
+    guard !didAttemptSessionRestore else { return }
+    didAttemptSessionRestore = true
+    guard sourceLocations.isEmpty, assets.isEmpty, !isLoading,
+      presentationMode == .viewer, let session = sessionPersistence.loadSession() else { return }
+    sessionSaveTask?.cancel()
+    cancelQuery()
+    isRestoringSession = true
+    let generation = restoreGeneration
+    let startingQueryRevision = libraryQueryRevision
+    var appliedQuery: LibraryQuery?
+    defer {
+      isApplyingSession = false
+      isRestoringSession = false
+      // Comparison restoration also suspends. Do not lose typing or sorting changes
+      // received after the ordinary collection was committed but before A/B is ready.
+      if restoreGeneration == generation, !Task.isCancelled,
+        let appliedQuery, libraryQuery != appliedQuery {
+        applyLibraryQuery()
+      }
+    }
+    if !session.sources.isEmpty {
+      do {
+        let urls = try session.sources.map { try $0.resolve() }
+        let restoredAccess = ImageLibraryAccess(urls)
+        let opened = try await library.open(urls: urls, allowsEmptyFolder: true)
+        // Once the user changes search/sort/filter, that choice outranks the saved query.
+        var options = libraryQueryRevision == startingQueryRevision ? session.query : libraryQuery
+        var result = try await queryAssets(opened.assets, options: options)
+        while options != (libraryQueryRevision == startingQueryRevision ? session.query : libraryQuery) {
+          try Task.checkCancellation()
+          options = libraryQuery
+          result = try await queryAssets(result.all, options: options)
+        }
+        guard !Task.isCancelled, restoreGeneration == generation else { return }
+        isApplyingSession = true
+        libraryAccess = [restoredAccess] + opened.access
+        sourceLocations = urls.map { SessionLocation(url: $0) }
+        currentFolderURL = opened.folderURL?.standardizedFileURL
+        libraryQuery = options
+        allAssets = result.all
+        let focused = result.visible.first { $0.sessionID == session.selectedID }?.url
+        let mode = PresentationMode(rawValue: session.presentationMode) == .overview
+          ? PresentationMode.overview : .viewer
+        applyLoadedAssets(result.visible, focusing: focused, mode: mode)
+        queryFocusID = session.selectedID ?? currentAsset?.sessionID
+        selectedURLs = Set(assets.filter { session.selectedIDs.contains($0.sessionID) }.map(\.url))
+        imagesPerPage = min(10, max(1, session.imagesPerPage))
+        baseScaleMode = session.actualPixels ? .actualPixels : .fit
+        zoom = session.zoom.isFinite ? min(16, max(0.1, session.zoom)) : 1
+        panOffset = CGSize(width: session.panX.isFinite ? session.panX : 0,
+          height: session.panY.isFinite ? session.panY : 0)
+        appliedQuery = options
+        isApplyingSession = false
+      } catch is CancellationError {
+        return
+      } catch {
+        // The ordinary folder may be on a missing volume while both comparison
+        // folders are still available. Keep restoring those independent sources.
+        guard !Task.isCancelled, restoreGeneration == generation else { return }
+        showStatus(L10n.text("이전 보기를 복원하지 못했습니다. 열기에서 폴더를 다시 선택하세요."))
+      }
+    }
+    guard !Task.isCancelled, restoreGeneration == generation else { return }
+    if let comparison = session.comparison {
+      await folderComparison.restoreSession(comparison)
+    }
+    guard !Task.isCancelled, restoreGeneration == generation else { return }
+    isApplyingSession = true
+    comparisonReturnMode = PresentationMode(rawValue: session.returnMode) == .overview ? .overview : .viewer
+    if session.presentationMode == PresentationMode.folderComparison.rawValue,
+      !folderComparison.first.assets.isEmpty || !folderComparison.second.assets.isEmpty {
+      presentationMode = .folderComparison
+      comparisonReturnMode = PresentationMode(rawValue: session.returnMode) == .overview ? .overview : .viewer
+    }
+  }
+
   private func cancelLibraryLoad() {
     loadGeneration = UUID()
     loadTask?.cancel()
@@ -999,6 +1323,8 @@ final class AppStore: ObservableObject {
   }
 
   private func load(urls: [URL], fromTree: Bool = false) {
+    invalidateSessionRestore()
+    cancelQuery()
     cancelLibraryLoad()
     let generation = loadGeneration
     prefetchTask?.cancel()
@@ -1011,9 +1337,20 @@ final class AppStore: ObservableObject {
         let opened = try await library.open(urls: urls, allowsEmptyFolder: fromTree)
         try Task.checkCancellation()
         guard let self, self.loadGeneration == generation else { return }
+        var options = self.libraryQuery
+        var queried = try await self.queryAssets(opened.assets, options: options)
+        while options != self.libraryQuery {
+          try Task.checkCancellation()
+          options = self.libraryQuery
+          queried = try await self.queryAssets(queried.all, options: options)
+        }
+        try Task.checkCancellation()
+        guard self.loadGeneration == generation else { return }
         self.libraryAccess = opened.access
+        self.sourceLocations = urls.map { SessionLocation(url: $0) }
         self.currentFolderURL = opened.folderURL?.standardizedFileURL
-        self.applyLoadedAssets(opened.assets, focusing: opened.focusedURL, mode: destinationMode)
+        self.allAssets = queried.all
+        self.applyLoadedAssets(queried.visible, focusing: opened.focusedURL, mode: destinationMode)
       } catch is CancellationError {
         // 사용자가 다른 폴더를 열었을 때 이전 스캔의 결과는 조용히 폐기합니다.
       } catch {
@@ -1034,6 +1371,7 @@ final class AppStore: ObservableObject {
       } ?? 0
     pageStartIndex = focusedIndex
     currentIndex = focusedIndex
+    queryFocusID = currentAsset?.sessionID
     selectedURLs = newAssets.indices.contains(focusedIndex) ? [newAssets[focusedIndex].url] : []
     selectionAnchor = newAssets.isEmpty ? nil : focusedIndex
     isLoading = false

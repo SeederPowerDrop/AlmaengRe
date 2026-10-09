@@ -11,7 +11,8 @@ struct FolderTreeView: View {
   private var selectedFolder: URL? {
     let folder = store.presentationMode == .folderComparison
       ? comparison.pane(comparison.activeSide).folderURL
-      : store.currentFolderURL ?? store.currentAsset?.url.deletingLastPathComponent()
+      : store.currentFolderURL ?? store.currentAsset?.archiveOrigin?.archiveURL.deletingLastPathComponent()
+        ?? store.currentAsset?.url.deletingLastPathComponent()
     return folder?.standardizedFileURL
   }
 
@@ -23,6 +24,10 @@ struct FolderTreeView: View {
     VStack(spacing: 0) {
       header
       Divider()
+      if !store.favoriteFolders.isEmpty {
+        favorites
+        Divider()
+      }
       ScrollViewReader { proxy in
         GeometryReader { viewport in
           ScrollView([.vertical, .horizontal]) {
@@ -63,6 +68,15 @@ struct FolderTreeView: View {
         Label("폴더 트리", systemImage: "list.bullet.indent")
           .font(.system(size: 12, weight: .semibold))
         Spacer(minLength: 4)
+        if let folder = selectedFolder ?? tree.rootURL {
+          Button { store.toggleFavoriteFolder(folder) } label: {
+            Image(systemName: store.isFavoriteFolder(folder) ? "pin.fill" : "pin")
+          }
+          .buttonStyle(.plain)
+          .foregroundStyle(store.isFavoriteFolder(folder) ? ViewerTheme.accent : Color.secondary)
+          .help(store.isFavoriteFolder(folder) ? "즐겨찾는 폴더에서 해제" : "즐겨찾는 폴더에 고정")
+          .accessibilityLabel(store.isFavoriteFolder(folder) ? "즐겨찾는 폴더에서 해제" : "즐겨찾는 폴더에 고정")
+        }
         Button { store.showsFolderTree = false } label: {
           Image(systemName: "xmark").font(.system(size: 10, weight: .semibold))
         }
@@ -109,6 +123,43 @@ struct FolderTreeView: View {
     .padding(.horizontal, 12).padding(.vertical, 11)
   }
 
+  private var favorites: some View {
+    VStack(alignment: .leading, spacing: 4) {
+      Text("즐겨찾는 폴더")
+        .font(.system(size: 10, weight: .semibold)).foregroundStyle(.secondary)
+        .padding(.horizontal, 12)
+      ScrollView {
+        VStack(spacing: 2) {
+          ForEach(store.favoriteFolders) { favorite in
+            HStack(spacing: 6) {
+              Button { store.openFavoriteFolder(favorite) } label: {
+                HStack(spacing: 7) {
+                  Image(systemName: "folder.fill").foregroundStyle(ViewerTheme.accent)
+                  Text(verbatim: favorite.name).lineLimit(1).truncationMode(.middle)
+                  Spacer(minLength: 0)
+                }
+                .frame(height: 27).contentShape(Rectangle())
+              }
+              .buttonStyle(.plain)
+              .disabled(!store.canOpenFolderFromTree)
+              Button { store.removeFavoriteFolder(favorite.id) } label: {
+                Image(systemName: "pin.slash").foregroundStyle(.secondary)
+              }
+              .buttonStyle(.plain)
+              .help("즐겨찾는 폴더에서 해제")
+              .accessibilityLabel("즐겨찾는 폴더에서 해제")
+            }
+            .padding(.horizontal, 12)
+            .help(favorite.location.url.path)
+          }
+        }
+      }
+      .frame(height: min(145, CGFloat(store.favoriteFolders.count) * 29))
+    }
+    .font(.system(size: 12))
+    .padding(.vertical, 8)
+  }
+
   private func folderRow(_ row: FolderTreeRow) -> some View {
     VStack(alignment: .leading, spacing: 3) {
       HStack(spacing: 2) {
@@ -148,6 +199,11 @@ struct FolderTreeView: View {
       .background(selectedFolder == row.url ? ViewerTheme.selection : Color.clear,
         in: RoundedRectangle(cornerRadius: 5))
       .help(row.url.path)
+      .contextMenu {
+        Button(store.isFavoriteFolder(row.url) ? "즐겨찾는 폴더에서 해제" : "즐겨찾는 폴더에 고정") {
+          store.toggleFavoriteFolder(row.url)
+        }
+      }
       if let error = row.errorMessage {
         Label("폴더를 읽을 수 없습니다.", systemImage: "exclamationmark.circle")
           .font(.system(size: 10)).foregroundStyle(.secondary)

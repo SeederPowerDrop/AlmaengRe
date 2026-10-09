@@ -26,6 +26,8 @@ struct ViewerImageTile: View {
   let highlightsSelection: Bool
   var onPresentationReady: (ImageAsset) -> Void = { _ in }
   var onBaseImageSizeChange: (CGSize) -> Void = { _ in }
+  var onExitFocus: (() -> Void)? = nil
+  var onShowControls: (() -> Void)? = nil
 
   @Environment(\.displayScale) private var displayScale
   @State private var frame: RenderedFrame?
@@ -95,11 +97,19 @@ struct ViewerImageTile: View {
 
   @ViewBuilder
   private func filenameOverlay(frame: RenderedFrame?) -> some View {
-    if filenameDisplaySize.isVisible {
+    if filenameDisplaySize.isVisible || onExitFocus != nil {
       HStack(spacing: 10) {
-        Text(asset.filename)
-          .lineLimit(1)
-          .truncationMode(.middle)
+        if let onExitFocus {
+          Button(action: onExitFocus) { Image(systemName: "xmark") }
+            .buttonStyle(ViewerToolButtonStyle())
+            .help("집중 보기 종료 (Esc)")
+            .accessibilityLabel("집중 보기 종료 (Esc)")
+        }
+        if filenameDisplaySize.isVisible {
+          Text(asset.filename)
+            .lineLimit(1)
+            .truncationMode(.middle)
+        }
 
         Spacer(minLength: 8)
 
@@ -107,12 +117,18 @@ struct ViewerImageTile: View {
           Text("\(frame.frameIndex + 1)/\(frame.frameCount)")
             .monospacedDigit()
         }
+        if let onShowControls {
+          Button(action: onShowControls) { Image(systemName: "slider.horizontal.3") }
+            .buttonStyle(ViewerToolButtonStyle())
+            .help("조작창 표시")
+            .accessibilityLabel("조작창 표시")
+        }
       }
-      .font(.system(size: filenameDisplaySize.fontSize, weight: .semibold))
+      .font(.system(size: max(12, filenameDisplaySize.fontSize), weight: .semibold))
       // 불투명 검정과 완전한 흰색을 써 밝은 이미지 위에서도 대비를 보장합니다.
       .foregroundStyle(Color.white)
-      .padding(.horizontal, filenameDisplaySize.horizontalPadding)
-      .padding(.vertical, filenameDisplaySize.verticalPadding)
+      .padding(.horizontal, max(onExitFocus == nil ? 0 : 6, filenameDisplaySize.horizontalPadding))
+      .padding(.vertical, max(onExitFocus == nil ? 0 : 4, filenameDisplaySize.verticalPadding))
       .frame(maxWidth: .infinity)
       .background(Color.black)
     } else if let frame, frame.frameCount > 1 {
@@ -214,8 +230,11 @@ struct ViewerImageTile: View {
           // 파일명과 하단 조작부가 비교 설명을 가리지 않도록 위쪽에 여백을 둡니다.
           .padding(
             .top,
-            filenameDisplaySize.isVisible
-              ? filenameDisplaySize.fontSize + filenameDisplaySize.verticalPadding * 2 : 0)
+            onExitFocus != nil
+              ? max(28, filenameDisplaySize.fontSize * 1.25)
+                + max(4, filenameDisplaySize.verticalPadding) * 2
+              : filenameDisplaySize.isVisible
+                ? filenameDisplaySize.fontSize + filenameDisplaySize.verticalPadding * 2 : 0)
       }
     }
   }

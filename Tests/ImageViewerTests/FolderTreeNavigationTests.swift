@@ -107,11 +107,11 @@ struct FolderTreeNavigationTests {
 
     comparison.activeSide = .first
     store.openFolderFromTree(a)
-    try await wait { !comparison.first.isLoading }
+    try await wait { !comparison.first.isLoading && !comparison.isMatching }
     #expect(comparison.first.assets.count == 2 && comparison.second.assets.isEmpty)
     comparison.activeSide = .second
     store.openFolderFromTree(b)
-    try await wait { !comparison.second.isLoading }
+    try await wait { !comparison.second.isLoading && !comparison.isMatching }
     #expect(sameFolder(comparison.first.folderURL, a) && sameFolder(comparison.second.folderURL, b))
     #expect(comparison.second.assets.count == 4)
 
@@ -127,7 +127,7 @@ struct FolderTreeNavigationTests {
     comparison.activeSide = .second
     #expect(store.canOpenFolderFromTree)
     store.openFolderFromTree(a)
-    try await wait { !comparison.second.isLoading }
+    try await wait { !comparison.second.isLoading && !comparison.isMatching }
     #expect(comparison.second.assets.count == 2 && sameFolder(comparison.second.folderURL, a))
     #expect(comparison.first.currentAsset == lockedAsset)
     #expect(store.presentationMode == .folderComparison)
