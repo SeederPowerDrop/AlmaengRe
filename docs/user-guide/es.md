@@ -1,4 +1,4 @@
-<!-- almeng-guide-source-sha256: d473810f98a43edc48639f00fbe7b598704741892ce1e2c9a169f454dcb5aca5 -->
+<!-- almeng-guide-source-sha256: 9634608eeda777b75828552e0adad7b9906fc7385a9ee8134603944086287129 -->
 
 <a name="top"></a>
 
@@ -22,7 +22,7 @@ Versión 0.13.1 · A fecha de 2026-10-09
 - [2. Recorrer las imágenes y concentrarse en una foto](#viewer)
 - [3. Buscar y seleccionar en Todo a la vista](#overview)
 - [4. Comparar dos colecciones de imágenes](#compare)
-- [5. Etiquetar fotos con el teclado](#tags)
+- [5. Etiquetar fotos y vídeos](#tags)
 - [6. Configurar nombres, colores y seguimiento de etiquetas](#tag-editor)
 - [7. Buscar fotos por ubicación](#map)
 - [8. Consultar información y metadatos de la imagen](#information)
@@ -102,7 +102,7 @@ El Visor muestra entre una y diez imágenes a la vez. Amplía para examinar deta
 
 ### Avanzar por varias imágenes
 
-En el visor normal, ←/→ avanza el número de imágenes configurado por vista. ⌥←/⌥→ también mueve una vista completa cuando se muestran varias imágenes. En el modo de etiquetado, las flechas solas avanzan una foto cada vez y las flechas con Opción siguen avanzando una vista completa.
+En el Visor normal, ←/→ avanza una página; con Etiquetado ON, un elemento. Al mostrar varios elementos, ↑/↓ selecciona la fila superior o inferior de la página actual y se detiene en la primera y la última. Si la última fila está incompleta, selecciona la tarjeta disponible más cercana. ⌥←/⌥→ siempre cambia de página, incluso al etiquetar.
 
 ### Controles de desplazamiento
 
@@ -130,15 +130,15 @@ Todo a la vista reúne la colección en una cuadrícula para seleccionar y prepa
 
 **Pantalla 03.** Todo a la vista combina la cuadrícula con la búsqueda y los controles de selección y tamaño.
 
-1. **Cuadrícula de miniaturas** — Haz clic, selecciona un intervalo o arrastra por las tarjetas; haz doble clic para abrir una foto.
-2. **Búsqueda, filtros y selección del mapa** — Busca, ordena y filtra la lista. La franja azul muestra el número de áreas y fotos, con Volver al mapa y Quitar área del mapa.
+1. **Cuadrícula de miniaturas** — Haz clic, selecciona un intervalo o arrastra para elegir tarjetas. Los vídeos tienen vistas previas fijas; un doble clic los abre a pantalla completa.
+2. **Búsqueda, filtros y vídeos** — Ajusta búsqueda, orden, formato, etiquetas y Mostrar vídeos para la lista actual.
 3. **Tamaño y selección** — Ajusta el tamaño de las vistas previas y utiliza las acciones de las imágenes seleccionadas para trabajar por lotes.
 
 ### Cómo hacerlo
 
 1. En Todo a la vista (G), ajusta el tamaño de las miniaturas. Un doble clic abre una foto en el Visor o un vídeo a pantalla completa.
 2. Escribe en Buscar nombres de archivo. La búsqueda ignora mayúsculas y minúsculas; todos los términos separados por espacios deben aparecer en el nombre. Elige uno o varios formatos, o Todos los formatos para quitar ese filtro.
-3. Haz clic para seleccionar, ⌘ + clic para añadir o quitar una imagen y ⇧ + clic para seleccionar un intervalo. Arrastra un rectángulo desde una imagen o un espacio vacío para seleccionar las tarjetas que toque. ←/→ mueve la selección una tarjeta; ↑/↓ una fila de la cuadrícula actual. También funciona en las listas filtradas por áreas del mapa. Los atajos personalizados tienen prioridad. En modo de etiquetado, las cuatro flechas avanzan una imagen cada vez.
+3. Haz clic para seleccionar, ⌘ + clic para añadir o quitar y ⇧ + clic para un intervalo. Arrastra un rectángulo desde una tarjeta o el fondo para seleccionar las tarjetas que toque. Con Etiquetado ON u OFF, ←/→ avanza una tarjeta y ↑/↓ una fila. Se detiene en la primera y la última fila; si la última está incompleta, elige la tarjeta disponible más cercana. También funciona en listas filtradas por el mapa. Con OFF, los atajos personalizados tienen prioridad.
 
 ### Atajos de selección
 
@@ -206,31 +206,31 @@ La comparación muestra originales sin ajustes y excluye vídeos. Sal para edita
 
 <a name="tags"></a>
 
-## 5. Etiquetar fotos con el teclado
+## 5. Etiquetar fotos y vídeos
 
-El etiquetado permite asignar varias etiquetas personales a una foto mientras navegas. Son marcas de la aplicación, no acciones ejecutadas sobre el archivo original.
+Añade varias etiquetas a fotos y vídeos mientras navegas. Solo Etiquetado ON permite cambiarlas; son marcas de la aplicación, no acciones sobre los originales.
 
-![El modo de etiquetado, las teclas asignadas y sus marcas de color.](figures/tags.png)
+![Etiquetado ON: teclas y botones inferiores para el elemento actual, más el menú de cada tarjeta.](figures/tags.png)
 
-**Pantalla 05.** El modo de etiquetado, las teclas asignadas y sus marcas de color.
+**Pantalla 05.** Etiquetado ON: teclas y botones inferiores para el elemento actual, más el menú de cada tarjeta.
 
-1. **Modo de etiquetado** — Activa o desactiva el modo; al desactivarlo vuelven las funciones habituales de las teclas.
-2. **Teclas de etiquetas** — Usa 1–4, QWER y ASDF o haz clic en un botón de etiqueta. Una foto puede llevar varias marcas.
-3. **Filtro Etiquetas** — Reúne las fotos coincidentes o sin etiquetar de la colección abierta.
+1. **Etiquetado ON/OFF** — ON permite cambiar etiquetas; OFF restaura los atajos habituales.
+2. **Teclas y botones inferiores** — Cambia las etiquetas del elemento actual. Se pueden combinar varias.
+3. **Menú de cada tarjeta** — Cambia solo esa foto o vídeo, sin alterar la selección actual o múltiple.
 
 ### Cómo hacerlo
 
-1. Abre fotos y haz clic en Etiquetado, usa el menú Etiquetas de fotos o pulsa ⌘⇧M. En Comparación de imágenes, las etiquetas se aplican a la foto del panel activo.
-2. Recorre las fotos con ← y →. Pulsa las teclas físicas 1–4, QWER o ASDF para añadir o quitar sus etiquetas. Una segunda pulsación retira la etiqueta; varias pueden coexistir.
-3. Sal del etiquetado con ⌘⇧M, Esc o el botón de cierre del panel. Usa el filtro Etiquetas para mostrar Cualquiera de las etiquetas elegidas, Todas las etiquetas elegidas o Fotos sin etiquetar. En Comparación de imágenes, usa el botón de etiquetas bajo el nombre de cada panel para configurar su filtro por separado.
+1. Usa Etiquetado ON/OFF, Etiquetas de fotos o ⌘⇧M. ON termina la entrada de búsqueda. Las teclas afectan al elemento actual o a la foto del panel activo en Comparación de imágenes.
+2. Con ON, usa las teclas físicas 1–4, QWER, ASDF o los botones inferiores. En Visor y Todo a la vista, el menú de cada tarjeta solo cambia su foto o vídeo; no cambia la selección ni aplica etiquetas a toda una selección múltiple.
+3. En la vista normal, pasa a OFF con ⌘⇧M, Esc o cerrando el panel. El filtro Etiquetas muestra Cualquiera de las etiquetas elegidas, Todas las etiquetas elegidas o Fotos sin etiquetar. En comparación, ajusta cada filtro bajo el nombre del panel.
 
 ### Mantener un ritmo constante
 
-Añadir una etiqueta no avanza automáticamente. Mientras el etiquetado está activo, la lista filtrada permanece fija para que varias pulsaciones afecten a la misma foto. Los resultados se actualizan al salir del modo. Las flechas solas avanzan una foto cada vez. La comparación también aplaza las actualizaciones automáticas, pero cambiar explícitamente un filtro de etiquetas se aplica de inmediato.
+Etiquetar no avanza automáticamente. Con ON, la lista queda estable y ←/→ en el Visor avanza un elemento. OFF actualiza los resultados. La comparación también aplaza la actualización, salvo al cambiar el filtro explícitamente. En Visor, no se etiqueta hasta que aparezca la foto o vista previa de vídeo solicitada.
 
 ### Qué significan las teclas
 
-Los nombres iniciales, incluidos Eliminar y Subir, son solo ejemplos. Las teclas nunca eliminan, suben, mueven ni editan una foto. Cámbialos según tu trabajo, por ejemplo Candidata para imprimir o Edición terminada.
+Nombres iniciales: 1–4 Una estrella, Dos estrellas, Tres estrellas, Cuatro estrellas; Q Subir, W Retocar, E Eliminar, R Pendiente; A Paisaje, S Personas, D Objetos, F Animales. Son etiquetas editables: las teclas no suben, retocan, eliminan ni mueven archivos. Se conservan los nombres ya guardados.
 
 ### Guardado local
 
@@ -238,7 +238,7 @@ Las etiquetas asignadas, sus nombres y colores y los informes se guardan en la b
 
 ### Conviene saber
 
-- Las teclas de etiquetas tienen prioridad sobre las acciones normales durante el etiquetado. Por ejemplo, 1 y F aplican etiquetas en vez de Tamaño real o modo de concentración. Sal del etiquetado para recuperar esos atajos normales.
+- Con OFF, 1 y F recuperan Tamaño real y concentración. El vídeo a pantalla completa tiene interruptor, menú y teclas de etiquetas para ese vídeo; ←/→ siguen cambiando la posición de reproducción y Esc cierra primero la pantalla completa.
 
 [Volver arriba](#top)
 
@@ -737,8 +737,8 @@ Espacio activa el modo de concentración solo cuando ninguna acción personaliza
 
 | Teclas | Acción | Cuándo se aplica |
 | --- | --- | --- |
-| ← / → | Imagen o página anterior / siguiente | Configurable. El Visor avanza por el número de imágenes por pantalla; la comparación sigue Solo A / Ambos / Solo B. Todo a la vista avanza una imagen cada vez. |
-| ↑ / ↓ | Subir / bajar una fila en Todo a la vista | Avanza una fila de la cuadrícula normal de Todo a la vista. Los atajos personalizados tienen prioridad; el modo de etiquetado avanza una imagen. |
+| ← / → | Imagen o página anterior / siguiente | Configurable. El Visor normal avanza una página; Etiquetado ON y Todo a la vista, un elemento. La comparación sigue Solo A / Ambos / Solo B. |
+| ↑ / ↓ | Seleccionar la fila superior / inferior | En Todo a la vista y el Visor con varios elementos, con Etiquetado ON u OFF. El Visor permanece en la página actual. Se detiene en las filas extremas; los atajos personalizados tienen prioridad con OFF. |
 | ⌥← / ⌥→ | Página anterior / siguiente del visor | Teclas contextuales fijas cuando el Visor muestra varias imágenes, también durante el etiquetado; los atajos personalizados del visor tienen prioridad. |
 | = / − | Ampliar / reducir | Configurable; se aplica al visor normal o a la vista comparativa activa. |
 | 0 / 1 | Ajustar a la ventana / Tamaño real | Configurable. La tecla 1 sola aplica una etiqueta durante el etiquetado. |
@@ -763,8 +763,8 @@ Espacio activa el modo de concentración solo cuando ninguna acción personaliza
 | ⌥← / ⌥→ | Imagen anterior / siguiente solo en A | Acción de comparación configurable; A está a la izquierda o arriba. Un panel bloqueado permanece fijo. |
 | ⇧⌥← / ⇧⌥→ | Imagen anterior / siguiente solo en B | Acción de comparación configurable; B está a la derecha o abajo. Un panel bloqueado permanece fijo. |
 | ⌘⇧M | Alternar el modo de etiquetado | Atajo fijo del menú de la aplicación. |
-| 1 2 3 4 · Q W E R · A S D F | Añadir/quitar las doce etiquetas de fotos | Posiciones físicas fijas; solo en etiquetado. Nombres y colores editables; las teclas no eliminan ni suben archivos. |
-| ← / ↑ · → / ↓ | Foto anterior / siguiente durante el etiquetado | Navegación fija del etiquetado; una foto cada vez. |
+| 1 2 3 4 · Q W E R · A S D F | Añadir/quitar las doce etiquetas de fotos y vídeos | Teclas físicas fijas; solo el elemento actual con Etiquetado ON. En pantalla completa, el vídeo mostrado. No eliminan ni suben archivos. |
+| ← / → · ↑ / ↓ | Recorrer elementos / filas al etiquetar | ←/→ avanza un elemento; ↑/↓ una fila de la cuadrícula. En el Visor con un elemento y en Comparación de imágenes, ↑/↓ pasa al elemento anterior o siguiente. |
 | ⌘A | Seleccionar todas las imágenes de la lista actual | Atajo fijo de selección fuera de Comparación de imágenes; los campos de texto mantienen la selección de texto habitual. |
 | Esc | Cancelar el gesto actual o salir del modo activo | Fijo. Sale del etiquetado, la comparación, la comparación de calidad de ampliación o la concentración; el Visor normal vuelve a Todo a la vista. También cancela gestos de selección de áreas. |
 

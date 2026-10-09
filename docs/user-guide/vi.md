@@ -1,4 +1,4 @@
-<!-- almeng-guide-source-sha256: b91582a0a2fbd5158f58233438668596e79f15003d76395b426351bc0162173d -->
+<!-- almeng-guide-source-sha256: 6886926620709456aa8907a7b2734f8bf836123b51224723cf253b0b0119fa7d -->
 
 <a name="top"></a>
 
@@ -22,7 +22,7 @@ Phiên bản 0.13.1 · Tính đến 2026-10-09
 - [2. Duyệt ảnh và xem tập trung](#viewer)
 - [3. Tìm và chọn ảnh trong Xem tất cả](#overview)
 - [4. So sánh hai bộ ảnh](#compare)
-- [5. Phân loại ảnh bằng bàn phím](#tags)
+- [5. Gắn nhãn ảnh và video](#tags)
 - [6. Đặt tên, màu nhãn và hiểu giới hạn theo dõi ảnh](#tag-editor)
 - [7. Tìm ảnh theo vị trí](#map)
 - [8. Xem thông tin ảnh và siêu dữ liệu](#information)
@@ -102,7 +102,7 @@ Trình xem có thể hiển thị từ một đến mười ảnh cùng lúc. Ph
 
 ### Chuyển nhiều ảnh cùng lúc
 
-Trong trình xem thông thường, ←/→ chuyển theo số ảnh đã đặt cho mỗi màn hình. Khi hiển thị nhiều ảnh, ⌥←/⌥→ cũng chuyển một màn hình mỗi lần. Trong chế độ phân loại, phím mũi tên đơn chuyển từng ảnh, còn Option kết hợp mũi tên vẫn chuyển theo màn hình.
+Trong Trình xem thông thường, ←/→ chuyển cả trang; khi Phân loại ON, chuyển từng mục. Khi hiển thị nhiều mục, ↑/↓ chọn hàng trên hoặc dưới trong trang hiện tại và dừng ở hàng đầu, hàng cuối. Nếu hàng cuối không đầy, thẻ hiện có gần nhất được chọn. ⌥←/⌥→ luôn chuyển cả trang, kể cả khi phân loại.
 
 ### Điều khiển di chuyển ảnh
 
@@ -130,15 +130,15 @@ Xem tất cả trải bộ ảnh hiện tại thành lưới ảnh thu nhỏ. D�
 
 **Màn hình 03.** Xem tất cả kết hợp lưới ảnh thu nhỏ với tìm kiếm, lựa chọn và điều chỉnh kích thước.
 
-1. **Lưới ảnh thu nhỏ** — Bấm, chọn theo khoảng hoặc kéo qua các thẻ; bấm đúp để mở ảnh.
-2. **Tìm kiếm, lọc và vùng chọn bản đồ** — Tìm, sắp xếp và lọc danh sách hiện tại. Thanh màu xanh cho biết số vùng và số ảnh, với các nút Quay lại bản đồ và Xóa vùng bản đồ.
+1. **Lưới ảnh thu nhỏ** — Bấm, chọn theo khoảng hoặc kéo để chọn thẻ. Video có bản xem trước tĩnh; bấm đúp để mở toàn màn hình.
+2. **Tìm kiếm, bộ lọc và video** — Điều chỉnh tìm kiếm, sắp xếp, định dạng, nhãn và Hiển thị video cho danh sách hiện tại.
 3. **Kích thước và lựa chọn** — Điều chỉnh ảnh xem trước và dùng các thao tác dành cho ảnh đã chọn để xử lý hàng loạt.
 
 ### Các bước thực hiện
 
 1. Trong Xem tất cả (G), chỉnh cỡ ảnh thu nhỏ. Nhấp đúp để mở ảnh trong Trình xem hoặc video toàn màn hình.
 2. Nhập vào Tìm theo tên tệp. Tìm kiếm không phân biệt chữ hoa/thường; mọi từ ngăn bằng dấu cách đều phải xuất hiện trong tên tệp. Chọn một hay nhiều định dạng, hoặc Tất cả định dạng để bỏ bộ lọc đó.
-3. Bấm để chọn, ⌘-bấm để thêm hoặc bỏ một ảnh và ⇧-bấm để chọn một khoảng. Kéo hình chữ nhật từ ảnh hoặc vùng trống để chọn các thẻ giao với vùng đó. ←/→ di chuyển từng thẻ; ↑/↓ di chuyển từng hàng của lưới hiện tại. Cách này cũng hoạt động khi danh sách được lọc theo vùng bản đồ. Phím tắt tùy chỉnh được ưu tiên. Trong chế độ phân loại, cả bốn phím mũi tên đều di chuyển từng ảnh.
+3. Bấm để chọn, ⌘-bấm để thêm hoặc bỏ, ⇧-bấm để chọn một khoảng. Kéo hình chữ nhật từ thẻ hoặc vùng trống để chọn các thẻ giao với vùng đó. Với Phân loại ON hay OFF, ←/→ chuyển từng thẻ và ↑/↓ chuyển từng hàng. Dừng ở hàng đầu và cuối; nếu hàng cuối không đầy, chọn thẻ hiện có gần nhất. Danh sách lọc theo bản đồ cũng tương tự. Khi OFF, phím tắt tùy chỉnh được ưu tiên.
 
 ### Phím hỗ trợ chọn ảnh
 
@@ -206,31 +206,31 @@ So sánh hiển thị ảnh gốc chưa chỉnh sửa, không gồm video. Thoá
 
 <a name="tags"></a>
 
-## 5. Phân loại ảnh bằng bàn phím
+## 5. Gắn nhãn ảnh và video
 
-Phân loại cho phép gắn nhiều nhãn riêng cho ảnh trong lúc duyệt. Nhãn là dấu trong ứng dụng, không phải thao tác thực hiện lên tệp gốc.
+Gắn nhiều nhãn cho ảnh và video trong lúc duyệt. Chỉ Phân loại ON cho phép đổi nhãn; đây là dấu trong ứng dụng, không phải thao tác lên tệp gốc.
 
-![Chế độ Phân loại với các phím được gán và dấu màu.](figures/tags.png)
+![Phân loại ON: phím và nút bên dưới cho mục hiện tại, cùng menu Nhãn riêng trên mỗi thẻ.](figures/tags.png)
 
-**Màn hình 05.** Chế độ Phân loại với các phím được gán và dấu màu.
+**Màn hình 05.** Phân loại ON: phím và nút bên dưới cho mục hiện tại, cùng menu Nhãn riêng trên mỗi thẻ.
 
-1. **Chế độ phân loại** — Bật hoặc tắt chế độ; khi tắt, các phím xem ảnh thông thường hoạt động trở lại.
-2. **Các phím nhãn** — Dùng 1–4, QWER, ASDF hoặc bấm nút nhãn. Một ảnh có thể mang nhiều dấu.
-3. **Bộ lọc nhãn** — Tập hợp ảnh phù hợp hoặc chưa gắn nhãn từ bộ ảnh đang mở.
+1. **Phân loại ON/OFF** — ON cho phép đổi nhãn; OFF khôi phục các phím xem thông thường.
+2. **Phím và nút bên dưới** — Bật/tắt nhãn của mục hiện tại. Có thể gắn nhiều nhãn cùng lúc.
+3. **Menu Nhãn trên mỗi thẻ** — Chỉ đổi ảnh hoặc video đó, không đổi lựa chọn hiện tại hay nhóm đang chọn.
 
 ### Các bước thực hiện
 
-1. Mở ảnh rồi bấm Phân loại, dùng menu Nhãn ảnh hoặc nhấn ⌘⇧M. Trong So sánh ảnh, nhãn áp dụng cho ảnh ở khung đang hoạt động.
-2. Duyệt bằng ← và →. Nhấn các vị trí phím 1–4, QWER hoặc ASDF để bật/tắt nhãn tương ứng. Nhấn lại để bỏ nhãn; một ảnh có thể có nhiều nhãn.
-3. Thoát Phân loại bằng ⌘⇧M, Esc hoặc nút đóng của bảng. Dùng bộ lọc Nhãn để xem Có bất kỳ nhãn đã chọn nào, Có tất cả nhãn đã chọn hoặc Ảnh chưa gắn nhãn. Trong So sánh ảnh, dùng nút nhãn dưới tên mỗi khung để đặt bộ lọc riêng.
+1. Dùng Phân loại ON/OFF, menu Nhãn ảnh hoặc ⌘⇧M. Bật ON kết thúc nhập tìm kiếm. Phím tác động lên mục hiện tại, hoặc ảnh trong khung hoạt động của So sánh ảnh.
+2. Khi ON, dùng vị trí phím 1–4, QWER, ASDF hoặc các nút bên dưới. Trong Trình xem và Xem tất cả, menu Nhãn trên mỗi thẻ chỉ đổi ảnh hay video đó, không đổi lựa chọn hoặc áp dụng cho toàn bộ nhóm chọn.
+3. Ở chế độ xem thông thường, chuyển OFF bằng ⌘⇧M, Esc hoặc đóng bảng. Bộ lọc Nhãn hiển thị Có bất kỳ nhãn đã chọn nào, Có tất cả nhãn đã chọn hoặc Ảnh chưa gắn nhãn. Trong So sánh ảnh, đặt bộ lọc riêng dưới tên mỗi khung.
 
 ### Giữ nhịp duyệt ổn định
 
-Gắn nhãn không tự chuyển sang ảnh tiếp theo. Trong chế độ Phân loại, danh sách đã lọc giữ nguyên để nhiều lần nhấn phím cùng tác động lên một ảnh. Kết quả lọc cập nhật khi thoát Phân loại. Trong chế độ này, phím mũi tên đơn chuyển từng ảnh. So sánh cũng hoãn cập nhật tự động, nhưng đổi bộ lọc nhãn trực tiếp sẽ áp dụng ngay.
+Gắn nhãn không tự chuyển mục. Khi ON, danh sách giữ nguyên và ←/→ trong Trình xem chuyển từng mục; OFF cập nhật kết quả. So sánh cũng hoãn cập nhật tự động, trừ khi đổi bộ lọc trực tiếp. Trong Trình xem, chỉ gắn nhãn sau khi ảnh hoặc bản xem trước video yêu cầu đã hiển thị.
 
 ### Ý nghĩa của các phím
 
-Tên ban đầu, kể cả Xóa và Tải lên, chỉ là ví dụ. Các phím này không xóa, tải lên, di chuyển hay sửa ảnh. Bạn có thể đổi tên theo công việc, như Chọn để in hoặc Đã chỉnh sửa.
+Tên ban đầu: 1–4 Một sao, Hai sao, Ba sao, Bốn sao; Q Tải lên, W Chỉnh sửa, E Xóa, R Chờ xử lý; A Phong cảnh, S Người, D Đồ vật, F Động vật. Đây chỉ là nhãn có thể sửa; phím không tải lên, chỉnh sửa, xóa hay di chuyển tệp. Tên đã lưu được giữ nguyên.
 
 ### Lưu trên máy
 
@@ -238,7 +238,7 @@ Nhãn đã gắn, tên và màu nhãn được lưu trong cơ sở dữ liệu c
 
 ### Điều cần biết
 
-- Khi Phân loại bật, các phím nhãn được ưu tiên hơn thao tác thông thường. Ví dụ, 1 và F gắn nhãn thay vì chọn Kích thước thực hay chế độ tập trung. Thoát Phân loại để dùng lại các phím tắt thông thường.
+- Khi OFF, 1 và F trở lại Kích thước thực và chế độ tập trung. Video toàn màn hình có nút bật/tắt, menu và phím nhãn cho chính video đó; ←/→ vẫn đổi vị trí phát và Esc đóng toàn màn hình trước.
 
 [Về đầu trang](#top)
 
@@ -737,8 +737,8 @@ Space chỉ đổi chế độ tập trung khi không có thao tác riêng dùng
 
 | Phím | Thao tác | Điều kiện sử dụng |
 | --- | --- | --- |
-| ← / → | Ảnh hoặc trang trước / tiếp theo | Có thể gán lại. Trình xem chuyển theo số ảnh mỗi màn hình; so sánh theo Chỉ A / Cả hai / Chỉ B. Xem tất cả di chuyển từng ảnh. |
-| ↑ / ↓ | Lên / xuống một hàng trong Xem tất cả | Di chuyển một hàng trong lưới Xem tất cả thông thường. Phím tắt tùy chỉnh được ưu tiên; chế độ phân loại di chuyển từng ảnh. |
+| ← / → | Ảnh hoặc trang trước / tiếp theo | Có thể gán lại. Trình xem thường chuyển cả trang; Phân loại ON và Xem tất cả chuyển từng mục. So sánh theo Chỉ A / Cả hai / Chỉ B. |
+| ↑ / ↓ | Chọn hàng phía trên / phía dưới | Trong Xem tất cả và Trình xem nhiều mục, với Phân loại ON hoặc OFF. Trình xem chỉ di chuyển trong trang hiện tại. Dừng ở hàng đầu và cuối; phím tắt tùy chỉnh được ưu tiên khi OFF. |
 | ⌥← / ⌥→ | Trang trước / tiếp theo trong trình xem | Phím theo ngữ cảnh cố định khi Trình xem hiển thị nhiều ảnh, kể cả lúc Phân loại; tổ hợp riêng cho trình xem được ưu tiên. |
 | = / − | Phóng to / thu nhỏ | Có thể gán lại; áp dụng cho trình xem thông thường hoặc khung so sánh đang hoạt động. |
 | 0 / 1 | Vừa cửa sổ / Kích thước thực | Có thể gán lại. Phím 1 đơn là phím nhãn khi Phân loại bật. |
@@ -763,8 +763,8 @@ Space chỉ đổi chế độ tập trung khi không có thao tác riêng dùng
 | ⌥← / ⌥→ | Ảnh trước / tiếp theo chỉ ở A | Thao tác so sánh có thể gán lại; A ở trái hoặc trên. Khung bị khóa giữ nguyên. |
 | ⇧⌥← / ⇧⌥→ | Ảnh trước / tiếp theo chỉ ở B | Thao tác so sánh có thể gán lại; B ở phải hoặc dưới. Khung bị khóa giữ nguyên. |
 | ⌘⇧M | Bật/tắt chế độ Phân loại | Phím tắt cố định của menu ứng dụng. |
-| 1 2 3 4 · Q W E R · A S D F | Bật/tắt mười hai nhãn ảnh | Vị trí phím vật lý cố định; chỉ dùng trong Phân loại. Tên và màu có thể sửa; các phím không xóa hay tải tệp lên. |
-| ← / ↑ · → / ↓ | Ảnh trước / tiếp theo khi phân loại | Điều hướng cố định trong Phân loại, mỗi lần chuyển một ảnh. |
+| 1 2 3 4 · Q W E R · A S D F | Bật/tắt mười hai nhãn cho ảnh và video | Vị trí phím cố định; chỉ mục hiện tại khi Phân loại ON. Toàn màn hình áp dụng cho video đang xem. Không xóa hay tải tệp lên mạng. |
+| ← / → · ↑ / ↓ | Chuyển mục / hàng khi phân loại | ←/→ chuyển từng mục; ↑/↓ chuyển từng hàng trong lưới. Trong Trình xem một mục và So sánh ảnh, ↑/↓ chuyển đến mục trước hoặc tiếp theo. |
 | ⌘A | Chọn mọi ảnh trong danh sách hiện tại | Phím chọn cố định khi ở ngoài So sánh ảnh; ô nhập chữ vẫn chọn văn bản như bình thường. |
 | Esc | Hủy cử chỉ hiện tại hoặc thoát chế độ đang dùng | Cố định. Thoát Phân loại, so sánh, so sánh chất lượng phóng to hoặc tập trung; Trình xem thông thường trở về Xem tất cả. Cũng hủy cử chỉ chọn vùng. |
 

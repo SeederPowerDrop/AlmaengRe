@@ -1,4 +1,4 @@
-<!-- almeng-guide-source-sha256: 8fb7b31756d2aa2472bf8f278224379a34fe2f1322e4ebd6551f9800188dd691 -->
+<!-- almeng-guide-source-sha256: 6ebad04f149aefaa803d9324ebf7a11de01f712d1fb68a37c64b26db184e8fc7 -->
 
 <a name="top"></a>
 
@@ -22,7 +22,7 @@ Version 0.13.1 · As of 2026-10-09
 - [2. Browse and focus on your images](#viewer)
 - [3. Find and select images in All at Once](#overview)
 - [4. Compare two image collections](#compare)
-- [5. Tag photos with the keyboard](#tags)
+- [5. Tag photos and videos](#tags)
 - [6. Set tag names, colors, and tracking expectations](#tag-editor)
 - [7. Find photos by location](#map)
 - [8. Inspect image information and metadata](#information)
@@ -102,7 +102,7 @@ Viewer can show one to ten images at a time. Zoom in to inspect details or hide 
 
 ### Moving through several images
 
-In the regular viewer, ←/→ advances by the configured number of images per screen. ⌥←/⌥→ also moves a full screen when more than one image is displayed. In Tagging mode, plain arrows move one image at a time while Option-arrow navigation still moves a full screen.
+In the regular viewer, ←/→ moves a full page; with Tagging ON, it moves one item. With multiple items displayed, ↑/↓ selects the row above or below within the current page and stops at its first and last rows. A short last row selects the nearest available card. ⌥←/⌥→ moves a full page, including while tagging.
 
 ### Pan controls
 
@@ -130,15 +130,15 @@ All at Once spreads the current collection into a thumbnail grid. Use it to scan
 
 **Screen 03.** All at Once combines the thumbnail grid with search, selection, and size controls.
 
-1. **Thumbnail grid** — Click, range-select, or drag across cards; double-click to open a photo.
-2. **Search, filters and map selection** — Search, sort and filter the current list. The blue map banner shows area and photo counts, with Back to map and Clear Map Area buttons.
+1. **Thumbnail grid** — Click, range-select, or drag to select cards. Videos show still previews; double-click opens them in full screen.
+2. **Search, filters, and videos** — Adjust search, sorting, format, tags, and Show Videos for the current list.
 3. **Size and selection** — Adjust preview size and use the selected-image actions for batch work.
 
 ### How to
 
 1. Choose All at Once (G) and adjust the thumbnail size. Double-click to open a photo in Viewer or a video in full screen.
 2. Type in Search Filenames. Search ignores letter case; every space-separated term must appear in the filename. Choose one or more formats, or All Formats to clear that filter.
-3. Click to select, ⌘-click to add or remove an image, and ⇧-click to select a range. Drag a rectangle from an image or empty space to select intersecting cards. ←/→ moves one card at a time; ↑/↓ moves one row in the current grid. This also works in a list restricted to selected map areas. Custom shortcuts take priority. In Tagging mode, all four arrows move one image at a time.
+3. Click to select, ⌘-click to add or remove, and ⇧-click to select a range. Drag a rectangle from a card or empty space to select intersecting cards. ←/→ moves one card; ↑/↓ moves one grid row with Tagging ON or OFF. Movement stops at the first and last rows; a short last row selects the nearest available card. This also works in map-filtered lists. Custom shortcuts take priority with Tagging OFF.
 
 ### Selection shortcuts
 
@@ -206,31 +206,31 @@ Comparison shows unedited originals and excludes videos. Exit for editing, batch
 
 <a name="tags"></a>
 
-## 5. Tag photos with the keyboard
+## 5. Tag photos and videos
 
-Tagging lets you attach several personal labels to a photo while browsing. Tags are marks in the app, not actions performed on the original file.
+Apply several personal labels while browsing photos and videos. Tags can change only with Tagging ON; they are marks in the app, not actions on original files.
 
-![Tagging mode with keyboard assignments and colored marks.](figures/tags.png)
+![Tagging ON with current-item keys and bottom buttons, plus each card’s Tags menu.](figures/tags.png)
 
-**Screen 05.** Tagging mode with keyboard assignments and colored marks.
+**Screen 05.** Tagging ON with current-item keys and bottom buttons, plus each card’s Tags menu.
 
-1. **Tagging mode** — Turn the mode on or off; ordinary viewing keys resume when it is off.
-2. **Tag keys** — Use 1–4, QWER, and ASDF, or click a tag button. A photo can carry several marks.
-3. **Tags filter** — Gather matching or untagged photos from the currently open collection.
+1. **Tagging ON/OFF** — Turn ON to change tags. OFF restores ordinary viewing shortcuts.
+2. **Keys and bottom buttons** — Toggle marks on the current item. Multiple tags can coexist.
+3. **Each card’s Tags menu** — Change only that photo or video, without changing the current or multiple selection.
 
 ### How to
 
-1. Open photos and click Tagging, use the Photo Tags menu, or press ⌘⇧M. In Image Comparison, tags apply to the active pane's photo.
-2. Browse with ← and →. Press the physical 1–4, QWER, or ASDF keys to toggle their tags. Press a key again to remove that tag; several tags can coexist.
-3. Exit Tagging with ⌘⇧M, Esc, or the panel's close button. Use the Tags filter to show Any selected tag, All selected tags, or Untagged Photos. In Image Comparison, use the tag button below each pane’s name to set its filter independently.
+1. Use Tagging ON/OFF, the Photo Tags menu, or ⌘⇧M. Turning it ON ends search entry. Keyboard tags affect the current item, or the active pane’s photo in Image Comparison.
+2. With ON, toggle tags with the physical 1–4, QWER, ASDF keys or bottom buttons. Each card’s Tags menu in Viewer or All at Once changes only its photo or video; it neither changes selection nor tags a multiple selection.
+3. In ordinary viewing, turn OFF with ⌘⇧M, Esc, or the panel close button. The Tags filter shows Any selected tag, All selected tags, or Untagged Photos. In Image Comparison, set each filter below its pane’s name.
 
 ### Keep a steady browsing rhythm
 
-Applying a tag does not automatically advance. While Tagging is active, the filtered list stays in place so several keypresses affect the same image. Filter results refresh when you leave Tagging. Plain arrow keys move a single photo in this mode. Comparison also defers automatic updates, but changing a tag filter explicitly takes effect immediately.
+Tagging never advances automatically. While ON, the list stays stable and ordinary Viewer ←/→ moves one item at a time. Turning OFF refreshes results. Comparison also defers automatic updates, but explicit filter changes apply immediately. In Viewer, tagging waits until the requested photo or video preview is displayed.
 
 ### What the keys mean
 
-The initial names, including Delete and Upload, are examples only. These keys never delete, upload, move, or edit a photo. Rename them for your workflow, such as Print candidate or Editing complete.
+Default names are 1–4: One star, Two stars, Three stars, Four stars; Q Upload, W Retouch, E Delete, R Hold; A Landscape, S People, D Objects, F Animals. These are editable labels only; the keys never upload, retouch, delete, or move files. Previously saved names are kept.
 
 ### Stored locally
 
@@ -238,7 +238,7 @@ Photo marks, classification names and colors, and tracking history are stored in
 
 ### Good to know
 
-- Tag keys take priority over regular actions while Tagging is active. For example, 1 and F apply tags instead of Actual Size or focus mode. Exit Tagging to use those normal shortcuts again.
+- With OFF, 1 and F resume Actual Size and focus mode. Full-screen video has a tagging switch and menu; its tag keys affect that video. There, ←/→ still seek and Esc closes full screen first.
 
 [Back to top](#top)
 
@@ -737,8 +737,8 @@ Space is a focus gesture only when no custom action uses plain Space and you are
 
 | Keys | Action | When it applies |
 | --- | --- | --- |
-| ← / → | Previous / next image or page | Configurable. Viewer moves by images per screen; comparison follows A Only / Both / B Only. All at Once moves one image at a time. |
-| ↑ / ↓ | Move up / down a row in All at Once | Moves one row in the regular All at Once grid. Custom shortcuts take priority; Tagging mode moves one image at a time. |
+| ← / → | Previous / next image or page | Configurable. Regular Viewer moves a full page; Tagging ON and All at Once move one item. Comparison follows A Only / Both / B Only. |
+| ↑ / ↓ | Select the row above / below | Works in All at Once and multiple-item Viewer with Tagging ON or OFF. Viewer stays within the current page. Stops at row boundaries; custom shortcuts take priority with Tagging OFF. |
 | ⌥← / ⌥→ | Previous / next viewer page | Fixed contextual keys when Viewer shows multiple images, including during Tagging; custom viewer assignments take priority. |
 | = / − | Zoom in / out | Configurable; applies to the regular viewer or active comparison view. |
 | 0 / 1 | Fit to Window / Actual Size | Configurable. Plain 1 is a tag key while Tagging is active. |
@@ -763,8 +763,8 @@ Space is a focus gesture only when no custom action uses plain Space and you are
 | ⌥← / ⌥→ | Previous / next in A only | Configurable comparison action; A is left or top. A locked pane stays fixed. |
 | ⇧⌥← / ⇧⌥→ | Previous / next in B only | Configurable comparison action; B is right or bottom. A locked pane stays fixed. |
 | ⌘⇧M | Toggle Tagging mode | Fixed app-menu shortcut. |
-| 1 2 3 4 · Q W E R · A S D F | Toggle the twelve photo tags | Fixed physical key positions; Tagging only. Names and colors are editable; keys do not delete or upload files. |
-| ← / ↑ · → / ↓ | Previous / next photo while tagging | Fixed Tagging navigation; moves one photo at a time. |
+| 1 2 3 4 · Q W E R · A S D F | Toggle twelve tags on photos and videos | Fixed physical keys; current item only with Tagging ON. In full screen they affect that video. They never delete or upload files. |
+| ← / → · ↑ / ↓ | Move between items / rows while tagging | ←/→ moves one item; grid ↑/↓ moves one row. In single-item Viewer and Image Comparison, ↑/↓ moves to the previous or next item. |
 | ⌘A | Select all images in the current list | Fixed selection shortcut outside Image Comparison; text fields retain normal text selection. |
 | Esc | Cancel the current gesture or leave the active mode | Fixed. Exits Tagging, comparison, zoom-quality comparison, or focus; regular Viewer returns to All at Once. Also cancels area-selection gestures. |
 

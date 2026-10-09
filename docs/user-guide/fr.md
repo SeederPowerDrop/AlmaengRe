@@ -1,4 +1,4 @@
-<!-- almeng-guide-source-sha256: a8f3ddc286ba32bd66b318008c5a92f011fc23d66b4c321193ebf708df540618 -->
+<!-- almeng-guide-source-sha256: 3466de06f2ee465a229033f6d1ea1bbff10289b647c5d5babc03a109120e60c4 -->
 
 <a name="top"></a>
 
@@ -22,7 +22,7 @@ Version 0.13.1 · Au 2026-10-09
 - [2. Parcourir les images et se concentrer sur une photo](#viewer)
 - [3. Rechercher et sélectionner dans Tout voir](#overview)
 - [4. Comparer deux collections d’images](#compare)
-- [5. Étiqueter les photos au clavier](#tags)
+- [5. Étiqueter les photos et vidéos](#tags)
 - [6. Définir les noms, couleurs et règles de suivi des étiquettes](#tag-editor)
 - [7. Retrouver les photos par lieu](#map)
 - [8. Examiner les informations et les métadonnées](#information)
@@ -102,7 +102,7 @@ La Visionneuse affiche de une à dix images à la fois. Agrandissez les détails
 
 ### Parcourir plusieurs images
 
-Dans la visionneuse normale, ←/→ avance du nombre d’images défini par vue. ⌥←/⌥→ déplace également une vue entière lorsque plusieurs images sont affichées. En mode marquage, les flèches seules avancent d’une photo, tandis que les flèches avec Option déplacent toujours une vue entière.
+Dans la Visionneuse, ←/→ avance d’une page, ou d’un élément avec Marquage ON. Avec plusieurs éléments, ↑/↓ sélectionne la ligne au-dessus ou en dessous dans la page actuelle, sans dépasser la première ni la dernière ligne. Une dernière ligne incomplète sélectionne la carte disponible la plus proche. ⌥←/⌥→ change toujours de page, même pendant le marquage.
 
 ### Commandes de déplacement
 
@@ -130,15 +130,15 @@ Tout voir réunit la collection en grille pour sélectionner et préparer les op
 
 **Écran 03.** Tout voir réunit la grille de vignettes, la recherche et les commandes de sélection et de taille.
 
-1. **Grille de vignettes** — Cliquez, sélectionnez une plage ou faites glisser sur les cartes ; double-cliquez pour ouvrir une photo.
-2. **Recherche, filtres et sélection sur la carte** — Recherchez, triez et filtrez la liste. Le bandeau bleu indique le nombre de zones et de photos, avec Retour à la carte et Effacer la zone de carte.
+1. **Grille de vignettes** — Cliquez, sélectionnez une plage ou faites glisser pour choisir les cartes. Les vidéos ont un aperçu fixe ; un double-clic les ouvre en plein écran.
+2. **Recherche, filtres et vidéos** — Réglez recherche, tri, format, étiquettes et Afficher les vidéos pour la liste actuelle.
 3. **Taille et sélection** — Réglez la taille des aperçus et utilisez les actions sur les images sélectionnées pour les opérations par lot.
 
 ### Marche à suivre
 
 1. Dans Tout voir (G), ajustez la taille des vignettes. Un double-clic ouvre une photo dans la Visionneuse ou une vidéo en plein écran.
 2. Saisissez du texte dans Rechercher un nom de fichier. La recherche ignore les majuscules ; chaque terme séparé par une espace doit apparaître dans le nom. Choisissez un ou plusieurs formats, ou Tous les formats pour effacer ce filtre.
-3. Cliquez pour sélectionner, ⌘ + clic pour ajouter ou retirer, ⇧ + clic pour une plage. Tracez un rectangle depuis une image ou le fond pour sélectionner les cartes touchées. ←/→ avance d’une vignette ; ↑/↓ d’une ligne, même dans une liste filtrée par la carte. Les raccourcis personnalisés restent prioritaires. En mode marquage, les quatre flèches avancent d’une image à la fois.
+3. Cliquez pour sélectionner, ⌘ + clic pour ajouter ou retirer, ⇧ + clic pour une plage. Tracez un rectangle depuis une carte ou le fond pour sélectionner les cartes touchées. Avec Marquage ON ou OFF, ←/→ avance d’une carte et ↑/↓ d’une ligne. Le déplacement s’arrête aux première et dernière lignes ; si la dernière est incomplète, la carte disponible la plus proche est choisie. Cela vaut aussi pour les listes filtrées par la carte. Sur OFF, les raccourcis personnalisés sont prioritaires.
 
 ### Raccourcis de sélection
 
@@ -206,31 +206,31 @@ La comparaison affiche les originaux sans retouches et exclut les vidéos. Quitt
 
 <a name="tags"></a>
 
-## 5. Étiqueter les photos au clavier
+## 5. Étiqueter les photos et vidéos
 
-Le marquage permet d’ajouter plusieurs étiquettes personnelles à une photo pendant la navigation. Ce sont des marques dans l’application, pas des actions sur le fichier original.
+Ajoutez plusieurs étiquettes aux photos et vidéos pendant la navigation. Seul Marquage ON permet de les modifier ; ce sont des marques, pas des actions sur les originaux.
 
-![Le mode marquage, ses touches et ses étiquettes colorées.](figures/tags.png)
+![Marquage ON : touches et boutons inférieurs pour l’élément actuel, menu propre à chaque vignette.](figures/tags.png)
 
-**Écran 05.** Le mode marquage, ses touches et ses étiquettes colorées.
+**Écran 05.** Marquage ON : touches et boutons inférieurs pour l’élément actuel, menu propre à chaque vignette.
 
-1. **Mode marquage** — Activez ou désactivez le mode ; les touches d’affichage habituelles reprennent leur rôle lorsqu’il est désactivé.
-2. **Touches d’étiquettes** — Utilisez 1–4, QWER et ASDF ou cliquez sur une étiquette. Une photo peut porter plusieurs marques.
-3. **Filtre Étiquettes** — Rassemblez les photos correspondantes ou sans étiquette dans la collection actuellement ouverte.
+1. **Marquage ON/OFF** — ON permet de modifier les étiquettes ; OFF rétablit les raccourcis ordinaires.
+2. **Touches et boutons inférieurs** — Modifiez les étiquettes de l’élément actuel. Plusieurs peuvent coexister.
+3. **Menu de chaque vignette** — Modifiez seulement cette photo ou vidéo, sans changer la sélection actuelle ou multiple.
 
 ### Marche à suivre
 
-1. Ouvrez des photos et cliquez sur Marquage, utilisez le menu Étiquettes des photos ou appuyez sur ⌘⇧M. En Comparaison d’images, les étiquettes concernent la photo du volet actif.
-2. Parcourez avec ← et →. Appuyez sur les touches physiques 1–4, QWER ou ASDF pour ajouter ou retirer leurs étiquettes. Une nouvelle pression retire l’étiquette ; plusieurs peuvent coexister.
-3. Quittez le marquage avec ⌘⇧M, Esc ou le bouton de fermeture du panneau. Utilisez le filtre Étiquettes pour afficher Au moins une étiquette choisie, Toutes les étiquettes choisies ou Photos sans étiquette. Dans Comparaison d’images, le bouton d’étiquettes sous le nom de chaque volet règle son filtre indépendamment.
+1. Utilisez Marquage ON/OFF, Étiquettes des photos ou ⌘⇧M. ON termine la saisie de recherche. Les touches visent l’élément actuel, ou la photo du volet actif en Comparaison d’images.
+2. Sur ON, utilisez les touches physiques 1–4, QWER, ASDF ou les boutons inférieurs. Dans Visionneuse et Tout voir, le menu de chaque vignette ne modifie que sa photo ou vidéo, sans changer la sélection ni traiter toute une sélection multiple.
+3. En vue ordinaire, passez sur OFF avec ⌘⇧M, Esc ou la fermeture du panneau. Le filtre Étiquettes propose Au moins une étiquette choisie, Toutes les étiquettes choisies ou Photos sans étiquette. En comparaison, réglez chaque filtre sous le nom du volet.
 
 ### Garder un rythme régulier
 
-Ajouter une étiquette ne fait pas avancer automatiquement. Pendant le marquage, la liste filtrée reste en place afin que plusieurs touches concernent la même image. Les résultats sont actualisés à la sortie du mode. Les flèches seules avancent d’une photo à la fois dans ce mode. La comparaison diffère aussi les mises à jour automatiques, mais changer explicitement un filtre d’étiquettes s’applique immédiatement.
+Aucune avance automatique après marquage. Sur ON, la liste reste stable et ←/→ dans la Visionneuse avance d’un élément. OFF actualise les résultats. La comparaison diffère aussi l’actualisation, sauf changement explicite du filtre. Dans Visionneuse, le marquage attend l’affichage de la photo ou de l’aperçu vidéo demandé.
 
 ### Signification des touches
 
-Les noms initiaux, dont Supprimer et Téléverser, ne sont que des exemples. Ces touches ne suppriment, ne téléversent, ne déplacent et ne retouchent jamais une photo. Renommez-les selon votre travail, par exemple À imprimer ou Retouche terminée.
+Noms initiaux : 1–4 Une étoile, Deux étoiles, Trois étoiles, Quatre étoiles ; Q Téléverser, W Retoucher, E Supprimer, R En attente ; A Paysage, S Personnes, D Objets, F Animaux. Ces étiquettes sont modifiables : les touches ne téléversent, ne retouchent, ne suppriment ni ne déplacent les fichiers. Les noms déjà enregistrés sont conservés.
 
 ### Enregistrement local
 
@@ -238,7 +238,7 @@ Les étiquettes attribuées, leurs noms et couleurs ainsi que les rapports sont 
 
 ### Bon à savoir
 
-- Les touches d’étiquettes priment sur les actions ordinaires pendant le marquage. Ainsi, 1 et F attribuent des étiquettes au lieu d’activer Taille réelle ou le mode concentration. Quittez le marquage pour réutiliser ces raccourcis ordinaires.
+- Sur OFF, 1 et F retrouvent Taille réelle et le mode concentration. En vidéo plein écran, le bouton de marquage, le menu et les touches concernent cette vidéo ; ←/→ règlent toujours la lecture et Esc ferme d’abord le plein écran.
 
 [Retour en haut](#top)
 
@@ -737,8 +737,8 @@ Espace sert au mode concentration uniquement si aucune action personnalisée n�
 
 | Touches | Action | Conditions d’utilisation |
 | --- | --- | --- |
-| ← / → | Image ou page précédente / suivante | Configurable. La Visionneuse avance par le nombre d’images par vue ; la comparaison suit A seul / Les deux / B seul. Tout voir avance d’une image à la fois. |
-| ↑ / ↓ | Monter / descendre d’une ligne dans Tout voir | Déplace la sélection d’une ligne dans la grille normale de Tout voir. Les raccourcis personnalisés ont la priorité ; le mode marquage avance d’une image. |
+| ← / → | Image ou page précédente / suivante | Configurable. La Visionneuse normale avance d’une page ; Marquage ON et Tout voir, d’un élément. La comparaison suit A seul / Les deux / B seul. |
+| ↑ / ↓ | Sélectionner la ligne au-dessus / en dessous | Dans Tout voir et la Visionneuse à plusieurs éléments, avec Marquage ON ou OFF. La Visionneuse reste dans la page actuelle. Arrêt aux lignes extrêmes ; raccourcis personnalisés prioritaires sur OFF. |
 | ⌥← / ⌥→ | Page précédente / suivante de la visionneuse | Touches contextuelles fixes lorsque plusieurs images sont affichées, y compris pendant le marquage ; les raccourcis personnalisés de la visionneuse sont prioritaires. |
 | = / − | Zoom avant / arrière | Configurable ; concerne la visionneuse normale ou le volet de comparaison actif. |
 | 0 / 1 | Adapter à la fenêtre / Taille réelle | Configurable. La touche 1 seule sert d’étiquette pendant le marquage. |
@@ -763,8 +763,8 @@ Espace sert au mode concentration uniquement si aucune action personnalisée n�
 | ⌥← / ⌥→ | Image précédente / suivante dans A uniquement | Action de comparaison configurable ; A est à gauche ou en haut. Un volet verrouillé reste fixe. |
 | ⇧⌥← / ⇧⌥→ | Image précédente / suivante dans B uniquement | Action de comparaison configurable ; B est à droite ou en bas. Un volet verrouillé reste fixe. |
 | ⌘⇧M | Activer/désactiver le mode marquage | Raccourci fixe du menu de l’application. |
-| 1 2 3 4 · Q W E R · A S D F | Ajouter/retirer les douze étiquettes photo | Positions physiques fixes ; mode marquage uniquement. Noms et couleurs modifiables ; aucune touche ne supprime ni ne téléverse de fichier. |
-| ← / ↑ · → / ↓ | Photo précédente / suivante pendant le marquage | Navigation fixe du mode marquage ; une photo à la fois. |
+| 1 2 3 4 · Q W E R · A S D F | Ajouter/retirer les douze étiquettes de photos et vidéos | Touches physiques fixes, élément actuel seulement avec Marquage ON ; en plein écran, la vidéo affichée. Aucune suppression ni aucun téléversement. |
+| ← / → · ↑ / ↓ | Parcourir les éléments / lignes pendant le marquage | ←/→ avance d’un élément ; ↑/↓ d’une ligne dans la grille. Dans la Visionneuse à un élément et la Comparaison d’images, ↑/↓ passe à l’élément précédent ou suivant. |
 | ⌘A | Sélectionner toutes les images de la liste actuelle | Raccourci fixe de sélection hors Comparaison d’images ; les champs de texte conservent leur sélection de texte habituelle. |
 | Esc | Annuler le geste ou quitter le mode actif | Fixe. Quitte le marquage, la comparaison, la comparaison de qualité du zoom ou le mode concentration ; la Visionneuse normale revient à Tout voir. Annule aussi les gestes de sélection de zone. |
 
