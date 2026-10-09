@@ -1,4 +1,4 @@
-<!-- almeng-guide-source-sha256: 74704cfb833082dfc5167ca053d339bf947f4fdd9c5cccd564c961cff936a6ec -->
+<!-- almeng-guide-source-sha256: d473810f98a43edc48639f00fbe7b598704741892ce1e2c9a169f454dcb5aca5 -->
 
 <a name="top"></a>
 
@@ -12,7 +12,7 @@
 
 Una guía práctica de la versión de desarrollo 0.13.1 actual. Empieza por abrir una carpeta de imágenes y consulta después el capítulo correspondiente a lo que quieras hacer. Los nombres de los menús siguen la interfaz en español de la aplicación.
 
-Versión 0.13.1 · A fecha de 2026-10-07
+Versión 0.13.1 · A fecha de 2026-10-09
 
 > Las capturas muestran la aplicación real con la interfaz en coreano e imágenes sintéticas de demostración. Las anotaciones numeradas y las explicaciones están traducidas al español; los píxeles de las capturas no se modifican. No se utiliza ninguna colección personal de fotos.
 
@@ -29,12 +29,13 @@ Versión 0.13.1 · A fecha de 2026-10-07
 - [9. Editar una imagen y exportar una copia](#editing)
 - [10. Renombrar, redimensionar, convertir y compartir por lotes](#batch)
 - [11. Añadir marcas de agua con texto, EXIF y logo](#watermark)
-- [12. Reproducir vídeos, extraer fotogramas y guardar clips](#video)
+- [12. Vídeos: reproducción, fotogramas y clips](#video)
 - [13. Recorrer y guardar los fotogramas de una animación](#animation)
-- [14. Entender la ampliación con IA, el HDR y la carga](#quality)
-- [15. Reproducir un álbum o establecer el fondo de pantalla](#slideshow)
-- [16. Adaptar la aplicación a tu forma de trabajar](#settings)
-- [17. Atajos y solución rápida de problemas](#shortcuts)
+- [14. Ampliar y comparar el resultado de la IA](#ai-upscaling)
+- [15. Entender la calidad de visualización, el HDR y la carga](#quality)
+- [16. Reproducir un álbum o establecer el fondo de pantalla](#slideshow)
+- [17. Adaptar la aplicación a tu forma de trabajar](#settings)
+- [18. Atajos y solución rápida de problemas](#shortcuts)
 - [Atajos de un vistazo](#shortcut-reference)
 
 ---
@@ -43,12 +44,20 @@ Versión 0.13.1 · A fecha de 2026-10-07
 
 ## 1. Abrir imágenes, carpetas y archivos ZIP
 
-Usa Abrir… para cualquier tipo de entrada. Una foto, una carpeta o un archivo ZIP se recorren después de la misma manera.
+Usa Abrir… para fotos, vídeos, carpetas y ZIP. Fotos y vídeos compatibles aparecen juntos de forma predeterminada; los ZIP solo admiten imágenes.
+
+![Inicio reúne el logotipo, el botón para abrir y las fotos vistas recientemente.](figures/home.png)
+
+**Pantalla 01.** Inicio reúne el logotipo, el botón para abrir y las fotos vistas recientemente.
+
+1. **Abrir o continuar** — Usa Abrir… para una colección nueva o Continuar sesión anterior para recuperar el trabajo guardado.
+2. **Siete fotos recientes** — Hasta siete fotos vistas en Visor o Comparación de imágenes, las más recientes primero; pulsa para reabrir. Incluye imágenes, GIF y fotos dentro de ZIP; excluye vídeos.
+3. **Vaciar el historial reciente** — Quitar de la lista para una foto o Vaciar lista borra solo el historial, sin eliminar archivos originales. Volver a ver una foto puede añadirla otra vez a la lista.
 
 ### Cómo hacerlo
 
-1. Inicia 알맹Re en macOS 14 o posterior. Elige Abrir… en la pantalla de inicio, la barra de herramientas o el menú Archivo, o pulsa ⌘O.
-2. Elige una carpeta para recorrer sus imágenes. Elige una sola imagen para empezar por ella y continuar con las demás de la misma carpeta. Si seleccionas varias imágenes, solo se abrirán las seleccionadas. Los vídeos están ocultos de forma predeterminada: activa Mostrar vídeos encima de la lista para incluirlos. Esta preferencia se recuerda; abrir directamente un vídeo compatible la activa automáticamente y no cambia la visibilidad de los GIF.
+1. Inicia 알맹Re en macOS 14 o posterior para ver Inicio. Usa Abrir… (⌘O) o pulsa una foto reciente. Abrir… también está en la barra de herramientas y el menú Archivo.
+2. Elige una carpeta para recorrerla. Una foto permite seguir por su carpeta; seleccionar varios archivos abre solo esos archivos. Mostrar vídeos está activado de forma predeterminada y recuerda tu elección. Abrir un vídeo directamente también lo activa.
 3. Elige un archivo ZIP para ver las imágenes compatibles que contiene, incluidas las de sus subcarpetas. También puedes abrir archivos desde Finder o arrastrar imágenes y carpetas a la aplicación.
 
 ### Carpetas y favoritas
@@ -59,9 +68,9 @@ El Árbol de carpetas se despliega según sea necesario. Haz clic en el nombre d
 
 Las imágenes se extraen en una carpeta temporal mientras el archivo está abierto. Exporta una copia antes de renombrarlas o editar sus metadatos de origen. La aplicación no reescribe el ZIP. Admite archivos sin compresión o con Deflate; rechaza los cifrados y otros métodos de compresión. Los límites son 2 GiB por archivo ZIP, 10 000 entradas, 256 MiB por entrada extraída y 1 GiB de datos extraídos en total. No se admiten vídeos dentro de archivos ZIP.
 
-### Retomar donde lo dejaste
+### Inicio y la sesión anterior
 
-La aplicación restaura la última colección, la imagen seleccionada, el modo de vista y la búsqueda cuando es posible. Si se desconecta una unidad o cambian los permisos, usa Abrir… de nuevo. Los ajustes de edición y los resultados de IA sin guardar no se restauran.
+El inicio normal muestra Inicio. Continuar sesión anterior restaura la colección, selección, vista y búsqueda cuando es posible. Inicio en la barra de herramientas o el menú conserva el trabajo actual. Los archivos abiertos desde Finder se muestran directamente. Si cambian las conexiones o los permisos, usa Abrir… de nuevo. Los ajustes y resultados de IA sin guardar no se restauran al reiniciar.
 
 ### Conviene saber
 
@@ -75,15 +84,15 @@ La aplicación restaura la última colección, la imagen seleccionada, el modo d
 
 ## 2. Recorrer las imágenes y concentrarse en una foto
 
-El Visor muestra entre una y diez imágenes a la vez. Amplía para examinar detalles u oculta los controles de alrededor para concentrarte en la foto.
+El Visor muestra entre una y diez imágenes a la vez. Amplía para examinar detalles u oculta los controles de alrededor para concentrarte en la foto. En vistas múltiples, los vídeos empiezan como imágenes fijas y se reproducen sin sonido al pasar el puntero.
 
-![El Visor principal, con los controles de visualización alrededor de la imagen.](figures/viewer.png)
+![El Visor muestra varias fotos y vídeos juntos. Pasa el puntero sobre un vídeo para previsualizarlo sin sonido.](figures/viewer.png)
 
-**Pantalla 01.** El Visor principal, con los controles de visualización alrededor de la imagen.
+**Pantalla 02.** El Visor muestra varias fotos y vídeos juntos. Pasa el puntero sobre un vídeo para previsualizarlo sin sonido.
 
 1. **Modos de vista** — Cambia entre Visor, Todo a la vista, Vista de mapa y Comparación de imágenes.
-2. **Búsqueda, filtros y selección del mapa** — Busca, ordena y filtra la lista. La franja azul muestra el número de áreas y fotos, con Volver al mapa y Quitar área del mapa.
-3. **Controles de visualización** — Recorre las imágenes, ajusta el zoom, cambia cuántas se muestran y elige el método de desplazamiento.
+2. **Búsqueda, filtros y vídeos** — Ajusta búsqueda, formato, etiquetas, orden y Mostrar vídeos para la lista actual.
+3. **Controles de visualización** — Recorre los elementos y cambia cuántos se muestran. Ajusta el zoom y el desplazamiento de las fotos.
 
 ### Cómo hacerlo
 
@@ -115,11 +124,11 @@ La × inferior oculta solo la barra flotante de controles. Vuelve a abrirla con 
 
 ## 3. Buscar y seleccionar en Todo a la vista
 
-Todo a la vista distribuye la colección actual en una cuadrícula de miniaturas. Úsala para examinar una carpeta, delimitar una selección y preparar una operación por lotes.
+Todo a la vista reúne la colección en una cuadrícula para seleccionar y preparar tareas por lotes. Los vídeos tienen una vista previa fija.
 
 ![Todo a la vista combina la cuadrícula con la búsqueda y los controles de selección y tamaño.](figures/overview.png)
 
-**Pantalla 02.** Todo a la vista combina la cuadrícula con la búsqueda y los controles de selección y tamaño.
+**Pantalla 03.** Todo a la vista combina la cuadrícula con la búsqueda y los controles de selección y tamaño.
 
 1. **Cuadrícula de miniaturas** — Haz clic, selecciona un intervalo o arrastra por las tarjetas; haz doble clic para abrir una foto.
 2. **Búsqueda, filtros y selección del mapa** — Busca, ordena y filtra la lista. La franja azul muestra el número de áreas y fotos, con Volver al mapa y Quitar área del mapa.
@@ -127,7 +136,7 @@ Todo a la vista distribuye la colección actual en una cuadrícula de miniaturas
 
 ### Cómo hacerlo
 
-1. Elige Todo a la vista o pulsa G. Ajusta el tamaño de las miniaturas para ver más imágenes o vistas previas mayores. Haz doble clic en una miniatura para abrirla en el Visor.
+1. En Todo a la vista (G), ajusta el tamaño de las miniaturas. Un doble clic abre una foto en el Visor o un vídeo a pantalla completa.
 2. Escribe en Buscar nombres de archivo. La búsqueda ignora mayúsculas y minúsculas; todos los términos separados por espacios deben aparecer en el nombre. Elige uno o varios formatos, o Todos los formatos para quitar ese filtro.
 3. Haz clic para seleccionar, ⌘ + clic para añadir o quitar una imagen y ⇧ + clic para seleccionar un intervalo. Arrastra un rectángulo desde una imagen o un espacio vacío para seleccionar las tarjetas que toque. ←/→ mueve la selección una tarjeta; ↑/↓ una fila de la cuadrícula actual. También funciona en las listas filtradas por áreas del mapa. Los atajos personalizados tienen prioridad. En modo de etiquetado, las cuatro flechas avanzan una imagen cada vez.
 
@@ -149,7 +158,7 @@ Anchura y altura son los píxeles originales con la orientación del archivo, an
 
 ### Conviene saber
 
-- La búsqueda usa el nombre del archivo, no los objetos, el contenido visual ni el texto OCR. Si faltan imágenes esperadas, borra la búsqueda y los filtros activos antes de volver a abrir la carpeta.
+- Se buscan nombres de archivo, no contenido ni OCR. Sin resultados, los controles siguen arriba; usa Restablecer búsqueda y filtros. No se eliminan archivos. Con Fotos sin etiquetar desactivado y ninguna etiqueta seleccionada, no se filtra por etiquetas.
 
 [Volver arriba](#top)
 
@@ -163,7 +172,7 @@ Comparación de imágenes conserva dos colecciones independientes, A y B, lado a
 
 ![Dos colecciones en Comparación de imágenes.](figures/compare.png)
 
-**Pantalla 03.** Dos colecciones en Comparación de imágenes.
+**Pantalla 04.** Dos colecciones en Comparación de imágenes.
 
 1. **Paneles A y B** — Bajo cada nombre, revisa las teclas de etiquetas seleccionadas, las condiciones y la cantidad de fotos. Con Fotos sin etiquetar desactivado y ninguna etiqueta seleccionada, se muestran todas las fotos; A/B pueden compartir fotos. Si no hay resultados, revisa las etiquetas y los filtros comunes de búsqueda, formato y mapa. Borrar elimina solo el filtro de etiquetas de ese panel.
 2. **Comportamiento de la comparación** — Elige el emparejamiento, el destino de navegación, la repetición del lado corto y el zoom vinculado.
@@ -203,7 +212,7 @@ El etiquetado permite asignar varias etiquetas personales a una foto mientras na
 
 ![El modo de etiquetado, las teclas asignadas y sus marcas de color.](figures/tags.png)
 
-**Pantalla 04.** El modo de etiquetado, las teclas asignadas y sus marcas de color.
+**Pantalla 05.** El modo de etiquetado, las teclas asignadas y sus marcas de color.
 
 1. **Modo de etiquetado** — Activa o desactiva el modo; al desactivarlo vuelven las funciones habituales de las teclas.
 2. **Teclas de etiquetas** — Usa 1–4, QWER y ASDF o haz clic en un botón de etiqueta. Una foto puede llevar varias marcas.
@@ -243,7 +252,7 @@ Da a las doce teclas nombres adecuados para tu trabajo. Las asignaciones se comp
 
 ![El editor compartido de nombres y colores de etiquetas.](figures/tag-editor.png)
 
-**Pantalla 05.** El editor compartido de nombres y colores de etiquetas.
+**Pantalla 06.** El editor compartido de nombres y colores de etiquetas.
 
 1. **Nombres por tecla** — Cada tecla fija tiene un nombre editable, compartido en todas las carpetas.
 2. **Colores** — Elige una señal visual coherente entre los diez colores de la paleta.
@@ -283,7 +292,7 @@ Vista de mapa sitúa en un mapa las fotos con metadatos GPS. Combina hasta tres 
 
 ![Vista de mapa con áreas seleccionables y un resumen de las fotos coincidentes.](figures/map.png)
 
-**Pantalla 06.** Vista de mapa con áreas seleccionables y un resumen de las fotos coincidentes.
+**Pantalla 07.** Vista de mapa con áreas seleccionables y un resumen de las fotos coincidentes.
 
 1. **Herramientas de área** — Añade un radio, un rectángulo, un contorno a mano alzada o la extensión visible del mapa.
 2. **Controles de las áreas** — Mueve y redimensiona el área activa; combina un máximo de tres áreas.
@@ -355,7 +364,7 @@ Edición de imagen permite previsualizar cambios sin sobrescribir el original. E
 
 ![El panel de edición junto a la vista previa de la imagen actual.](figures/editing.png)
 
-**Pantalla 07.** El panel de edición junto a la vista previa de la imagen actual.
+**Pantalla 08.** El panel de edición junto a la vista previa de la imagen actual.
 
 1. **Presencia y estilos de película** — Abre Presencia para ajustar la imagen o elige un estilo de película y su intensidad.
 2. **Vista previa de la imagen** — Examina el resultado actual; usa Tamaño real para ajustar detalles.
@@ -395,7 +404,7 @@ Usa los archivos seleccionados en el Visor, Todo a la vista, los resultados filt
 
 ![La ventana de conversión por lotes, los ajustes de tamaño y la vista previa de los archivos.](figures/batch.png)
 
-**Pantalla 08.** La ventana de conversión por lotes, los ajustes de tamaño y la vista previa de los archivos.
+**Pantalla 09.** La ventana de conversión por lotes, los ajustes de tamaño y la vista previa de los archivos.
 
 1. **Formato y tamaño** — Elige formato y tamaño proporcional. Los formatos con pérdida permiten ajustar calidad; también hay un ajuste para reducir peso.
 2. **Marca de agua y carpeta** — Abre los ajustes de marca de agua o elige la carpeta para las copias.
@@ -435,7 +444,7 @@ Añade texto, firma, EXIF y logo a copias de las fotos seleccionadas, sin cambia
 
 ![Combina texto, EXIF y logo, arrastra la marca en la vista previa y elige si ampliar el lienzo.](figures/watermark.png)
 
-**Pantalla 09.** Combina texto, EXIF y logo, arrastra la marca en la vista previa y elige si ampliar el lienzo.
+**Pantalla 10.** Combina texto, EXIF y logo, arrastra la marca en la vista previa y elige si ampliar el lienzo.
 
 1. **Texto, fuente y EXIF** — Elige texto, fuente y EXIF de cada foto. Añadir campos conserva el tamaño del texto.
 2. **Logo y posición** — Elige un logo y ajusta tamaño, margen y opacidad con deslizadores o cifras.
@@ -469,13 +478,13 @@ La marca sigue ajustes, recorte, rotación y reducción. La vista previa reducid
 
 <a name="video"></a>
 
-## 12. Reproducir vídeos, extraer fotogramas y guardar clips
+## 12. Vídeos: reproducción, fotogramas y clips
 
-Los vídeos están ocultos de forma predeterminada. Activa Mostrar vídeos para verlos junto a las imágenes y abre Fotogramas y clips… para extraer un PNG o guardar un intervalo como una copia independiente.
+Fotos y vídeos aparecen juntos de forma predeterminada. Todo a la vista muestra vistas previas fijas; un vídeo individual se abre en pausa. Usa Fotogramas y clips… para extraer PNG o guardar clips sin cambiar el original.
 
 ![La ventana Fotogramas y clips para un vídeo, con el reproductor y los ajustes de exportación.](figures/video.png)
 
-**Pantalla 10.** La ventana Fotogramas y clips para un vídeo, con el reproductor y los ajustes de exportación.
+**Pantalla 11.** La ventana Fotogramas y clips para un vídeo, con el reproductor y los ajustes de exportación.
 
 1. **Reproductor de vídeo** — Reproduce o pausa el vídeo para comprobar la imagen y el sonido.
 2. **Fotogramas y posición** — Avanza por fotogramas cuando sea compatible o busca un instante, y extrae el fotograma actual como PNG.
@@ -483,8 +492,8 @@ Los vídeos están ocultos de forma predeterminada. Activa Mostrar vídeos para 
 
 ### Cómo hacerlo
 
-1. Activa Mostrar vídeos encima de la lista. La aplicación recuerda esta preferencia, que no afecta a los GIF. Abrir directamente un vídeo compatible activa la opción de forma automática.
-2. Los vídeos aparecen inicialmente en pausa en el visor; el sonido solo empieza cuando inicias la reproducción. En Fotogramas y clips…, usa la posición de reproducción y Fotograma anterior / Fotograma siguiente cuando el contenido permita avanzar de ese modo. El avance sigue los fotogramas reales; no se presenta un número de fotograma exacto calculado a partir de la tasa nominal de un vídeo con tasa variable.
+1. En una vista múltiple, pasa el puntero sobre un vídeo para reproducirlo sin sonido; usa Activar sonido para escucharlo. Al retirar el puntero, se detiene y silencia. Haz doble clic en un vídeo de Todo a la vista o el Visor: se reproduce solo a pantalla completa desde la misma posición y con el mismo estado de sonido. Ajusta la reproducción, posición y sonido con los controles. Esc o Cerrar pantalla completa recupera la disposición original.
+2. En Fotogramas y clips…, cambia la posición de reproducción o usa Fotograma anterior / Fotograma siguiente si el vídeo lo admite. Se recorren fotogramas reales; no se calcula un recuento exacto a partir de una tasa variable.
 3. Usa Extraer el fotograma actual como PNG… para guardar la imagen mostrada. Para un clip, fija Inicio (s) y Final (s), si lo deseas con Fijar el inicio aquí / Fijar el final aquí; elige MP4 o MOV y la calidad, y usa Guardar una copia del clip….
 
 ### Formatos disponibles en este Mac
@@ -515,7 +524,7 @@ Fotogramas y clips… permite recorrer animaciones GIF, APNG y WebP que este Mac
 
 ![La ventana Fotogramas y clips para una animación, con la vista previa, los fotogramas y las dimensiones de salida.](figures/animation.png)
 
-**Pantalla 11.** La ventana Fotogramas y clips para una animación, con la vista previa, los fotogramas y las dimensiones de salida.
+**Pantalla 12.** La ventana Fotogramas y clips para una animación, con la vista previa, los fotogramas y las dimensiones de salida.
 
 1. **Vista previa de la animación** — Comprueba el fotograma mostrado y el movimiento antes de guardar.
 2. **Navegación por fotogramas** — Avanza o retrocede un fotograma y extrae el actual como PNG.
@@ -547,21 +556,56 @@ La lectura de GIF, APNG y WebP y los formatos de salida ofrecidos dependen de lo
 
 ---
 
+<a name="ai-upscaling"></a>
+
+## 14. Ampliar y comparar el resultado de la IA
+
+Ampliación con IA crea una nueva imagen con el doble de ancho y de alto. Examina sus detalles y compara la misma zona con el original antes de guardar una copia PNG.
+
+![La vista previa permite ajustar el zoom y mover una división para comparar la misma zona del original y del resultado de IA.](figures/ai-upscaling.png)
+
+**Pantalla 13.** La vista previa permite ajustar el zoom y mover una división para comparar la misma zona del original y del resultado de IA.
+
+1. **Vista y zoom** — Elige Resultado de la ampliación con IA o Comparar con el original. Examina detalles con +/−, el porcentaje, Ajustar a la ventana y 100% · Píxeles reales.
+2. **División entre original e IA** — Mueve la división entre el original a la izquierda y el resultado de IA a la derecha. Arrastrar la imagen o desplazar mueve ambos lados a la vez.
+3. **Guardar una copia PNG** — Guarda el resultado 2× completo como copia PNG, independientemente del zoom de la vista previa.
+
+### Cómo hacerlo
+
+1. Selecciona una foto, abre Ampliación con IA… y haz clic en Iniciar ampliación con IA. Cuando termine el proceso, la vista previa mostrará el Resultado de la ampliación con IA.
+2. Usa los botones +/− o el gesto de pellizcar en el trackpad para ampliar y reducir. Arrastra la imagen o desplaza para examinar un detalle; Ajustar a la ventana vuelve a mostrar la imagen completa.
+3. Selecciona Comparar con el original y arrastra la división a izquierda o derecha. El original queda a la izquierda y el resultado de IA a la derecha, con el mismo zoom y posición. Tras comprobarlo, haz clic en Guardar copia PNG….
+
+### Qué significa 100% · Píxeles reales
+
+Al 100%, cada píxel del resultado de IA corresponde a un píxel físico de la pantalla. Se tiene en cuenta la escala Retina, por lo que el tamaño de la ventana en puntos no tiene por qué coincidir con las dimensiones de la imagen en píxeles. El porcentaje se refiere al resultado de IA, no al original. Ajustar a la ventana elige un zoom que muestra toda la imagen. Estos controles solo cambian la vista previa: no redimensionan el archivo, no cambian el resultado guardado ni vuelven a ejecutar la IA.
+
+### Comparar el mismo detalle
+
+El original de la izquierda se muestra a 2× mediante interpolación convencional para igualar el ancho y el alto del resultado de IA. Ambos lados comparten el zoom y el desplazamiento, por lo que al mover la división puedes comparar los mismos bordes y texturas. Arrastra la división para cambiar el límite de comparación; arrastra otra zona de la imagen para moverla. Los detalles generados por IA son una estimación y no garantizan recuperar información real que falte en el original.
+
+### Salida y límites de la IA
+
+El modelo incluido funciona localmente con Core ML: las fotos no se suben y no hay que descargar un modelo durante el uso. Se duplican el ancho y el alto. El resultado es PNG sRGB SDR de 8 bits, con la transparencia interpolada aparte. Las animaciones usan el primer fotograma y no se incluyen los ajustes del visor. La salida se limita a un máximo de 64 millones de píxeles y puede ser menor en Mac con poca memoria. Guarda antes de cerrar; los detalles de IA son una estimación.
+
+### Conviene saber
+
+- No se ofrece IA 4×, salida HDR de IA ni ampliación con IA por lotes. Guarda una copia PNG antes de cerrar. El archivo original no cambia.
+
+[Volver arriba](#top)
+
+---
+
 <a name="quality"></a>
 
-## 14. Entender la ampliación con IA, el HDR y la carga
+## 15. Entender la calidad de visualización, el HDR y la carga
 
 Ampliación de alta calidad cambia la interpolación de pantalla. Ampliación con IA crea una imagen mayor que puedes guardar. La salida HDR es una preferencia de visualización, no una prueba de que la foto sea HDR.
 
 ### Cómo hacerlo
 
 1. Para suavizar la visualización, activa Ampliación de alta calidad. Su comparación lado a lado o arriba y abajo muestra la misma foto con zoom y desplazamiento vinculados; Esc cierra esa comparación.
-2. Para crear una imagen 2×, selecciona una foto, abre Ampliación con IA… y haz clic en Iniciar ampliación con IA. Examina Comparar con el original y Píxeles reales; después usa Guardar copia PNG….
-3. Usa Salida HDR activada / Salida HDR desactivada para permitir o impedir la visualización de rango ampliado. En Ajustes → General → Carga de imágenes, elige Prioridad, Cómodo, Normal o Lento según tu trabajo.
-
-### Salida y límites de la IA
-
-El modelo incluido funciona localmente con Core ML: las fotos no se suben y no hay que descargar un modelo durante el uso. Se duplican el ancho y el alto. El resultado es PNG sRGB SDR de 8 bits, con la transparencia interpolada aparte. Las animaciones usan el primer fotograma y no se incluyen los ajustes del visor. La salida se limita a un máximo de 64 millones de píxeles y puede ser menor en Mac con poca memoria. Guarda antes de cerrar; los detalles de IA son una estimación.
+2. Usa Salida HDR activada / Salida HDR desactivada para permitir o impedir la visualización de rango ampliado. En Ajustes → General → Carga de imágenes, elige Prioridad, Cómodo, Normal o Lento según tu trabajo.
 
 ### Formatos y rendimiento
 
@@ -569,7 +613,7 @@ Los formatos que se pueden leer y escribir dependen del macOS en uso. La aplicac
 
 ### Conviene saber
 
-- Durante la navegación rápida puede seguir visible una vista previa pequeña o la foto anterior hasta que esté lista la imagen final. No se ofrece IA 4×, salida HDR de IA ni ampliación con IA por lotes.
+- Durante la navegación rápida puede seguir visible una vista previa pequeña o la foto anterior hasta que esté lista la imagen final.
 
 [Volver arriba](#top)
 
@@ -577,7 +621,7 @@ Los formatos que se pueden leer y escribir dependen del macOS en uso. La aplicac
 
 <a name="slideshow"></a>
 
-## 15. Reproducir un álbum o establecer el fondo de pantalla
+## 16. Reproducir un álbum o establecer el fondo de pantalla
 
 Álbum de fotos avanza automáticamente por la lista actual, una imagen cada vez en modo de concentración. El fondo de pantalla usa una copia aparte preparada para las pantallas elegidas.
 
@@ -609,13 +653,13 @@ La aplicación crea un PNG sin alterar el original. Usa el primer fotograma de l
 
 <a name="settings"></a>
 
-## 16. Adaptar la aplicación a tu forma de trabajar
+## 17. Adaptar la aplicación a tu forma de trabajar
 
 Ajustes reúne las opciones de visualización, los atajos personalizados, las etiquetas y las asociaciones de archivos. Muchas preferencias se recuperan automáticamente al volver a iniciar.
 
 ![Ajustes agrupa las preferencias principales en cuatro pestañas.](figures/settings.png)
 
-**Pantalla 12.** Ajustes agrupa las preferencias principales en cuatro pestañas.
+**Pantalla 14.** Ajustes agrupa las preferencias principales en cuatro pestañas.
 
 1. **Pestañas de Ajustes** — General, Atajos, Etiquetas de fotos y Asociaciones de archivos cubren tareas distintas.
 2. **Preferencias de visualización** — Configura pantalla, miniaturas, nombres de archivo, navegación y carga.
@@ -633,7 +677,7 @@ La interfaz usa el idioma asignado a la app por macOS. Cámbialo en Ajustes del 
 
 ### Preferencias recordadas
 
-Se conservan el tamaño de las miniaturas, la ampliación de alta calidad, los nombres de archivo, las preferencias de carga, los favoritos, las etiquetas y los atajos. La última colección y posición pueden restaurarse si los archivos siguen accesibles. La comparación de calidad de ampliación empieza desactivada tras reiniciar. Los ajustes visuales y resultados de IA deben exportarse aparte. También se recuerda la opción Mostrar vídeos situada encima de la lista; está desactivada de forma predeterminada y no afecta a los GIF.
+Se conservan el tamaño de las miniaturas, la ampliación de alta calidad, los nombres de archivo, las preferencias de carga, los favoritos, las etiquetas y los atajos. Continuar sesión anterior en Inicio restaura la colección y posición si los archivos siguen accesibles. La comparación de calidad de ampliación empieza desactivada tras reiniciar. Los ajustes visuales y resultados de IA deben exportarse aparte. Mostrar vídeos está activado de forma predeterminada y recuerda tu elección sin afectar a los GIF.
 
 ### Asociaciones de archivos
 
@@ -649,13 +693,13 @@ Solo se modifican los grupos de formatos marcados. macOS puede pedir confirmaci�
 
 <a name="shortcuts"></a>
 
-## 17. Atajos y solución rápida de problemas
+## 18. Atajos y solución rápida de problemas
 
 La referencia siguiente enumera las teclas de acción predeterminadas y las contextuales fijas. ⌘ significa Comando, ⌥ Opción, ⌃ Control y ⇧ Mayús.
 
 ![La pestaña Atajos muestra las acciones configurables y los conflictos.](figures/shortcuts.png)
 
-**Pantalla 13.** La pestaña Atajos muestra las acciones configurables y los conflictos.
+**Pantalla 15.** La pestaña Atajos muestra las acciones configurables y los conflictos.
 
 1. **Acciones** — Sitúa el puntero sobre el nombre de una acción para saber dónde y cómo funciona.
 2. **Teclas y modificadores** — Elige la tecla y activa Control, Opción, Mayús o Comando.

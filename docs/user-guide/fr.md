@@ -1,4 +1,4 @@
-<!-- almeng-guide-source-sha256: 53004da782d3e180f7113419402370b092613bc739df406c0896cd34c4682f8d -->
+<!-- almeng-guide-source-sha256: a8f3ddc286ba32bd66b318008c5a92f011fc23d66b4c321193ebf708df540618 -->
 
 <a name="top"></a>
 
@@ -12,7 +12,7 @@
 
 Un guide pratique de la version de développement 0.13.1 actuelle. Commencez par ouvrir un dossier d’images, puis consultez le chapitre correspondant à votre tâche. Les noms de menus de ce guide reprennent ceux de l’interface française.
 
-Version 0.13.1 · Au 2026-10-07
+Version 0.13.1 · Au 2026-10-09
 
 > Les captures montrent l’application réelle avec une interface coréenne et des images de démonstration synthétiques. Les annotations numérotées et les explications sont traduites en français ; les pixels des captures restent inchangés. Aucune collection de photos personnelle n’est utilisée.
 
@@ -29,12 +29,13 @@ Version 0.13.1 · Au 2026-10-07
 - [9. Retoucher une image et exporter une copie](#editing)
 - [10. Renommer, redimensionner, convertir et partager en lot](#batch)
 - [11. Ajouter un filigrane : texte, EXIF et logo](#watermark)
-- [12. Lire une vidéo, extraire une image et enregistrer un extrait](#video)
+- [12. Vidéos : lecture, images et extraits](#video)
 - [13. Parcourir et enregistrer les images d’une animation](#animation)
-- [14. Comprendre l’agrandissement IA, le HDR et le chargement](#quality)
-- [15. Lire un album photo ou définir le fond d’écran](#slideshow)
-- [16. Adapter l’application à vos habitudes](#settings)
-- [17. Raccourcis et dépannage rapide](#shortcuts)
+- [14. Zoomer et comparer le résultat de l’agrandissement IA](#ai-upscaling)
+- [15. Comprendre la qualité d’affichage, le HDR et le chargement](#quality)
+- [16. Lire un album photo ou définir le fond d’écran](#slideshow)
+- [17. Adapter l’application à vos habitudes](#settings)
+- [18. Raccourcis et dépannage rapide](#shortcuts)
 - [Les raccourcis en un regard](#shortcut-reference)
 
 ---
@@ -43,12 +44,20 @@ Version 0.13.1 · Au 2026-10-07
 
 ## 1. Ouvrir des images, des dossiers et des archives ZIP
 
-La commande Ouvrir… accepte tous les types d’entrée. Une photo, un dossier ou une archive ZIP se parcourent ensuite de la même manière.
+Ouvrez photos, vidéos, dossiers et ZIP avec Ouvrir…. Photos et vidéos compatibles s’affichent ensemble par défaut ; les ZIP sont limités aux images.
+
+![L’accueil réunit le logo, le bouton d’ouverture et les photos récemment consultées.](figures/home.png)
+
+**Écran 01.** L’accueil réunit le logo, le bouton d’ouverture et les photos récemment consultées.
+
+1. **Ouvrir ou reprendre** — Ouvrir… charge une nouvelle collection ; Reprendre la session précédente retrouve votre travail enregistré.
+2. **Sept photos récentes** — Jusqu’à sept photos vues dans la Visionneuse ou Comparaison d’images, les plus récentes d’abord. Cliquez pour rouvrir. Images, GIF et photos dans les ZIP inclus ; vidéos exclues.
+3. **Effacer l’historique récent** — Retirer de la liste pour une photo ou Vider la liste efface uniquement l’historique, jamais les originaux. Consulter à nouveau une photo peut la remettre dans la liste.
 
 ### Marche à suivre
 
-1. Lancez 알맹Re sous macOS 14 ou ultérieur. Choisissez Ouvrir… sur l’écran d’accueil, dans la barre d’outils ou dans le menu Fichier, ou appuyez sur ⌘O.
-2. Choisissez un dossier pour parcourir ses images. Choisissez une seule image pour commencer par celle-ci et poursuivre avec les autres images du même dossier. Si vous sélectionnez plusieurs images, seules celles-ci sont ouvertes. Les vidéos sont masquées par défaut : activez Afficher les vidéos au-dessus de la liste pour les inclure. Ce choix est mémorisé ; ouvrir directement une vidéo prise en charge l’active automatiquement, sans modifier la visibilité des GIF.
+1. Lancez 알맹Re sous macOS 14 ou ultérieur pour afficher l’accueil. Utilisez Ouvrir… (⌘O) ou cliquez sur une photo récente. Ouvrir… figure aussi dans la barre d’outils et le menu Fichier.
+2. Choisissez un dossier pour le parcourir. Une photo ouvre son dossier à partir de cette image ; une sélection multiple ouvre ces fichiers seuls. Afficher les vidéos est activé par défaut et mémorisé. Ouvrir une vidéo l’active aussi.
 3. Choisissez une archive ZIP pour afficher ses images prises en charge, y compris celles de ses sous-dossiers. Vous pouvez aussi ouvrir des fichiers depuis le Finder ou déposer des images et des dossiers dans l’application.
 
 ### Dossiers et favoris
@@ -59,9 +68,9 @@ L’arborescence des dossiers se développe selon vos besoins. Cliquez sur un no
 
 Les images sont extraites dans un dossier temporaire tant que l’archive est ouverte. Exportez une copie avant de renommer un fichier ou de modifier ses métadonnées source. L’application ne réécrit pas le ZIP. Les archives sans compression ou utilisant Deflate sont prises en charge ; les archives chiffrées et les autres méthodes de compression sont refusées. Les limites sont de 2 Gio par archive, 10 000 entrées, 256 Mio par entrée extraite et 1 Gio de données extraites au total. Les vidéos contenues dans les ZIP ne sont pas prises en charge.
 
-### Retrouver votre position
+### Accueil et session précédente
 
-L’application restaure, si possible, la dernière collection, l’image sélectionnée, le mode d’affichage et la recherche. Si un disque est déconnecté ou si les autorisations ont changé, utilisez de nouveau Ouvrir…. Les retouches et les résultats IA non enregistrés ne sont pas restaurés.
+Un lancement normal affiche l’accueil. Reprendre la session précédente restaure si possible la collection, la sélection, la vue et la recherche. Accueil dans la barre d’outils ou le menu conserve le travail en cours. Un fichier ouvert depuis le Finder s’affiche directement. Si les connexions ou autorisations changent, utilisez Ouvrir…. Les retouches et résultats IA non enregistrés ne sont pas restaurés au redémarrage.
 
 ### Bon à savoir
 
@@ -75,15 +84,15 @@ L’application restaure, si possible, la dernière collection, l’image sélec
 
 ## 2. Parcourir les images et se concentrer sur une photo
 
-La Visionneuse affiche de une à dix images à la fois. Agrandissez les détails ou masquez les commandes environnantes pour vous concentrer sur la photo.
+La Visionneuse affiche de une à dix images à la fois. Agrandissez les détails ou masquez les commandes environnantes pour vous concentrer sur la photo. En vue multiple, les vidéos affichent une image fixe et se lisent sans son au survol.
 
-![La Visionneuse principale, avec ses commandes autour de l’image.](figures/viewer.png)
+![La Visionneuse réunit plusieurs photos et vidéos. Survolez une vidéo pour un aperçu sans son.](figures/viewer.png)
 
-**Écran 01.** La Visionneuse principale, avec ses commandes autour de l’image.
+**Écran 02.** La Visionneuse réunit plusieurs photos et vidéos. Survolez une vidéo pour un aperçu sans son.
 
 1. **Modes d’affichage** — Passez entre Visionneuse, Tout voir, Vue carte et Comparaison d’images.
-2. **Recherche, filtres et sélection sur la carte** — Recherchez, triez et filtrez la liste. Le bandeau bleu indique le nombre de zones et de photos, avec Retour à la carte et Effacer la zone de carte.
-3. **Commandes d’affichage** — Parcourez les images, réglez le zoom, changez le nombre affiché et choisissez une méthode de déplacement.
+2. **Recherche, filtres et vidéos** — Réglez recherche, format, étiquettes, tri et Afficher les vidéos pour la liste actuelle.
+3. **Commandes d’affichage** — Parcourez les éléments et changez leur nombre affiché. Réglez le zoom et le déplacement des photos.
 
 ### Marche à suivre
 
@@ -115,11 +124,11 @@ Le × inférieur masque uniquement la barre de commandes flottante. Rouvrez-la a
 
 ## 3. Rechercher et sélectionner dans Tout voir
 
-Tout voir présente la collection actuelle sous forme de grille de vignettes. Utilisez-la pour examiner un dossier, affiner une sélection et préparer une opération par lot.
+Tout voir réunit la collection en grille pour sélectionner et préparer les opérations par lot. Les vidéos ont un aperçu fixe.
 
 ![Tout voir réunit la grille de vignettes, la recherche et les commandes de sélection et de taille.](figures/overview.png)
 
-**Écran 02.** Tout voir réunit la grille de vignettes, la recherche et les commandes de sélection et de taille.
+**Écran 03.** Tout voir réunit la grille de vignettes, la recherche et les commandes de sélection et de taille.
 
 1. **Grille de vignettes** — Cliquez, sélectionnez une plage ou faites glisser sur les cartes ; double-cliquez pour ouvrir une photo.
 2. **Recherche, filtres et sélection sur la carte** — Recherchez, triez et filtrez la liste. Le bandeau bleu indique le nombre de zones et de photos, avec Retour à la carte et Effacer la zone de carte.
@@ -127,9 +136,9 @@ Tout voir présente la collection actuelle sous forme de grille de vignettes. Ut
 
 ### Marche à suivre
 
-1. Choisissez Tout voir ou appuyez sur G. Réglez la taille des vignettes pour afficher plus d’images ou des aperçus plus grands. Double-cliquez sur une vignette pour l’ouvrir dans la Visionneuse.
+1. Dans Tout voir (G), ajustez la taille des vignettes. Un double-clic ouvre une photo dans la Visionneuse ou une vidéo en plein écran.
 2. Saisissez du texte dans Rechercher un nom de fichier. La recherche ignore les majuscules ; chaque terme séparé par une espace doit apparaître dans le nom. Choisissez un ou plusieurs formats, ou Tous les formats pour effacer ce filtre.
-3. Cliquez pour sélectionner, utilisez ⌘ + clic pour ajouter ou retirer une image, et ⇧ + clic pour sélectionner une plage. Faites glisser un rectangle depuis une image ou une zone vide pour sélectionner les cartes qu’il touche. ←/→ déplace la sélection d’une vignette ; ↑/↓ d’une ligne de la grille actuelle. Cela fonctionne aussi avec une liste limitée aux zones de la carte. Les raccourcis personnalisés ont la priorité. En mode marquage, les quatre flèches déplacent la sélection d’une image à la fois.
+3. Cliquez pour sélectionner, ⌘ + clic pour ajouter ou retirer, ⇧ + clic pour une plage. Tracez un rectangle depuis une image ou le fond pour sélectionner les cartes touchées. ←/→ avance d’une vignette ; ↑/↓ d’une ligne, même dans une liste filtrée par la carte. Les raccourcis personnalisés restent prioritaires. En mode marquage, les quatre flèches avancent d’une image à la fois.
 
 ### Raccourcis de sélection
 
@@ -149,7 +158,7 @@ Largeur et hauteur décrivent les pixels originaux, orientation du fichier compr
 
 ### Bon à savoir
 
-- La recherche porte sur le nom du fichier, pas sur les objets, le contenu visuel ou le texte OCR. Si des images attendues disparaissent, effacez la recherche et les filtres actifs avant de rouvrir le dossier.
+- Recherche par nom, sans contenu ni OCR. Aucun résultat : commandes en haut, Réinitialiser la recherche et les filtres ; fichiers préservés. Photos sans étiquette désactivé, aucune étiquette choisie : aucun filtre d’étiquette.
 
 [Retour en haut](#top)
 
@@ -163,7 +172,7 @@ La Comparaison d’images conserve deux collections indépendantes, A et B, côt
 
 ![Deux collections dans la Comparaison d’images.](figures/compare.png)
 
-**Écran 03.** Deux collections dans la Comparaison d’images.
+**Écran 04.** Deux collections dans la Comparaison d’images.
 
 1. **Volets A et B** — Sous chaque nom, vérifiez les touches d’étiquettes sélectionnées, les critères et le nombre de photos. Si Photos sans étiquette est désactivé et qu’aucune étiquette n’est sélectionnée, toutes les photos s’affichent ; A/B peuvent se recouper. Si le résultat est vide, vérifiez les étiquettes et les filtres communs de recherche, format et carte. Effacer retire uniquement le filtre d’étiquettes de ce volet.
 2. **Comportement de la comparaison** — Choisissez la méthode d’association, la cible de navigation, la répétition du côté le plus court et la liaison du zoom.
@@ -203,7 +212,7 @@ Le marquage permet d’ajouter plusieurs étiquettes personnelles à une photo p
 
 ![Le mode marquage, ses touches et ses étiquettes colorées.](figures/tags.png)
 
-**Écran 04.** Le mode marquage, ses touches et ses étiquettes colorées.
+**Écran 05.** Le mode marquage, ses touches et ses étiquettes colorées.
 
 1. **Mode marquage** — Activez ou désactivez le mode ; les touches d’affichage habituelles reprennent leur rôle lorsqu’il est désactivé.
 2. **Touches d’étiquettes** — Utilisez 1–4, QWER et ASDF ou cliquez sur une étiquette. Une photo peut porter plusieurs marques.
@@ -243,7 +252,7 @@ Donnez aux douze touches des noms adaptés à votre travail. Les affectations so
 
 ![L’éditeur commun des noms et couleurs d’étiquettes.](figures/tag-editor.png)
 
-**Écran 05.** L’éditeur commun des noms et couleurs d’étiquettes.
+**Écran 06.** L’éditeur commun des noms et couleurs d’étiquettes.
 
 1. **Noms par touche** — Chaque touche fixe reçoit un nom modifiable, commun à tous les dossiers.
 2. **Couleurs** — Choisissez un repère visuel cohérent dans la palette de dix couleurs.
@@ -283,7 +292,7 @@ Vue carte place sur une carte les photos contenant des métadonnées GPS. Combin
 
 ![Vue carte avec ses zones de sélection et le résumé des photos correspondantes.](figures/map.png)
 
-**Écran 06.** Vue carte avec ses zones de sélection et le résumé des photos correspondantes.
+**Écran 07.** Vue carte avec ses zones de sélection et le résumé des photos correspondantes.
 
 1. **Outils de zone** — Ajoutez un rayon, un rectangle, un contour à main levée ou l’étendue actuelle de la carte.
 2. **Poignées des zones** — Déplacez et redimensionnez la zone active ; combinez au maximum trois zones.
@@ -355,7 +364,7 @@ Retouche d’image prévisualise les modifications sans écraser l’original. E
 
 ![Le panneau de retouche à côté de l’aperçu de l’image actuelle.](figures/editing.png)
 
-**Écran 07.** Le panneau de retouche à côté de l’aperçu de l’image actuelle.
+**Écran 08.** Le panneau de retouche à côté de l’aperçu de l’image actuelle.
 
 1. **Présence et rendus argentiques** — Ouvrez Présence pour régler l’image ou choisissez un rendu argentique et son intensité.
 2. **Aperçu de l’image** — Examinez le résultat actuel ; utilisez Taille réelle pour les réglages de détail.
@@ -395,7 +404,7 @@ Utilisez les fichiers sélectionnés dans la Visionneuse, Tout voir, les résult
 
 ![La fenêtre de conversion par lot, ses réglages de taille et la prévisualisation des fichiers.](figures/batch.png)
 
-**Écran 08.** La fenêtre de conversion par lot, ses réglages de taille et la prévisualisation des fichiers.
+**Écran 09.** La fenêtre de conversion par lot, ses réglages de taille et la prévisualisation des fichiers.
 
 1. **Format et taille** — Choisissez format et taille proportionnelle. Les formats avec perte proposent la qualité ; un préréglage réduit le poids.
 2. **Filigrane et dossier** — Ouvrez les réglages du filigrane ou choisissez le dossier des copies.
@@ -435,7 +444,7 @@ Ajoutez texte, signature, EXIF et logo aux copies des photos sélectionnées, sa
 
 ![Combinez texte, EXIF et logo, déplacez le filigrane dans l’aperçu et choisissez l’extension du canevas.](figures/watermark.png)
 
-**Écran 09.** Combinez texte, EXIF et logo, déplacez le filigrane dans l’aperçu et choisissez l’extension du canevas.
+**Écran 10.** Combinez texte, EXIF et logo, déplacez le filigrane dans l’aperçu et choisissez l’extension du canevas.
 
 1. **Texte, police et EXIF** — Choisissez texte, police et EXIF propres à chaque photo. Ajouter des champs conserve la taille du texte.
 2. **Logo et placement** — Choisissez un logo et réglez taille, marge et opacité par curseurs ou nombres.
@@ -469,13 +478,13 @@ Le filigrane suit retouches, recadrage, rotation et réduction. L’aperçu réd
 
 <a name="video"></a>
 
-## 12. Lire une vidéo, extraire une image et enregistrer un extrait
+## 12. Vidéos : lecture, images et extraits
 
-Les vidéos sont masquées par défaut. Activez Afficher les vidéos pour les parcourir avec vos images, puis ouvrez Images et extraits… pour extraire un PNG ou enregistrer une plage dans une copie distincte.
+Photos et vidéos s’affichent ensemble par défaut. Tout voir montre des aperçus vidéo fixes ; une vidéo seule s’ouvre en pause. Images et extraits… permet d’extraire un PNG ou d’enregistrer un extrait sans changer l’original.
 
 ![La fenêtre Images et extraits pour une vidéo, avec le lecteur et les réglages d’exportation.](figures/video.png)
 
-**Écran 10.** La fenêtre Images et extraits pour une vidéo, avec le lecteur et les réglages d’exportation.
+**Écran 11.** La fenêtre Images et extraits pour une vidéo, avec le lecteur et les réglages d’exportation.
 
 1. **Lecteur vidéo** — Lancez ou mettez en pause la vidéo pour vérifier l’image et le son.
 2. **Images et position** — Parcourez les images prises en charge ou une position temporelle, puis extrayez l’image actuelle en PNG.
@@ -483,8 +492,8 @@ Les vidéos sont masquées par défaut. Activez Afficher les vidéos pour les pa
 
 ### Marche à suivre
 
-1. Activez Afficher les vidéos au-dessus de la liste. Ce choix est mémorisé et ne change pas l’affichage des GIF. Ouvrir directement un fichier vidéo pris en charge active automatiquement cette option.
-2. Une vidéo affichée dans la visionneuse reste d’abord en pause ; le son ne démarre que lorsque vous lancez la lecture. Dans Images et extraits…, utilisez la position de lecture et Image précédente / Image suivante lorsque le média permet cette navigation. Le déplacement suit les images réelles ; un nombre d’images exact n’est pas déduit de la fréquence nominale d’une vidéo à fréquence variable.
+1. En vue multiple, survolez une vidéo pour la lire sans son ; Activer le son permet de l’écouter. Quitter la vignette arrête et coupe le son. Double-cliquez une vidéo dans Tout voir ou la Visionneuse : elle se lit seule en plein écran, à la même position et avec le même réglage sonore. Ajustez lecture, position et son avec les commandes. Échap ou Fermer le plein écran retrouve la disposition initiale.
+2. Dans Images et extraits…, déplacez la position de lecture ou utilisez Image précédente / Image suivante si la vidéo le permet. Le déplacement suit les images réelles ; aucun compte exact n’est déduit d’une fréquence variable.
 3. Choisissez Extraire l’image actuelle en PNG… pour l’image affichée. Pour un extrait, définissez Début (s) et Fin (s), éventuellement avec Définir le début ici / Définir la fin ici, puis choisissez MP4 ou MOV, la qualité et Enregistrer une copie de l’extrait….
 
 ### Formats disponibles sur ce Mac
@@ -515,7 +524,7 @@ Images et extraits… permet de parcourir les animations GIF, APNG et WebP que c
 
 ![La fenêtre Images et extraits pour une animation, avec l’aperçu, les images et les dimensions de sortie.](figures/animation.png)
 
-**Écran 11.** La fenêtre Images et extraits pour une animation, avec l’aperçu, les images et les dimensions de sortie.
+**Écran 12.** La fenêtre Images et extraits pour une animation, avec l’aperçu, les images et les dimensions de sortie.
 
 1. **Aperçu de l’animation** — Contrôlez l’image affichée et le mouvement avant de sauvegarder.
 2. **Navigation dans les images** — Avancez ou reculez d’une image et extrayez l’image actuelle en PNG.
@@ -547,21 +556,56 @@ La lecture GIF, APNG ou WebP et les formats de sortie proposés dépendent des c
 
 ---
 
+<a name="ai-upscaling"></a>
+
+## 14. Zoomer et comparer le résultat de l’agrandissement IA
+
+Agrandissement IA crée une nouvelle image dont la largeur et la hauteur sont doublées. Examinez ses détails et comparez la même zone avec l’original avant d’enregistrer une copie PNG.
+
+![L’aperçu permet de régler le zoom et de déplacer une séparation pour comparer la même zone de l’original et du résultat IA.](figures/ai-upscaling.png)
+
+**Écran 13.** L’aperçu permet de régler le zoom et de déplacer une séparation pour comparer la même zone de l’original et du résultat IA.
+
+1. **Vue et zoom** — Choisissez Résultat de l’agrandissement IA ou Comparer à l’original. Examinez les détails avec +/−, le pourcentage, Ajuster à la fenêtre et 100% · Pixels réels.
+2. **Séparation original et IA** — Déplacez la séparation entre l’original à gauche et le résultat IA à droite. Glisser l’image ou faire défiler déplace les deux côtés ensemble.
+3. **Enregistrer une copie PNG** — Enregistrez le résultat 2× complet en copie PNG, indépendamment du zoom de l’aperçu.
+
+### Marche à suivre
+
+1. Sélectionnez une photo, ouvrez Agrandissement IA… et cliquez sur Lancer l’agrandissement IA. Une fois le traitement terminé, l’aperçu affiche le Résultat de l’agrandissement IA.
+2. Utilisez les boutons +/− ou le pincement du trackpad pour zoomer. Faites glisser l’image ou faites défiler pour examiner un détail ; Ajuster à la fenêtre réaffiche l’image entière.
+3. Sélectionnez Comparer à l’original et déplacez la séparation vers la gauche ou la droite. L’original est à gauche et le résultat IA à droite, avec le même zoom et la même position. Après vérification, cliquez sur Enregistrer une copie PNG….
+
+### Que signifie 100% · Pixels réels ?
+
+À 100%, un pixel du résultat IA correspond à un pixel physique de l’écran. Le calcul tient compte de la mise à l’échelle Retina : la taille de la fenêtre en points ne correspond donc pas nécessairement aux dimensions de l’image en pixels. Le pourcentage se rapporte au résultat IA, et non à l’original. Ajuster à la fenêtre choisit un zoom qui montre l’image entière. Ces commandes modifient seulement l’aperçu : elles ne redimensionnent pas le fichier, ne changent pas le résultat enregistré et ne relancent pas le traitement IA.
+
+### Comparer le même détail
+
+L’original de gauche est affiché à 2× par interpolation classique pour avoir la même largeur et la même hauteur que le résultat IA. Les deux côtés partagent le zoom et le déplacement ; la séparation permet donc de comparer les mêmes contours et textures. Faites glisser la séparation pour déplacer la limite de comparaison, ou une autre partie de l’image pour la déplacer. Les détails créés par l’IA sont une estimation ; la récupération d’informations réelles absentes de l’original n’est pas garantie.
+
+### Résultat et limites de l’IA
+
+Le modèle fourni fonctionne localement avec Core ML : les photos ne sont pas téléversées et aucun modèle n’est téléchargé pendant l’utilisation. La largeur et la hauteur sont doublées. Le résultat est un PNG sRGB SDR 8 bits, avec une transparence interpolée séparément. Une animation utilise sa première image et les retouches de la visionneuse sont exclues. La sortie est limitée à 64 millions de pixels au maximum, avec une limite potentiellement inférieure sur les Mac peu dotés en mémoire. Enregistrez avant de fermer ; les détails IA sont une estimation.
+
+### Bon à savoir
+
+- L’IA 4×, la sortie HDR par IA et l’agrandissement IA par lot ne sont pas proposés. Enregistrez une copie PNG avant de fermer. Le fichier original reste inchangé.
+
+[Retour en haut](#top)
+
+---
+
 <a name="quality"></a>
 
-## 14. Comprendre l’agrandissement IA, le HDR et le chargement
+## 15. Comprendre la qualité d’affichage, le HDR et le chargement
 
 Zoom haute qualité change l’interpolation d’affichage. Agrandissement IA crée une image plus grande à enregistrer. La sortie HDR est une préférence d’affichage, pas une preuve que la photo est HDR.
 
 ### Marche à suivre
 
 1. Pour un affichage plus lisse, activez Zoom haute qualité. Sa comparaison côte à côte ou de haut en bas montre la même photo avec zoom et déplacement liés ; Esc ferme cette comparaison.
-2. Pour créer une image 2×, sélectionnez une photo, ouvrez Agrandissement IA… et cliquez sur Lancer l’agrandissement IA. Vérifiez Comparer à l’original et Pixels réels, puis Enregistrer une copie PNG….
-3. Utilisez les commandes de sortie HDR activée/désactivée pour autoriser ou non l’affichage étendu. Dans Réglages → Général → Chargement des images, choisissez Prioritaire, Confortable, Normal ou Lent selon votre usage.
-
-### Résultat et limites de l’IA
-
-Le modèle fourni fonctionne localement avec Core ML : les photos ne sont pas téléversées et aucun modèle n’est téléchargé pendant l’utilisation. La largeur et la hauteur sont doublées. Le résultat est un PNG sRGB SDR 8 bits, avec une transparence interpolée séparément. Une animation utilise sa première image et les retouches de la visionneuse sont exclues. La sortie est limitée à 64 millions de pixels au maximum, avec une limite potentiellement inférieure sur les Mac peu dotés en mémoire. Enregistrez avant de fermer ; les détails IA sont une estimation.
+2. Utilisez les commandes de sortie HDR activée/désactivée pour autoriser ou non l’affichage étendu. Dans Réglages → Général → Chargement des images, choisissez Prioritaire, Confortable, Normal ou Lent selon votre usage.
 
 ### Formats et performances
 
@@ -569,7 +613,7 @@ Les formats lisibles et inscriptibles dépendent du macOS exécuté. L’applica
 
 ### Bon à savoir
 
-- Pendant une navigation rapide, un petit aperçu ou la photo précédente peut rester visible jusqu’à ce que l’image finale soit prête. L’IA 4×, la sortie HDR par IA et l’agrandissement IA par lot ne sont pas proposés.
+- Pendant une navigation rapide, un petit aperçu ou la photo précédente peut rester visible jusqu’à ce que l’image finale soit prête.
 
 [Retour en haut](#top)
 
@@ -577,7 +621,7 @@ Les formats lisibles et inscriptibles dépendent du macOS exécuté. L’applica
 
 <a name="slideshow"></a>
 
-## 15. Lire un album photo ou définir le fond d’écran
+## 16. Lire un album photo ou définir le fond d’écran
 
 Album photo fait défiler automatiquement la liste actuelle, une image à la fois en mode concentration. Le fond d’écran utilise une copie distincte préparée pour les écrans choisis.
 
@@ -609,13 +653,13 @@ L’application crée un PNG sans modifier la source. Elle prend la première im
 
 <a name="settings"></a>
 
-## 16. Adapter l’application à vos habitudes
+## 17. Adapter l’application à vos habitudes
 
 Les réglages réunissent l’affichage quotidien, les raccourcis personnalisés, les étiquettes et les associations de fichiers. De nombreux choix reviennent automatiquement au lancement suivant.
 
 ![Les réglages regroupent les principales préférences dans quatre onglets.](figures/settings.png)
 
-**Écran 12.** Les réglages regroupent les principales préférences dans quatre onglets.
+**Écran 14.** Les réglages regroupent les principales préférences dans quatre onglets.
 
 1. **Onglets des réglages** — Général, Raccourcis, Étiquettes photo et Associations de fichiers correspondent chacun à une tâche.
 2. **Préférences d’affichage** — Réglez l’écran, les vignettes, les noms de fichiers, la navigation et le chargement.
@@ -633,7 +677,7 @@ L’interface suit la langue attribuée à l’app par macOS. Modifiez-la dans R
 
 ### Préférences mémorisées
 
-La taille des vignettes, le zoom haute qualité, les noms de fichiers, le chargement, les favoris, les étiquettes et les raccourcis sont conservés. La dernière collection et la position d’affichage peuvent être restaurées si les fichiers restent accessibles. La comparaison de qualité du zoom est désactivée au prochain lancement. Retouches visuelles et résultats IA doivent être exportés séparément. Le choix Afficher les vidéos au-dessus de la liste est lui aussi mémorisé ; il est désactivé par défaut et n’affecte pas les GIF.
+La taille des vignettes, le zoom haute qualité, les noms de fichiers, le chargement, les favoris, les étiquettes et les raccourcis sont conservés. Reprendre la session précédente sur l’accueil restaure la collection et la position si les fichiers restent accessibles. La comparaison de qualité du zoom est désactivée au prochain lancement. Retouches visuelles et résultats IA doivent être exportés séparément. Afficher les vidéos est activé par défaut et mémorise votre choix sans affecter les GIF.
 
 ### Associations de fichiers
 
@@ -649,13 +693,13 @@ Seuls les groupes de formats cochés sont modifiés. macOS peut demander confirm
 
 <a name="shortcuts"></a>
 
-## 17. Raccourcis et dépannage rapide
+## 18. Raccourcis et dépannage rapide
 
 Le tableau suivant indique les touches d’action par défaut et les touches contextuelles fixes. ⌘ signifie Commande, ⌥ Option, ⌃ Contrôle et ⇧ Maj.
 
 ![L’onglet Raccourcis présente les actions configurables et les conflits.](figures/shortcuts.png)
 
-**Écran 13.** L’onglet Raccourcis présente les actions configurables et les conflits.
+**Écran 15.** L’onglet Raccourcis présente les actions configurables et les conflits.
 
 1. **Actions** — Survolez le nom d’une action pour savoir où et comment elle fonctionne.
 2. **Touches et modificateurs** — Choisissez la touche, puis activez Contrôle, Option, Maj ou Commande.

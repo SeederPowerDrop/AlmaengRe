@@ -1,4 +1,4 @@
-<!-- almeng-guide-source-sha256: 1e4a39ed014c1564966f7a27323ce6c6d7819fc91423591bd5f2067747151bc7 -->
+<!-- almeng-guide-source-sha256: 8fb7b31756d2aa2472bf8f278224379a34fe2f1322e4ebd6551f9800188dd691 -->
 
 <a name="top"></a>
 
@@ -12,7 +12,7 @@
 
 A practical guide to the current 0.13.1 development version. Start with a folder of images, then use the chapters as a reference for the task in front of you. Menu names in this guide follow the app's English interface.
 
-Version 0.13.1 · As of 2026-10-07
+Version 0.13.1 · As of 2026-10-09
 
 > Screenshots show the real app with a Korean interface and synthetic demonstration media. Numbered annotations and explanations are translated into this guide's language; the screenshot pixels remain unchanged. No personal photo or video collection is used.
 
@@ -31,10 +31,11 @@ Version 0.13.1 · As of 2026-10-07
 - [11. Add text, EXIF and logo watermarks](#watermark)
 - [12. Play videos and save frames or clips](#video)
 - [13. Extract and resize animated images](#animation)
-- [14. Understand AI enlargement, HDR, and loading](#quality)
-- [15. Play a Photo Album or set wallpaper](#slideshow)
-- [16. Make the app work your way](#settings)
-- [17. Shortcuts and quick troubleshooting](#shortcuts)
+- [14. Zoom in and compare AI upscaling results](#ai-upscaling)
+- [15. Understand display quality, HDR, and loading](#quality)
+- [16. Play a Photo Album or set wallpaper](#slideshow)
+- [17. Make the app work your way](#settings)
+- [18. Shortcuts and quick troubleshooting](#shortcuts)
 - [Shortcuts at a glance](#shortcut-reference)
 
 ---
@@ -43,12 +44,20 @@ Version 0.13.1 · As of 2026-10-07
 
 ## 1. Open images, videos, folders, and ZIP archives
 
-Use Open… for photos, folders, ZIP images, and supported videos. Images and GIFs appear by default; Show Videos adds videos to the browsing list.
+Use Open… for photos, videos, folders, and ZIP images. Photos and supported videos appear together by default; ZIP viewing supports images only.
+
+![Home brings together the app logo, Open button, and recently viewed photos.](figures/home.png)
+
+**Screen 01.** Home brings together the app logo, Open button, and recently viewed photos.
+
+1. **Open or continue** — Use Open… for a new collection or Continue Previous Session to return to your saved workspace.
+2. **Seven recent photos** — Up to seven photos viewed in Viewer or Image Comparison appear newest first; click to reopen. Regular images, GIFs, and photos inside ZIP archives are included; videos are excluded.
+3. **Clear recent history** — Remove from List for one photo or Clear List removes history only, preserving original files. Viewing a photo again can add it back to the list.
 
 ### How to
 
-1. Launch 알맹Re on macOS 14 or later. Choose Open… on the start screen, toolbar, or File menu, or press ⌘O.
-2. Choose a folder to browse its images. Choose one image to start there and continue through the same folder; selecting several opens only those files. Turn on Show Videos to include videos. Opening a video directly also turns it on.
+1. Launch 알맹Re on macOS 14 or later to see Home. Use Open… (⌘O) or click a recent photo. Open… is also available in the toolbar and File menu.
+2. Choose a folder to browse it. Opening one photo continues through the same folder; selecting several files opens only those files. Show Videos is on by default and remembers your choice. Opening a video directly turns it on.
 3. Choose a ZIP archive to view its supported images, including images in nested archive paths. You can also open files from Finder or drag images and folders into the app.
 
 ### Folders and favorites
@@ -59,9 +68,9 @@ Folder Tree expands folders as needed. Click a folder name to open it, use the u
 
 Images are extracted into a temporary folder while the archive is open. Export a copy before renaming or editing source metadata. The app does not rewrite the ZIP. Stored/Deflate archives are supported; encrypted archives and other compression methods are rejected. Limits include a 2 GiB archive, 10,000 entries, 256 MiB per extracted entry, and 1 GiB total extracted data. ZIP videos are not supported, even when Show Videos is on.
 
-### Return to your place
+### Home and your previous workspace
 
-The app restores the last collection, selected image, viewing mode, and search settings when possible. If a drive is disconnected or access has changed, use Open… again. Editing adjustments and unsaved AI results are not restored.
+A normal launch starts at Home. Continue Previous Session restores the last collection, selection, view mode, and search settings when possible. Home in the toolbar or menu returns there while keeping the current workspace. Opening a file from Finder or another app goes straight to that file. If connections or permissions change, use Open… again. Editing adjustments and unsaved AI results are not restored after relaunch.
 
 ### Good to know
 
@@ -75,15 +84,15 @@ The app restores the last collection, selected image, viewing mode, and search s
 
 ## 2. Browse and focus on your images
 
-Viewer can show one to ten images at a time. Zoom in to inspect details or hide the surrounding controls for a focused view.
+Viewer can show one to ten images at a time. Zoom in to inspect details or hide the surrounding controls for a focused view. In multi-item views, videos start as still previews and play muted when you hover over them.
 
-![The main Viewer, with the viewing controls surrounding the image.](figures/viewer.png)
+![Viewer shows several photos and videos together. Hover over a video for a muted preview.](figures/viewer.png)
 
-**Screen 01.** The main Viewer, with the viewing controls surrounding the image.
+**Screen 02.** Viewer shows several photos and videos together. Hover over a video for a muted preview.
 
 1. **View modes** — Switch between Viewer, All at Once, Map View, and Image Comparison.
-2. **Search, filters and map selection** — Search, sort and filter the current list. The blue map banner shows area and photo counts, with Back to map and Clear Map Area buttons.
-3. **Viewing controls** — Move through images, set zoom, change the number displayed, and choose the pan method.
+2. **Search, filters, and videos** — Adjust search, format, tags, sorting, and Show Videos for the current list.
+3. **Viewing controls** — Move through items and change the number displayed. Set photo zoom and the pan method.
 
 ### How to
 
@@ -115,11 +124,11 @@ The lower × hides only the floating control bar. Reopen it from the button besi
 
 ## 3. Find and select images in All at Once
 
-All at Once spreads the current collection into a thumbnail grid. Use it to scan a folder, narrow a selection, and prepare a batch operation.
+All at Once spreads the current collection into a thumbnail grid. Use it to scan a folder, narrow a selection, and prepare a batch operation. Videos appear as static previews without playback.
 
 ![All at Once combines the thumbnail grid with search, selection, and size controls.](figures/overview.png)
 
-**Screen 02.** All at Once combines the thumbnail grid with search, selection, and size controls.
+**Screen 03.** All at Once combines the thumbnail grid with search, selection, and size controls.
 
 1. **Thumbnail grid** — Click, range-select, or drag across cards; double-click to open a photo.
 2. **Search, filters and map selection** — Search, sort and filter the current list. The blue map banner shows area and photo counts, with Back to map and Clear Map Area buttons.
@@ -127,7 +136,7 @@ All at Once spreads the current collection into a thumbnail grid. Use it to scan
 
 ### How to
 
-1. Choose All at Once or press G. Adjust the thumbnail-size slider to see more images or larger previews. Double-click a thumbnail to open it in Viewer.
+1. Choose All at Once (G) and adjust the thumbnail size. Double-click to open a photo in Viewer or a video in full screen.
 2. Type in Search Filenames. Search ignores letter case; every space-separated term must appear in the filename. Choose one or more formats, or All Formats to clear that filter.
 3. Click to select, ⌘-click to add or remove an image, and ⇧-click to select a range. Drag a rectangle from an image or empty space to select intersecting cards. ←/→ moves one card at a time; ↑/↓ moves one row in the current grid. This also works in a list restricted to selected map areas. Custom shortcuts take priority. In Tagging mode, all four arrows move one image at a time.
 
@@ -149,7 +158,7 @@ Width and height are original pixel dimensions with file orientation applied, be
 
 ### Good to know
 
-- Search is by filename, not by objects, image content, or OCR text. If expected images disappear, clear the search and active filters before reopening the folder.
+- Search uses filenames, not image content or OCR. With no matches, controls stay at the top; use Reset Search and Filters. Files remain intact. Untagged Photos off with no tags selected means no tag restriction.
 
 [Back to top](#top)
 
@@ -163,7 +172,7 @@ Image Comparison keeps independent A and B collections side by side or above and
 
 ![Two collections in Image Comparison.](figures/compare.png)
 
-**Screen 03.** Two collections in Image Comparison.
+**Screen 04.** Two collections in Image Comparison.
 
 1. **A and B panes** — Below each pane’s name, check the selected tag keys, conditions, and photo count. With Untagged Photos off and no tags selected, all photos are shown; A/B may overlap. For empty results, check tags and shared search, format, and map filters. Clear removes only that pane’s tag filter.
 2. **Comparison behavior** — Choose matching, the navigation target, shorter-side looping, and linked zoom.
@@ -203,7 +212,7 @@ Tagging lets you attach several personal labels to a photo while browsing. Tags 
 
 ![Tagging mode with keyboard assignments and colored marks.](figures/tags.png)
 
-**Screen 04.** Tagging mode with keyboard assignments and colored marks.
+**Screen 05.** Tagging mode with keyboard assignments and colored marks.
 
 1. **Tagging mode** — Turn the mode on or off; ordinary viewing keys resume when it is off.
 2. **Tag keys** — Use 1–4, QWER, and ASDF, or click a tag button. A photo can carry several marks.
@@ -243,7 +252,7 @@ Give the twelve tag keys names that fit your work. The same assignments apply ac
 
 ![The shared editor for tag names and colors.](figures/tag-editor.png)
 
-**Screen 05.** The shared editor for tag names and colors.
+**Screen 06.** The shared editor for tag names and colors.
 
 1. **Names by key** — Each fixed key gets an editable name; the names are shared by every folder.
 2. **Colors** — Choose a consistent visual cue from the ten-color palette.
@@ -283,7 +292,7 @@ Map View places photos with GPS metadata on a map. Combine up to three areas to 
 
 ![Map View with selectable areas and a matching-photo summary.](figures/map.png)
 
-**Screen 06.** Map View with selectable areas and a matching-photo summary.
+**Screen 07.** Map View with selectable areas and a matching-photo summary.
 
 1. **Area tools** — Add a radius, rectangle, freehand boundary, or the current map extent.
 2. **Area handles** — Move and resize an active area; combine at most three areas.
@@ -355,7 +364,7 @@ Image Editing previews changes without overwriting the original. Export the resu
 
 ![The editing panel beside a preview of the current image.](figures/editing.png)
 
-**Screen 07.** The editing panel beside a preview of the current image.
+**Screen 08.** The editing panel beside a preview of the current image.
 
 1. **Presence and Film Looks** — Expand Presence to adjust the image, or choose a film look and its strength.
 2. **Image preview** — Inspect the current result; use Actual Size for detail adjustments.
@@ -395,7 +404,7 @@ Select photos in the viewer, overview or a classification-filtered list, then us
 
 ![The batch dialog converts selected photos and resizes them proportionally.](figures/batch.png)
 
-**Screen 08.** The batch dialog converts selected photos and resizes them proportionally.
+**Screen 09.** The batch dialog converts selected photos and resizes them proportionally.
 
 1. **Format and size** — Choose the output format and proportional size. Lossy formats offer quality settings; a compression preset is also available.
 2. **Watermark and destination** — Open watermark settings or choose the folder for copies.
@@ -435,7 +444,7 @@ Place text, a signature, selected capture information and a logo on copies of on
 
 ![Combine text, EXIF and a logo, drag the preview watermark and choose whether to extend the canvas.](figures/watermark.png)
 
-**Screen 09.** Combine text, EXIF and a logo, drag the preview watermark and choose whether to extend the canvas.
+**Screen 10.** Combine text, EXIF and a logo, drag the preview watermark and choose whether to extend the canvas.
 
 1. **Text, font and EXIF** — Choose text, font and per-photo EXIF. Adding fields keeps the text size.
 2. **Logo and placement** — Choose a logo and adjust size, margin and opacity with sliders or numbers.
@@ -471,11 +480,11 @@ Watermarks follow edits, crop, rotation and output resizing. The first photo’s
 
 ## 12. Play videos and save frames or clips
 
-Turn on Show Videos to include videos in folders, then open Frames & Clips… to inspect frames, extract a PNG, or save a shorter or smaller copy. The original stays intact.
+Photos and videos appear together by default. All At Once shows static video previews; a single video opens paused. Use Frames & Clips… to extract a PNG or save a clip copy while preserving the original.
 
 ![Frames & Clips provides video playback, frame inspection, and clip export.](figures/video.png)
 
-**Screen 10.** Frames & Clips provides video playback, frame inspection, and clip export.
+**Screen 11.** Frames & Clips provides video playback, frame inspection, and clip export.
 
 1. **Video player** — Playback starts paused. Play, pause, and listen to available audio using the player.
 2. **Frame and time controls** — Step through supported frames or seek by time, then extract the current frame as PNG.
@@ -483,7 +492,7 @@ Turn on Show Videos to include videos in folders, then open Frames & Clips… to
 
 ### How to
 
-1. Turn on Show Videos above the list, in the menu, or in Settings → General. It is off by default and remembers your choice; GIFs remain visible either way. Opening a video directly turns it on. Playback starts paused; press Play to hear available audio.
+1. In a multi-item view, hover over a video for muted playback; use Turn Sound On to listen. Leaving the tile stops playback and mutes it again. Double-click a video in All At Once or Viewer to open it alone in full screen, playing from its current time with the same mute setting. Use the controls for playback, seeking, and sound; Esc or Close Full Screen returns to the original layout. Show Videos in the list, menu, or settings can hide videos; GIFs are unaffected.
 2. Open a video in Viewer and choose Frames & Clips…. Use Previous Frame and Next Frame where the file supports stepping, or seek with Playback Position. Choose Extract Current Frame as PNG… to save the displayed moment.
 3. Under Range to Save, use Set Start Here / Set End Here or enter Start (s) and End (s). Choose MP4 or MOV and Export Quality, then Save Clip Copy…. Full Range selects the entire video; Reduce Size Preset selects MP4 and Up to 720p.
 
@@ -515,7 +524,7 @@ Frames & Clips… works with animated GIF, APNG, and WebP that macOS ImageIO can
 
 ![Frames & Clips previews an animation and saves a frame or a resized animated copy.](figures/animation.png)
 
-**Screen 11.** Frames & Clips previews an animation and saves a frame or a resized animated copy.
+**Screen 12.** Frames & Clips previews an animation and saves a frame or a resized animated copy.
 
 1. **Animation preview** — Inspect the source animation; photo-editing adjustments are not included.
 2. **Frame controls** — Play or step through frames, read the frame number, and extract a PNG.
@@ -547,21 +556,56 @@ The source and existing output files cannot be overwritten. Choose a new name fo
 
 ---
 
+<a name="ai-upscaling"></a>
+
+## 14. Zoom in and compare AI upscaling results
+
+AI Upscaling creates a new image with twice the width and height. Inspect its details and compare the same area with the original before saving a PNG copy.
+
+![The preview lets you adjust zoom and move a divider to compare the same area of the original and AI upscaling result.](figures/ai-upscaling.png)
+
+**Screen 13.** The preview lets you adjust zoom and move a divider to compare the same area of the original and AI upscaling result.
+
+1. **View and zoom** — Choose AI Upscaling Result or Compare with Original. Inspect details with +/−, the zoom percentage, Fit to Window, and 100% · Actual Pixels.
+2. **Original and AI divider** — Move the divider between the original on the left and the AI result on the right. Drag the image or scroll to pan both sides together.
+3. **Save a PNG copy** — Save the completed 2× result as a PNG copy, independently of the preview zoom.
+
+### How to
+
+1. Select a photo, open AI Upscaling…, and click Start AI Upscaling. When processing finishes, the preview shows the AI Upscaling Result.
+2. Use the +/− buttons or pinch the trackpad to zoom. Drag the image or scroll to pan to a detail; Fit to Window shows the whole image again.
+3. Select Compare with Original and drag the divider left or right. The original is on the left and the AI result on the right, at the same zoom and position. After checking the result, click Save PNG Copy….
+
+### What 100% · Actual Pixels means
+
+At 100%, one AI output pixel maps to one physical screen pixel. This accounts for Retina scaling, so the window’s size in points need not equal the image’s pixel dimensions. The percentage refers to the AI output, not the original. Fit to Window chooses a zoom that shows the entire image. These controls change only the preview: they do not resize the file, change the saved output, or run AI processing again.
+
+### Compare the same detail
+
+The original on the left is displayed at 2× using ordinary interpolation to match the AI output’s width and height. Both sides share zoom and pan, so moving the divider reveals the same edges and textures. Drag the divider to change the comparison boundary; drag elsewhere on the image to pan. AI-generated detail is an estimate and is not guaranteed to recover real information missing from the original.
+
+### AI output and limits
+
+The bundled model runs locally through Core ML; photos are not uploaded and no model download is needed during use. Width and height are doubled. Output is 8-bit SDR sRGB PNG, with separately interpolated transparency. Animated input uses the first frame and viewer edits are not included. The output limit is at most 64 million pixels and can be lower on low-memory Macs. Save before closing; AI detail is an estimate.
+
+### Good to know
+
+- AI 4×, HDR AI output, and batch AI upscaling are not provided. Save a PNG copy before closing. The original file is unchanged.
+
+[Back to top](#top)
+
+---
+
 <a name="quality"></a>
 
-## 14. Understand AI enlargement, HDR, and loading
+## 15. Understand display quality, HDR, and loading
 
 High-Quality Zoom changes display interpolation. AI Upscaling creates a larger image you can save. HDR output is a display preference, not a label that proves a photo is HDR.
 
 ### How to
 
 1. For smoother display, turn on High-Quality Zoom. Its side-by-side or top-and-bottom comparison shows the same photo with linked zoom and pan; Esc closes that comparison.
-2. For a new 2× image, select a photo, open AI Upscaling…, and click Start AI Upscaling. Inspect Compare with Original and Actual Pixels, then Save PNG Copy….
-3. Use HDR ON / HDR OFF to allow or disable extended-range display. In Settings → General → Image Loading, choose Priority, Comfortable, Normal, or Slow for your workload.
-
-### AI output and limits
-
-The bundled model runs locally through Core ML; photos are not uploaded and no model download is needed during use. Width and height are doubled. Output is 8-bit SDR sRGB PNG, with separately interpolated transparency. Animated input uses the first frame and viewer edits are not included. The output limit is at most 64 million pixels and can be lower on low-memory Macs. Save before closing; AI detail is an estimate.
+2. Use HDR ON / HDR OFF to allow or disable extended-range display. In Settings → General → Image Loading, choose Priority, Comfortable, Normal, or Slow for your workload.
 
 ### Formats and performance
 
@@ -569,7 +613,7 @@ Reading and writing support depend on the running macOS. The app adds QOI and co
 
 ### Good to know
 
-- During rapid navigation, a small preview or the previous photo can remain visible until the final image is ready. AI 4×, HDR AI output, and batch AI upscaling are not provided.
+- During rapid navigation, a small preview or the previous photo can remain visible until the final image is ready.
 
 [Back to top](#top)
 
@@ -577,7 +621,7 @@ Reading and writing support depend on the running macOS. The app adds QOI and co
 
 <a name="slideshow"></a>
 
-## 15. Play a Photo Album or set wallpaper
+## 16. Play a Photo Album or set wallpaper
 
 Photo Album automatically advances through the current list in a focused single-image view. Wallpaper uses a separate copy prepared for the chosen displays.
 
@@ -609,13 +653,13 @@ The app creates a PNG without altering the source. Animated input uses the first
 
 <a name="settings"></a>
 
-## 16. Make the app work your way
+## 17. Make the app work your way
 
 Settings groups everyday viewing choices, custom shortcuts, tag assignments, and default file associations. Many viewing choices return automatically at the next launch.
 
 ![Settings keeps the main preferences in four tabs.](figures/settings.png)
 
-**Screen 12.** Settings keeps the main preferences in four tabs.
+**Screen 14.** Settings keeps the main preferences in four tabs.
 
 1. **Settings tabs** — General, Shortcuts, Photo Tags, and File Associations each cover a different task.
 2. **Viewing preferences** — Set display, thumbnail, filename, navigation, and loading choices.
@@ -633,7 +677,7 @@ The interface follows the language assigned to the app by macOS. Change it in Sy
 
 ### Remembered preferences
 
-Thumbnail size, high-quality zoom, filename display, loading preferences, favorites, tag settings, and custom keys are retained. Show Videos is off by default and remembers your choice; GIF visibility is unchanged. The last collection and viewing position can be restored if files remain accessible. Magnification-quality comparison starts off after relaunch. Visual editing adjustments and AI results must be exported separately.
+Thumbnail size, high-quality zoom, filename display, loading preferences, favorites, tag settings, and custom keys are retained. Show Videos is on by default and remembers your choice; GIF visibility is unchanged. Continue Previous Session on Home restores the last collection and viewing position if files remain accessible. Magnification-quality comparison starts off after relaunch. Visual editing adjustments and AI results must be exported separately.
 
 ### File associations
 
@@ -649,13 +693,13 @@ Only the checked format groups are changed. macOS may ask for confirmation. Movi
 
 <a name="shortcuts"></a>
 
-## 17. Shortcuts and quick troubleshooting
+## 18. Shortcuts and quick troubleshooting
 
 The reference that follows lists the app's default action keys and fixed contextual keys. ⌘ means Command, ⌥ Option, ⌃ Control, and ⇧ Shift.
 
 ![The Shortcuts tab shows configurable actions and conflict feedback.](figures/shortcuts.png)
 
-**Screen 13.** The Shortcuts tab shows configurable actions and conflict feedback.
+**Screen 15.** The Shortcuts tab shows configurable actions and conflict feedback.
 
 1. **Actions** — Hover over an action name to learn where and how it works.
 2. **Keys and modifiers** — Choose the key, then toggle Control, Option, Shift, or Command.

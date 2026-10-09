@@ -1,4 +1,4 @@
-<!-- almeng-guide-source-sha256: 06550b48cbd902f4422945a5b60b1021be4ef5c52d1db32ee0e1085430689df3 -->
+<!-- almeng-guide-source-sha256: b91582a0a2fbd5158f58233438668596e79f15003d76395b426351bc0162173d -->
 
 <a name="top"></a>
 
@@ -12,7 +12,7 @@
 
 Hướng dẫn thực hành cho phiên bản phát triển 0.13.1 hiện tại. Hãy bắt đầu bằng một thư mục ảnh, rồi tra cứu chương phù hợp với việc bạn muốn làm. Tên menu trong hướng dẫn theo giao diện tiếng Việt của ứng dụng.
 
-Phiên bản 0.13.1 · Tính đến 2026-10-07
+Phiên bản 0.13.1 · Tính đến 2026-10-09
 
 > Ảnh chụp màn hình lấy từ ứng dụng thật với giao diện tiếng Hàn và ảnh minh họa được tạo riêng. Các chú thích đánh số và phần giải thích được dịch sang ngôn ngữ của hướng dẫn; nội dung ảnh chụp màn hình giữ nguyên. Không sử dụng bộ sưu tập ảnh cá nhân.
 
@@ -31,10 +31,11 @@ Phiên bản 0.13.1 · Tính đến 2026-10-07
 - [11. Thêm dấu chìm bằng chữ, EXIF và logo](#watermark)
 - [12. Phát video, trích xuất khung hình và lưu đoạn phim](#video)
 - [13. Duyệt và lưu các khung hình của ảnh động](#animation)
-- [14. Hiểu phóng to AI, HDR và tải ảnh](#quality)
-- [15. Phát album ảnh hoặc đặt hình nền](#slideshow)
-- [16. Thiết lập theo cách làm việc của bạn](#settings)
-- [17. Phím tắt và xử lý nhanh vấn đề](#shortcuts)
+- [14. Phóng to và so sánh kết quả AI](#ai-upscaling)
+- [15. Hiểu chất lượng hiển thị, HDR và tải ảnh](#quality)
+- [16. Phát album ảnh hoặc đặt hình nền](#slideshow)
+- [17. Thiết lập theo cách làm việc của bạn](#settings)
+- [18. Phím tắt và xử lý nhanh vấn đề](#shortcuts)
 - [Bảng phím tắt](#shortcut-reference)
 
 ---
@@ -43,12 +44,20 @@ Phiên bản 0.13.1 · Tính đến 2026-10-07
 
 ## 1. Mở ảnh, thư mục và tệp ZIP
 
-Dùng Mở… cho mọi loại đầu vào. Một ảnh, một thư mục hay một tệp ZIP đều dùng chung cách duyệt ảnh.
+Dùng Mở… cho ảnh, video, thư mục và ZIP. Ảnh và video được hỗ trợ mặc định hiển thị cùng nhau; ZIP chỉ hỗ trợ ảnh.
+
+![Trang chủ gồm biểu tượng ứng dụng, nút mở và ảnh đã xem gần đây.](figures/home.png)
+
+**Màn hình 01.** Trang chủ gồm biểu tượng ứng dụng, nút mở và ảnh đã xem gần đây.
+
+1. **Mở hoặc tiếp tục** — Dùng Mở… để mở bộ ảnh mới hoặc Tiếp tục phiên trước để trở lại công việc đã lưu.
+2. **Bảy ảnh gần đây** — Tối đa bảy ảnh đã xem trong Trình xem hoặc So sánh ảnh, ảnh xem gần nhất trước; bấm để mở lại. Gồm ảnh thường, GIF và ảnh trong ZIP; không gồm video.
+3. **Xóa lịch sử gần đây** — Xóa khỏi danh sách cho từng ảnh hoặc Xóa danh sách chỉ xóa lịch sử, không xóa tệp gốc. Xem lại một ảnh có thể đưa ảnh đó trở lại danh sách.
 
 ### Các bước thực hiện
 
-1. Chạy 알맹Re trên macOS 14 trở lên. Chọn Mở… trên màn hình bắt đầu, thanh công cụ hoặc menu Tệp, hay nhấn ⌘O.
-2. Chọn một thư mục để duyệt ảnh bên trong. Chọn một ảnh để bắt đầu từ ảnh đó rồi xem tiếp các ảnh khác cùng thư mục. Nếu chọn nhiều ảnh, chỉ các ảnh được chọn sẽ được mở. Video mặc định bị ẩn: bật Hiển thị video phía trên danh sách để xem thêm video. Lựa chọn này được ghi nhớ; mở trực tiếp video được hỗ trợ sẽ tự bật tùy chọn và không thay đổi việc hiển thị GIF.
+1. Chạy 알맹Re trên macOS 14 trở lên để vào Trang chủ. Dùng Mở… (⌘O) hoặc bấm ảnh gần đây. Mở… cũng có trên thanh công cụ và menu Tệp.
+2. Chọn thư mục để duyệt nội dung. Mở một ảnh để xem tiếp trong cùng thư mục; chọn nhiều tệp chỉ mở những tệp đó. Hiển thị video mặc định bật và ghi nhớ lựa chọn. Mở trực tiếp video cũng bật tùy chọn này.
 3. Chọn tệp ZIP để xem các ảnh được hỗ trợ, kể cả ảnh trong thư mục con của tệp nén. Bạn cũng có thể mở tệp từ Finder hoặc kéo ảnh và thư mục vào ứng dụng.
 
 ### Thư mục và mục yêu thích
@@ -59,9 +68,9 @@ Cây thư mục mở rộng từng thư mục khi cần. Bấm tên thư mục �
 
 Ảnh được giải nén vào thư mục tạm trong lúc tệp ZIP đang mở. Hãy xuất bản sao trước khi đổi tên hoặc sửa siêu dữ liệu gốc. Ứng dụng không ghi lại tệp ZIP. Hỗ trợ phương thức Stored/Deflate; không mở tệp nén mã hóa hoặc dùng phương thức khác. Giới hạn gồm tệp ZIP 2 GiB, 10.000 mục, 256 MiB cho mỗi mục sau giải nén và tổng dữ liệu giải nén 1 GiB. Không hỗ trợ video bên trong tệp ZIP.
 
-### Trở về vị trí trước đó
+### Trang chủ và phiên trước
 
-Khi có thể, ứng dụng khôi phục bộ ảnh, ảnh đang chọn, chế độ xem và thiết lập tìm kiếm gần nhất. Nếu ổ đĩa bị ngắt kết nối hoặc quyền truy cập thay đổi, hãy dùng Mở… lần nữa. Các điều chỉnh ảnh và kết quả AI chưa lưu không được khôi phục.
+Khi mở bình thường, ứng dụng hiển thị Trang chủ. Tiếp tục phiên trước khôi phục bộ ảnh, lựa chọn, chế độ xem và tìm kiếm khi có thể. Trang chủ trên thanh công cụ hoặc menu giữ nguyên công việc hiện tại. Tệp mở từ Finder được hiển thị ngay. Nếu kết nối hoặc quyền thay đổi, dùng Mở… lần nữa. Các chỉnh sửa và kết quả AI chưa lưu không được khôi phục khi mở lại ứng dụng.
 
 ### Điều cần biết
 
@@ -75,15 +84,15 @@ Khi có thể, ứng dụng khôi phục bộ ảnh, ảnh đang chọn, chế �
 
 ## 2. Duyệt ảnh và xem tập trung
 
-Trình xem có thể hiển thị từ một đến mười ảnh cùng lúc. Phóng to để kiểm tra chi tiết hoặc ẩn các điều khiển xung quanh để tập trung vào ảnh.
+Trình xem có thể hiển thị từ một đến mười ảnh cùng lúc. Phóng to để kiểm tra chi tiết hoặc ẩn các điều khiển xung quanh để tập trung vào ảnh. Khi xem nhiều mục, video bắt đầu bằng ảnh tĩnh và phát tắt tiếng khi di chuột lên.
 
-![Trình xem chính với các điều khiển bao quanh ảnh.](figures/viewer.png)
+![Trình xem hiển thị nhiều ảnh và video cùng nhau. Di chuột lên video để xem trước tắt tiếng.](figures/viewer.png)
 
-**Màn hình 01.** Trình xem chính với các điều khiển bao quanh ảnh.
+**Màn hình 02.** Trình xem hiển thị nhiều ảnh và video cùng nhau. Di chuột lên video để xem trước tắt tiếng.
 
 1. **Chế độ xem** — Chuyển giữa Trình xem, Xem tất cả, Xem bản đồ và So sánh ảnh.
-2. **Tìm kiếm, lọc và vùng chọn bản đồ** — Tìm, sắp xếp và lọc danh sách hiện tại. Thanh màu xanh cho biết số vùng và số ảnh, với các nút Quay lại bản đồ và Xóa vùng bản đồ.
-3. **Điều khiển xem** — Chuyển ảnh, đặt mức thu phóng, đổi số ảnh hiển thị và chọn cách di chuyển ảnh.
+2. **Tìm kiếm, bộ lọc và video** — Chỉnh tìm kiếm, định dạng, nhãn, sắp xếp và Hiển thị video cho danh sách hiện tại.
+3. **Điều khiển xem** — Duyệt các mục và đổi số mục hiển thị. Chỉnh mức thu phóng và cách di chuyển ảnh.
 
 ### Các bước thực hiện
 
@@ -115,11 +124,11 @@ Dấu × phía dưới chỉ ẩn thanh điều khiển nổi. Mở lại bằng
 
 ## 3. Tìm và chọn ảnh trong Xem tất cả
 
-Xem tất cả trải bộ ảnh hiện tại thành lưới ảnh thu nhỏ. Dùng chế độ này để nhìn qua thư mục, chọn ảnh cần dùng và chuẩn bị thao tác hàng loạt.
+Xem tất cả trải bộ ảnh hiện tại thành lưới ảnh thu nhỏ. Dùng chế độ này để nhìn qua thư mục, chọn ảnh cần dùng và chuẩn bị thao tác hàng loạt. Video chỉ hiển thị ảnh xem trước tĩnh, không phát.
 
 ![Xem tất cả kết hợp lưới ảnh thu nhỏ với tìm kiếm, lựa chọn và điều chỉnh kích thước.](figures/overview.png)
 
-**Màn hình 02.** Xem tất cả kết hợp lưới ảnh thu nhỏ với tìm kiếm, lựa chọn và điều chỉnh kích thước.
+**Màn hình 03.** Xem tất cả kết hợp lưới ảnh thu nhỏ với tìm kiếm, lựa chọn và điều chỉnh kích thước.
 
 1. **Lưới ảnh thu nhỏ** — Bấm, chọn theo khoảng hoặc kéo qua các thẻ; bấm đúp để mở ảnh.
 2. **Tìm kiếm, lọc và vùng chọn bản đồ** — Tìm, sắp xếp và lọc danh sách hiện tại. Thanh màu xanh cho biết số vùng và số ảnh, với các nút Quay lại bản đồ và Xóa vùng bản đồ.
@@ -127,7 +136,7 @@ Xem tất cả trải bộ ảnh hiện tại thành lưới ảnh thu nhỏ. D�
 
 ### Các bước thực hiện
 
-1. Chọn Xem tất cả hoặc nhấn G. Điều chỉnh thanh kích thước ảnh thu nhỏ để thấy nhiều ảnh hơn hoặc ảnh xem trước lớn hơn. Bấm đúp ảnh thu nhỏ để mở trong Trình xem.
+1. Trong Xem tất cả (G), chỉnh cỡ ảnh thu nhỏ. Nhấp đúp để mở ảnh trong Trình xem hoặc video toàn màn hình.
 2. Nhập vào Tìm theo tên tệp. Tìm kiếm không phân biệt chữ hoa/thường; mọi từ ngăn bằng dấu cách đều phải xuất hiện trong tên tệp. Chọn một hay nhiều định dạng, hoặc Tất cả định dạng để bỏ bộ lọc đó.
 3. Bấm để chọn, ⌘-bấm để thêm hoặc bỏ một ảnh và ⇧-bấm để chọn một khoảng. Kéo hình chữ nhật từ ảnh hoặc vùng trống để chọn các thẻ giao với vùng đó. ←/→ di chuyển từng thẻ; ↑/↓ di chuyển từng hàng của lưới hiện tại. Cách này cũng hoạt động khi danh sách được lọc theo vùng bản đồ. Phím tắt tùy chỉnh được ưu tiên. Trong chế độ phân loại, cả bốn phím mũi tên đều di chuyển từng ảnh.
 
@@ -149,7 +158,7 @@ Chiều rộng và cao là số pixel gốc theo hướng tệp, chưa áp dụn
 
 ### Điều cần biết
 
-- Tìm kiếm dựa trên tên tệp, không tìm vật thể, nội dung ảnh hay chữ OCR. Nếu không thấy ảnh mong đợi, hãy xóa tìm kiếm và các bộ lọc đang bật trước khi mở lại thư mục.
+- Tìm theo tên tệp, không theo nội dung hay OCR. Không có kết quả, điều khiển vẫn ở trên; dùng Đặt lại tìm kiếm và bộ lọc. Tệp không bị xóa. Tắt Ảnh chưa gắn nhãn và không chọn nhãn: không lọc theo nhãn.
 
 [Về đầu trang](#top)
 
@@ -163,7 +172,7 @@ So sánh ảnh giữ hai bộ A và B độc lập, đặt cạnh nhau hoặc tr
 
 ![Hai bộ ảnh trong So sánh ảnh.](figures/compare.png)
 
-**Màn hình 03.** Hai bộ ảnh trong So sánh ảnh.
+**Màn hình 04.** Hai bộ ảnh trong So sánh ảnh.
 
 1. **Khung A và B** — Dưới tên mỗi khung, xem phím nhãn đã chọn, điều kiện và số ảnh. Khi tắt Ảnh chưa gắn nhãn và không chọn nhãn nào, mọi ảnh đều được hiển thị; A/B có thể trùng ảnh. Nếu kết quả trống, kiểm tra nhãn và bộ lọc chung về tìm kiếm, định dạng, bản đồ. Xóa chỉ bỏ bộ lọc nhãn của khung đó.
 2. **Cách so sánh** — Chọn cách ghép ảnh, bên cần chuyển, lặp bên ít ảnh hơn và liên kết thu phóng.
@@ -203,7 +212,7 @@ Phân loại cho phép gắn nhiều nhãn riêng cho ảnh trong lúc duyệt. 
 
 ![Chế độ Phân loại với các phím được gán và dấu màu.](figures/tags.png)
 
-**Màn hình 04.** Chế độ Phân loại với các phím được gán và dấu màu.
+**Màn hình 05.** Chế độ Phân loại với các phím được gán và dấu màu.
 
 1. **Chế độ phân loại** — Bật hoặc tắt chế độ; khi tắt, các phím xem ảnh thông thường hoạt động trở lại.
 2. **Các phím nhãn** — Dùng 1–4, QWER, ASDF hoặc bấm nút nhãn. Một ảnh có thể mang nhiều dấu.
@@ -243,7 +252,7 @@ Nhãn đã gắn, tên và màu nhãn được lưu trong cơ sở dữ liệu c
 
 ![Trình sửa dùng chung cho tên và màu nhãn.](figures/tag-editor.png)
 
-**Màn hình 05.** Trình sửa dùng chung cho tên và màu nhãn.
+**Màn hình 06.** Trình sửa dùng chung cho tên và màu nhãn.
 
 1. **Tên theo phím** — Mỗi phím cố định có tên chỉnh sửa được; mọi thư mục dùng chung các tên này.
 2. **Màu sắc** — Chọn dấu hiệu dễ nhận biết từ bảng mười màu.
@@ -283,7 +292,7 @@ Xem bản đồ đặt các ảnh có siêu dữ liệu GPS lên bản đồ. K�
 
 ![Xem bản đồ với các vùng có thể chọn và phần tóm tắt ảnh phù hợp.](figures/map.png)
 
-**Màn hình 06.** Xem bản đồ với các vùng có thể chọn và phần tóm tắt ảnh phù hợp.
+**Màn hình 07.** Xem bản đồ với các vùng có thể chọn và phần tóm tắt ảnh phù hợp.
 
 1. **Công cụ vùng** — Thêm vùng tròn, chữ nhật, đường bao tự do hoặc phạm vi bản đồ hiện tại.
 2. **Tay nắm vùng** — Di chuyển và đổi kích thước vùng đang chọn; kết hợp tối đa ba vùng.
@@ -355,7 +364,7 @@ Chỉnh sửa ảnh xem trước thay đổi mà không ghi đè ảnh gốc. H�
 
 ![Bảng chỉnh sửa bên cạnh bản xem trước của ảnh hiện tại.](figures/editing.png)
 
-**Màn hình 07.** Bảng chỉnh sửa bên cạnh bản xem trước của ảnh hiện tại.
+**Màn hình 08.** Bảng chỉnh sửa bên cạnh bản xem trước của ảnh hiện tại.
 
 1. **Độ nổi bật và phong cách phim** — Mở Độ nổi bật để chỉnh ảnh hoặc chọn phong cách phim và cường độ.
 2. **Xem trước ảnh** — Kiểm tra kết quả hiện tại; dùng Kích thước thực khi điều chỉnh chi tiết.
@@ -395,7 +404,7 @@ Xử lý hàng loạt ảnh đã chọn từ Trình xem, Xem tất cả, danh s�
 
 ![Cửa sổ chuyển đổi hàng loạt với định dạng, thu nhỏ đúng tỷ lệ và nơi lưu.](figures/batch.png)
 
-**Màn hình 08.** Cửa sổ chuyển đổi hàng loạt với định dạng, thu nhỏ đúng tỷ lệ và nơi lưu.
+**Màn hình 09.** Cửa sổ chuyển đổi hàng loạt với định dạng, thu nhỏ đúng tỷ lệ và nơi lưu.
 
 1. **Định dạng và kích thước** — Chọn định dạng và kích thước đúng tỷ lệ. Định dạng mất dữ liệu có chỉnh chất lượng; cũng có thiết lập giảm dung lượng.
 2. **Dấu chìm và thư mục** — Mở cài đặt dấu chìm hoặc chọn thư mục lưu bản sao.
@@ -435,7 +444,7 @@ Chuyển đổi áp dụng điều chỉnh hiện tại vào bản sao và giữ
 
 ![Kết hợp chữ, EXIF và logo, kéo dấu chìm trong bản xem trước rồi chọn mở rộng khung ảnh.](figures/watermark.png)
 
-**Màn hình 09.** Kết hợp chữ, EXIF và logo, kéo dấu chìm trong bản xem trước rồi chọn mở rộng khung ảnh.
+**Màn hình 10.** Kết hợp chữ, EXIF và logo, kéo dấu chìm trong bản xem trước rồi chọn mở rộng khung ảnh.
 
 1. **Chữ, phông và EXIF** — Chọn chữ, phông và EXIF của từng ảnh. Thêm mục vẫn giữ cỡ chữ.
 2. **Logo và bố cục** — Chọn logo, chỉnh kích thước, lề và độ đục bằng thanh trượt hoặc số.
@@ -471,11 +480,11 @@ Dấu chìm áp dụng sau chỉnh sửa, cắt, xoay và thu nhỏ đầu ra. B
 
 ## 12. Phát video, trích xuất khung hình và lưu đoạn phim
 
-Video mặc định bị ẩn. Bật Hiển thị video để xem cùng với ảnh, rồi mở Khung hình và đoạn phim… để trích xuất PNG hoặc lưu một khoảng thành bản sao riêng.
+Ảnh và video mặc định hiển thị cùng nhau. Xem tất cả dùng ảnh xem trước tĩnh; một video riêng mở ở trạng thái tạm dừng. Khung hình và đoạn phim… cho phép trích xuất PNG hoặc lưu đoạn phim mà giữ nguyên tệp gốc.
 
 ![Cửa sổ Khung hình và đoạn phim cho video, với trình phát và thiết lập xuất.](figures/video.png)
 
-**Màn hình 10.** Cửa sổ Khung hình và đoạn phim cho video, với trình phát và thiết lập xuất.
+**Màn hình 11.** Cửa sổ Khung hình và đoạn phim cho video, với trình phát và thiết lập xuất.
 
 1. **Trình phát video** — Phát hoặc tạm dừng video để kiểm tra hình ảnh và âm thanh.
 2. **Khung hình và vị trí** — Duyệt từng khung hình khi được hỗ trợ hoặc tìm theo thời điểm, rồi trích xuất khung hiện tại thành PNG.
@@ -483,8 +492,8 @@ Video mặc định bị ẩn. Bật Hiển thị video để xem cùng với �
 
 ### Các bước thực hiện
 
-1. Bật Hiển thị video phía trên danh sách. Ứng dụng ghi nhớ lựa chọn này và không thay đổi việc hiển thị GIF. Mở trực tiếp một tệp video được hỗ trợ sẽ tự bật tùy chọn này.
-2. Video trong trình xem ban đầu ở trạng thái tạm dừng; âm thanh chỉ bắt đầu khi bạn chủ động phát. Trong Khung hình và đoạn phim…, dùng vị trí phát và Khung hình trước / Khung hình tiếp theo nếu nội dung hỗ trợ bước từng khung. Thao tác này đi theo khung hình thực; ứng dụng không khẳng định số khung hình chính xác bằng cách tính từ tốc độ khung hình danh nghĩa của video có tốc độ thay đổi.
+1. Khi xem nhiều mục, di chuột lên video để phát tắt tiếng; chọn Bật âm thanh để nghe. Rời con trỏ khỏi ô sẽ dừng phát và tắt tiếng lại. Nhấp đúp video trong Xem tất cả hoặc Trình xem để mở riêng toàn màn hình, tự phát từ thời điểm hiện tại với cùng trạng thái âm thanh. Dùng điều khiển để phát, tìm và chỉnh âm thanh; Esc hoặc Đóng toàn màn hình trở về bố cục ban đầu. Hiển thị video trong danh sách, menu hoặc cài đặt cho phép ẩn video mà không ảnh hưởng đến GIF.
+2. Trong Khung hình và đoạn phim…, dùng vị trí phát và Khung hình trước / Khung hình tiếp theo nếu nội dung hỗ trợ bước từng khung. Thao tác này đi theo khung hình thực; ứng dụng không khẳng định số khung hình chính xác bằng cách tính từ tốc độ khung hình danh nghĩa của video có tốc độ thay đổi.
 3. Dùng Trích xuất khung hình hiện tại thành PNG… để lưu hình đang hiển thị. Để lưu đoạn phim, đặt Bắt đầu (giây) và Kết thúc (giây), có thể dùng Đặt điểm bắt đầu tại đây / Đặt điểm kết thúc tại đây; chọn MP4 hoặc MOV, chất lượng rồi Lưu bản sao đoạn phim….
 
 ### Định dạng khả dụng trên máy Mac này
@@ -515,7 +524,7 @@ Khung hình và đoạn phim… cho phép duyệt GIF, APNG và WebP mà máy Ma
 
 ![Cửa sổ Khung hình và đoạn phim cho ảnh động, với bản xem trước, khung hình và kích thước đầu ra.](figures/animation.png)
 
-**Màn hình 11.** Cửa sổ Khung hình và đoạn phim cho ảnh động, với bản xem trước, khung hình và kích thước đầu ra.
+**Màn hình 12.** Cửa sổ Khung hình và đoạn phim cho ảnh động, với bản xem trước, khung hình và kích thước đầu ra.
 
 1. **Bản xem trước ảnh động** — Kiểm tra khung đang hiển thị và chuyển động trước khi lưu.
 2. **Điều khiển khung hình** — Tiến hoặc lùi một khung và trích xuất khung hiện tại thành PNG.
@@ -547,21 +556,56 @@ Khả năng đọc GIF, APNG, WebP và các định dạng đầu ra được cu
 
 ---
 
+<a name="ai-upscaling"></a>
+
+## 14. Phóng to và so sánh kết quả AI
+
+Phóng to bằng AI tạo ảnh mới có chiều rộng và chiều cao đều gấp đôi. Xem kỹ chi tiết và so sánh cùng một vùng với ảnh gốc trước khi lưu bản sao PNG.
+
+![Bản xem trước cho phép điều chỉnh thu phóng và di chuyển đường phân chia để so sánh cùng một vùng của ảnh gốc và kết quả AI.](figures/ai-upscaling.png)
+
+**Màn hình 13.** Bản xem trước cho phép điều chỉnh thu phóng và di chuyển đường phân chia để so sánh cùng một vùng của ảnh gốc và kết quả AI.
+
+1. **Chế độ xem và thu phóng** — Chọn Kết quả phóng to bằng AI hoặc So sánh với ảnh gốc. Kiểm tra chi tiết bằng +/−, phần trăm, Vừa cửa sổ và 100% · Điểm ảnh thực tế.
+2. **Đường phân chia ảnh gốc và AI** — Di chuyển đường phân chia giữa ảnh gốc bên trái và kết quả AI bên phải. Kéo ảnh hoặc cuộn sẽ di chuyển cả hai bên cùng nhau.
+3. **Lưu bản sao PNG** — Lưu toàn bộ kết quả 2× thành bản sao PNG, không phụ thuộc mức thu phóng bản xem trước.
+
+### Các bước thực hiện
+
+1. Chọn ảnh, mở Phóng to bằng AI… rồi bấm Bắt đầu phóng to bằng AI. Khi xử lý xong, bản xem trước hiển thị Kết quả phóng to bằng AI.
+2. Dùng nút +/− hoặc chụm/mở ngón tay trên trackpad để thu phóng. Kéo ảnh hoặc cuộn để di chuyển đến chi tiết cần xem; Vừa cửa sổ hiển thị lại toàn bộ ảnh.
+3. Chọn So sánh với ảnh gốc rồi kéo đường phân chia sang trái hoặc phải. Ảnh gốc ở bên trái và kết quả AI ở bên phải, dùng cùng mức thu phóng và vị trí. Sau khi kiểm tra, bấm Lưu bản sao PNG….
+
+### Ý nghĩa của 100% · Điểm ảnh thực tế
+
+Ở mức 100%, một điểm ảnh của kết quả AI được hiển thị bằng một điểm ảnh vật lý trên màn hình. Phép tính có xét tỷ lệ Retina, nên kích thước cửa sổ tính bằng point không nhất thiết bằng kích thước ảnh tính bằng pixel. Phần trăm dựa trên kết quả AI, không phải ảnh gốc. Vừa cửa sổ chọn mức thu phóng để thấy toàn bộ ảnh. Các điều khiển này chỉ thay đổi bản xem trước: không đổi kích thước tệp, kết quả lưu hoặc chạy lại xử lý AI.
+
+### So sánh cùng một chi tiết
+
+Ảnh gốc bên trái được hiển thị 2× bằng nội suy thông thường để có cùng chiều rộng và chiều cao với kết quả AI. Hai bên dùng chung thu phóng và vị trí, nên có thể di chuyển đường phân chia để so sánh cùng đường nét và kết cấu. Kéo đường phân chia để đổi ranh giới so sánh; kéo chỗ khác trên ảnh để di chuyển ảnh. Chi tiết do AI tạo là ước đoán, không đảm bảo khôi phục thông tin thực bị thiếu trong ảnh gốc.
+
+### Đầu ra AI và giới hạn
+
+Mô hình đi kèm chạy cục bộ qua Core ML; ảnh không được tải lên và không cần tải mô hình khi sử dụng. Chiều rộng và chiều cao đều tăng gấp đôi. Đầu ra là PNG sRGB SDR 8-bit, với độ trong suốt được nội suy riêng. Ảnh động dùng khung đầu, không bao gồm chỉnh sửa của trình xem. Đầu ra tối đa 64 triệu pixel và có thể thấp hơn trên Mac ít bộ nhớ. Lưu trước khi đóng; chi tiết do AI tạo là ước đoán.
+
+### Điều cần biết
+
+- Không có AI 4×, đầu ra AI HDR hay phóng to AI hàng loạt. Lưu bản sao PNG trước khi đóng. Tệp gốc không thay đổi.
+
+[Về đầu trang](#top)
+
+---
+
 <a name="quality"></a>
 
-## 14. Hiểu phóng to AI, HDR và tải ảnh
+## 15. Hiểu chất lượng hiển thị, HDR và tải ảnh
 
 Phóng to chất lượng cao thay cách nội suy khi hiển thị. Phóng to bằng AI tạo ảnh lớn hơn để lưu. Đầu ra HDR là tùy chọn hiển thị, không phải dấu xác nhận ảnh đang xem là HDR.
 
 ### Các bước thực hiện
 
 1. Để hiển thị mượt hơn, bật Phóng to chất lượng cao. So sánh cạnh nhau hoặc trên dưới hiển thị cùng một ảnh với thu phóng và di chuyển liên kết; Esc đóng kiểu so sánh này.
-2. Để tạo ảnh mới 2×, chọn ảnh, mở Phóng to bằng AI… rồi bấm Bắt đầu phóng to bằng AI. Kiểm tra bằng So sánh với ảnh gốc và Điểm ảnh thực tế, sau đó Lưu bản sao PNG….
-3. Dùng HDR ON / HDR OFF để cho phép hoặc tắt hiển thị dải sáng mở rộng. Trong Cài đặt → Chung → Tải hình ảnh, chọn Ưu tiên, Thoải mái, Bình thường hoặc Chậm theo công việc.
-
-### Đầu ra AI và giới hạn
-
-Mô hình đi kèm chạy cục bộ qua Core ML; ảnh không được tải lên và không cần tải mô hình khi sử dụng. Chiều rộng và chiều cao đều tăng gấp đôi. Đầu ra là PNG sRGB SDR 8-bit, với độ trong suốt được nội suy riêng. Ảnh động dùng khung đầu, không bao gồm chỉnh sửa của trình xem. Đầu ra tối đa 64 triệu pixel và có thể thấp hơn trên Mac ít bộ nhớ. Lưu trước khi đóng; chi tiết do AI tạo là ước đoán.
+2. Dùng HDR ON / HDR OFF để cho phép hoặc tắt hiển thị dải sáng mở rộng. Trong Cài đặt → Chung → Tải hình ảnh, chọn Ưu tiên, Thoải mái, Bình thường hoặc Chậm theo công việc.
 
 ### Định dạng và hiệu năng
 
@@ -569,7 +613,7 @@ Khả năng đọc và ghi phụ thuộc macOS đang chạy. Ứng dụng bổ s
 
 ### Điều cần biết
 
-- Khi chuyển nhanh, bản xem trước nhỏ hoặc ảnh trước đó có thể còn hiển thị cho tới khi ảnh cuối sẵn sàng. Không có AI 4×, đầu ra AI HDR hay phóng to AI hàng loạt.
+- Khi chuyển nhanh, bản xem trước nhỏ hoặc ảnh trước đó có thể còn hiển thị cho tới khi ảnh cuối sẵn sàng.
 
 [Về đầu trang](#top)
 
@@ -577,7 +621,7 @@ Khả năng đọc và ghi phụ thuộc macOS đang chạy. Ứng dụng bổ s
 
 <a name="slideshow"></a>
 
-## 15. Phát album ảnh hoặc đặt hình nền
+## 16. Phát album ảnh hoặc đặt hình nền
 
 Album ảnh tự chuyển qua danh sách hiện tại trong chế độ tập trung một ảnh. Hình nền dùng bản sao riêng được chuẩn bị cho các màn hình đã chọn.
 
@@ -609,13 +653,13 @@ Phát tạm dừng khi thoát chế độ tập trung, chuyển ứng dụng, m�
 
 <a name="settings"></a>
 
-## 16. Thiết lập theo cách làm việc của bạn
+## 17. Thiết lập theo cách làm việc của bạn
 
 Cài đặt tập hợp các lựa chọn xem thường ngày, phím tắt riêng, gán nhãn và liên kết tệp mặc định. Nhiều tùy chọn xem được tự khôi phục trong lần chạy sau.
 
 ![Cài đặt sắp xếp các tùy chọn chính trong bốn thẻ.](figures/settings.png)
 
-**Màn hình 12.** Cài đặt sắp xếp các tùy chọn chính trong bốn thẻ.
+**Màn hình 14.** Cài đặt sắp xếp các tùy chọn chính trong bốn thẻ.
 
 1. **Các thẻ cài đặt** — Chung, Phím tắt, Nhãn ảnh và Liên kết tệp phụ trách các thiết lập khác nhau.
 2. **Tùy chọn xem** — Đặt cách hiển thị, ảnh thu nhỏ, tên tệp, điều hướng và tải ảnh.
@@ -633,7 +677,7 @@ Giao diện dùng ngôn ngữ mà macOS chỉ định cho ứng dụng. Đổi t
 
 ### Các tùy chọn được ghi nhớ
 
-Kích thước ảnh thu nhỏ, phóng to chất lượng cao, hiển thị tên tệp, tùy chọn tải, mục yêu thích, thiết lập nhãn và phím riêng được giữ lại. Bộ ảnh và vị trí xem gần nhất có thể khôi phục nếu tệp vẫn truy cập được. So sánh chất lượng phóng to bắt đầu ở trạng thái tắt sau khi chạy lại. Các chỉnh sửa hình ảnh và kết quả AI cần được xuất riêng. Lựa chọn Hiển thị video phía trên danh sách cũng được ghi nhớ; mặc định tắt và không ảnh hưởng đến GIF.
+Kích thước ảnh thu nhỏ, phóng to chất lượng cao, hiển thị tên tệp, tùy chọn tải, mục yêu thích, thiết lập nhãn và phím riêng được giữ lại. Tiếp tục phiên trước trên Trang chủ khôi phục bộ ảnh và vị trí xem nếu tệp vẫn truy cập được. So sánh chất lượng phóng to bắt đầu ở trạng thái tắt sau khi chạy lại. Các chỉnh sửa hình ảnh và kết quả AI cần được xuất riêng. Hiển thị video mặc định bật và ghi nhớ lựa chọn mà không ảnh hưởng đến GIF.
 
 ### Liên kết tệp
 
@@ -649,13 +693,13 @@ Chỉ các nhóm định dạng được đánh dấu mới thay đổi. macOS c
 
 <a name="shortcuts"></a>
 
-## 17. Phím tắt và xử lý nhanh vấn đề
+## 18. Phím tắt và xử lý nhanh vấn đề
 
 Bảng tham khảo tiếp theo liệt kê các phím thao tác mặc định và phím cố định theo ngữ cảnh. ⌘ là Command, ⌥ là Option, ⌃ là Control và ⇧ là Shift.
 
 ![Thẻ Phím tắt hiển thị các thao tác có thể gán và thông báo xung đột.](figures/shortcuts.png)
 
-**Màn hình 13.** Thẻ Phím tắt hiển thị các thao tác có thể gán và thông báo xung đột.
+**Màn hình 15.** Thẻ Phím tắt hiển thị các thao tác có thể gán và thông báo xung đột.
 
 1. **Thao tác** — Di chuột lên tên để biết thao tác dùng ở đâu và hoạt động thế nào.
 2. **Phím và phím bổ trợ** — Chọn phím, rồi bật/tắt Control, Option, Shift hoặc Command.
