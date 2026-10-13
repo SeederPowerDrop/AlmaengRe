@@ -1,5 +1,24 @@
 import AppKit
 
+enum OverviewGridNavigation {
+  static func columnCount(width: CGFloat, thumbnailSize: CGFloat) -> Int {
+    guard width.isFinite, thumbnailSize.isFinite else { return 1 }
+    let size = min(thumbnailSize, max(1, width - 50))
+    // Match OverviewView's 18 pt padding, 14 pt card inset and 12 pt spacing.
+    return max(1, Int((max(0, width - 36) + 12) / (max(1, size) + 26)))
+  }
+
+  static func target(from index: Int, offset: Int, count: Int, wraps: Bool) -> Int {
+    guard count > 0 else { return 0 }
+    let target = index + offset
+    if wraps {
+      if target < 0 { return count - 1 }
+      if target >= count { return 0 }
+    }
+    return min(max(0, target), count - 1)
+  }
+}
+
 /// 번호 배지와 실제 aspect-fit 이미지의 면적을 비교합니다. 원본을 별도로 읽지
 /// 않고, 이미 디코딩된 썸네일의 크기를 사용하므로 대용량 폴더에도 부담이 작습니다.
 enum OverviewNumberPlacement {

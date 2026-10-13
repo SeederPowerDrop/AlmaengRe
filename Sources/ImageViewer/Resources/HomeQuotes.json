@@ -1,0 +1,2072 @@
+[
+  {
+    "id": "01",
+    "sourceURL": "https://vangoghletters.org/vg/letters/let022/print.html",
+    "originalText": "Als men waarachtig van de natuur houdt dan vindt men ’t overal mooi.",
+    "originalLanguage": "nl",
+    "publicDomainBasis": "Van Gogh’s own 19th-century letter text; author died in 1890. Original Dutch/French wording is used, not the modern English translation or editorial notes. The official edition records the original manuscript and its date; publication history identifies the 1914 collected letters: https://vangoghletters.org/vg/publications_1.html. All non-original-language texts here are newly prepared AlmengRe translations.",
+    "localizations": {
+      "ko": {
+        "text": "자연을 진심으로 사랑하면 어디에서나 아름다움을 발견한다.",
+        "author": "빈센트 반 고흐",
+        "work": "편지 022 (1874-04-30)",
+        "isTranslation": true
+      },
+      "en": {
+        "text": "When you genuinely love nature, you find beauty wherever you are.",
+        "author": "Vincent van Gogh",
+        "work": "Letter 022 (1874-04-30)",
+        "isTranslation": true
+      },
+      "ja": {
+        "text": "自然を心から愛していれば、どこにいても美しさを見つけられる。",
+        "author": "フィンセント・ファン・ゴッホ",
+        "work": "書簡 022 (1874-04-30)",
+        "isTranslation": true
+      },
+      "zh-Hans": {
+        "text": "真心热爱自然，就能在每一处发现美。",
+        "author": "文森特·梵高",
+        "work": "书信 022 (1874-04-30)",
+        "isTranslation": true
+      },
+      "vi": {
+        "text": "Khi thật lòng yêu thiên nhiên, ta thấy cái đẹp ở khắp nơi.",
+        "author": "Vincent van Gogh",
+        "work": "Thư 022 (1874-04-30)",
+        "isTranslation": true
+      },
+      "es": {
+        "text": "Quien ama de verdad la naturaleza encuentra belleza en todas partes.",
+        "author": "Vincent van Gogh",
+        "work": "Carta 022 (1874-04-30)",
+        "isTranslation": true
+      },
+      "fr": {
+        "text": "Quand on aime véritablement la nature, on trouve de la beauté partout.",
+        "author": "Vincent van Gogh",
+        "work": "Lettre 022 (1874-04-30)",
+        "isTranslation": true
+      },
+      "de": {
+        "text": "Wer die Natur wahrhaft liebt, findet es überall schön.",
+        "author": "Vincent van Gogh",
+        "work": "Brief 022 (1874-04-30)",
+        "isTranslation": true
+      },
+      "ru": {
+        "text": "Если по-настоящему любишь природу, всюду находишь красоту.",
+        "author": "Винсент ван Гог",
+        "work": "Письмо 022 (1874-04-30)",
+        "isTranslation": true
+      },
+      "ar": {
+        "text": "من يحب الطبيعة بصدق يجد الجمال في كل مكان.",
+        "author": "فينسنت فان غوخ",
+        "work": "الرسالة 022 (1874-04-30)",
+        "isTranslation": true
+      }
+    }
+  },
+  {
+    "id": "02",
+    "sourceURL": "https://vangoghletters.org/vg/letters/let258/print.html",
+    "originalText": "Wat is het buiten toch mooi als ’t alles nat is van den regen – vóór – onder – na den regen.",
+    "originalLanguage": "nl",
+    "publicDomainBasis": "Van Gogh’s own 19th-century letter text; author died in 1890. Original Dutch/French wording is used, not the modern English translation or editorial notes. The official edition records the original manuscript and its date; publication history identifies the 1914 collected letters: https://vangoghletters.org/vg/publications_1.html. All non-original-language texts here are newly prepared AlmengRe translations.",
+    "localizations": {
+      "ko": {
+        "text": "모든 것이 비에 젖어 있을 때 바깥은 얼마나 아름다운가. 비가 오기 전에도, 오는 동안에도, 온 뒤에도.",
+        "author": "빈센트 반 고흐",
+        "work": "편지 258 (1882-08-20)",
+        "isTranslation": true
+      },
+      "en": {
+        "text": "How beautiful it is outside when everything is rain-wet—before, during, and after the rain.",
+        "author": "Vincent van Gogh",
+        "work": "Letter 258 (1882-08-20)",
+        "isTranslation": true
+      },
+      "ja": {
+        "text": "すべてが雨に濡れているとき、外はなんと美しいのだろう。雨の前も、降っている間も、降った後も。",
+        "author": "フィンセント・ファン・ゴッホ",
+        "work": "書簡 258 (1882-08-20)",
+        "isTranslation": true
+      },
+      "zh-Hans": {
+        "text": "万物被雨水浸润时，户外多么美丽——雨前、雨中、雨后都是如此。",
+        "author": "文森特·梵高",
+        "work": "书信 258 (1882-08-20)",
+        "isTranslation": true
+      },
+      "vi": {
+        "text": "Ngoài trời đẹp biết bao khi mọi thứ ướt mưa—trước, trong và sau cơn mưa.",
+        "author": "Vincent van Gogh",
+        "work": "Thư 258 (1882-08-20)",
+        "isTranslation": true
+      },
+      "es": {
+        "text": "Qué hermoso es el exterior cuando todo está mojado por la lluvia: antes, durante y después de llover.",
+        "author": "Vincent van Gogh",
+        "work": "Carta 258 (1882-08-20)",
+        "isTranslation": true
+      },
+      "fr": {
+        "text": "Comme le dehors est beau quand tout est mouillé de pluie — avant, pendant et après la pluie.",
+        "author": "Vincent van Gogh",
+        "work": "Lettre 258 (1882-08-20)",
+        "isTranslation": true
+      },
+      "de": {
+        "text": "Wie schön ist es draußen, wenn alles vom Regen nass ist — vor, während und nach dem Regen.",
+        "author": "Vincent van Gogh",
+        "work": "Brief 258 (1882-08-20)",
+        "isTranslation": true
+      },
+      "ru": {
+        "text": "Как прекрасно снаружи, когда всё мокро от дождя — до, во время и после дождя.",
+        "author": "Винсент ван Гог",
+        "work": "Письмо 258 (1882-08-20)",
+        "isTranslation": true
+      },
+      "ar": {
+        "text": "ما أجمل الخارج حين يبتل كل شيء بالمطر؛ قبل المطر وأثناءه وبعده.",
+        "author": "فينسنت فان غوخ",
+        "work": "الرسالة 258 (1882-08-20)",
+        "isTranslation": true
+      }
+    }
+  },
+  {
+    "id": "03",
+    "sourceURL": "https://vangoghletters.org/vg/letters/let274/print.html",
+    "originalText": "Want het groote geschiedt niet bij impulsie alleen en is een aaneenschakeling van kleine dingen die tot elkaar gebragt zijn.",
+    "originalLanguage": "nl",
+    "publicDomainBasis": "Van Gogh’s own 19th-century letter text; author died in 1890. Original Dutch/French wording is used, not the modern English translation or editorial notes. The official edition records the original manuscript and its date; publication history identifies the 1914 collected letters: https://vangoghletters.org/vg/publications_1.html. All non-original-language texts here are newly prepared AlmengRe translations.",
+    "localizations": {
+      "ko": {
+        "text": "위대한 일은 충동만으로 이루어지지 않는다. 작은 일들이 서로 이어져 이루어진다.",
+        "author": "빈센트 반 고흐",
+        "work": "편지 274 (1882-10-22)",
+        "isTranslation": true
+      },
+      "en": {
+        "text": "Great things do not arise from impulse alone; they are a chain of small things brought together.",
+        "author": "Vincent van Gogh",
+        "work": "Letter 274 (1882-10-22)",
+        "isTranslation": true
+      },
+      "ja": {
+        "text": "偉大なことは衝動だけで成し遂げられるのではなく、小さなことが結びついた連なりなのだ。",
+        "author": "フィンセント・ファン・ゴッホ",
+        "work": "書簡 274 (1882-10-22)",
+        "isTranslation": true
+      },
+      "zh-Hans": {
+        "text": "伟大的事并非仅凭冲动而成，而是由相互连接的小事汇聚而成。",
+        "author": "文森特·梵高",
+        "work": "书信 274 (1882-10-22)",
+        "isTranslation": true
+      },
+      "vi": {
+        "text": "Việc lớn không chỉ đến từ thôi thúc nhất thời, mà là chuỗi những việc nhỏ được nối lại với nhau.",
+        "author": "Vincent van Gogh",
+        "work": "Thư 274 (1882-10-22)",
+        "isTranslation": true
+      },
+      "es": {
+        "text": "Lo grande no surge solo del impulso: es una sucesión de pequeñas cosas enlazadas entre sí.",
+        "author": "Vincent van Gogh",
+        "work": "Carta 274 (1882-10-22)",
+        "isTranslation": true
+      },
+      "fr": {
+        "text": "Les grandes choses ne naissent pas du seul élan ; elles sont un enchaînement de petites choses réunies.",
+        "author": "Vincent van Gogh",
+        "work": "Lettre 274 (1882-10-22)",
+        "isTranslation": true
+      },
+      "de": {
+        "text": "Denn Großes entsteht nicht allein aus einem Impuls, sondern aus einer Verkettung kleiner Dinge, die zusammengebracht werden.",
+        "author": "Vincent van Gogh",
+        "work": "Brief 274 (1882-10-22)",
+        "isTranslation": true
+      },
+      "ru": {
+        "text": "Великое возникает не из одного лишь порыва, а из цепочки малых дел, соединённых вместе.",
+        "author": "Винсент ван Гог",
+        "work": "Письмо 274 (1882-10-22)",
+        "isTranslation": true
+      },
+      "ar": {
+        "text": "لا تنشأ الأمور العظيمة من الاندفاع وحده، بل من سلسلة أمور صغيرة تتصل بعضها ببعض.",
+        "author": "فينسنت فان غوخ",
+        "work": "الرسالة 274 (1882-10-22)",
+        "isTranslation": true
+      }
+    }
+  },
+  {
+    "id": "04",
+    "sourceURL": "https://vangoghletters.org/vg/letters/let676/print.html",
+    "originalText": "Souvent il me semble que la nuit est bien plus vivante et richement colorée que le jour.",
+    "originalLanguage": "fr",
+    "publicDomainBasis": "Van Gogh’s own 19th-century letter text; author died in 1890. Original Dutch/French wording is used, not the modern English translation or editorial notes. The official edition records the original manuscript and its date; publication history identifies the 1914 collected letters: https://vangoghletters.org/vg/publications_1.html. All non-original-language texts here are newly prepared AlmengRe translations.",
+    "localizations": {
+      "ko": {
+        "text": "나는 종종 밤이 낮보다 훨씬 더 생생하고 색채도 풍부하다고 느낀다.",
+        "author": "빈센트 반 고흐",
+        "work": "편지 676 (1888-09-08)",
+        "isTranslation": true
+      },
+      "en": {
+        "text": "I often feel that night is far more alive and richly colored than day.",
+        "author": "Vincent van Gogh",
+        "work": "Letter 676 (1888-09-08)",
+        "isTranslation": true
+      },
+      "ja": {
+        "text": "夜は昼よりもずっと生き生きとして、色彩も豊かだと、私にはよく思える。",
+        "author": "フィンセント・ファン・ゴッホ",
+        "work": "書簡 676 (1888-09-08)",
+        "isTranslation": true
+      },
+      "zh-Hans": {
+        "text": "我常常觉得，夜晚比白昼更加鲜活，色彩也更加丰富。",
+        "author": "文森特·梵高",
+        "work": "书信 676 (1888-09-08)",
+        "isTranslation": true
+      },
+      "vi": {
+        "text": "Tôi thường cảm thấy đêm sống động và giàu màu sắc hơn ban ngày rất nhiều.",
+        "author": "Vincent van Gogh",
+        "work": "Thư 676 (1888-09-08)",
+        "isTranslation": true
+      },
+      "es": {
+        "text": "A menudo me parece que la noche está mucho más viva y es más rica en color que el día.",
+        "author": "Vincent van Gogh",
+        "work": "Carta 676 (1888-09-08)",
+        "isTranslation": true
+      },
+      "fr": {
+        "text": "Souvent il me semble que la nuit est bien plus vivante et richement colorée que le jour.",
+        "author": "Vincent van Gogh",
+        "work": "Lettre 676 (1888-09-08)",
+        "isTranslation": false
+      },
+      "de": {
+        "text": "Oft scheint mir die Nacht viel lebendiger und reicher an Farben als der Tag.",
+        "author": "Vincent van Gogh",
+        "work": "Brief 676 (1888-09-08)",
+        "isTranslation": true
+      },
+      "ru": {
+        "text": "Мне часто кажется, что ночь гораздо живее и богаче красками, чем день.",
+        "author": "Винсент ван Гог",
+        "work": "Письмо 676 (1888-09-08)",
+        "isTranslation": true
+      },
+      "ar": {
+        "text": "كثيرًا ما يبدو لي أن الليل أكثر حيوية وأغنى ألوانًا من النهار بكثير.",
+        "author": "فينسنت فان غوخ",
+        "work": "الرسالة 676 (1888-09-08)",
+        "isTranslation": true
+      }
+    }
+  },
+  {
+    "id": "05",
+    "sourceURL": "https://vangoghletters.org/vg/letters/let396/print.html",
+    "originalText": "iedere teekening die men maakt, iedere studie die men schildert is een stap.",
+    "originalLanguage": "nl",
+    "publicDomainBasis": "Van Gogh’s own 19th-century letter text; author died in 1890. Original Dutch/French wording is used, not the modern English translation or editorial notes. The official edition records the original manuscript and its date; publication history identifies the 1914 collected letters: https://vangoghletters.org/vg/publications_1.html. All non-original-language texts here are newly prepared AlmengRe translations.",
+    "localizations": {
+      "ko": {
+        "text": "드로잉 한 장, 그림 습작 한 장이 모두 한 걸음이다.",
+        "author": "빈센트 반 고흐",
+        "work": "편지 396 (1883-10)",
+        "isTranslation": true
+      },
+      "en": {
+        "text": "Every drawing you make, every study you paint, is a step.",
+        "author": "Vincent van Gogh",
+        "work": "Letter 396 (1883-10)",
+        "isTranslation": true
+      },
+      "ja": {
+        "text": "描くデッサンの一枚一枚、描く習作の一枚一枚が、一歩なのだ。",
+        "author": "フィンセント・ファン・ゴッホ",
+        "work": "書簡 396 (1883-10)",
+        "isTranslation": true
+      },
+      "zh-Hans": {
+        "text": "每画一幅素描，每绘一幅习作，都是向前一步。",
+        "author": "文森特·梵高",
+        "work": "书信 396 (1883-10)",
+        "isTranslation": true
+      },
+      "vi": {
+        "text": "Mỗi bức vẽ ta thực hiện, mỗi bức nghiên cứu ta vẽ bằng màu, đều là một bước.",
+        "author": "Vincent van Gogh",
+        "work": "Thư 396 (1883-10)",
+        "isTranslation": true
+      },
+      "es": {
+        "text": "Cada dibujo que se hace, cada estudio que se pinta, es un paso.",
+        "author": "Vincent van Gogh",
+        "work": "Carta 396 (1883-10)",
+        "isTranslation": true
+      },
+      "fr": {
+        "text": "Chaque dessin que l’on fait, chaque étude que l’on peint est un pas.",
+        "author": "Vincent van Gogh",
+        "work": "Lettre 396 (1883-10)",
+        "isTranslation": true
+      },
+      "de": {
+        "text": "Jede Zeichnung, die man macht, jede Studie, die man malt, ist ein Schritt.",
+        "author": "Vincent van Gogh",
+        "work": "Brief 396 (1883-10)",
+        "isTranslation": true
+      },
+      "ru": {
+        "text": "Каждый сделанный рисунок, каждый написанный этюд — это шаг.",
+        "author": "Винсент ван Гог",
+        "work": "Письмо 396 (1883-10)",
+        "isTranslation": true
+      },
+      "ar": {
+        "text": "كل رسم تنجزه وكل دراسة ترسمها بالألوان هي خطوة.",
+        "author": "فينسنت فان غوخ",
+        "work": "الرسالة 396 (1883-10)",
+        "isTranslation": true
+      }
+    }
+  },
+  {
+    "id": "06",
+    "sourceURL": "https://www.gutenberg.org/files/46203/46203-h/46203-h.htm",
+    "originalText": "Jedes Kunstwerk ist Kind seiner Zeit, oft ist es Mutter unserer Gefühle.",
+    "originalLanguage": "de",
+    "publicDomainBasis": "German original, R. Piper & Co., Munich, third edition 1912; author died in 1944. Project Gutenberg identifies this original-language edition as public domain in the USA: https://www.gutenberg.org/ebooks/46203. All non-German texts here are newly prepared AlmengRe translations, not copied from later translations.",
+    "localizations": {
+      "ko": {
+        "text": "모든 예술 작품은 시대의 자식이며, 흔히 우리 감정의 어머니이기도 하다.",
+        "author": "바실리 칸딘스키",
+        "work": "예술에서의 정신적인 것에 대하여 · I (1912)",
+        "isTranslation": true
+      },
+      "en": {
+        "text": "Every artwork is a child of its time, and often a mother to our feelings.",
+        "author": "Wassily Kandinsky",
+        "work": "On the Spiritual in Art · I (1912)",
+        "isTranslation": true
+      },
+      "ja": {
+        "text": "すべての芸術作品はその時代の子であり、しばしば私たちの感情の母でもある。",
+        "author": "ワシリー・カンディンスキー",
+        "work": "芸術における精神的なもの · I (1912)",
+        "isTranslation": true
+      },
+      "zh-Hans": {
+        "text": "每一件艺术作品都是它所处时代的孩子，也常常是我们情感的母亲。",
+        "author": "瓦西里·康定斯基",
+        "work": "论艺术中的精神 · I (1912)",
+        "isTranslation": true
+      },
+      "vi": {
+        "text": "Mỗi tác phẩm nghệ thuật là đứa con của thời đại mình, và thường là người mẹ của cảm xúc chúng ta.",
+        "author": "Wassily Kandinsky",
+        "work": "Về tinh thần trong nghệ thuật · I (1912)",
+        "isTranslation": true
+      },
+      "es": {
+        "text": "Cada obra de arte es hija de su tiempo y, a menudo, madre de nuestros sentimientos.",
+        "author": "Vasili Kandinski",
+        "work": "De lo espiritual en el arte · I (1912)",
+        "isTranslation": true
+      },
+      "fr": {
+        "text": "Toute œuvre d’art est l’enfant de son époque et souvent la mère de nos sentiments.",
+        "author": "Vassily Kandinsky",
+        "work": "Du spirituel dans l’art · I (1912)",
+        "isTranslation": true
+      },
+      "de": {
+        "text": "Jedes Kunstwerk ist Kind seiner Zeit, oft ist es Mutter unserer Gefühle.",
+        "author": "Wassily Kandinsky",
+        "work": "Über das Geistige in der Kunst · I (1912)",
+        "isTranslation": false
+      },
+      "ru": {
+        "text": "Каждое произведение искусства — дитя своего времени, а нередко и мать наших чувств.",
+        "author": "Василий Кандинский",
+        "work": "О духовном в искусстве · I (1912)",
+        "isTranslation": true
+      },
+      "ar": {
+        "text": "كل عمل فني ابن عصره، وكثيرًا ما يكون أمًّا لمشاعرنا.",
+        "author": "فاسيلي كاندينسكي",
+        "work": "حول الروحاني في الفن · I (1912)",
+        "isTranslation": true
+      }
+    }
+  },
+  {
+    "id": "07",
+    "sourceURL": "https://www.gutenberg.org/files/46203/46203-h/46203-h.htm",
+    "originalText": "Die Farbe ist die Taste. Das Auge ist der Hammer. Die Seele ist das Klavier mit vielen Saiten.",
+    "originalLanguage": "de",
+    "publicDomainBasis": "German original, R. Piper & Co., Munich, third edition 1912; author died in 1944. Project Gutenberg identifies this original-language edition as public domain in the USA: https://www.gutenberg.org/ebooks/46203. All non-German texts here are newly prepared AlmengRe translations, not copied from later translations.",
+    "localizations": {
+      "ko": {
+        "text": "색은 건반이고, 눈은 해머이며, 영혼은 수많은 현을 가진 피아노다.",
+        "author": "바실리 칸딘스키",
+        "work": "예술에서의 정신적인 것에 대하여 · V (1912)",
+        "isTranslation": true
+      },
+      "en": {
+        "text": "Color is the key. The eye is the hammer. The soul is the piano with many strings.",
+        "author": "Wassily Kandinsky",
+        "work": "On the Spiritual in Art · V (1912)",
+        "isTranslation": true
+      },
+      "ja": {
+        "text": "色は鍵盤、目はハンマー、魂は多くの弦を備えたピアノである。",
+        "author": "ワシリー・カンディンスキー",
+        "work": "芸術における精神的なもの · V (1912)",
+        "isTranslation": true
+      },
+      "zh-Hans": {
+        "text": "色彩是琴键，眼睛是琴槌，灵魂是拥有众多琴弦的钢琴。",
+        "author": "瓦西里·康定斯基",
+        "work": "论艺术中的精神 · V (1912)",
+        "isTranslation": true
+      },
+      "vi": {
+        "text": "Màu sắc là phím đàn. Mắt là búa đàn. Tâm hồn là cây đàn piano có nhiều dây.",
+        "author": "Wassily Kandinsky",
+        "work": "Về tinh thần trong nghệ thuật · V (1912)",
+        "isTranslation": true
+      },
+      "es": {
+        "text": "El color es la tecla. El ojo es el martillo. El alma es el piano de muchas cuerdas.",
+        "author": "Vasili Kandinski",
+        "work": "De lo espiritual en el arte · V (1912)",
+        "isTranslation": true
+      },
+      "fr": {
+        "text": "La couleur est la touche. L’œil est le marteau. L’âme est le piano aux nombreuses cordes.",
+        "author": "Vassily Kandinsky",
+        "work": "Du spirituel dans l’art · V (1912)",
+        "isTranslation": true
+      },
+      "de": {
+        "text": "Die Farbe ist die Taste. Das Auge ist der Hammer. Die Seele ist das Klavier mit vielen Saiten.",
+        "author": "Wassily Kandinsky",
+        "work": "Über das Geistige in der Kunst · V (1912)",
+        "isTranslation": false
+      },
+      "ru": {
+        "text": "Цвет — это клавиша. Глаз — молоточек. Душа — фортепиано с множеством струн.",
+        "author": "Василий Кандинский",
+        "work": "О духовном в искусстве · V (1912)",
+        "isTranslation": true
+      },
+      "ar": {
+        "text": "اللون هو المفتاح، والعين هي المطرقة، والروح هي البيانو ذو الأوتار الكثيرة.",
+        "author": "فاسيلي كاندينسكي",
+        "work": "حول الروحاني في الفن · V (1912)",
+        "isTranslation": true
+      }
+    }
+  },
+  {
+    "id": "08",
+    "sourceURL": "https://www.gutenberg.org/files/46203/46203-h/46203-h.htm",
+    "originalText": "Die Form ist also die Äußerung des inneren Inhaltes.",
+    "originalLanguage": "de",
+    "publicDomainBasis": "German original, R. Piper & Co., Munich, third edition 1912; author died in 1944. Project Gutenberg identifies this original-language edition as public domain in the USA: https://www.gutenberg.org/ebooks/46203. All non-German texts here are newly prepared AlmengRe translations, not copied from later translations.",
+    "localizations": {
+      "ko": {
+        "text": "형태는 곧 내면의 내용을 드러내는 표현이다.",
+        "author": "바실리 칸딘스키",
+        "work": "예술에서의 정신적인 것에 대하여 · VI (1912)",
+        "isTranslation": true
+      },
+      "en": {
+        "text": "Form, then, is the expression of inner content.",
+        "author": "Wassily Kandinsky",
+        "work": "On the Spiritual in Art · VI (1912)",
+        "isTranslation": true
+      },
+      "ja": {
+        "text": "つまり、形は内なる内容の表現なのである。",
+        "author": "ワシリー・カンディンスキー",
+        "work": "芸術における精神的なもの · VI (1912)",
+        "isTranslation": true
+      },
+      "zh-Hans": {
+        "text": "因此，形式是内在内容的表达。",
+        "author": "瓦西里·康定斯基",
+        "work": "论艺术中的精神 · VI (1912)",
+        "isTranslation": true
+      },
+      "vi": {
+        "text": "Vậy hình thức là sự biểu đạt nội dung bên trong.",
+        "author": "Wassily Kandinsky",
+        "work": "Về tinh thần trong nghệ thuật · VI (1912)",
+        "isTranslation": true
+      },
+      "es": {
+        "text": "La forma es, por tanto, la expresión del contenido interior.",
+        "author": "Vasili Kandinski",
+        "work": "De lo espiritual en el arte · VI (1912)",
+        "isTranslation": true
+      },
+      "fr": {
+        "text": "La forme est donc l’expression du contenu intérieur.",
+        "author": "Vassily Kandinsky",
+        "work": "Du spirituel dans l’art · VI (1912)",
+        "isTranslation": true
+      },
+      "de": {
+        "text": "Die Form ist also die Äußerung des inneren Inhaltes.",
+        "author": "Wassily Kandinsky",
+        "work": "Über das Geistige in der Kunst · VI (1912)",
+        "isTranslation": false
+      },
+      "ru": {
+        "text": "Итак, форма есть выражение внутреннего содержания.",
+        "author": "Василий Кандинский",
+        "work": "О духовном в искусстве · VI (1912)",
+        "isTranslation": true
+      },
+      "ar": {
+        "text": "الشكل إذن هو التعبير عن المضمون الداخلي.",
+        "author": "فاسيلي كاندينسكي",
+        "work": "حول الروحاني في الفن · VI (1912)",
+        "isTranslation": true
+      }
+    }
+  },
+  {
+    "id": "09",
+    "sourceURL": "https://www.gutenberg.org/files/46203/46203-h/46203-h.htm",
+    "originalText": "Das ist schön, was einer inneren seelischen Notwendigkeit entspringt.",
+    "originalLanguage": "de",
+    "publicDomainBasis": "German original, R. Piper & Co., Munich, third edition 1912; author died in 1944. Project Gutenberg identifies this original-language edition as public domain in the USA: https://www.gutenberg.org/ebooks/46203. All non-German texts here are newly prepared AlmengRe translations, not copied from later translations.",
+    "localizations": {
+      "ko": {
+        "text": "영혼의 내적 필연성에서 비롯되는 것이 아름답다.",
+        "author": "바실리 칸딘스키",
+        "work": "예술에서의 정신적인 것에 대하여 · VIII (1912)",
+        "isTranslation": true
+      },
+      "en": {
+        "text": "What arises from an inner need of the soul is beautiful.",
+        "author": "Wassily Kandinsky",
+        "work": "On the Spiritual in Art · VIII (1912)",
+        "isTranslation": true
+      },
+      "ja": {
+        "text": "魂の内なる必然から生まれるものは美しい。",
+        "author": "ワシリー・カンディンスキー",
+        "work": "芸術における精神的なもの · VIII (1912)",
+        "isTranslation": true
+      },
+      "zh-Hans": {
+        "text": "源于心灵内在必然性的事物是美的。",
+        "author": "瓦西里·康定斯基",
+        "work": "论艺术中的精神 · VIII (1912)",
+        "isTranslation": true
+      },
+      "vi": {
+        "text": "Cái đẹp là điều nảy sinh từ nhu cầu tất yếu bên trong tâm hồn.",
+        "author": "Wassily Kandinsky",
+        "work": "Về tinh thần trong nghệ thuật · VIII (1912)",
+        "isTranslation": true
+      },
+      "es": {
+        "text": "Es bello lo que nace de una necesidad interior del alma.",
+        "author": "Vasili Kandinski",
+        "work": "De lo espiritual en el arte · VIII (1912)",
+        "isTranslation": true
+      },
+      "fr": {
+        "text": "Est beau ce qui naît d’une nécessité intérieure de l’âme.",
+        "author": "Vassily Kandinsky",
+        "work": "Du spirituel dans l’art · VIII (1912)",
+        "isTranslation": true
+      },
+      "de": {
+        "text": "Das ist schön, was einer inneren seelischen Notwendigkeit entspringt.",
+        "author": "Wassily Kandinsky",
+        "work": "Über das Geistige in der Kunst · VIII (1912)",
+        "isTranslation": false
+      },
+      "ru": {
+        "text": "Прекрасно то, что рождается из внутренней душевной необходимости.",
+        "author": "Василий Кандинский",
+        "work": "О духовном в искусстве · VIII (1912)",
+        "isTranslation": true
+      },
+      "ar": {
+        "text": "جميل ما ينبع من ضرورة داخلية في الروح.",
+        "author": "فاسيلي كاندينسكي",
+        "work": "حول الروحاني في الفن · VIII (1912)",
+        "isTranslation": true
+      }
+    }
+  },
+  {
+    "id": "10",
+    "sourceURL": "https://de.wikisource.org/wiki/Seite:Schoepferische_Konfession_-_Paul_Klee.pdf/8",
+    "originalText": "Kunst gibt nicht das Sichtbare wieder, sondern macht sichtbar.",
+    "originalLanguage": "de",
+    "publicDomainBasis": "German original published in Tribüne der Kunst und der Zeit XIII, Erich Reiss Verlag, Berlin, 1920, p. 28; author died in 1940. Source is a twice-proofread transcription paired with the original page scan. The 1920 publication is public domain in the USA, and the original author has been dead for over 70 years. All non-German texts are newly prepared AlmengRe translations.",
+    "localizations": {
+      "ko": {
+        "text": "예술은 보이는 것을 재현하는 것이 아니라, 보이게 하는 것이다.",
+        "author": "파울 클레",
+        "work": "창조적 고백 · I (1920)",
+        "isTranslation": true
+      },
+      "en": {
+        "text": "Art does not reproduce the visible; it makes visible.",
+        "author": "Paul Klee",
+        "work": "Creative Confession · I (1920)",
+        "isTranslation": true
+      },
+      "ja": {
+        "text": "芸術は見えるものを再現するのではなく、見えるようにする。",
+        "author": "パウル・クレー",
+        "work": "創造的告白 · I (1920)",
+        "isTranslation": true
+      },
+      "zh-Hans": {
+        "text": "艺术并非再现可见之物，而是使之可见。",
+        "author": "保罗·克利",
+        "work": "创造的告白 · I (1920)",
+        "isTranslation": true
+      },
+      "vi": {
+        "text": "Nghệ thuật không tái hiện cái hữu hình, mà làm cho ta nhìn thấy.",
+        "author": "Paul Klee",
+        "work": "Lời tự bạch về sáng tạo · I (1920)",
+        "isTranslation": true
+      },
+      "es": {
+        "text": "El arte no reproduce lo visible, sino que hace visible.",
+        "author": "Paul Klee",
+        "work": "Confesión creativa · I (1920)",
+        "isTranslation": true
+      },
+      "fr": {
+        "text": "L’art ne reproduit pas le visible, il rend visible.",
+        "author": "Paul Klee",
+        "work": "Confession créatrice · I (1920)",
+        "isTranslation": true
+      },
+      "de": {
+        "text": "Kunst gibt nicht das Sichtbare wieder, sondern macht sichtbar.",
+        "author": "Paul Klee",
+        "work": "Schöpferische Konfession · I (1920)",
+        "isTranslation": false
+      },
+      "ru": {
+        "text": "Искусство не воспроизводит видимое, а делает видимым.",
+        "author": "Пауль Клее",
+        "work": "Творческое кредо · I (1920)",
+        "isTranslation": true
+      },
+      "ar": {
+        "text": "الفن لا يعيد إنتاج المرئي، بل يجعل الأشياء مرئية.",
+        "author": "بول كلي",
+        "work": "اعتراف إبداعي · I (1920)",
+        "isTranslation": true
+      }
+    }
+  },
+  {
+    "id": "11",
+    "sourceURL": "https://www.gutenberg.org/files/174/174-h/174-h.htm",
+    "originalText": "The artist is the creator of beautiful things.",
+    "originalLanguage": "en",
+    "publicDomainBasis": "English original, 1891 preface; Oscar Wilde died in 1900. Project Gutenberg catalog ebook 174 identifies the work as public domain in the USA. Non-English text here is newly translated for this app, not copied from a modern edition.",
+    "localizations": {
+      "ko": {
+        "text": "예술가는 아름다운 것을 창조하는 사람이다.",
+        "author": "오스카 와일드",
+        "work": "도리언 그레이의 초상 · 서문",
+        "isTranslation": true
+      },
+      "en": {
+        "text": "The artist is the creator of beautiful things.",
+        "author": "Oscar Wilde",
+        "work": "The Picture of Dorian Gray · Preface",
+        "isTranslation": false
+      },
+      "ja": {
+        "text": "芸術家は美しいものを生み出す人である。",
+        "author": "オスカー・ワイルド",
+        "work": "ドリアン・グレイの肖像 · 序文",
+        "isTranslation": true
+      },
+      "zh-Hans": {
+        "text": "艺术家是美好事物的创造者。",
+        "author": "奥斯卡·王尔德",
+        "work": "道林·格雷的画像 · 序言",
+        "isTranslation": true
+      },
+      "vi": {
+        "text": "Nghệ sĩ là người sáng tạo nên những điều đẹp đẽ.",
+        "author": "Oscar Wilde",
+        "work": "Chân dung Dorian Gray · Lời tựa",
+        "isTranslation": true
+      },
+      "es": {
+        "text": "El artista es quien crea cosas bellas.",
+        "author": "Oscar Wilde",
+        "work": "El retrato de Dorian Gray · Prefacio",
+        "isTranslation": true
+      },
+      "fr": {
+        "text": "L’artiste est celui qui crée de belles choses.",
+        "author": "Oscar Wilde",
+        "work": "Le Portrait de Dorian Gray · Préface",
+        "isTranslation": true
+      },
+      "de": {
+        "text": "Der Künstler ist der Schöpfer schöner Dinge.",
+        "author": "Oscar Wilde",
+        "work": "Das Bildnis des Dorian Gray · Vorwort",
+        "isTranslation": true
+      },
+      "ru": {
+        "text": "Художник — создатель прекрасного.",
+        "author": "Оскар Уайльд",
+        "work": "Портрет Дориана Грея · Предисловие",
+        "isTranslation": true
+      },
+      "ar": {
+        "text": "الفنان هو مبدع الأشياء الجميلة.",
+        "author": "أوسكار وايلد",
+        "work": "صورة دوريان غراي · المقدمة",
+        "isTranslation": true
+      }
+    }
+  },
+  {
+    "id": "12",
+    "sourceURL": "https://www.gutenberg.org/files/174/174-h/174-h.htm",
+    "originalText": "All art is at once surface and symbol.",
+    "originalLanguage": "en",
+    "publicDomainBasis": "English original, 1891 preface; Oscar Wilde died in 1900. Project Gutenberg catalog ebook 174 identifies the work as public domain in the USA. Non-English text here is newly translated for this app, not copied from a modern edition.",
+    "localizations": {
+      "ko": {
+        "text": "모든 예술은 겉모습이면서 동시에 상징이다.",
+        "author": "오스카 와일드",
+        "work": "도리언 그레이의 초상 · 서문",
+        "isTranslation": true
+      },
+      "en": {
+        "text": "All art is at once surface and symbol.",
+        "author": "Oscar Wilde",
+        "work": "The Picture of Dorian Gray · Preface",
+        "isTranslation": false
+      },
+      "ja": {
+        "text": "あらゆる芸術は、表面であると同時に象徴である。",
+        "author": "オスカー・ワイルド",
+        "work": "ドリアン・グレイの肖像 · 序文",
+        "isTranslation": true
+      },
+      "zh-Hans": {
+        "text": "一切艺术既是表象，也是象征。",
+        "author": "奥斯卡·王尔德",
+        "work": "道林·格雷的画像 · 序言",
+        "isTranslation": true
+      },
+      "vi": {
+        "text": "Mọi nghệ thuật vừa là bề mặt, vừa là biểu tượng.",
+        "author": "Oscar Wilde",
+        "work": "Chân dung Dorian Gray · Lời tựa",
+        "isTranslation": true
+      },
+      "es": {
+        "text": "Todo arte es a la vez superficie y símbolo.",
+        "author": "Oscar Wilde",
+        "work": "El retrato de Dorian Gray · Prefacio",
+        "isTranslation": true
+      },
+      "fr": {
+        "text": "Tout art est à la fois surface et symbole.",
+        "author": "Oscar Wilde",
+        "work": "Le Portrait de Dorian Gray · Préface",
+        "isTranslation": true
+      },
+      "de": {
+        "text": "Alle Kunst ist zugleich Oberfläche und Symbol.",
+        "author": "Oscar Wilde",
+        "work": "Das Bildnis des Dorian Gray · Vorwort",
+        "isTranslation": true
+      },
+      "ru": {
+        "text": "Всякое искусство — одновременно поверхность и символ.",
+        "author": "Оскар Уайльд",
+        "work": "Портрет Дориана Грея · Предисловие",
+        "isTranslation": true
+      },
+      "ar": {
+        "text": "كل فن هو سطح ورمز في آن واحد.",
+        "author": "أوسكار وايلد",
+        "work": "صورة دوريان غراي · المقدمة",
+        "isTranslation": true
+      }
+    }
+  },
+  {
+    "id": "13",
+    "sourceURL": "https://www.gutenberg.org/files/3773/3773-h/3773-h.htm",
+    "originalText": "Have nothing in your houses that you do not know to be useful or believe to be beautiful.",
+    "originalLanguage": "en",
+    "publicDomainBasis": "English original, collected in 1882; transcription of the 1919 Longmans, Green and Co. edition. William Morris died in 1896. Project Gutenberg catalog ebook 3773 identifies the work as public domain in the USA. Non-English text here is newly translated for this app.",
+    "localizations": {
+      "ko": {
+        "text": "쓸모가 확실하거나 아름답다고 믿는 것만 집에 두어라.",
+        "author": "윌리엄 모리스",
+        "work": "예술을 향한 희망과 두려움 · 삶의 아름다움",
+        "isTranslation": true
+      },
+      "en": {
+        "text": "Have nothing in your houses that you do not know to be useful or believe to be beautiful.",
+        "author": "William Morris",
+        "work": "Hopes and Fears for Art · The Beauty of Life",
+        "isTranslation": false
+      },
+      "ja": {
+        "text": "役立つと確信できず、美しいとも思えないものは、家に置かないこと。",
+        "author": "ウィリアム・モリス",
+        "work": "芸術への希望と不安 · 生活の美",
+        "isTranslation": true
+      },
+      "zh-Hans": {
+        "text": "家中不要留既不确定有用、也不认为美的东西。",
+        "author": "威廉·莫里斯",
+        "work": "对艺术的希望与忧虑 · 生活之美",
+        "isTranslation": true
+      },
+      "vi": {
+        "text": "Đừng giữ trong nhà thứ gì mà bạn không biết là hữu ích, cũng không tin là đẹp.",
+        "author": "William Morris",
+        "work": "Hy vọng và lo âu về nghệ thuật · Vẻ đẹp của cuộc sống",
+        "isTranslation": true
+      },
+      "es": {
+        "text": "No tengáis en casa nada que no sepáis útil ni creáis bello.",
+        "author": "William Morris",
+        "work": "Esperanzas y temores por el arte · La belleza de la vida",
+        "isTranslation": true
+      },
+      "fr": {
+        "text": "N’ayez chez vous rien que vous ne sachiez utile ni ne croyiez beau.",
+        "author": "William Morris",
+        "work": "Espoirs et craintes pour l’art · La beauté de la vie",
+        "isTranslation": true
+      },
+      "de": {
+        "text": "Habt nichts in euren Häusern, von dem ihr weder wisst, dass es nützlich ist, noch glaubt, dass es schön ist.",
+        "author": "William Morris",
+        "work": "Hoffnungen und Ängste für die Kunst · Die Schönheit des Lebens",
+        "isTranslation": true
+      },
+      "ru": {
+        "text": "Не держите дома ничего, что вы не считаете ни полезным, ни красивым.",
+        "author": "Уильям Моррис",
+        "work": "Надежды и опасения об искусстве · Красота жизни",
+        "isTranslation": true
+      },
+      "ar": {
+        "text": "لا تحتفظوا في بيوتكم بشيء لا تعرفون أنه نافع ولا تعتقدون أنه جميل.",
+        "author": "ويليام موريس",
+        "work": "آمال ومخاوف بشأن الفن · جمال الحياة",
+        "isTranslation": true
+      }
+    }
+  },
+  {
+    "id": "14",
+    "sourceURL": "https://www.gutenberg.org/files/3773/3773-h/3773-h.htm",
+    "originalText": "I do not want art for a few, any more than education for a few, or freedom for a few.",
+    "originalLanguage": "en",
+    "publicDomainBasis": "English original, collected in 1882; transcription of the 1919 Longmans, Green and Co. edition. William Morris died in 1896. Project Gutenberg catalog ebook 3773 identifies the work as public domain in the USA. Non-English text here is newly translated for this app.",
+    "localizations": {
+      "ko": {
+        "text": "소수만을 위한 교육이나 자유를 바라지 않듯, 소수만을 위한 예술도 바라지 않는다.",
+        "author": "윌리엄 모리스",
+        "work": "예술을 향한 희망과 두려움 · 작은 예술들",
+        "isTranslation": true
+      },
+      "en": {
+        "text": "I do not want art for a few, any more than education for a few, or freedom for a few.",
+        "author": "William Morris",
+        "work": "Hopes and Fears for Art · The Lesser Arts",
+        "isTranslation": false
+      },
+      "ja": {
+        "text": "少数の人だけの教育や自由を望まないのと同じく、少数の人だけの芸術も望まない。",
+        "author": "ウィリアム・モリス",
+        "work": "芸術への希望と不安 · 小芸術",
+        "isTranslation": true
+      },
+      "zh-Hans": {
+        "text": "我不愿艺术只属于少数人，正如我不愿教育或自由只属于少数人。",
+        "author": "威廉·莫里斯",
+        "work": "对艺术的希望与忧虑 · 小艺术",
+        "isTranslation": true
+      },
+      "vi": {
+        "text": "Tôi không muốn nghệ thuật chỉ dành cho số ít, cũng như giáo dục hay tự do chỉ dành cho số ít.",
+        "author": "William Morris",
+        "work": "Hy vọng và lo âu về nghệ thuật · Những nghệ thuật nhỏ",
+        "isTranslation": true
+      },
+      "es": {
+        "text": "No quiero arte para unos pocos, como tampoco educación para unos pocos ni libertad para unos pocos.",
+        "author": "William Morris",
+        "work": "Esperanzas y temores por el arte · Las artes menores",
+        "isTranslation": true
+      },
+      "fr": {
+        "text": "Je ne veux pas d’art pour quelques-uns, pas plus que d’éducation ou de liberté pour quelques-uns.",
+        "author": "William Morris",
+        "work": "Espoirs et craintes pour l’art · Les arts mineurs",
+        "isTranslation": true
+      },
+      "de": {
+        "text": "Ich will Kunst nicht nur für wenige, ebenso wenig wie Bildung oder Freiheit nur für wenige.",
+        "author": "William Morris",
+        "work": "Hoffnungen und Ängste für die Kunst · Die kleinen Künste",
+        "isTranslation": true
+      },
+      "ru": {
+        "text": "Я не хочу искусства для немногих, как не хочу образования или свободы лишь для немногих.",
+        "author": "Уильям Моррис",
+        "work": "Надежды и опасения об искусстве · Малые искусства",
+        "isTranslation": true
+      },
+      "ar": {
+        "text": "لا أريد فناً لقلة من الناس، مثلما لا أريد تعليماً لقلة أو حرية لقلة.",
+        "author": "ويليام موريس",
+        "work": "آمال ومخاوف بشأن الفن · الفنون الصغرى",
+        "isTranslation": true
+      }
+    }
+  },
+  {
+    "id": "15",
+    "sourceURL": "https://www.gutenberg.org/files/29433/29433-h/29433-h.htm",
+    "originalText": "The eye is the best of artists.",
+    "originalLanguage": "en",
+    "publicDomainBasis": "English original, first published in 1836; this transcription is of the 1849 edition. Ralph Waldo Emerson died in 1882. Project Gutenberg catalog ebook 29433 identifies the work as public domain in the USA. Non-English text here is newly translated for this app.",
+    "localizations": {
+      "ko": {
+        "text": "눈은 예술가 중에서도 으뜸이다.",
+        "author": "랠프 월도 에머슨",
+        "work": "자연 · 3장 아름다움",
+        "isTranslation": true
+      },
+      "en": {
+        "text": "The eye is the best of artists.",
+        "author": "Ralph Waldo Emerson",
+        "work": "Nature · III. Beauty",
+        "isTranslation": false
+      },
+      "ja": {
+        "text": "目は芸術家のなかでも最も優れている。",
+        "author": "ラルフ・ウォルドー・エマソン",
+        "work": "自然 · 第3章 美",
+        "isTranslation": true
+      },
+      "zh-Hans": {
+        "text": "眼睛是最出色的艺术家。",
+        "author": "拉尔夫·沃尔多·爱默生",
+        "work": "论自然 · 第三章 美",
+        "isTranslation": true
+      },
+      "vi": {
+        "text": "Đôi mắt là người nghệ sĩ tài ba nhất.",
+        "author": "Ralph Waldo Emerson",
+        "work": "Thiên nhiên · III. Cái đẹp",
+        "isTranslation": true
+      },
+      "es": {
+        "text": "El ojo es el mejor de los artistas.",
+        "author": "Ralph Waldo Emerson",
+        "work": "Naturaleza · III. Belleza",
+        "isTranslation": true
+      },
+      "fr": {
+        "text": "L’œil est le meilleur des artistes.",
+        "author": "Ralph Waldo Emerson",
+        "work": "La Nature · III. Beauté",
+        "isTranslation": true
+      },
+      "de": {
+        "text": "Das Auge ist der beste aller Künstler.",
+        "author": "Ralph Waldo Emerson",
+        "work": "Natur · III. Schönheit",
+        "isTranslation": true
+      },
+      "ru": {
+        "text": "Глаз — лучший из художников.",
+        "author": "Ральф Уолдо Эмерсон",
+        "work": "Природа · III. Красота",
+        "isTranslation": true
+      },
+      "ar": {
+        "text": "العين أفضل الفنانين.",
+        "author": "رالف والدو إمرسون",
+        "work": "الطبيعة · الفصل الثالث: الجمال",
+        "isTranslation": true
+      }
+    }
+  },
+  {
+    "id": "16",
+    "sourceURL": "https://www.gutenberg.org/files/29433/29433-h/29433-h.htm",
+    "originalText": "And as the eye is the best composer, so light is the first of painters.",
+    "originalLanguage": "en",
+    "publicDomainBasis": "English original, first published in 1836; this transcription is of the 1849 edition. Ralph Waldo Emerson died in 1882. Project Gutenberg catalog ebook 29433 identifies the work as public domain in the USA. Non-English text here is newly translated for this app.",
+    "localizations": {
+      "ko": {
+        "text": "눈이 최고의 구성자이듯, 빛은 으뜸가는 화가다.",
+        "author": "랠프 월도 에머슨",
+        "work": "자연 · 3장 아름다움",
+        "isTranslation": true
+      },
+      "en": {
+        "text": "And as the eye is the best composer, so light is the first of painters.",
+        "author": "Ralph Waldo Emerson",
+        "work": "Nature · III. Beauty",
+        "isTranslation": false
+      },
+      "ja": {
+        "text": "目が最も優れた構成者であるように、光は画家のなかでも第一人者である。",
+        "author": "ラルフ・ウォルドー・エマソン",
+        "work": "自然 · 第3章 美",
+        "isTranslation": true
+      },
+      "zh-Hans": {
+        "text": "正如眼睛最善于构图，光便是画家中的翘楚。",
+        "author": "拉尔夫·沃尔多·爱默生",
+        "work": "论自然 · 第三章 美",
+        "isTranslation": true
+      },
+      "vi": {
+        "text": "Và như đôi mắt là bậc thầy bố cục, ánh sáng là họa sĩ hàng đầu.",
+        "author": "Ralph Waldo Emerson",
+        "work": "Thiên nhiên · III. Cái đẹp",
+        "isTranslation": true
+      },
+      "es": {
+        "text": "Y así como el ojo es el mejor compositor, la luz es la primera de los pintores.",
+        "author": "Ralph Waldo Emerson",
+        "work": "Naturaleza · III. Belleza",
+        "isTranslation": true
+      },
+      "fr": {
+        "text": "Et de même que l’œil est le meilleur compositeur, la lumière est la première des peintres.",
+        "author": "Ralph Waldo Emerson",
+        "work": "La Nature · III. Beauté",
+        "isTranslation": true
+      },
+      "de": {
+        "text": "Und wie das Auge der beste Komponist ist, so ist das Licht der erste unter den Malern.",
+        "author": "Ralph Waldo Emerson",
+        "work": "Natur · III. Schönheit",
+        "isTranslation": true
+      },
+      "ru": {
+        "text": "И как глаз — лучший мастер композиции, так свет — первый среди живописцев.",
+        "author": "Ральф Уолдо Эмерсон",
+        "work": "Природа · III. Красота",
+        "isTranslation": true
+      },
+      "ar": {
+        "text": "وكما أن العين أمهر من يؤلف المشهد، فإن الضوء أول الرسامين.",
+        "author": "رالف والدو إمرسون",
+        "work": "الطبيعة · الفصل الثالث: الجمال",
+        "isTranslation": true
+      }
+    }
+  },
+  {
+    "id": "17",
+    "sourceURL": "https://www.gutenberg.org/files/29433/29433-h/29433-h.htm",
+    "originalText": "Nature always wears the colors of the spirit.",
+    "originalLanguage": "en",
+    "publicDomainBasis": "English original, first published in 1836; this transcription is of the 1849 edition. Ralph Waldo Emerson died in 1882. Project Gutenberg catalog ebook 29433 identifies the work as public domain in the USA. Non-English text here is newly translated for this app.",
+    "localizations": {
+      "ko": {
+        "text": "자연은 언제나 마음의 빛깔을 띤다.",
+        "author": "랠프 월도 에머슨",
+        "work": "자연 · 1장 자연",
+        "isTranslation": true
+      },
+      "en": {
+        "text": "Nature always wears the colors of the spirit.",
+        "author": "Ralph Waldo Emerson",
+        "work": "Nature · I. Nature",
+        "isTranslation": false
+      },
+      "ja": {
+        "text": "自然はいつも心の色をまとっている。",
+        "author": "ラルフ・ウォルドー・エマソン",
+        "work": "自然 · 第1章 自然",
+        "isTranslation": true
+      },
+      "zh-Hans": {
+        "text": "自然总是披着心灵的色彩。",
+        "author": "拉尔夫·沃尔多·爱默生",
+        "work": "论自然 · 第一章 自然",
+        "isTranslation": true
+      },
+      "vi": {
+        "text": "Thiên nhiên luôn khoác lên mình sắc màu của tâm hồn.",
+        "author": "Ralph Waldo Emerson",
+        "work": "Thiên nhiên · I. Thiên nhiên",
+        "isTranslation": true
+      },
+      "es": {
+        "text": "La naturaleza siempre viste los colores del espíritu.",
+        "author": "Ralph Waldo Emerson",
+        "work": "Naturaleza · I. Naturaleza",
+        "isTranslation": true
+      },
+      "fr": {
+        "text": "La nature porte toujours les couleurs de l’esprit.",
+        "author": "Ralph Waldo Emerson",
+        "work": "La Nature · I. Nature",
+        "isTranslation": true
+      },
+      "de": {
+        "text": "Die Natur trägt immer die Farben des Geistes.",
+        "author": "Ralph Waldo Emerson",
+        "work": "Natur · I. Natur",
+        "isTranslation": true
+      },
+      "ru": {
+        "text": "Природа всегда окрашена в цвета духа.",
+        "author": "Ральф Уолдо Эмерсон",
+        "work": "Природа · I. Природа",
+        "isTranslation": true
+      },
+      "ar": {
+        "text": "ترتدي الطبيعة دائماً ألوان الروح.",
+        "author": "رالف والدو إمرسون",
+        "work": "الطبيعة · الفصل الأول: الطبيعة",
+        "isTranslation": true
+      }
+    }
+  },
+  {
+    "id": "18",
+    "sourceURL": "https://www.gutenberg.org/cache/epub/205/pg205-images.html",
+    "originalText": "To affect the quality of the day, that is the highest of arts.",
+    "originalLanguage": "en",
+    "publicDomainBasis": "English original, first published in 1854. Henry David Thoreau died in 1862. Project Gutenberg catalog ebook 205 identifies the work as public domain in the USA. Non-English text here is newly translated for this app.",
+    "localizations": {
+      "ko": {
+        "text": "하루의 질을 바꾸는 것, 그것이 가장 높은 예술이다.",
+        "author": "헨리 데이비드 소로",
+        "work": "월든 · 어디서 무엇을 위해 살았는가",
+        "isTranslation": true
+      },
+      "en": {
+        "text": "To affect the quality of the day, that is the highest of arts.",
+        "author": "Henry David Thoreau",
+        "work": "Walden · Where I Lived, and What I Lived For",
+        "isTranslation": false
+      },
+      "ja": {
+        "text": "一日の質を変えること、それが最高の芸術である。",
+        "author": "ヘンリー・デイヴィッド・ソロー",
+        "work": "ウォールデン · どこで、何のために生きたか",
+        "isTranslation": true
+      },
+      "zh-Hans": {
+        "text": "改变一天的品质，这就是最高的艺术。",
+        "author": "亨利·戴维·梭罗",
+        "work": "瓦尔登湖 · 我生活的地方与生活的目的",
+        "isTranslation": true
+      },
+      "vi": {
+        "text": "Làm thay đổi phẩm chất của một ngày, đó là nghệ thuật cao nhất.",
+        "author": "Henry David Thoreau",
+        "work": "Walden · Tôi sống ở đâu và sống vì điều gì",
+        "isTranslation": true
+      },
+      "es": {
+        "text": "Influir en la calidad del día es el arte más elevado.",
+        "author": "Henry David Thoreau",
+        "work": "Walden · Dónde viví y para qué viví",
+        "isTranslation": true
+      },
+      "fr": {
+        "text": "Agir sur la qualité du jour, voilà le plus élevé des arts.",
+        "author": "Henry David Thoreau",
+        "work": "Walden · Où je vécus et pour quoi je vécus",
+        "isTranslation": true
+      },
+      "de": {
+        "text": "Die Qualität des Tages zu beeinflussen, das ist die höchste aller Künste.",
+        "author": "Henry David Thoreau",
+        "work": "Walden · Wo ich lebte und wofür ich lebte",
+        "isTranslation": true
+      },
+      "ru": {
+        "text": "Изменить качество дня — вот высшее из искусств.",
+        "author": "Генри Дэвид Торо",
+        "work": "Уолден · Где я жил и ради чего",
+        "isTranslation": true
+      },
+      "ar": {
+        "text": "التأثير في نوعية اليوم، ذلك أسمى الفنون.",
+        "author": "هنري ديفيد ثورو",
+        "work": "والدن · أين عشت ولأي غاية عشت",
+        "isTranslation": true
+      }
+    }
+  },
+  {
+    "id": "19",
+    "sourceURL": "https://www.gutenberg.org/cache/epub/205/pg205-images.html",
+    "originalText": "Heaven is under our feet as well as over our heads.",
+    "originalLanguage": "en",
+    "publicDomainBasis": "English original, first published in 1854. Henry David Thoreau died in 1862. Project Gutenberg catalog ebook 205 identifies the work as public domain in the USA. Non-English text here is newly translated for this app.",
+    "localizations": {
+      "ko": {
+        "text": "하늘은 머리 위에만 있는 것이 아니라 발아래에도 있다.",
+        "author": "헨리 데이비드 소로",
+        "work": "월든 · 겨울의 호수",
+        "isTranslation": true
+      },
+      "en": {
+        "text": "Heaven is under our feet as well as over our heads.",
+        "author": "Henry David Thoreau",
+        "work": "Walden · The Pond in Winter",
+        "isTranslation": false
+      },
+      "ja": {
+        "text": "天は頭の上だけでなく、足の下にもある。",
+        "author": "ヘンリー・デイヴィッド・ソロー",
+        "work": "ウォールデン · 冬の池",
+        "isTranslation": true
+      },
+      "zh-Hans": {
+        "text": "天空不只在我们头顶，也在我们脚下。",
+        "author": "亨利·戴维·梭罗",
+        "work": "瓦尔登湖 · 冬天的湖",
+        "isTranslation": true
+      },
+      "vi": {
+        "text": "Bầu trời ở dưới chân ta cũng như ở trên đầu ta.",
+        "author": "Henry David Thoreau",
+        "work": "Walden · Hồ vào mùa đông",
+        "isTranslation": true
+      },
+      "es": {
+        "text": "El cielo está bajo nuestros pies tanto como sobre nuestras cabezas.",
+        "author": "Henry David Thoreau",
+        "work": "Walden · El estanque en invierno",
+        "isTranslation": true
+      },
+      "fr": {
+        "text": "Le ciel est sous nos pieds aussi bien qu’au-dessus de nos têtes.",
+        "author": "Henry David Thoreau",
+        "work": "Walden · L’étang en hiver",
+        "isTranslation": true
+      },
+      "de": {
+        "text": "Der Himmel ist ebenso unter unseren Füßen wie über unseren Köpfen.",
+        "author": "Henry David Thoreau",
+        "work": "Walden · Der Teich im Winter",
+        "isTranslation": true
+      },
+      "ru": {
+        "text": "Небо у нас под ногами так же, как и над головой.",
+        "author": "Генри Дэвид Торо",
+        "work": "Уолден · Пруд зимой",
+        "isTranslation": true
+      },
+      "ar": {
+        "text": "السماء تحت أقدامنا كما هي فوق رؤوسنا.",
+        "author": "هنري ديفيد ثورو",
+        "work": "والدن · البركة في الشتاء",
+        "isTranslation": true
+      }
+    }
+  },
+  {
+    "id": "20",
+    "sourceURL": "https://www.gutenberg.org/cache/epub/45315/pg45315-images.html",
+    "originalText": "What is now proved was once only imagined.",
+    "originalLanguage": "en",
+    "publicDomainBasis": "English original, created circa 1790–1793; transcription of the 1906 John W. Luce edition. William Blake died in 1827. Project Gutenberg catalog ebook 45315 identifies the work as public domain in the USA. Non-English text here is newly translated for this app.",
+    "localizations": {
+      "ko": {
+        "text": "지금 입증된 것도 한때는 상상에 불과했다.",
+        "author": "윌리엄 블레이크",
+        "work": "천국과 지옥의 결혼 · 지옥의 잠언",
+        "isTranslation": true
+      },
+      "en": {
+        "text": "What is now proved was once only imagined.",
+        "author": "William Blake",
+        "work": "The Marriage of Heaven and Hell · Proverbs of Hell",
+        "isTranslation": false
+      },
+      "ja": {
+        "text": "今では証明されたことも、かつては想像にすぎなかった。",
+        "author": "ウィリアム・ブレイク",
+        "work": "天国と地獄の結婚 · 地獄の箴言",
+        "isTranslation": true
+      },
+      "zh-Hans": {
+        "text": "如今已被证实的事物，曾经也只是想象。",
+        "author": "威廉·布莱克",
+        "work": "天堂与地狱的婚姻 · 地狱箴言",
+        "isTranslation": true
+      },
+      "vi": {
+        "text": "Điều nay đã được chứng minh từng chỉ là tưởng tượng.",
+        "author": "William Blake",
+        "work": "Cuộc hôn nhân của Thiên đường và Địa ngục · Châm ngôn Địa ngục",
+        "isTranslation": true
+      },
+      "es": {
+        "text": "Lo que hoy está demostrado antes solo fue imaginado.",
+        "author": "William Blake",
+        "work": "El matrimonio del cielo y el infierno · Proverbios del infierno",
+        "isTranslation": true
+      },
+      "fr": {
+        "text": "Ce qui est aujourd’hui prouvé n’était autrefois qu’imaginé.",
+        "author": "William Blake",
+        "work": "Le Mariage du Ciel et de l’Enfer · Proverbes de l’Enfer",
+        "isTranslation": true
+      },
+      "de": {
+        "text": "Was heute bewiesen ist, war einst nur vorgestellt.",
+        "author": "William Blake",
+        "work": "Die Hochzeit von Himmel und Hölle · Sprichwörter der Hölle",
+        "isTranslation": true
+      },
+      "ru": {
+        "text": "То, что теперь доказано, когда-то существовало лишь в воображении.",
+        "author": "Уильям Блейк",
+        "work": "Бракосочетание Рая и Ада · Притчи Ада",
+        "isTranslation": true
+      },
+      "ar": {
+        "text": "ما ثبت الآن لم يكن يوماً سوى خيال.",
+        "author": "ويليام بليك",
+        "work": "زواج الجنة والجحيم · أمثال الجحيم",
+        "isTranslation": true
+      }
+    }
+  },
+  {
+    "id": "21",
+    "sourceURL": "https://www.gutenberg.org/cache/epub/5000/pg5000.html",
+    "originalText": "Wisdom is the daughter of experience.",
+    "originalLanguage": "en",
+    "publicDomainBasis": "Leonardo died in 1519. Source is the Jean Paul Richter English translation, identified by Project Gutenberg 5000 as 1888; Richter died in 1937. This historic translation is public domain in the USA and life-plus-70 jurisdictions. No modern translation reused. Other-language renderings newly translated for this app.",
+    "localizations": {
+      "ko": {
+        "text": "지혜는 경험의 딸이다.",
+        "author": "레오나르도 다빈치",
+        "work": "노트 §1150 · 리히터 영역(1888)",
+        "isTranslation": true
+      },
+      "en": {
+        "text": "Wisdom is the daughter of experience.",
+        "author": "Leonardo da Vinci",
+        "work": "Notebooks §1150 · Richter translation (1888)",
+        "isTranslation": false
+      },
+      "ja": {
+        "text": "知恵は経験の娘である。",
+        "author": "レオナルド・ダ・ヴィンチ",
+        "work": "手稿 §1150・リヒター英訳（1888）",
+        "isTranslation": true
+      },
+      "zh-Hans": {
+        "text": "智慧是经验的女儿。",
+        "author": "列奥纳多·达·芬奇",
+        "work": "笔记 §1150 · 里希特英译（1888）",
+        "isTranslation": true
+      },
+      "vi": {
+        "text": "Trí tuệ là con gái của kinh nghiệm.",
+        "author": "Leonardo da Vinci",
+        "work": "Sổ tay §1150 · bản dịch Anh của Richter (1888)",
+        "isTranslation": true
+      },
+      "es": {
+        "text": "La sabiduría es hija de la experiencia.",
+        "author": "Leonardo da Vinci",
+        "work": "Cuadernos §1150 · traducción inglesa de Richter (1888)",
+        "isTranslation": true
+      },
+      "fr": {
+        "text": "La sagesse est fille de l’expérience.",
+        "author": "Léonard de Vinci",
+        "work": "Carnets §1150 · traduction anglaise de Richter (1888)",
+        "isTranslation": true
+      },
+      "de": {
+        "text": "Weisheit ist die Tochter der Erfahrung.",
+        "author": "Leonardo da Vinci",
+        "work": "Notizbücher §1150 · englische Übersetzung von Richter (1888)",
+        "isTranslation": true
+      },
+      "ru": {
+        "text": "Мудрость — дочь опыта.",
+        "author": "Леонардо да Винчи",
+        "work": "Записные книжки §1150 · английский перевод Рихтера (1888)",
+        "isTranslation": true
+      },
+      "ar": {
+        "text": "الحكمة ابنة التجربة.",
+        "author": "ليوناردو دا فينشي",
+        "work": "الدفاتر §1150 · ترجمة ريختر الإنجليزية (1888)",
+        "isTranslation": true
+      }
+    }
+  },
+  {
+    "id": "22",
+    "sourceURL": "https://www.gutenberg.org/cache/epub/5000/pg5000.html",
+    "originalText": "good judgment is born of clear understanding",
+    "originalLanguage": "en",
+    "publicDomainBasis": "Leonardo died in 1519. Source is the Jean Paul Richter English translation, identified by Project Gutenberg 5000 as 1888; Richter died in 1937. This historic translation is public domain in the USA and life-plus-70 jurisdictions. No modern translation reused. Other-language renderings newly translated for this app.",
+    "localizations": {
+      "ko": {
+        "text": "좋은 판단은 명확한 이해에서 태어난다.",
+        "author": "레오나르도 다빈치",
+        "work": "노트 §18 · 리히터 영역(1888)",
+        "isTranslation": true
+      },
+      "en": {
+        "text": "good judgment is born of clear understanding",
+        "author": "Leonardo da Vinci",
+        "work": "Notebooks §18 · Richter translation (1888)",
+        "isTranslation": false
+      },
+      "ja": {
+        "text": "よい判断は明確な理解から生まれる。",
+        "author": "レオナルド・ダ・ヴィンチ",
+        "work": "手稿 §18・リヒター英訳（1888）",
+        "isTranslation": true
+      },
+      "zh-Hans": {
+        "text": "良好的判断源于清晰的理解。",
+        "author": "列奥纳多·达·芬奇",
+        "work": "笔记 §18 · 里希特英译（1888）",
+        "isTranslation": true
+      },
+      "vi": {
+        "text": "Phán đoán sáng suốt sinh ra từ sự hiểu biết rõ ràng.",
+        "author": "Leonardo da Vinci",
+        "work": "Sổ tay §18 · bản dịch Anh của Richter (1888)",
+        "isTranslation": true
+      },
+      "es": {
+        "text": "El buen juicio nace de una comprensión clara.",
+        "author": "Leonardo da Vinci",
+        "work": "Cuadernos §18 · traducción inglesa de Richter (1888)",
+        "isTranslation": true
+      },
+      "fr": {
+        "text": "Un bon jugement naît d’une compréhension claire.",
+        "author": "Léonard de Vinci",
+        "work": "Carnets §18 · traduction anglaise de Richter (1888)",
+        "isTranslation": true
+      },
+      "de": {
+        "text": "Ein gutes Urteil entsteht aus klarem Verständnis.",
+        "author": "Leonardo da Vinci",
+        "work": "Notizbücher §18 · englische Übersetzung von Richter (1888)",
+        "isTranslation": true
+      },
+      "ru": {
+        "text": "Верное суждение рождается из ясного понимания.",
+        "author": "Леонардо да Винчи",
+        "work": "Записные книжки §18 · английский перевод Рихтера (1888)",
+        "isTranslation": true
+      },
+      "ar": {
+        "text": "الحكم السديد يولد من الفهم الواضح.",
+        "author": "ليوناردو دا فينشي",
+        "work": "الدفاتر §18 · ترجمة ريختر الإنجليزية (1888)",
+        "isTranslation": true
+      }
+    }
+  },
+  {
+    "id": "23",
+    "sourceURL": "https://www.gutenberg.org/cache/epub/5000/pg5000.html",
+    "originalText": "Nature is full of infinite causes that have never occured in experience.",
+    "originalLanguage": "en",
+    "publicDomainBasis": "Leonardo died in 1519. Source is the Jean Paul Richter English translation, identified by Project Gutenberg 5000 as 1888; Richter died in 1937. This historic translation is public domain in the USA and life-plus-70 jurisdictions. No modern translation reused. Other-language renderings newly translated for this app.",
+    "localizations": {
+      "ko": {
+        "text": "자연에는 아직 경험으로 드러나지 않은 무수한 원인이 가득하다.",
+        "author": "레오나르도 다빈치",
+        "work": "노트 §1151 · 리히터 영역(1888)",
+        "isTranslation": true
+      },
+      "en": {
+        "text": "Nature is full of infinite causes that have never occured in experience.",
+        "author": "Leonardo da Vinci",
+        "work": "Notebooks §1151 · Richter translation (1888)",
+        "isTranslation": false
+      },
+      "ja": {
+        "text": "自然は、まだ経験に現れたことのない無数の原因に満ちている。",
+        "author": "レオナルド・ダ・ヴィンチ",
+        "work": "手稿 §1151・リヒター英訳（1888）",
+        "isTranslation": true
+      },
+      "zh-Hans": {
+        "text": "自然充满了无穷无尽、从未在经验中显现的原因。",
+        "author": "列奥纳多·达·芬奇",
+        "work": "笔记 §1151 · 里希特英译（1888）",
+        "isTranslation": true
+      },
+      "vi": {
+        "text": "Thiên nhiên đầy những nguyên nhân vô tận chưa từng xuất hiện trong trải nghiệm.",
+        "author": "Leonardo da Vinci",
+        "work": "Sổ tay §1151 · bản dịch Anh của Richter (1888)",
+        "isTranslation": true
+      },
+      "es": {
+        "text": "La naturaleza está llena de infinitas causas que nunca se han manifestado en la experiencia.",
+        "author": "Leonardo da Vinci",
+        "work": "Cuadernos §1151 · traducción inglesa de Richter (1888)",
+        "isTranslation": true
+      },
+      "fr": {
+        "text": "La nature est pleine d’une infinité de causes qui ne se sont jamais manifestées dans l’expérience.",
+        "author": "Léonard de Vinci",
+        "work": "Carnets §1151 · traduction anglaise de Richter (1888)",
+        "isTranslation": true
+      },
+      "de": {
+        "text": "Die Natur ist voller unendlicher Ursachen, die noch nie in der Erfahrung aufgetreten sind.",
+        "author": "Leonardo da Vinci",
+        "work": "Notizbücher §1151 · englische Übersetzung von Richter (1888)",
+        "isTranslation": true
+      },
+      "ru": {
+        "text": "Природа полна бесконечного множества причин, ещё не проявившихся в опыте.",
+        "author": "Леонардо да Винчи",
+        "work": "Записные книжки §1151 · английский перевод Рихтера (1888)",
+        "isTranslation": true
+      },
+      "ar": {
+        "text": "الطبيعة زاخرة بأسباب لا حصر لها لم تظهر قط في التجربة.",
+        "author": "ليوناردو دا فينشي",
+        "work": "الدفاتر §1151 · ترجمة ريختر الإنجليزية (1888)",
+        "isTranslation": true
+      }
+    }
+  },
+  {
+    "id": "24",
+    "sourceURL": "https://www.gutenberg.org/files/47610/47610-h/47610-h.htm",
+    "originalText": "But the history of errors, properly managed, often shortens the road to truth.",
+    "originalLanguage": "en",
+    "publicDomainBasis": "English original: Royal Academy discourses delivered in the eighteenth century; source edition 1887. Reynolds died in 1792. Public domain in the USA and life-plus-70 jurisdictions. Localized renderings newly translated for this app.",
+    "localizations": {
+      "ko": {
+        "text": "그러나 오류의 역사를 잘 활용하면 진리에 이르는 길이 짧아지곤 한다.",
+        "author": "조슈아 레이놀즈",
+        "work": "미술 강론 II (1769)",
+        "isTranslation": true
+      },
+      "en": {
+        "text": "But the history of errors, properly managed, often shortens the road to truth.",
+        "author": "Joshua Reynolds",
+        "work": "Discourses on Art II (1769)",
+        "isTranslation": false
+      },
+      "ja": {
+        "text": "しかし、誤りの歴史をうまく生かせば、真理への道はしばしば短くなる。",
+        "author": "ジョシュア・レノルズ",
+        "work": "美術講話 II (1769)",
+        "isTranslation": true
+      },
+      "zh-Hans": {
+        "text": "然而，善用错误的历史，往往能缩短通向真理的道路。",
+        "author": "乔舒亚·雷诺兹",
+        "work": "艺术讲演录 II (1769)",
+        "isTranslation": true
+      },
+      "vi": {
+        "text": "Nhưng lịch sử của những sai lầm, nếu được vận dụng đúng, thường rút ngắn con đường đến chân lý.",
+        "author": "Joshua Reynolds",
+        "work": "Các bài giảng về nghệ thuật II (1769)",
+        "isTranslation": true
+      },
+      "es": {
+        "text": "Pero la historia de los errores, bien aprovechada, suele acortar el camino hacia la verdad.",
+        "author": "Joshua Reynolds",
+        "work": "Discursos sobre arte II (1769)",
+        "isTranslation": true
+      },
+      "fr": {
+        "text": "Mais l’histoire des erreurs, bien exploitée, raccourcit souvent le chemin vers la vérité.",
+        "author": "Joshua Reynolds",
+        "work": "Discours sur l’art II (1769)",
+        "isTranslation": true
+      },
+      "de": {
+        "text": "Doch die Geschichte der Irrtümer, richtig genutzt, verkürzt oft den Weg zur Wahrheit.",
+        "author": "Joshua Reynolds",
+        "work": "Reden über die Kunst II (1769)",
+        "isTranslation": true
+      },
+      "ru": {
+        "text": "Но история ошибок, если ею правильно воспользоваться, часто сокращает путь к истине.",
+        "author": "Джошуа Рейнольдс",
+        "work": "Речи об искусстве II (1769)",
+        "isTranslation": true
+      },
+      "ar": {
+        "text": "لكن تاريخ الأخطاء، إذا أُحسن الانتفاع به، كثيرًا ما يختصر الطريق إلى الحقيقة.",
+        "author": "جوشوا رينولدز",
+        "work": "محاضرات في الفن II (1769)",
+        "isTranslation": true
+      }
+    }
+  },
+  {
+    "id": "25",
+    "sourceURL": "https://www.gutenberg.org/files/47610/47610-h/47610-h.htm",
+    "originalText": "Invention is one of the great marks of genius",
+    "originalLanguage": "en",
+    "publicDomainBasis": "English original: Royal Academy discourses delivered in the eighteenth century; source edition 1887. Reynolds died in 1792. Public domain in the USA and life-plus-70 jurisdictions. Localized renderings newly translated for this app.",
+    "localizations": {
+      "ko": {
+        "text": "창안은 천재성을 드러내는 중요한 징표 중 하나다.",
+        "author": "조슈아 레이놀즈",
+        "work": "미술 강론 VI (1774)",
+        "isTranslation": true
+      },
+      "en": {
+        "text": "Invention is one of the great marks of genius",
+        "author": "Joshua Reynolds",
+        "work": "Discourses on Art VI (1774)",
+        "isTranslation": false
+      },
+      "ja": {
+        "text": "創案は、天才を示す大きな徴の一つである。",
+        "author": "ジョシュア・レノルズ",
+        "work": "美術講話 VI (1774)",
+        "isTranslation": true
+      },
+      "zh-Hans": {
+        "text": "创造是天才的重要标志之一。",
+        "author": "乔舒亚·雷诺兹",
+        "work": "艺术讲演录 VI (1774)",
+        "isTranslation": true
+      },
+      "vi": {
+        "text": "Sáng tạo là một trong những dấu hiệu nổi bật của thiên tài.",
+        "author": "Joshua Reynolds",
+        "work": "Các bài giảng về nghệ thuật VI (1774)",
+        "isTranslation": true
+      },
+      "es": {
+        "text": "La invención es una de las grandes señales del genio.",
+        "author": "Joshua Reynolds",
+        "work": "Discursos sobre arte VI (1774)",
+        "isTranslation": true
+      },
+      "fr": {
+        "text": "L’invention est l’une des grandes marques du génie.",
+        "author": "Joshua Reynolds",
+        "work": "Discours sur l’art VI (1774)",
+        "isTranslation": true
+      },
+      "de": {
+        "text": "Erfindungskraft ist eines der großen Kennzeichen des Genies.",
+        "author": "Joshua Reynolds",
+        "work": "Reden über die Kunst VI (1774)",
+        "isTranslation": true
+      },
+      "ru": {
+        "text": "Изобретательность — один из главных признаков гения.",
+        "author": "Джошуа Рейнольдс",
+        "work": "Речи об искусстве VI (1774)",
+        "isTranslation": true
+      },
+      "ar": {
+        "text": "الابتكار إحدى العلامات الكبرى للعبقرية.",
+        "author": "جوشوا رينولدز",
+        "work": "محاضرات في الفن VI (1774)",
+        "isTranslation": true
+      }
+    }
+  },
+  {
+    "id": "26",
+    "sourceURL": "https://fr.wikisource.org/wiki/L%E2%80%99Art_(Rodin)/Texte_entier",
+    "originalText": "Mais, à vrai dire, tout est idée, tout est symbole.",
+    "originalLanguage": "fr",
+    "publicDomainBasis": "French original, L’Art, entretiens réunis par Paul Gsell, Grasset 1911; Rodin died in 1917 and Gsell in 1947 (BnF authority FRBNF12058488). Public domain in the USA and life-plus-70 jurisdictions. Other-language renderings newly translated for this app.",
+    "localizations": {
+      "ko": {
+        "text": "그러나 사실 모든 것은 생각이며, 모든 것은 상징이다.",
+        "author": "오귀스트 로댕",
+        "work": "예술 · 폴 그셀 대담, VIII장(1911)",
+        "isTranslation": true
+      },
+      "en": {
+        "text": "But, in truth, everything is an idea, everything is a symbol.",
+        "author": "Auguste Rodin",
+        "work": "Art · conversations with Paul Gsell, ch. VIII (1911)",
+        "isTranslation": true
+      },
+      "ja": {
+        "text": "しかし、本当のところ、すべては思想であり、すべては象徴である。",
+        "author": "オーギュスト・ロダン",
+        "work": "芸術・ポール・グセルとの対話、第VIII章（1911）",
+        "isTranslation": true
+      },
+      "zh-Hans": {
+        "text": "但说到底，一切都是思想，一切都是象征。",
+        "author": "奥古斯特·罗丹",
+        "work": "艺术 · 与保罗·格塞尔的谈话，第VIII章（1911）",
+        "isTranslation": true
+      },
+      "vi": {
+        "text": "Nhưng thật ra, mọi thứ đều là ý tưởng, mọi thứ đều là biểu tượng.",
+        "author": "Auguste Rodin",
+        "work": "Nghệ thuật · trò chuyện với Paul Gsell, chương VIII (1911)",
+        "isTranslation": true
+      },
+      "es": {
+        "text": "Pero, a decir verdad, todo es idea, todo es símbolo.",
+        "author": "Auguste Rodin",
+        "work": "El arte · conversaciones con Paul Gsell, cap. VIII (1911)",
+        "isTranslation": true
+      },
+      "fr": {
+        "text": "Mais, à vrai dire, tout est idée, tout est symbole.",
+        "author": "Auguste Rodin",
+        "work": "L’Art · entretiens réunis par Paul Gsell, ch. VIII (1911)",
+        "isTranslation": false
+      },
+      "de": {
+        "text": "Doch in Wahrheit ist alles Idee, alles Symbol.",
+        "author": "Auguste Rodin",
+        "work": "Die Kunst · Gespräche mit Paul Gsell, Kap. VIII (1911)",
+        "isTranslation": true
+      },
+      "ru": {
+        "text": "Но, по правде говоря, всё есть мысль, всё есть символ.",
+        "author": "Огюст Роден",
+        "work": "Искусство · беседы с Полем Гзеллем, гл. VIII (1911)",
+        "isTranslation": true
+      },
+      "ar": {
+        "text": "لكن، في الحقيقة، كل شيء فكرة، وكل شيء رمز.",
+        "author": "أوغست رودان",
+        "work": "الفن · حوارات جمعها بول غسيل، الفصل VIII (1911)",
+        "isTranslation": true
+      }
+    }
+  },
+  {
+    "id": "27",
+    "sourceURL": "https://fr.wikisource.org/wiki/L%E2%80%99Art_(Rodin)/Texte_entier",
+    "originalText": "Les arbres, les plantes lui parlent comme des amis.",
+    "originalLanguage": "fr",
+    "publicDomainBasis": "French original, L’Art, entretiens réunis par Paul Gsell, Grasset 1911; Rodin died in 1917 and Gsell in 1947 (BnF authority FRBNF12058488). Public domain in the USA and life-plus-70 jurisdictions. Other-language renderings newly translated for this app.",
+    "localizations": {
+      "ko": {
+        "text": "나무와 식물은 예술가에게 친구처럼 말을 건넨다.",
+        "author": "오귀스트 로댕",
+        "work": "예술 · 폴 그셀 대담, II장(1911)",
+        "isTranslation": true
+      },
+      "en": {
+        "text": "Trees and plants speak to the artist like friends.",
+        "author": "Auguste Rodin",
+        "work": "Art · conversations with Paul Gsell, ch. II (1911)",
+        "isTranslation": true
+      },
+      "ja": {
+        "text": "木々や草花は、芸術家に友のように語りかける。",
+        "author": "オーギュスト・ロダン",
+        "work": "芸術・ポール・グセルとの対話、第II章（1911）",
+        "isTranslation": true
+      },
+      "zh-Hans": {
+        "text": "树木与植物像朋友一样向艺术家诉说。",
+        "author": "奥古斯特·罗丹",
+        "work": "艺术 · 与保罗·格塞尔的谈话，第II章（1911）",
+        "isTranslation": true
+      },
+      "vi": {
+        "text": "Cây cối và thực vật trò chuyện với người nghệ sĩ như những người bạn.",
+        "author": "Auguste Rodin",
+        "work": "Nghệ thuật · trò chuyện với Paul Gsell, chương II (1911)",
+        "isTranslation": true
+      },
+      "es": {
+        "text": "Los árboles y las plantas le hablan al artista como amigos.",
+        "author": "Auguste Rodin",
+        "work": "El arte · conversaciones con Paul Gsell, cap. II (1911)",
+        "isTranslation": true
+      },
+      "fr": {
+        "text": "Les arbres, les plantes lui parlent comme des amis.",
+        "author": "Auguste Rodin",
+        "work": "L’Art · entretiens réunis par Paul Gsell, ch. II (1911)",
+        "isTranslation": false
+      },
+      "de": {
+        "text": "Die Bäume und Pflanzen sprechen zum Künstler wie Freunde.",
+        "author": "Auguste Rodin",
+        "work": "Die Kunst · Gespräche mit Paul Gsell, Kap. II (1911)",
+        "isTranslation": true
+      },
+      "ru": {
+        "text": "Деревья и растения говорят с художником как друзья.",
+        "author": "Огюст Роден",
+        "work": "Искусство · беседы с Полем Гзеллем, гл. II (1911)",
+        "isTranslation": true
+      },
+      "ar": {
+        "text": "تخاطب الأشجار والنباتات الفنان كأصدقاء.",
+        "author": "أوغست رودان",
+        "work": "الفن · حوارات جمعها بول غسيل، الفصل II (1911)",
+        "isTranslation": true
+      }
+    }
+  },
+  {
+    "id": "28",
+    "sourceURL": "https://www.gutenberg.org/files/38923/38923-h/38923-h.htm",
+    "originalText": "To see clearly is poetry, prophecy, and religion,—all in one.",
+    "originalLanguage": "en",
+    "publicDomainBasis": "English original published in the nineteenth century; Ruskin died in 1900. Public domain in the USA and life-plus-70 jurisdictions. Localized renderings newly translated for this app.",
+    "localizations": {
+      "ko": {
+        "text": "또렷이 본다는 것은 시이자 예언이며 종교인 것, 그 모두가 하나인 것이다.",
+        "author": "존 러스킨",
+        "work": "현대 화가들 3권 · 16장 §28(1856)",
+        "isTranslation": true
+      },
+      "en": {
+        "text": "To see clearly is poetry, prophecy, and religion,—all in one.",
+        "author": "John Ruskin",
+        "work": "Modern Painters III · ch. XVI §28 (1856)",
+        "isTranslation": false
+      },
+      "ja": {
+        "text": "明晰に見ることは、詩であり、予言であり、宗教である。そのすべてが一つなのだ。",
+        "author": "ジョン・ラスキン",
+        "work": "近代画家論 第3巻・第16章 §28（1856）",
+        "isTranslation": true
+      },
+      "zh-Hans": {
+        "text": "清晰地看见，便是诗、预言与宗教，三者合而为一。",
+        "author": "约翰·罗斯金",
+        "work": "现代画家 第3卷 · 第16章 §28（1856）",
+        "isTranslation": true
+      },
+      "vi": {
+        "text": "Nhìn thật rõ là thi ca, tiên tri và tôn giáo — tất cả hòa làm một.",
+        "author": "John Ruskin",
+        "work": "Các họa sĩ hiện đại III · chương XVI §28 (1856)",
+        "isTranslation": true
+      },
+      "es": {
+        "text": "Ver con claridad es poesía, profecía y religión: todo en uno.",
+        "author": "John Ruskin",
+        "work": "Pintores modernos III · cap. XVI §28 (1856)",
+        "isTranslation": true
+      },
+      "fr": {
+        "text": "Voir clairement, c’est la poésie, la prophétie et la religion, toutes réunies.",
+        "author": "John Ruskin",
+        "work": "Les Peintres modernes III · ch. XVI §28 (1856)",
+        "isTranslation": true
+      },
+      "de": {
+        "text": "Klar zu sehen ist Dichtung, Prophezeiung und Religion — alles in einem.",
+        "author": "John Ruskin",
+        "work": "Moderne Maler III · Kap. XVI §28 (1856)",
+        "isTranslation": true
+      },
+      "ru": {
+        "text": "Ясно видеть — это поэзия, пророчество и религия, всё в одном.",
+        "author": "Джон Рёскин",
+        "work": "Современные художники III · гл. XVI §28 (1856)",
+        "isTranslation": true
+      },
+      "ar": {
+        "text": "أن ترى بوضوح هو الشعر والنبوءة والدين، كلها في آن واحد.",
+        "author": "جون راسكن",
+        "work": "الرسامون المحدثون، ج3 · الفصل 16 §28 (1856)",
+        "isTranslation": true
+      }
+    }
+  },
+  {
+    "id": "29",
+    "sourceURL": "https://www.gutenberg.org/cache/epub/7291/pg7291-images.html",
+    "originalText": "Then FINE ART is that in which the hand, the head, and the heart of man go together.",
+    "originalLanguage": "en",
+    "publicDomainBasis": "English original published in the nineteenth century; Ruskin died in 1900. Public domain in the USA and life-plus-70 jurisdictions. Localized renderings newly translated for this app.",
+    "localizations": {
+      "ko": {
+        "text": "그렇다면 순수예술은 사람의 손과 머리와 마음이 함께 움직이는 것이다.",
+        "author": "존 러스킨",
+        "work": "두 갈래 길 · 강연 2(1859)",
+        "isTranslation": true
+      },
+      "en": {
+        "text": "Then FINE ART is that in which the hand, the head, and the heart of man go together.",
+        "author": "John Ruskin",
+        "work": "The Two Paths · lecture II (1859)",
+        "isTranslation": false
+      },
+      "ja": {
+        "text": "したがって純粋芸術とは、人の手と頭と心がともに働くものである。",
+        "author": "ジョン・ラスキン",
+        "work": "二つの道・第2講（1859）",
+        "isTranslation": true
+      },
+      "zh-Hans": {
+        "text": "那么，纯艺术就是人的手、头脑和心灵共同运作之处。",
+        "author": "约翰·罗斯金",
+        "work": "两条道路 · 第2讲（1859）",
+        "isTranslation": true
+      },
+      "vi": {
+        "text": "Vậy mỹ thuật là nơi bàn tay, trí óc và trái tim con người cùng hoạt động.",
+        "author": "John Ruskin",
+        "work": "Hai con đường · bài giảng II (1859)",
+        "isTranslation": true
+      },
+      "es": {
+        "text": "Así, las bellas artes son aquellas en las que la mano, la cabeza y el corazón actúan juntos.",
+        "author": "John Ruskin",
+        "work": "Los dos caminos · conferencia II (1859)",
+        "isTranslation": true
+      },
+      "fr": {
+        "text": "Les beaux-arts sont donc ceux où la main, la tête et le cœur de l’être humain œuvrent ensemble.",
+        "author": "John Ruskin",
+        "work": "Les Deux Chemins · conférence II (1859)",
+        "isTranslation": true
+      },
+      "de": {
+        "text": "Schöne Kunst ist demnach jene, in der Hand, Kopf und Herz des Menschen zusammenwirken.",
+        "author": "John Ruskin",
+        "work": "Die zwei Wege · Vortrag II (1859)",
+        "isTranslation": true
+      },
+      "ru": {
+        "text": "Итак, изящное искусство — то, в чём рука, ум и сердце человека действуют вместе.",
+        "author": "Джон Рёскин",
+        "work": "Два пути · лекция II (1859)",
+        "isTranslation": true
+      },
+      "ar": {
+        "text": "إذن، الفن الجميل هو ما تعمل فيه يد الإنسان وعقله وقلبه معًا.",
+        "author": "جون راسكن",
+        "work": "الطريقان · المحاضرة الثانية (1859)",
+        "isTranslation": true
+      }
+    }
+  },
+  {
+    "id": "30",
+    "sourceURL": "https://digi.ub.uni-heidelberg.de/diglit/ruskin1904bd15a/0395",
+    "originalText": "ALL GREAT ART IS PRAISE",
+    "originalLanguage": "en",
+    "publicDomainBasis": "English original published in the nineteenth century; Ruskin died in 1900. Public domain in the USA and life-plus-70 jurisdictions. Localized renderings newly translated for this app.",
+    "localizations": {
+      "ko": {
+        "text": "모든 위대한 예술은 찬미다.",
+        "author": "존 러스킨",
+        "work": "피에솔레의 법칙 · 1장(1877–1878)",
+        "isTranslation": true
+      },
+      "en": {
+        "text": "ALL GREAT ART IS PRAISE",
+        "author": "John Ruskin",
+        "work": "The Laws of Fésole · ch. I (1877–1878)",
+        "isTranslation": false
+      },
+      "ja": {
+        "text": "すべての偉大な芸術は賛美である。",
+        "author": "ジョン・ラスキン",
+        "work": "フィエーゾレの法則・第1章（1877–1878）",
+        "isTranslation": true
+      },
+      "zh-Hans": {
+        "text": "一切伟大的艺术都是赞美。",
+        "author": "约翰·罗斯金",
+        "work": "菲耶索莱法则 · 第1章（1877–1878）",
+        "isTranslation": true
+      },
+      "vi": {
+        "text": "Mọi nghệ thuật vĩ đại đều là sự ngợi ca.",
+        "author": "John Ruskin",
+        "work": "Các quy tắc Fésole · chương I (1877–1878)",
+        "isTranslation": true
+      },
+      "es": {
+        "text": "Todo gran arte es alabanza.",
+        "author": "John Ruskin",
+        "work": "Las leyes de Fésole · cap. I (1877–1878)",
+        "isTranslation": true
+      },
+      "fr": {
+        "text": "Tout grand art est louange.",
+        "author": "John Ruskin",
+        "work": "Les Lois de Fésole · ch. I (1877–1878)",
+        "isTranslation": true
+      },
+      "de": {
+        "text": "Alle große Kunst ist Lobpreis.",
+        "author": "John Ruskin",
+        "work": "Die Gesetze von Fésole · Kap. I (1877–1878)",
+        "isTranslation": true
+      },
+      "ru": {
+        "text": "Всякое великое искусство — хвала.",
+        "author": "Джон Рёскин",
+        "work": "Законы Фьезоле · гл. I (1877–1878)",
+        "isTranslation": true
+      },
+      "ar": {
+        "text": "كل فن عظيم هو ثناء.",
+        "author": "جون راسكن",
+        "work": "قوانين فيزولي · الفصل الأول (1877–1878)",
+        "isTranslation": true
+      }
+    }
+  }
+]

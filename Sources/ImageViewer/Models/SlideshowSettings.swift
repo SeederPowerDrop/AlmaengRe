@@ -12,7 +12,7 @@ enum SlideshowSettings {
   }
 
   static func nextIndex(after index: Int, count: Int, repeats: Bool) -> Int? {
-    guard count > 1, (0..<count).contains(index) else { return nil }
+    guard count > 0, (0..<count).contains(index) else { return nil }
     if index + 1 < count { return index + 1 }
     return repeats ? 0 : nil
   }

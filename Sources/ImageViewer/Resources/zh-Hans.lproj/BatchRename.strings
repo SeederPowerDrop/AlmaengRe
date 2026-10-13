@@ -1,0 +1,11 @@
+"classification.mode" = "使用分类名称";
+"classification.label" = "用于命名的分类";
+"classification.choose" = "请选择分类。";
+"classification.unavailable" = "无法载入分类信息。请关闭此窗口并检查分类的保存状态。";
+"classification.emptyName" = "此分类尚未命名。请设置分类名称后重试。";
+"classification.noMatches" = "所选文件中没有属于此分类的文件。";
+"classification.help" = "仅按列表顺序重命名属于所选分类的文件。例如：上传01、上传02。符合条件的文件达到100个时，编号从001开始，位数会按需增加。";
+"classification.scope" = "此分类有%d个符合条件的文件，所选文件共%d个。其他文件保持不变。";
+"classification.unnamed" = "未命名分类";
+"classification.option" = "%@ · %@（%d个文件）";
+"numbering.help" = "编号按当前列表顺序添加在扩展名前。要更改图像格式，请使用“%@”。";

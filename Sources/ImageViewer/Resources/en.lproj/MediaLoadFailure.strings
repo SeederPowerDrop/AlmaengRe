@@ -1,0 +1,15 @@
+"empty" = "This file is empty (0 bytes). Copy it again from the original or a backup.";
+"missing" = "The file could not be found. It may have been moved or deleted, or its drive may be disconnected.";
+"permission" = "Permission to read this file was denied. Reopen the folder to allow access.";
+"notDownloaded" = "This file has not been downloaded to your device. Finish downloading it in Finder.";
+"unavailable" = "The file could not be read. Check its drive and file access.";
+"unsupported" = "This format or codec is not supported.";
+"unreadableData" = "The file data could not be read. It may be damaged or in an unsupported format.";
+"noVideoTrack" = "This file has no video track to display.";
+"protected" = "Protected videos cannot be played.";
+"invalidVideo" = "The video's duration or display information is invalid.";
+"rendering" = "The image could not be displayed. Try opening it again.";
+"resource" = "The device or memory needed to display this file is unavailable. Try again shortly.";
+"tooLarge" = "This image is too large to display within safe memory limits.";
+"unknown" = "Loading failed, but the cause could not be determined. Try opening the file again.";
+"preview.title" = "Preview unavailable";

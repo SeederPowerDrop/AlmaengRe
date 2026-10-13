@@ -5,6 +5,7 @@ enum PresentationMode: String, CaseIterable, Identifiable, Sendable {
   case viewer
   // 표시 이름은 몽땅보기로 바뀌어도 내부 식별자는 이전 버전과 동일하게 유지합니다.
   case overview
+  case map
   case folderComparison
 
   var id: Self { self }
@@ -13,6 +14,7 @@ enum PresentationMode: String, CaseIterable, Identifiable, Sendable {
     switch self {
     case .viewer: L10n.text("뷰어")
     case .overview: L10n.text("몽땅보기")
+    case .map: L10n.text("지도 보기")
     case .folderComparison: L10n.text("이미지 비교")
     }
   }

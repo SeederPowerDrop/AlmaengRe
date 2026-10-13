@@ -1,0 +1,6 @@
+"grid.playAll" = "Phát các video đang hiển thị";
+"grid.playSelected" = "Phát video đã chọn (%d)";
+"grid.pauseAll" = "Tạm dừng tất cả video";
+"grid.select" = "Chọn video để phát";
+"grid.play" = "Phát video";
+"grid.pause" = "Tạm dừng video";

@@ -1,0 +1,15 @@
+"empty" = "El archivo está vacío (0 bytes). Vuelve a copiarlo desde el original o una copia de seguridad.";
+"missing" = "No se encuentra el archivo. Puede haberse movido o eliminado, o su unidad puede estar desconectada.";
+"permission" = "No tienes permiso para leer este archivo. Vuelve a abrir la carpeta para permitir el acceso.";
+"notDownloaded" = "Este archivo no se ha descargado en tu dispositivo. Completa la descarga en el Finder.";
+"unavailable" = "No se puede leer el archivo. Comprueba su unidad y el acceso al archivo.";
+"unsupported" = "Este formato o códec no es compatible.";
+"unreadableData" = "No se pueden leer los datos del archivo. Puede estar dañado o tener un formato no compatible.";
+"noVideoTrack" = "Este archivo no contiene una pista de vídeo que se pueda mostrar.";
+"protected" = "No se pueden reproducir vídeos protegidos.";
+"invalidVideo" = "La duración o la información de visualización del vídeo no es válida.";
+"rendering" = "No se pudo mostrar la imagen. Intenta abrirla de nuevo.";
+"resource" = "Un dispositivo o la memoria necesaria para mostrar el contenido no está disponible. Inténtalo de nuevo en unos instantes.";
+"tooLarge" = "Esta imagen es demasiado grande y supera el límite de memoria seguro.";
+"unknown" = "La carga ha fallado, pero no se pudo determinar la causa. Intenta abrir el archivo de nuevo.";
+"preview.title" = "Vista previa no disponible";

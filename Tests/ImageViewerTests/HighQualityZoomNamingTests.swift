@@ -5,11 +5,12 @@ import Testing
 
 @Suite("고화질 확대 명칭과 이전 설정 호환")
 struct HighQualityZoomNamingTests {
-  @Test("8개 언어의 메뉴·비교·설정에 고화질 확대 이름을 사용한다")
+  @Test("10개 언어의 메뉴·비교·설정에 고화질 확대 이름을 사용한다")
   func namesAreLocalized() {
     let titles = ["ko": "고화질 확대", "en": "High-Quality Zoom", "zh-Hans": "高画质缩放",
       "ja": "高画質拡大", "fr": "Zoom haute qualité", "es": "Ampliación de alta calidad",
-      "ar": "تكبير عالي الجودة", "vi": "Phóng to chất lượng cao"]
+      "ar": "تكبير عالي الجودة", "vi": "Phóng to chất lượng cao",
+      "de": "Hochwertiger Zoom", "ru": "Качественное увеличение"]
     for locale in L10n.supportedLocalizations {
       #expect(L10n.text("고화질 확대", localeIdentifier: locale) == titles[locale])
       let keys = L10n.keys(localeIdentifier: locale)
@@ -27,7 +28,7 @@ struct HighQualityZoomNamingTests {
 
   @Test("표시 이름만 바꾸고 저장된 확대 모드와 사용자 단축키를 유지한다")
   @MainActor
-  func legacyPreferences() throws {
+  func legacyPreferences() async throws {
     let suite = "ImageViewer.HighQualityZoomNaming.\(UUID())"
     let defaults = try #require(UserDefaults(suiteName: suite))
     defer { defaults.removePersistentDomain(forName: suite) }
@@ -36,6 +37,20 @@ struct HighQualityZoomNamingTests {
     defaults.set(try JSONEncoder().encode(["toggleAntialiasing": customKey]),
       forKey: "ImageViewer.ShortcutBindings.v1")
     let store = AppStore(defaults: defaults, monitorsSystemResources: false)
+    let folder = FileManager.default.temporaryDirectory
+      .appendingPathComponent("zoom-naming-\(UUID())", isDirectory: true)
+    try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+    defer { try? FileManager.default.removeItem(at: folder) }
+    let photo = folder.appendingPathComponent("synthetic.qoi")
+    try Data([0x71, 0x6f, 0x69, 0x66, 0, 0, 0, 1, 0, 0, 0, 1, 3, 0,
+      0xfe, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1]).write(to: photo)
+    store.open(urls: [photo])
+    let deadline = ContinuousClock.now + .seconds(5)
+    while (store.isLoading || store.isFiltering), ContinuousClock.now < deadline {
+      try await Task.sleep(for: .milliseconds(10))
+    }
+    try #require(!store.isLoading && !store.isFiltering && store.assets.count == 1)
+    try #require(!store.showsHome && store.presentationMode == .viewer)
     let shortcuts = ShortcutStore(defaults: defaults)
     #expect(!store.isAntialiasingEnabled)
     #expect(shortcuts.binding(for: .toggleAntialiasing) == customKey)

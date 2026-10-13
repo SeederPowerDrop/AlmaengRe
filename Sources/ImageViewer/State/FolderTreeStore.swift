@@ -240,9 +240,13 @@ final class FolderTreeStore: ObservableObject {
   }
 
   private func removeBranch(_ url: URL) {
-    for child in Array(nodes.keys) where Self.contains(child, in: url) {
+    // Child links already describe the subtree. Scanning all nodes once for each
+    // removed sibling made refreshing a wide, stale tree quadratic on the UI actor.
+    var pending = [url]
+    while let child = pending.popLast() {
+      guard let node = nodes.removeValue(forKey: child) else { continue }
+      pending.append(contentsOf: node.children ?? [])
       pendingReads.removeValue(forKey: child)?.task.cancel()
-      nodes[child] = nil
       expanded.remove(child)
     }
   }
@@ -261,7 +265,7 @@ final class FolderTreeStore: ObservableObject {
       }
     }
     append(rootURL, depth: 0)
-    rows = result
+    if rows != result { rows = result }
   }
 
   private nonisolated static func normalized(_ url: URL) -> URL {

@@ -3,7 +3,7 @@ import Foundation
 
 struct BatchRenameOptions: Hashable, Sendable {
   enum NameMode: String, CaseIterable, Identifiable, Sendable {
-    case keep, replace, replaceText
+    case keep, replace, replaceText, classification
 
     var id: Self { self }
     var title: String {
@@ -11,6 +11,7 @@ struct BatchRenameOptions: Hashable, Sendable {
       case .keep: L10n.text("현재 이름 유지")
       case .replace: L10n.text("전체 이름 바꾸기")
       case .replaceText: L10n.text("이름의 일부 바꾸기")
+      case .classification: BatchRenameL10n.text("classification.mode")
       }
     }
   }
@@ -30,6 +31,7 @@ struct BatchRenameOptions: Hashable, Sendable {
   }
 
   var nameMode: NameMode = .keep
+  var classificationSlot: PhotoMarkSlot?
   var newName = ""
   var searchText = ""
   var replacementText = ""
@@ -38,7 +40,7 @@ struct BatchRenameOptions: Hashable, Sendable {
   var addsNumber = false
   var startNumber = 1
   var numberStep = 1
-  var numberDigits = 3
+  var numberDigits = 2
   var numberSeparator = "_"
   var extensionMode: ExtensionMode = .keep
   var customExtension = ""
@@ -58,8 +60,27 @@ struct BatchRenameEntry: Identifiable, Sendable {
 
 struct BatchRenamePlan: Sendable {
   var entries: [BatchRenameEntry]
+  var issue: String? = nil
   var changedCount: Int { entries.filter(\.isChanged).count }
-  var canApply: Bool { changedCount > 0 && entries.allSatisfy { $0.issue == nil } }
+  var canApply: Bool { issue == nil && changedCount > 0 && entries.allSatisfy { $0.issue == nil } }
+}
+
+/// A snapshot from the same explicit selection as the rename preview. A photo
+/// with several classifications is included once, according to the chosen slot.
+struct BatchRenameClassifications: Hashable, Sendable {
+  var labels: [PhotoMarkSlot: String]
+  var marksByURL: [URL: Set<PhotoMarkSlot>]
+
+  init(labels: [PhotoMarkSlot: String], marksByURL: [URL: Set<PhotoMarkSlot>]) {
+    self.labels = labels
+    self.marksByURL = marksByURL.reduce(into: [:]) { result, entry in
+      result[entry.key.standardizedFileURL, default: []].formUnion(entry.value)
+    }
+  }
+
+  func contains(_ url: URL, slot: PhotoMarkSlot) -> Bool {
+    marksByURL[url.standardizedFileURL]?.contains(slot) == true
+  }
 }
 
 /// File identity and nanosecond timestamps detect replacements and edits after preview.
@@ -96,8 +117,31 @@ struct BatchRenameSourceSnapshot: Equatable, Sendable {
 }
 
 enum BatchRenamePlanner {
-  static func plan(urls: [URL], options: BatchRenameOptions) -> BatchRenamePlan {
-    var entries = urls.enumerated().map { index, input in
+  static func plan(urls: [URL], options: BatchRenameOptions,
+    classifications: BatchRenameClassifications? = nil) -> BatchRenamePlan {
+    let sources: [URL]
+    var classificationName = ""
+    if options.nameMode == .classification {
+      guard let slot = options.classificationSlot else {
+        return BatchRenamePlan(entries: [], issue: BatchRenameL10n.text("classification.choose"))
+      }
+      guard let classifications else {
+        return BatchRenamePlan(entries: [], issue: BatchRenameL10n.text("classification.unavailable"))
+      }
+      classificationName = classifications.labels[slot]?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+      guard !classificationName.isEmpty else {
+        return BatchRenamePlan(entries: [], issue: BatchRenameL10n.text("classification.emptyName"))
+      }
+      sources = urls.filter { classifications.contains($0, slot: slot) }
+      guard !sources.isEmpty else {
+        return BatchRenamePlan(entries: [], issue: BatchRenameL10n.text("classification.noMatches"))
+      }
+    } else {
+      sources = urls
+    }
+    // Use one width for the whole matching selection: 01…99, 001…100, etc.
+    let classificationDigits = max(2, String(sources.count).count)
+    var entries = sources.enumerated().map { index, input in
       let source = input.standardizedFileURL
       var issue: String?
       var name = source.deletingPathExtension().lastPathComponent
@@ -110,9 +154,12 @@ enum BatchRenamePlanner {
         } else {
           name = name.replacingOccurrences(of: options.searchText, with: options.replacementText)
         }
+      case .classification:
+        let digits = String(index + 1)
+        name = classificationName + String(repeating: "0", count: classificationDigits - digits.count) + digits
       }
-      name = options.prefix + name + options.suffix
-      if options.addsNumber {
+      if options.nameMode != .classification { name = options.prefix + name + options.suffix }
+      if options.addsNumber && options.nameMode != .classification {
         if options.startNumber < 0 || options.numberStep < 1 || !(1...20).contains(options.numberDigits) {
           issue = L10n.text("시작 번호는 0 이상, 증가 값은 1 이상, 자릿수는 1~20으로 입력해 주세요.")
         } else {

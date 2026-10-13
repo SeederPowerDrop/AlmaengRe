@@ -26,7 +26,42 @@ struct DisplayShortcutTests {
     }
     #expect(
       shortcuts.action(matching: try makeEvent(code: 18, characters: "1", modifiers: []))
+        == nil)
+    #expect(
+      shortcuts.action(matching: try makeEvent(code: 18, characters: "1", modifiers: [.command]))
         == .actualPixels)
+  }
+
+  @Test("실제 크기의 이전 기본값만 Command-1로 옮기고 사용자 지정과 충돌을 보존한다")
+  func actualPixelsDefaultMigration() throws {
+    let suite = "ImageViewer.ShortcutMigrationTests.\(UUID().uuidString)"
+    let defaults = try #require(UserDefaults(suiteName: suite))
+    defer { defaults.removePersistentDomain(forName: suite) }
+    let legacy = KeyBinding(key: "1")
+    let commandOne = KeyBinding(key: "1", modifiers: [.command])
+    let custom = KeyBinding(key: "k", modifiers: [.command, .shift])
+    let cases: [(saved: [String: KeyBinding], expected: KeyBinding)] = [
+      (["actualPixels": legacy, "previousPage": custom], commandOne),
+      (["previousPage": custom], commandOne),
+      (["actualPixels": custom], custom),
+      (["actualPixels": legacy, "nextPage": commandOne], legacy),
+      (["nextPage": commandOne], legacy),
+    ]
+    for scenario in cases {
+      defaults.removePersistentDomain(forName: suite)
+      defaults.set(try JSONEncoder().encode(scenario.saved), forKey: "ImageViewer.ShortcutBindings.v1")
+      let shortcuts = ShortcutStore(defaults: defaults)
+      #expect(shortcuts.binding(for: .actualPixels) == scenario.expected)
+      #expect(shortcuts.conflictingActions.isEmpty)
+      for (action, binding) in scenario.saved where action != "actualPixels" {
+        #expect(shortcuts.binding(for: try #require(ShortcutAction(rawValue: action))) == binding)
+      }
+      #expect(ShortcutStore(defaults: defaults).binding(for: .actualPixels) == scenario.expected)
+      shortcuts.setBinding(legacy, for: .actualPixels)
+      #expect(ShortcutStore(defaults: defaults).binding(for: .actualPixels) == legacy)
+      shortcuts.reset()
+      #expect(ShortcutStore(defaults: defaults).binding(for: .actualPixels) == commandOne)
+    }
   }
 
   @Test("이전 사용자 단축키를 보존하고 새 단축키도 수정·저장·초기화한다")
@@ -58,11 +93,25 @@ struct DisplayShortcutTests {
   }
 
   @Test("다섯 이동 방식의 메뉴 동작과 단축키가 같은 설정을 변경하고 저장한다")
-  func panActions() throws {
+  func panActions() async throws {
     let suite = "ImageViewer.ShortcutTests.\(UUID().uuidString)"
     let defaults = try #require(UserDefaults(suiteName: suite))
     defer { defaults.removePersistentDomain(forName: suite) }
     let store = AppStore(defaults: defaults, monitorsSystemResources: false)
+    let folder = FileManager.default.temporaryDirectory
+      .appendingPathComponent("pan-shortcut-\(UUID())", isDirectory: true)
+    try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+    defer { try? FileManager.default.removeItem(at: folder) }
+    let photo = folder.appendingPathComponent("synthetic.qoi")
+    try Data([0x71, 0x6f, 0x69, 0x66, 0, 0, 0, 1, 0, 0, 0, 1, 3, 0,
+      0xfe, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1]).write(to: photo)
+    store.open(urls: [photo])
+    let deadline = ContinuousClock.now + .seconds(5)
+    while (store.isLoading || store.isFiltering), ContinuousClock.now < deadline {
+      try await Task.sleep(for: .milliseconds(10))
+    }
+    try #require(!store.isLoading && !store.isFiltering && store.assets.count == 1)
+    try #require(!store.showsHome && store.presentationMode == .viewer)
     for mode in PanInteractionMode.allCases {
       store.perform(mode.shortcutAction)
       #expect(store.panInteractionMode == mode)

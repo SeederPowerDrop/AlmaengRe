@@ -1,0 +1,23 @@
+/* About follows the app language; Korean is the original and fallback. */
+"subtitle" = "A macOS image viewer, free for everyone to use.";
+"opening" = "While looking for an image viewer I liked on the Mac, I ended up making one myself through vibe coding. This app takes inspiration from several image viewers on Windows and macOS.";
+"story" = "I'd also like to share the story behind the app's name, which took some thought to choose. When I was young, I became fascinated with a program called 알맹이3, created by 안일준 프로그램 연구소 (An Il-jun's Software Lab, www.aijsoft.com). Looking back, it was a little rough around the edges, but its many features captivated me. What stayed with me most was the developer's own account of why they made it and what made it special.\n\nI don't know where the developer is now or how they're doing. I only vaguely remember that they may have moved to Australia. To pay tribute to that program and the spirit behind it, I named this app 알맹Re.";
+"philosophy" = "Just as the knowledge we share can help someone get started, I hope the tools I make will open up new possibilities for others. I hope everyone can use the basic features they need on their computers with ease and at no cost. I'd like people and AI alike to be able to use basic digital tools freely, learning and creating together.";
+"thanks" = "Thank you.";
+"closing" = "And ERW FWS WRG";
+"close" = "Close";
+"windowTitle" = "About 알맹Re";
+"profile" = "Developer profile illustration";
+"confirm" = "OK";
+"licenses" = "Open-source licenses";
+"back" = "Back to introduction";
+"guide" = "Getting started";
+"supportTitle" = "Support this project";
+"supportMessage" = "To pass on the help I've received, I make tools that everyone can use for free. If you've found this app useful, a small donation would mean a lot.";
+"bitcoinDescription" = "Scan the QR code with a Bitcoin wallet such as BlueWallet, or send a donation to the address below.";
+"bitcoinAddress" = "Bitcoin donation address";
+"bitcoinQR" = "QR code for the Bitcoin donation address";
+"copyAddress" = "Copy address";
+"addressCopied" = "Address copied.";
+"openWallet" = "Open in wallet";
+"walletUnavailable" = "Copy the Bitcoin address and paste it into your wallet.";

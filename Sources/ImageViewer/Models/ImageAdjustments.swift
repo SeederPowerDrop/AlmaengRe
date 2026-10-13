@@ -1,7 +1,7 @@
 import CoreGraphics
 import Foundation
 
-/// 회전한 이미지의 좌상단을 원점으로 하는, 해상도에 독립적인 자르기 영역입니다.
+/// 회전·반전한 이미지의 좌상단을 원점으로 하는, 해상도에 독립적인 자르기 영역입니다.
 struct NormalizedCrop: Codable, Hashable, Sendable {
   var x: Double
   var y: Double
@@ -56,6 +56,18 @@ struct NormalizedCrop: Codable, Hashable, Sendable {
     return Self(x: crop.y, y: 1 - crop.x - crop.width,
       width: crop.height, height: crop.width).normalized
   }
+
+  func flippedHorizontally() -> Self {
+    let crop = normalized
+    return Self(x: 1 - crop.x - crop.width, y: crop.y,
+      width: crop.width, height: crop.height).normalized
+  }
+
+  func flippedVertically() -> Self {
+    let crop = normalized
+    return Self(x: crop.x, y: 1 - crop.y - crop.height,
+      width: crop.width, height: crop.height).normalized
+  }
 }
 
 /// 뷰어에서 비파괴적으로 적용하는 기본 이미지 보정값입니다.
@@ -72,8 +84,21 @@ struct ImageAdjustments: Codable, Hashable, Sendable {
   var temperature: Double = 0
   var vibrance: Double = 0
   var exposure: Double = 0
+  var shadows: Double = 0
+  var blackPoint: Double = 0
+  var whites: Double = 0
+  var toneCurves = ImageToneCurves()
+  var colorMixer = ImageColorMixer()
+  var texture: Double = 0
+  var clarity: Double = 0
+  var dehaze: Double = 0
+  var filmLook: ImageFilmLook = .none
+  var filmStrength: Double = 1
   var isInverted = false
   var quarterTurns = 0
+  // Reflections are applied after rotation, in the displayed image's axes.
+  var isFlippedHorizontally = false
+  var isFlippedVertically = false
   var crop: NormalizedCrop? = nil
 
   static let identity = ImageAdjustments()
@@ -89,8 +114,13 @@ struct ImageAdjustments: Codable, Hashable, Sendable {
       && temperature == 0
       && vibrance == 0
       && exposure == 0
+      && shadows == 0 && blackPoint == 0 && whites == 0
+      && toneCurves.isIdentity && colorMixer.isIdentity
+      && texture == 0 && clarity == 0 && dehaze == 0
+      && (filmLook == .none || filmStrength == 0)
       && !isInverted
       && normalizedQuarterTurns == 0
+      && !isFlippedHorizontally && !isFlippedVertically
       && effectiveCrop == nil
   }
 
@@ -106,12 +136,24 @@ struct ImageAdjustments: Codable, Hashable, Sendable {
 
   mutating func rotateClockwise() {
     crop = effectiveCrop?.rotatedClockwise()
+    swap(&isFlippedHorizontally, &isFlippedVertically)
     quarterTurns = (normalizedQuarterTurns + 1) % 4
   }
 
   mutating func rotateCounterclockwise() {
     crop = effectiveCrop?.rotatedCounterclockwise()
+    swap(&isFlippedHorizontally, &isFlippedVertically)
     quarterTurns = (normalizedQuarterTurns + 3) % 4
+  }
+
+  mutating func flipHorizontally() {
+    crop = effectiveCrop?.flippedHorizontally()
+    isFlippedHorizontally.toggle()
+  }
+
+  mutating func flipVertically() {
+    crop = effectiveCrop?.flippedVertically()
+    isFlippedVertically.toggle()
   }
 
   mutating func reset() {
@@ -123,6 +165,9 @@ extension ImageAdjustments {
   private enum CodingKeys: String, CodingKey {
     case brightness, contrast, saturation, highlights, sharpness, noiseReduction
     case hue, temperature, vibrance, exposure, isInverted, quarterTurns, crop
+    case shadows, blackPoint, whites, toneCurves, colorMixer, texture, clarity, dehaze
+    case filmLook, filmStrength
+    case isFlippedHorizontally, isFlippedVertically
   }
 
   /// 이전 저장값에 새 키가 없어도 추가 보정은 기본값으로 복원합니다.
@@ -139,8 +184,20 @@ extension ImageAdjustments {
     temperature = try values.decodeIfPresent(Double.self, forKey: .temperature) ?? 0
     vibrance = try values.decodeIfPresent(Double.self, forKey: .vibrance) ?? 0
     exposure = try values.decodeIfPresent(Double.self, forKey: .exposure) ?? 0
+    shadows = try values.decodeIfPresent(Double.self, forKey: .shadows) ?? 0
+    blackPoint = try values.decodeIfPresent(Double.self, forKey: .blackPoint) ?? 0
+    whites = try values.decodeIfPresent(Double.self, forKey: .whites) ?? 0
+    toneCurves = try values.decodeIfPresent(ImageToneCurves.self, forKey: .toneCurves) ?? .init()
+    colorMixer = try values.decodeIfPresent(ImageColorMixer.self, forKey: .colorMixer) ?? .init()
+    texture = try values.decodeIfPresent(Double.self, forKey: .texture) ?? 0
+    clarity = try values.decodeIfPresent(Double.self, forKey: .clarity) ?? 0
+    dehaze = try values.decodeIfPresent(Double.self, forKey: .dehaze) ?? 0
+    filmLook = try values.decodeIfPresent(ImageFilmLook.self, forKey: .filmLook) ?? .none
+    filmStrength = try values.decodeIfPresent(Double.self, forKey: .filmStrength) ?? 1
     isInverted = try values.decodeIfPresent(Bool.self, forKey: .isInverted) ?? false
     quarterTurns = try values.decodeIfPresent(Int.self, forKey: .quarterTurns) ?? 0
+    isFlippedHorizontally = try values.decodeIfPresent(Bool.self, forKey: .isFlippedHorizontally) ?? false
+    isFlippedVertically = try values.decodeIfPresent(Bool.self, forKey: .isFlippedVertically) ?? false
     crop = try values.decodeIfPresent(NormalizedCrop.self, forKey: .crop)?.normalized
   }
 }

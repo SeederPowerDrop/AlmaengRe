@@ -7,11 +7,43 @@ import Testing
 @Suite("다중 선택과 이름 변경 연결")
 @MainActor
 struct BatchSelectionTests {
+  @Test("우클릭 후 목록이 바뀌어도 원래 파일을 선택하고 사라진 대상은 중단한다")
+  func contextMenuKeepsFileIdentity() async throws {
+    let folder = try makeLibrary()
+    defer { try? FileManager.default.removeItem(at: folder) }
+    let store = AppStore(defaults: UserDefaults(suiteName: "BatchSelectionTests-\(UUID())")!,
+      monitorsSystemResources: false)
+    store.open(urls: [folder])
+    try await waitForLoad(store)
+    let target = store.assets[1].url
+    store.libraryQuery.sort = .nameDescending
+    #expect(!store.prepareBatchContextSelection(url: target))
+    try await waitForQuery(store)
+    #expect(store.assets[1].url != target)
+    #expect(store.prepareBatchContextSelection(url: target))
+    #expect(store.selectedURLs == [target])
+
+    store.selectAllAssets()
+    let group = store.selectedURLs
+    #expect(store.prepareBatchContextSelection(url: target))
+    #expect(store.selectedURLs == group)
+
+    store.libraryQuery.searchText = "photo4"
+    try await waitForQuery(store)
+    store.selectAllAssets()
+    let remaining = store.selectedURLs
+    #expect(!store.prepareBatchContextSelection(url: target))
+    #expect(store.selectedURLs == remaining)
+    #expect(!remaining.contains(target))
+    #expect(store.batchSheet == nil)
+  }
+
   @Test("⌘ 선택, ⇧ 범위, 전체 선택과 해제가 목록 순서를 유지한다")
   func selectionGestures() async throws {
     let folder = try makeLibrary()
     defer { try? FileManager.default.removeItem(at: folder) }
-    let store = AppStore()
+    let store = AppStore(defaults: UserDefaults(suiteName: "BatchSelectionTests-\(UUID())")!,
+      monitorsSystemResources: false)
     store.open(urls: [folder])
     try await waitForLoad(store)
     let urls = store.assets.map(\.url)
@@ -47,7 +79,8 @@ struct BatchSelectionTests {
       try? FileManager.default.removeItem(at: second)
     }
     let inputs = [first.appendingPathComponent("photo1.qoi"), second.appendingPathComponent("photo3.qoi")]
-    let store = AppStore()
+    let store = AppStore(defaults: UserDefaults(suiteName: "BatchSelectionTests-\(UUID())")!,
+      monitorsSystemResources: false)
     store.open(urls: inputs)
     try await waitForLoad(store)
     store.select(index: 1)
@@ -72,7 +105,8 @@ struct BatchSelectionTests {
   func folderRenameUpdatesLibraryThroughPathAliases() async throws {
     let folder = try makeLibrary(in: URL(fileURLWithPath: "/private/tmp", isDirectory: true))
     defer { try? FileManager.default.removeItem(at: folder) }
-    let store = AppStore()
+    let store = AppStore(defaults: UserDefaults(suiteName: "BatchSelectionTests-\(UUID())")!,
+      monitorsSystemResources: false)
     store.open(urls: [folder])
     try await waitForLoad(store)
     let originalURLs = store.assets.map(\.url)
@@ -115,6 +149,14 @@ struct BatchSelectionTests {
     }
     #expect(!store.isLoading)
     try #require(!store.assets.isEmpty)
+  }
+
+  private func waitForQuery(_ store: AppStore) async throws {
+    for _ in 0..<200 {
+      if !store.isFiltering { break }
+      try await Task.sleep(for: .milliseconds(10))
+    }
+    try #require(!store.isFiltering)
   }
 
   private func makeLibrary(in parent: URL = FileManager.default.temporaryDirectory) throws -> URL {

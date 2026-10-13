@@ -1,0 +1,16 @@
+"editor.open" = "Vergleichsnamen…";
+"editor.title" = "Vergleichsnamen";
+"editor.left" = "Name links";
+"editor.right" = "Name rechts";
+"editor.top" = "Name oben";
+"editor.bottom" = "Name unten";
+"automatic.label" = "Automatischer Name: %@";
+"editor.help" = "Leer lassen, um Ordnernamen zu verwenden. Derselbe Ordner wird durch A/B unterschieden. Die tatsächlichen Ordnernamen bleiben unverändert.";
+"editor.reset" = "Automatische Namen verwenden";
+"action.cancel" = "Abbrechen";
+"action.save" = "Sichern";
+"target.only" = "Nur %@";
+"target.left" = "%@ · Links";
+"target.right" = "%@ · Rechts";
+"target.top" = "%@ · Oben";
+"target.bottom" = "%@ · Unten";

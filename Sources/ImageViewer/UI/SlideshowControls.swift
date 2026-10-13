@@ -18,7 +18,7 @@ struct SlideshowOptionsView: View {
           .labelsHidden()
       }
       Toggle("전자 앨범 반복 재생", isOn: $store.slideshowRepeats)
-      Text("1~300초. 사진이 표시된 뒤 시간을 셉니다. 집중 보기를 나가거나 다른 앱으로 전환하면 일시정지합니다.")
+      Text("1~300초. 사진은 표시된 뒤 시간을 세고, 영상은 끝까지 재생한 뒤 넘어갑니다. 집중 보기를 나가거나 다른 앱으로 전환하면 일시정지합니다.")
         .font(.caption)
         .foregroundStyle(.secondary)
         .fixedSize(horizontal: false, vertical: true)

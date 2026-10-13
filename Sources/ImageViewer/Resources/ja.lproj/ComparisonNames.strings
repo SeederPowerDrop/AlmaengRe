@@ -1,0 +1,16 @@
+"editor.open" = "比較名…";
+"editor.title" = "比較名";
+"editor.left" = "左の名前";
+"editor.right" = "右の名前";
+"editor.top" = "上の名前";
+"editor.bottom" = "下の名前";
+"automatic.label" = "自動の名前：%@";
+"editor.help" = "空欄ではフォルダ名を使います。同じフォルダはA/Bで区別します。実際のフォルダ名は変わりません。";
+"editor.reset" = "自動の名前に戻す";
+"action.cancel" = "キャンセル";
+"action.save" = "保存";
+"target.only" = "%@のみ";
+"target.left" = "%@ · 左";
+"target.right" = "%@ · 右";
+"target.top" = "%@ · 上";
+"target.bottom" = "%@ · 下";

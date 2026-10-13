@@ -1,5 +1,18 @@
 import SwiftUI
 
+/// Keep random access and stable file IDs without allocating an enumerated array
+/// whenever selection changes. The backing array shares its existing storage.
+struct IndexedImageAssets: RandomAccessCollection {
+  typealias Index = Int
+  typealias Element = (index: Int, asset: ImageAsset)
+  private let assets: [ImageAsset]
+
+  init(_ assets: [ImageAsset]) { self.assets = assets }
+  var startIndex: Int { assets.startIndex }
+  var endIndex: Int { assets.endIndex }
+  subscript(position: Int) -> Element { (position, assets[position]) }
+}
+
 /// 각 비교 칸의 전체 목록과 현재 위치를 보여 줍니다. 화면에 보이는 셀만 읽습니다.
 struct ComparisonFilmstrip: View {
   @ObservedObject var store: AppStore
@@ -15,9 +28,9 @@ struct ComparisonFilmstrip: View {
     ScrollViewReader { proxy in
       ScrollView(.horizontal) {
         LazyHStack(spacing: 5) {
-          ForEach(Array(pane.assets.enumerated()), id: \.element.id) { index, asset in
-            thumbnail(asset, at: index)
-              .id(asset.id)
+          ForEach(IndexedImageAssets(pane.assets), id: \.asset.id) { entry in
+            thumbnail(entry.asset, at: entry.index)
+              .id(entry.asset.id)
           }
         }
         .padding(.horizontal, 10)
@@ -38,7 +51,7 @@ struct ComparisonFilmstrip: View {
   }
 
   private func thumbnail(_ asset: ImageAsset, at index: Int) -> some View {
-    let isCurrent = pane.index == index
+    let isCurrent = pane.currentAsset?.id == asset.id
     return Button {
       comparison.jump(side, number: index + 1)
     } label: {

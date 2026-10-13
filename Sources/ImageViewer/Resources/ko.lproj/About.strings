@@ -1,0 +1,23 @@
+/* About follows the app language; Korean is the original and fallback. */
+"subtitle" = "누구나 자유롭게 쓰는 macOS 이미지 뷰어.";
+"opening" = "맥에서 쓸 만한 이미지 뷰어를 찾다가, 바이브 코딩으로 직접 만들게 되었습니다. 윈도우와 맥의 여러 이미지 뷰어에서 영감을 받아 만든 앱입니다.";
+"story" = "고민 끝에 지은 앱 이름의 유래도 전하고 싶습니다. 어렸을 적 안일준 프로그램 연구소(www.aijsoft.com)에서 만든 알맹이3라는 프로그램에 푹 빠진 적이 있습니다. 지금 돌아보면 투박한 프로그램이었지만, 그 안의 이런저런 기능에 매료되었습니다. 특히 개발자분이 직접 적으신 알맹이의 제작 이유와 특징 소개가 오래도록 기억에 남았습니다.\n\n지금은 그 개발자분이 어디서 어떻게 지내시는지 알지 못합니다. 호주로 이민을 가셨던 것 같다는 어렴풋한 기억만 남아 있네요. 그 시절의 프로그램과 그 마음을 기리고 싶어, 이 앱의 이름을 알맹Re로 지었습니다.";
+"philosophy" = "함께 나눈 지식이 누군가의 시작이 되듯, 제가 만든 도구도 누군가의 가능성을 넓혀 주기를 바랍니다. 누구나 컴퓨터를 사용하는 데 필요한 기본적인 기능을 무료로, 편하게 누릴 수 있으면 좋겠습니다. 사람과 AI 모두 기본적인 디지털 도구를 자유롭게 쓰며, 함께 배우고 만들어 갈 수 있었으면 합니다.";
+"thanks" = "감사합니다.";
+"closing" = "그리고 ERW FWS WRG";
+"close" = "닫기";
+"windowTitle" = "알맹Re 정보";
+"profile" = "개발자 프로필 그림";
+"confirm" = "확인";
+"licenses" = "오픈소스 라이선스";
+"back" = "소개로 돌아가기";
+"guide" = "기본 사용법";
+"supportTitle" = "후원하기";
+"supportMessage" = "제가 받은 도움을 다시 나누는 마음으로, 누구나 무료로 쓸 수 있는 도구를 만듭니다. 유용하게 쓰셨다면 작은 후원으로 응원해 주세요.";
+"bitcoinDescription" = "BlueWallet 등 Bitcoin 지갑에서 QR 코드를 스캔하거나 아래 주소로 후원할 수 있습니다.";
+"bitcoinAddress" = "Bitcoin 후원 주소";
+"bitcoinQR" = "Bitcoin 후원 주소 QR 코드";
+"copyAddress" = "주소 복사";
+"addressCopied" = "주소를 복사했습니다.";
+"openWallet" = "지갑에서 열기";
+"walletUnavailable" = "Bitcoin 주소를 복사해 사용 중인 지갑에 붙여 넣어 주세요.";

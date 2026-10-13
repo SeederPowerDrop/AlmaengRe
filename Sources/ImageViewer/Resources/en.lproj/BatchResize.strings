@@ -1,0 +1,12 @@
+"일괄 변환 · 크기 변경" = "Batch Convert & Resize";
+"크기 유지" = "Keep size";
+"긴 변 기준" = "Longest edge";
+"비율 기준" = "Percentage";
+"이미지 크기" = "Image size";
+"픽셀" = "pixels";
+"용량 줄이기 설정" = "Reduce file size preset";
+"현재 조정·자르기 후의 비율을 유지해 줄이며, 작은 이미지는 확대하지 않습니다." = "Shrinks proportionally after current adjustments and cropping. Smaller images are not enlarged.";
+"용량 줄이기는 JPEG·긴 변 1920픽셀·품질 75%로 설정합니다. 결과 용량은 사진마다 다르며 더 커질 수도 있습니다." = "The preset uses JPEG, a 1920-pixel longest edge, and 75% quality. File sizes vary and may increase.";
+"긴 변은 1~65536픽셀, 비율은 1~100%로 입력하세요." = "Enter a longest edge of 1–65536 pixels or a percentage of 1–100%.";
+"이미지 크기를 변경하지 못했습니다." = "The image could not be resized.";
+"완료한 파일 공유…" = "Share completed files…";

@@ -1,0 +1,16 @@
+"editor.open" = "Noms de comparaison…";
+"editor.title" = "Noms de comparaison";
+"editor.left" = "Nom de gauche";
+"editor.right" = "Nom de droite";
+"editor.top" = "Nom du haut";
+"editor.bottom" = "Nom du bas";
+"automatic.label" = "Nom automatique : %@";
+"editor.help" = "Laissez vide pour utiliser les noms des dossiers. Un même dossier est distingué par A/B. Les noms réels des dossiers ne changent pas.";
+"editor.reset" = "Noms automatiques";
+"action.cancel" = "Annuler";
+"action.save" = "Enregistrer";
+"target.only" = "%@ uniquement";
+"target.left" = "%@ · Gauche";
+"target.right" = "%@ · Droite";
+"target.top" = "%@ · Haut";
+"target.bottom" = "%@ · Bas";

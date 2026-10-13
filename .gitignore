@@ -1,7 +1,12 @@
 .DS_Store
 /.build/
 /.swiftpm/
+__pycache__/
 /dist/
+# Local packages, previews, checkpoints and rendered QA intermediates.
+# Published manuals remain versioned under docs/user-guide/.
+/output/
+/tmp/
 *.xcuserstate
 xcuserdata/
 DerivedData/

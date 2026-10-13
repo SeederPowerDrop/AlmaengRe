@@ -4,11 +4,12 @@ import UniformTypeIdentifiers
 /// 모든 열기 진입점은 파일과 폴더를 함께 고르는 같은 대화상자를 사용합니다.
 @MainActor
 enum ImageOpenPanel {
-  static func make() -> NSOpenPanel {
+  static func make(includesVideos: Bool = false) -> NSOpenPanel {
     let panel = NSOpenPanel()
     panel.title = L10n.text("열기")
     panel.prompt = L10n.text("열기")
-    panel.message = L10n.text("이미지 또는 폴더를 선택하세요.")
+    panel.message = includesVideos ? MotionMediaL10n.text("open.message")
+      : L10n.text("이미지 또는 폴더를 선택하세요.")
     panel.canChooseDirectories = true
     panel.canChooseFiles = true
     panel.allowsMultipleSelection = true

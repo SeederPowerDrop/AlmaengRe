@@ -24,9 +24,9 @@ struct DefaultImageFormat: Identifiable, Hashable, Sendable {
     }
   }
 
-  static let all: [Self] = [
+  private static let families: [Self] = [
     Self(
-      id: "jpeg", titleKey: "JPEG 이미지", filenameExtensions: ["jpg", "jpeg", "jpe", "jfif"],
+      id: "jpeg", titleKey: "JPEG 이미지", filenameExtensions: ["jpg", "jpeg", "jpe", "jfif", "jif", "jfi"],
       typeIdentifiers: ["public.jpeg"]),
     Self(
       id: "png", titleKey: "PNG / APNG 이미지", filenameExtensions: ["png", "apng"],
@@ -54,7 +54,7 @@ struct DefaultImageFormat: Identifiable, Hashable, Sendable {
       id: "jpeg-xl", titleKey: "JPEG XL 이미지", filenameExtensions: ["jxl"],
       typeIdentifiers: ["public.jpeg-xl"]),
     Self(
-      id: "jpeg-2000", titleKey: "JPEG 2000 이미지", filenameExtensions: ["jp2", "j2k", "jpf", "jpx"],
+      id: "jpeg-2000", titleKey: "JPEG 2000 이미지", filenameExtensions: ["jp2", "j2k", "jpf", "jpx", "jpc", "j2c"],
       typeIdentifiers: ["public.jpeg-2000"]),
     Self(
       id: "photoshop", titleKey: "Photoshop 이미지", filenameExtensions: ["psd", "psb"],
@@ -85,10 +85,10 @@ struct DefaultImageFormat: Identifiable, Hashable, Sendable {
       typeIdentifiers: ["org.khronos.ktx", "org.khronos.ktx2", "org.khronos.astc", "public.pvr"]),
     Self(
       id: "raw", titleKey: "카메라 RAW 이미지",
-      filenameExtensions: ["raw", "dng", "cr2", "cr3", "nef", "arw", "orf", "rw2", "raf"],
+      filenameExtensions: ImageFormatRegistry.cameraRAWExtensions.sorted(),
       typeIdentifiers: rawTypeIdentifiers),
     Self(
-      id: "legacy", titleKey: "기타 레거시 이미지", filenameExtensions: ["pict", "sgi", "mpo", "atx"],
+      id: "legacy", titleKey: "기타 레거시 이미지", filenameExtensions: ["pict", "pic", "sgi", "rgb", "rgba", "bw", "mpo", "atx"],
       typeIdentifiers: ["com.apple.pict", "com.sgi.sgi-image", "public.mpo-image", "com.apple.atx"]),
     Self(
       id: "qoi", titleKey: "QOI 이미지", filenameExtensions: ["qoi"],
@@ -97,6 +97,47 @@ struct DefaultImageFormat: Identifiable, Hashable, Sendable {
       id: "pcx", titleKey: "PCX 이미지", filenameExtensions: ["pcx"],
       typeIdentifiers: ["org.openimageviewer.pcx"]),
   ]
+
+  /// Use the same native decoder inventory as folder scanning, including filename aliases.
+  /// Resolve aliases through Launch Services: third-party apps may register a different
+  /// concrete image UTI for an extension (for example PCX or APNG).
+  static let all: [Self] = {
+    var claimedIdentifiers = Set(families.flatMap(\.typeIdentifiers))
+    var claimedExtensions = Set<String>()
+    var result = families.map { family in
+      let aliases = family.typeIdentifiers.flatMap {
+        UTType($0)?.tags[.filenameExtension] ?? []
+      }
+      let extensions = Set(family.filenameExtensions + aliases)
+        .map { $0.lowercased() }.sorted().filter { claimedExtensions.insert($0).inserted }
+      let additionalTypes = extensions.compactMap { UTType(filenameExtension: $0) }
+        // Finder can represent a known image alias as a dynamic UTI. Include
+        // that exact type too; otherwise .jfif and several RAW aliases keep
+        // their old handler even after the parent image type is connected.
+        .filter { $0.isDynamic || $0.conforms(to: .image) }
+        .map(\.identifier).filter { claimedIdentifiers.insert($0).inserted }
+      return Self(id: family.id, titleKey: family.titleKey, filenameExtensions: extensions,
+        typeIdentifiers: family.typeIdentifiers + additionalTypes)
+    }
+    for identifier in ImageFormatRegistry.readableTypeIdentifiers.sorted()
+      where !claimedIdentifiers.contains(identifier) {
+      guard let type = UTType(identifier), type.conforms(to: .image) else { continue }
+      let aliases = (type.tags[.filenameExtension] ?? []).map { $0.lowercased() }.sorted()
+      guard !aliases.isEmpty else { continue }
+      claimedIdentifiers.insert(identifier)
+      let extensions = aliases.filter { claimedExtensions.insert($0).inserted }
+      if let index = result.firstIndex(where: { !Set($0.filenameExtensions).isDisjoint(with: aliases) }) {
+        let family = result[index]
+        result[index] = Self(id: family.id, titleKey: family.titleKey,
+          filenameExtensions: (family.filenameExtensions + extensions).sorted(),
+          typeIdentifiers: family.typeIdentifiers + [identifier])
+      } else {
+        result.append(Self(id: identifier, titleKey: aliases[0].uppercased(),
+          filenameExtensions: extensions, typeIdentifiers: [identifier]))
+      }
+    }
+    return result
+  }()
 
   private static let rawTypeIdentifiers = [
     "public.camera-raw-image", "com.adobe.raw-image", "com.canon.cr2-raw-image",
@@ -123,7 +164,7 @@ enum DefaultAppAssociationError: LocalizedError {
   case noSelection
   case applicationBundleRequired
   case noSupportedContentTypes
-  case someTypesFailed(successCount: Int, failureCount: Int)
+  case someTypesFailed(successCount: Int, failureCount: Int, formats: [String])
 
   var errorDescription: String? {
     switch self {
@@ -133,8 +174,9 @@ enum DefaultAppAssociationError: LocalizedError {
       L10n.text("기본 앱 연결은 배포된 알맹Re.app을 실행했을 때 사용할 수 있습니다.")
     case .noSupportedContentTypes:
       L10n.text("이 macOS에서 연결할 수 있는 이미지 형식을 찾지 못했습니다.")
-    case .someTypesFailed(let successCount, let failureCount):
+    case .someTypesFailed(let successCount, let failureCount, let formats):
       L10n.format("%d개 연결에 성공했고 %d개 연결에 실패했습니다.", successCount, failureCount)
+        + "\n" + L10n.format("연결 확인이 필요한 형식: %@", formats.joined(separator: ", "))
     }
   }
 }
@@ -142,23 +184,46 @@ enum DefaultAppAssociationError: LocalizedError {
 /// macOS의 공식 NSWorkspace API로 사용자가 고른 콘텐츠 타입만 기본 앱으로 연결합니다.
 @MainActor
 final class DefaultAppAssociationStore: ObservableObject {
-  @Published var selectedFormatIDs: Set<String> {
+  @Published private(set) var selectedFormatIDs: Set<String> {
     didSet {
-      UserDefaults.standard.set(Array(selectedFormatIDs).sorted(), forKey: Self.selectionKey)
+      defaults.set(Array(selectedFormatIDs).sorted(), forKey: Self.selectionKey)
     }
   }
   @Published private(set) var defaultTypeIdentifiers: Set<String> = []
   @Published private(set) var isApplying = false
   @Published private(set) var statusMessage: String?
 
-  let formats = DefaultImageFormat.all
+  let formats: [DefaultImageFormat]
+  private let defaults: UserDefaults
+  private let applicationURL: URL
+  private let defaultApplication: @MainActor (UTType) -> URL?
+  private let setDefaultApplication: @MainActor (URL, UTType) async throws -> Void
 
   private static let selectionKey = "ImageViewer.DefaultFormatSelection.v1"
 
-  init() {
-    selectedFormatIDs = Set(
-      UserDefaults.standard.stringArray(forKey: Self.selectionKey) ?? []
-    )
+  init(
+    defaults: UserDefaults = .standard,
+    applicationURL: URL = Bundle.main.bundleURL,
+    formats: [DefaultImageFormat] = DefaultImageFormat.all,
+    defaultApplication: @escaping @MainActor (UTType) -> URL? = {
+      NSWorkspace.shared.urlForApplication(toOpen: $0)
+    },
+    setDefaultApplication: @escaping @MainActor (URL, UTType) async throws -> Void = { url, type in
+      try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
+        NSWorkspace.shared.setDefaultApplication(at: url, toOpen: type) { error in
+          if let error { continuation.resume(throwing: error) }
+          else { continuation.resume(returning: ()) }
+        }
+      }
+    }
+  ) {
+    self.defaults = defaults
+    self.applicationURL = applicationURL
+    self.formats = formats
+    self.defaultApplication = defaultApplication
+    self.setDefaultApplication = setDefaultApplication
+    selectedFormatIDs = Set(defaults.stringArray(forKey: Self.selectionKey) ?? [])
+      .intersection(Set(formats.map(\.id)))
     refresh()
   }
 
@@ -167,6 +232,7 @@ final class DefaultAppAssociationStore: ObservableObject {
   }
 
   func setSelected(_ selected: Bool, format: DefaultImageFormat) {
+    guard !isApplying else { return }
     if selected {
       selectedFormatIDs.insert(format.id)
     } else {
@@ -175,10 +241,12 @@ final class DefaultAppAssociationStore: ObservableObject {
   }
 
   func selectAll() {
+    guard !isApplying else { return }
     selectedFormatIDs = Set(formats.map(\.id))
   }
 
   func clearSelection() {
+    guard !isApplying else { return }
     selectedFormatIDs.removeAll()
   }
 
@@ -194,12 +262,12 @@ final class DefaultAppAssociationStore: ObservableObject {
   }
 
   func applySelected() async throws {
+    guard !isApplying else { return }
     let selectedFormats = formats.filter { selectedFormatIDs.contains($0.id) }
     guard !selectedFormats.isEmpty else {
       throw DefaultAppAssociationError.noSelection
     }
 
-    let applicationURL = Bundle.main.bundleURL
     guard applicationURL.pathExtension.lowercased() == "app" else {
       throw DefaultAppAssociationError.applicationBundleRequired
     }
@@ -213,22 +281,26 @@ final class DefaultAppAssociationStore: ObservableObject {
     statusMessage = nil
     defer { isApplying = false }
 
-    var successCount = 0
-    var failureCount = 0
+    var failedIdentifiers = Set<String>()
     for contentType in contentTypes {
       do {
-        try await setDefaultApplication(applicationURL, for: contentType)
-        successCount += 1
+        try await setDefaultApplication(applicationURL, contentType)
       } catch {
-        failureCount += 1
+        failedIdentifiers.insert(contentType.identifier)
       }
     }
 
     refresh()
-    guard failureCount == 0 else {
+    // A completed request is not enough: verify the exact installed app, not just
+    // its bundle identifier (old builds and backup copies share that identifier).
+    failedIdentifiers.formUnion(contentTypes.map(\.identifier).filter {
+      !defaultTypeIdentifiers.contains($0)
+    })
+    guard failedIdentifiers.isEmpty else {
       throw DefaultAppAssociationError.someTypesFailed(
-        successCount: successCount,
-        failureCount: failureCount
+        successCount: contentTypes.count - failedIdentifiers.count,
+        failureCount: failedIdentifiers.count,
+        formats: selectedFormats.filter { !failedIdentifiers.isDisjoint(with: $0.typeIdentifiers) }.map(\.title)
       )
     }
     statusMessage = L10n.format("선택한 %d개 이미지 형식을 알맹Re에 연결했습니다.", selectedFormats.count)
@@ -236,30 +308,8 @@ final class DefaultAppAssociationStore: ObservableObject {
 
   private func isCurrentApplicationDefault(_ identifier: String) -> Bool {
     let type = UTType(identifier) ?? UTType(importedAs: identifier, conformingTo: .image)
-    guard let defaultURL = NSWorkspace.shared.urlForApplication(toOpen: type) else {
-      return false
-    }
-
-    let currentIdentifier = Bundle.main.bundleIdentifier
-    if let currentIdentifier,
-      Bundle(url: defaultURL)?.bundleIdentifier == currentIdentifier
-    {
-      return true
-    }
+    guard let defaultURL = defaultApplication(type) else { return false }
     return defaultURL.resolvingSymlinksInPath().standardizedFileURL
-      == Bundle.main.bundleURL.resolvingSymlinksInPath().standardizedFileURL
-  }
-
-  private func setDefaultApplication(_ applicationURL: URL, for contentType: UTType) async throws {
-    try await withCheckedThrowingContinuation {
-      (continuation: CheckedContinuation<Void, Error>) in
-      NSWorkspace.shared.setDefaultApplication(at: applicationURL, toOpen: contentType) { error in
-        if let error {
-          continuation.resume(throwing: error)
-        } else {
-          continuation.resume(returning: ())
-        }
-      }
-    }
+      == applicationURL.resolvingSymlinksInPath().standardizedFileURL
   }
 }

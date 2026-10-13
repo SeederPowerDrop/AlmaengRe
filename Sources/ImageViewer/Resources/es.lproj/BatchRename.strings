@@ -1,0 +1,11 @@
+"classification.mode" = "Usar un nombre de clasificación";
+"classification.label" = "Clasificación que se usará";
+"classification.choose" = "Elige una clasificación.";
+"classification.unavailable" = "No se pudo cargar la información de clasificación. Cierra esta ventana y comprueba que se haya guardado.";
+"classification.emptyName" = "Esta clasificación no tiene nombre. Asígnale uno e inténtalo de nuevo.";
+"classification.noMatches" = "Ningún archivo seleccionado tiene esta clasificación.";
+"classification.help" = "Solo se renombran los archivos de la clasificación elegida, en el orden de la lista. Por ejemplo: Subida01, Subida02. Con 100 archivos o más, la numeración empieza en 001 y se amplía según sea necesario.";
+"classification.scope" = "Se procesarán %d archivos coincidentes de un total de %d seleccionados. Los demás no cambiarán.";
+"classification.unnamed" = "Clasificación sin nombre";
+"classification.option" = "%@ · %@ (%d archivos)";
+"numbering.help" = "Los números se añaden antes de la extensión, en el orden actual de la lista. Para cambiar el formato de imagen, usa «%@».";

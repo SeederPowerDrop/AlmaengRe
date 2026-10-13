@@ -24,7 +24,7 @@ struct AppBrandingTests {
     #expect((info["CFBundleDocumentTypes"] as? [[String: Any]])?.isEmpty == false)
   }
 
-  @Test("8개 언어의 Finder 이름과 파일 연결 안내에 새 이름을 사용한다")
+  @Test("10개 언어의 Finder 이름과 파일 연결 안내에 새 이름을 사용한다")
   func localizedBranding() throws {
     for locale in L10n.supportedLocalizations {
       let folder = projectDirectory.appendingPathComponent(

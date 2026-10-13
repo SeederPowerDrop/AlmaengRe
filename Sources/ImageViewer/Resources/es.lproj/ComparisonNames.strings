@@ -1,0 +1,16 @@
+"editor.open" = "Nombres de comparación…";
+"editor.title" = "Nombres de comparación";
+"editor.left" = "Nombre izquierdo";
+"editor.right" = "Nombre derecho";
+"editor.top" = "Nombre superior";
+"editor.bottom" = "Nombre inferior";
+"automatic.label" = "Nombre automático: %@";
+"editor.help" = "Déjalo vacío para usar el nombre de la carpeta. Una misma carpeta se distingue con A/B. Los nombres reales de las carpetas no cambian.";
+"editor.reset" = "Usar nombres automáticos";
+"action.cancel" = "Cancelar";
+"action.save" = "Guardar";
+"target.only" = "Solo %@";
+"target.left" = "%@ · Izquierda";
+"target.right" = "%@ · Derecha";
+"target.top" = "%@ · Arriba";
+"target.bottom" = "%@ · Abajo";

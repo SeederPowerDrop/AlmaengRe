@@ -13,7 +13,7 @@ struct FolderComparisonTests {
     let suite = "FolderComparisonTests.\(UUID())"
     let defaults = try #require(UserDefaults(suiteName: suite))
     defer { defaults.removePersistentDomain(forName: suite) }
-    let comparison = FolderComparisonStore(defaults: defaults)
+    let comparison = FolderComparisonStore(defaults: defaults, alignment: .sequence)
     comparison.first.load(a); comparison.second.load(b)
     try await wait { !comparison.first.isLoading && !comparison.second.isLoading }
     #expect(comparison.first.assets.count == 4 && comparison.second.assets.count == 6)
@@ -50,7 +50,7 @@ struct FolderComparisonTests {
     let suite = "FolderComparisonHoldTests.\(UUID())"
     let defaults = try #require(UserDefaults(suiteName: suite))
     defer { defaults.removePersistentDomain(forName: suite) }
-    let comparison = FolderComparisonStore(defaults: defaults)
+    let comparison = FolderComparisonStore(defaults: defaults, alignment: .sequence)
     comparison.first.load(a); comparison.second.load(b)
     try await wait { !comparison.first.isLoading && !comparison.second.isLoading }
     #expect(comparison.endBehavior == .hold)
@@ -86,7 +86,7 @@ struct FolderComparisonTests {
     let suite = "FolderComparisonLoopTests.\(UUID())"
     let defaults = try #require(UserDefaults(suiteName: suite))
     defer { defaults.removePersistentDomain(forName: suite) }
-    let comparison = FolderComparisonStore(defaults: defaults)
+    let comparison = FolderComparisonStore(defaults: defaults, alignment: .sequence)
     comparison.endBehavior = .loop
     comparison.first.load(a); comparison.second.load(b)
     try await wait { !comparison.first.isLoading && !comparison.second.isLoading }
@@ -118,7 +118,7 @@ struct FolderComparisonTests {
     let suite = "FolderComparisonEqualCountTests.\(UUID())"
     let defaults = try #require(UserDefaults(suiteName: suite))
     defer { defaults.removePersistentDomain(forName: suite) }
-    let comparison = FolderComparisonStore(defaults: defaults)
+    let comparison = FolderComparisonStore(defaults: defaults, alignment: .sequence)
     comparison.endBehavior = .loop
     comparison.first.load(a); comparison.second.load(a)
     try await wait { !comparison.first.isLoading && !comparison.second.isLoading }
@@ -157,7 +157,7 @@ struct FolderComparisonTests {
     let suite = "FolderComparisonAvailablePaneTests.\(UUID())"
     let defaults = try #require(UserDefaults(suiteName: suite))
     defer { defaults.removePersistentDomain(forName: suite) }
-    let comparison = FolderComparisonStore(defaults: defaults)
+    let comparison = FolderComparisonStore(defaults: defaults, alignment: .sequence)
     #expect(!comparison.canNavigateBoth(1))
     comparison.first.load(a)
     try await wait { !comparison.first.isLoading }
@@ -215,6 +215,9 @@ struct FolderComparisonTests {
     #expect(pane.assets.count == 2 && pane.folderURL == b)
     pane.load(empty)
     try await wait { !pane.isLoading }
+    #expect(pane.assets.isEmpty && pane.errorMessage == nil)
+    pane.load(empty.appendingPathComponent("missing-folder"))
+    try await wait { !pane.isLoading }
     #expect(pane.assets.isEmpty && pane.errorMessage != nil)
     pane.load(a); pane.cancelLoad()
     try await Task.sleep(for: .milliseconds(100))
@@ -226,7 +229,7 @@ struct FolderComparisonTests {
     let suite = "FolderComparisonViewportTests.\(UUID())"
     let defaults = try #require(UserDefaults(suiteName: suite))
     defer { defaults.removePersistentDomain(forName: suite) }
-    let comparison = FolderComparisonStore(defaults: defaults)
+    let comparison = FolderComparisonStore(defaults: defaults, alignment: .sequence)
     #expect(comparison.linksViewport && comparison.arrangement == .horizontal)
     #expect(comparison.endBehavior == .hold && comparison.showsThumbnails)
     comparison.updateZoom(2, on: .first)
@@ -248,12 +251,12 @@ struct FolderComparisonTests {
     comparison.linksViewport = false
     comparison.endBehavior = .loop
     comparison.showsThumbnails = false
-    let restored = FolderComparisonStore(defaults: defaults)
+    let restored = FolderComparisonStore(defaults: defaults, alignment: .sequence)
     #expect(restored.arrangement == .vertical && !restored.linksViewport)
     #expect(restored.endBehavior == .loop && !restored.showsThumbnails)
     #expect(restored.first.assets.isEmpty && restored.second.assets.isEmpty)
     defaults.set("unknown", forKey: "ImageViewer.ComparisonEndBehavior.v1")
-    #expect(FolderComparisonStore(defaults: defaults).endBehavior == .hold)
+    #expect(FolderComparisonStore(defaults: defaults, alignment: .sequence).endBehavior == .hold)
   }
 
   @Test("한쪽 잠금은 이미지·확대·위치를 유지하고 다른 쪽만 조작한다")
@@ -263,7 +266,7 @@ struct FolderComparisonTests {
     let suite = "FolderComparisonLockTests.\(UUID())"
     let defaults = try #require(UserDefaults(suiteName: suite))
     defer { defaults.removePersistentDomain(forName: suite) }
-    let comparison = FolderComparisonStore(defaults: defaults)
+    let comparison = FolderComparisonStore(defaults: defaults, alignment: .sequence)
     comparison.first.load(a); comparison.second.load(b)
     try await wait { !comparison.first.isLoading && !comparison.second.isLoading }
     comparison.navigate(.first, direction: 1)
@@ -315,7 +318,7 @@ struct FolderComparisonTests {
     let suite = "FolderComparisonCoordinatesTests.\(UUID())"
     let defaults = try #require(UserDefaults(suiteName: suite))
     defer { defaults.removePersistentDomain(forName: suite) }
-    let comparison = FolderComparisonStore(defaults: defaults)
+    let comparison = FolderComparisonStore(defaults: defaults, alignment: .sequence)
     comparison.updateBaseImageSize(CGSize(width: 400, height: 200), on: .first)
     comparison.updateBaseImageSize(CGSize(width: 200, height: 400), on: .second)
     comparison.updateZoom(2, on: .first)
@@ -376,7 +379,7 @@ struct FolderComparisonTests {
     let suite = "FolderComparisonTrackpadTests.\(UUID())"
     let defaults = try #require(UserDefaults(suiteName: suite))
     defer { defaults.removePersistentDomain(forName: suite) }
-    let comparison = FolderComparisonStore(defaults: defaults)
+    let comparison = FolderComparisonStore(defaults: defaults, alignment: .sequence)
     comparison.updateZoom(2)
     let delta = CGSize(width: 30, height: 40)
     #expect(comparison.handlePointerPan(.trackpadScroll, delta: delta, on: .first,
@@ -409,6 +412,8 @@ struct FolderComparisonTests {
     let defaults = try #require(UserDefaults(suiteName: suite))
     defer { defaults.removePersistentDomain(forName: suite) }
     let store = AppStore(defaults: defaults, monitorsSystemResources: false)
+    // This routing regression exercises the retained independent sequence mode.
+    store.folderComparison.alignment = .sequence
     store.open(urls: [a])
     try await wait { !store.isLoading }
     store.select(index: 2)
@@ -431,7 +436,7 @@ struct FolderComparisonTests {
     #expect(store.folderComparison.first.index == 2)
   }
 
-  @Test("8개 언어와 충돌 없는 개별 탐색 단축키를 제공한다")
+  @Test("10개 언어와 충돌 없는 개별 탐색 단축키를 제공한다")
   func localizationAndShortcuts() {
     let keys = [
       "이미지 비교",
@@ -439,6 +444,14 @@ struct FolderComparisonTests {
       "이미지 비교 시작",
       "A · 왼쪽/위",
       "B · 오른쪽/아래",
+      "A · 왼쪽",
+      "A · 위",
+      "B · 오른쪽",
+      "B · 아래",
+      "이 폴더에 같은 이름의 사진이 없습니다.",
+      "폴더는 그대로 열려 있습니다. 파일명과 관계없이 보려면 목록 순서로 전환하세요.",
+      "목록 순서로 비교",
+      "양쪽 폴더를 목록 순서대로 비교합니다. 각 칸의 사진을 따로 고를 수 있습니다.",
       "좌우 배치",
       "상하 배치",
       "%@ 폴더 열기",

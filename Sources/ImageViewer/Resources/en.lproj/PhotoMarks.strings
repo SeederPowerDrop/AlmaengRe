@@ -1,0 +1,135 @@
+/* Photo marking and keyboard classification. */
+"mode.title" = "Tagging";
+"mode.help" = "With Tagging ON, use 1–4, QWER, and ASDF to toggle tags.";
+"mode.toggle" = "Toggle Tagging Mode";
+"mode.active" = "Tagging Mode";
+"mode.unavailable" = "Open a photo or video to tag it.";
+"menu.title" = "Photo Tags";
+"menu.edit" = "Edit Tag Names & Colors…";
+"panel.title" = "Photo Tags";
+"panel.hint" = "← → Browse items · 1–4, QWER, ASDF tag";
+"panel.multipleHint" = "A photo or video can have multiple tags.";
+"panel.noPhoto" = "Open a photo or video to tag.";
+"panel.loading" = "Loading photo tags…";
+"panel.close" = "Exit Tagging Mode";
+"labels.edit" = "Edit Tag Names & Colors";
+"labels.title" = "Tag Names and Colors by Key";
+"labels.hint" = "Keys have no built-in rating or action; the initial names are examples. Choose a name and color for each tag. These settings apply to all folders, and changing them keeps existing photo tags.";
+"labels.safety" = "Tags only add or remove marks. They never edit, delete, move, or upload original files.";
+"labels.placeholder" = "Tag name";
+"labels.unnamed" = "Unnamed tag";
+"labels.keyFormat" = "Tag name for %@";
+"save" = "Save";
+"cancel" = "Cancel";
+"done" = "Done";
+"filter.title" = "Tags";
+"filter.activeFormat" = "Tags %d";
+"filter.any" = "Any selected tag";
+"filter.all" = "All selected tags";
+"filter.allPhotos" = "All Photos";
+"filter.unmarked" = "Untagged Photos";
+"filter.reset" = "Clear Tag Filter";
+"filter.help" = "Gather photos by tag";
+"filter.empty" = "Try changing the tag or search filters.";
+"badge.moreFormat" = "+%d";
+"badge.accessibilityFormat" = "Tags: %@";
+"error.title" = "Unable to Save Photo Tags";
+"storage.error" = "Could not access photo tag data.";
+"default.one" = "⭐";
+"default.two" = "⭐⭐";
+"default.three" = "⭐⭐⭐";
+"default.four" = "⭐⭐⭐⭐";
+"default.q" = "Upload";
+"default.w" = "Retouch";
+"default.e" = "Delete";
+"default.r" = "Hold";
+"default.a" = "Landscape";
+"default.s" = "People";
+"default.d" = "Objects";
+"default.f" = "Animals";
+"panel.filterStable" = "The list stays in place while tagging. Results update when you exit tagging mode.";
+
+/* Editable key assignments and detailed help. */
+"settings.title" = "Photo Tags";
+"settings.hint" = "Set tag names and colors before opening any photos. Save to apply them to all folders and keep them for your next session.";
+"labels.keyHelpFormat" = "%@ is a shortcut for the tag name beside it. Edit that name to choose what this key marks.";
+"labels.editHelp" = "Choose tag names and colors for the 12 keys. Changes apply to all folders and keep existing photo tags.";
+"labels.saveHelp" = "Save tag names and colors for all folders. Existing photo tags are kept.";
+"labels.cancelHelp" = "Close the editor without saving name or color changes.";
+"labels.previewTitle" = "Key Assignments";
+"labels.previewFormat" = "%@ → %@";
+"mark.addHelpFormat" = "%@ → %@: with Tagging ON, press the key or click to add; repeat to remove. Multiple tags can coexist and original files stay unchanged.";
+"mark.removeHelpFormat" = "%@ → %@: this tag is applied. With Tagging ON, press the key or click to remove it. Other tags and original files stay unchanged.";
+"mode.detailHelp" = "⌘⇧M turns Tagging on or off. With it ON, use 1–4, QWER, ASDF or the tag panel to tag all selected photos and videos. Use checkboxes or ⌘-click to select multiple items and ⇧-click for a range. Each card’s Tags menu affects only that item. With Tagging OFF, ordinary viewing shortcuts apply. In Image Comparison, choose A Only, B Only, or Both under Apply Tags.";
+"labels.settingsLink" = "Edit Tag Names & Colors…";
+"labels.revert" = "Revert Changes";
+"labels.revertHelp" = "Restore saved tag names and colors without closing Settings. Unsaved changes are discarded.";
+
+/* Shared tag colors. */
+"colors.title" = "Color";
+"colors.keyFormat" = "Tag color for %@";
+"colors.help" = "Your color appears in tag panels, menus, and thumbnails. It is saved with the name.";
+"color.red" = "Red";
+"color.orange" = "Orange";
+"color.yellow" = "Yellow";
+"color.green" = "Green";
+"color.teal" = "Teal";
+"color.blue" = "Blue";
+"color.indigo" = "Indigo";
+"color.purple" = "Purple";
+"color.pink" = "Pink";
+"color.gray" = "Gray";
+
+/* Independent tag filters for comparison panes. */
+"comparison.open" = "Compare Current Photos by Tag";
+"comparison.openHelp" = "Open the current source collection in A and B. Keep the search, format, and map area filters, and choose tags separately for each pane.";
+"comparison.filter" = "Choose Tags";
+"comparison.allPhotos" = "All Photos";
+"comparison.titleFormat" = "Tags for Pane %@";
+"comparison.selectionHelp" = "Choose multiple tags to show in this pane. The same photo may appear on both sides.";
+"comparison.empty" = "No photos match these conditions.";
+"comparison.emptyHelp" = "Change the tags or check the shared search, format, and map area filters.";
+"comparison.reset" = "Clear This Pane’s Tag Filter";
+
+"mode.on" = "Tagging ON";
+
+"mode.off" = "Tagging OFF";
+
+"card.title" = "Tags";
+
+"card.help" = "Choose tags for this photo or video.";
+
+"card.accessibilityFormat" = "Tags for %@";
+
+"card.assignedFormat" = "%d tags";
+
+"target.title" = "Apply Tags";
+
+"target.first" = "A Only";
+
+"target.second" = "B Only";
+
+"target.both" = "Both";
+
+"target.help" = "Choose which photos the tag keys and buttons below affect. This is separate from image navigation.";
+
+"target.mixed" = "Applied to some photos";
+"panel.gridHint" = "← → Items · ↑ ↓ Rows · 1–4, QWER, ASDF tag";
+"panel.viewerGridHint" = "← → Pages · ↑ ↓ Rows · 1–4, QWER, ASDF tag";
+
+"panel.selectionFormat" = "Apply tags to %d selected items";
+
+"panel.selectionHint" = "Checkboxes or ⌘-click add items; ⇧-click selects a range. Tag keys and the panel affect all selected items; each card’s Tags menu affects only that item.";
+
+"selection.help" = "Add or remove this item from the selection. Tag keys and panel buttons apply to all selected photos and videos.";
+
+"selection.accessibilityFormat" = "Select %@";
+
+"panel.noSelection" = "Select items to tag.";
+
+/* Independent tag inheritance for new copies and exports. */
+"inheritance.title" = "Tags for Copies and Exports";
+"inheritance.copy" = "Apply original tags to copied files";
+"inheritance.export" = "Apply original tags to files exported after editing";
+"inheritance.defaults" = "Both options are off by default. Changes are saved immediately and apply to files copied or exported by the app from now on.";
+"inheritance.originals" = "Moving an original or restoring it from Trash preserves its tags regardless of these options.";

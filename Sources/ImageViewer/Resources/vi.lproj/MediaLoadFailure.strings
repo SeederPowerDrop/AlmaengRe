@@ -1,0 +1,15 @@
+"empty" = "Tệp này trống (0 byte). Hãy sao chép lại từ bản gốc hoặc bản sao lưu.";
+"missing" = "Không tìm thấy tệp. Tệp có thể đã được di chuyển hoặc xóa, hoặc ổ lưu trữ chưa được kết nối.";
+"permission" = "Không có quyền đọc tệp này. Hãy mở lại thư mục để cho phép truy cập.";
+"notDownloaded" = "Tệp này chưa được tải về thiết bị. Hãy hoàn tất tải xuống trong Finder.";
+"unavailable" = "Không thể đọc tệp. Hãy kiểm tra ổ lưu trữ và khả năng truy cập tệp.";
+"unsupported" = "Định dạng hoặc bộ mã hóa này không được hỗ trợ.";
+"unreadableData" = "Không thể đọc dữ liệu tệp. Tệp có thể bị hỏng hoặc có định dạng không được hỗ trợ.";
+"noVideoTrack" = "Tệp này không có rãnh video để hiển thị.";
+"protected" = "Không thể phát video được bảo vệ.";
+"invalidVideo" = "Thời lượng hoặc thông tin hiển thị của video không hợp lệ.";
+"rendering" = "Không thể hiển thị hình ảnh. Hãy mở lại ảnh.";
+"resource" = "Thiết bị hoặc bộ nhớ cần để hiển thị hiện không khả dụng. Hãy thử lại sau giây lát.";
+"tooLarge" = "Hình ảnh quá lớn, vượt quá giới hạn bộ nhớ an toàn.";
+"unknown" = "Không tải được tệp nhưng chưa xác định được nguyên nhân. Hãy mở lại tệp.";
+"preview.title" = "Không thể tải bản xem trước";

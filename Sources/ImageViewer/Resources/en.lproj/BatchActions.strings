@@ -1,0 +1,14 @@
+"export.menu" = "Batch Format, Resize & Compress…";
+"share.menu" = "Share Files…";
+"map.area" = "Area Photo Actions";
+"map.photo" = "This Photo";
+"map.location" = "All Photos at This Location";
+"report.menu" = "Classification File Report…";
+"share.unavailable" = "Sharing files are unavailable";
+"share.unavailableHint" = "Refresh the folder, check the files and access permissions, then select them again.";
+"share.failed" = "Unable to Share Files";
+
+"quick.rename" = "Rename";
+"quick.export" = "Format & Size";
+"quick.watermark" = "Watermark";
+"quick.share" = "Share";

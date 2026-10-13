@@ -23,6 +23,7 @@ struct SidebarView: View {
       folderHeader
         .padding(.horizontal, 14)
         .padding(.vertical, 15)
+        .background(ViewerTheme.chromeGradient)
 
       Divider()
 
@@ -50,6 +51,8 @@ struct SidebarView: View {
       folderHeader
         .frame(width: 160, alignment: .leading)
         .padding(.horizontal, 14)
+        .frame(maxHeight: .infinity)
+        .background(ViewerTheme.chromeGradient)
 
       Divider()
 
@@ -77,7 +80,7 @@ struct SidebarView: View {
     HStack(alignment: .top, spacing: 9) {
       Image(systemName: "folder")
         .font(.system(size: 17, weight: .medium))
-        .foregroundStyle(.secondary)
+        .foregroundStyle(ViewerTheme.accent.opacity(0.85))
         .padding(.top, 1)
         .accessibilityHidden(true)
 
@@ -87,7 +90,7 @@ struct SidebarView: View {
           .lineLimit(1)
           .truncationMode(.middle)
           .help(store.activeFolderName)
-        Text(L10n.format("%d개 이미지", store.assets.count))
+        Text(MotionMediaL10n.format("items.count", store.assets.count))
           .font(.system(size: 11))
           .foregroundStyle(.secondary)
           .monospacedDigit()
@@ -96,6 +99,9 @@ struct SidebarView: View {
             .font(.system(size: 11, weight: .medium))
             .foregroundStyle(ViewerTheme.accent)
             .monospacedDigit()
+            .padding(.horizontal, 6)
+            .padding(.vertical, 2)
+            .background(ViewerTheme.selection, in: RoundedRectangle(cornerRadius: 4))
         }
       }
       .frame(maxWidth: .infinity, alignment: .leading)
@@ -146,19 +152,12 @@ struct SidebarView: View {
           }
         }
         .padding(7)
-        .background {
-          RoundedRectangle(cornerRadius: 8, style: .continuous)
-            .fill(isSelected || isCurrent ? ViewerTheme.selection : Color.clear)
-        }
-        .overlay {
-          RoundedRectangle(cornerRadius: 8, style: .continuous)
-            .strokeBorder(isCurrent ? ViewerTheme.accent.opacity(0.65) : Color.clear, lineWidth: 1)
-        }
+        .modifier(SidebarThumbnailRowSurface(isSelected: isSelected, isCurrent: isCurrent))
         .contentShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
       }
       .buttonStyle(.plain)
       .contextMenu {
-        BatchAssetContextMenu(store: store, index: index)
+        BatchAssetContextMenu(store: store, url: asset.url)
       }
       .accessibilityLabel(asset.filename)
       .accessibilityValue(L10n.text(isSelected ? "선택됨" : "선택 안 됨"))
@@ -184,7 +183,8 @@ struct SidebarView: View {
     .clipShape(RoundedRectangle(cornerRadius: 5, style: .continuous))
     .overlay {
       RoundedRectangle(cornerRadius: 5, style: .continuous)
-        .strokeBorder(ViewerTheme.separator, lineWidth: 0.5)
+        .strokeBorder(ViewerTheme.controlBorder, lineWidth: 0.5)
+        .allowsHitTesting(false)
     }
     .overlay(alignment: .topTrailing) {
       if isSelected && store.selectedURLs.count > 1 {
@@ -213,5 +213,34 @@ struct SidebarView: View {
     } else {
       proxy.scrollTo(target, anchor: .center)
     }
+  }
+}
+
+/// 행의 호버 상태는 셀 안에 두어 커서 이동으로 전체 사진 목록을 갱신하지 않습니다.
+private struct SidebarThumbnailRowSurface: ViewModifier {
+  let isSelected: Bool
+  let isCurrent: Bool
+  @State private var isHovered = false
+
+  func body(content: Content) -> some View {
+    content
+      .background {
+        RoundedRectangle(cornerRadius: 8, style: .continuous)
+          .fill(ViewerTheme.panelGradient)
+          .opacity(isSelected || isCurrent ? 1 : isHovered ? 0.6 : 0)
+          .overlay {
+            RoundedRectangle(cornerRadius: 8, style: .continuous)
+              .fill(isSelected || isCurrent ? ViewerTheme.selection : Color.clear)
+          }
+      }
+      .overlay {
+        RoundedRectangle(cornerRadius: 8, style: .continuous)
+          .strokeBorder(
+            isCurrent ? ViewerTheme.selectionBorder
+              : isSelected ? ViewerTheme.selectionBorder.opacity(0.45)
+              : ViewerTheme.controlBorder.opacity(isHovered ? 0.7 : 0), lineWidth: 1)
+          .allowsHitTesting(false)
+      }
+      .onHover { isHovered = $0 }
   }
 }

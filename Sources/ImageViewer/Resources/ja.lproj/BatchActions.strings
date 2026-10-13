@@ -1,0 +1,14 @@
+"export.menu" = "形式・サイズ・容量を一括変更…";
+"share.menu" = "ファイルを共有…";
+"map.area" = "範囲の写真を操作";
+"map.photo" = "この写真を操作";
+"map.location" = "この場所のすべての写真を操作";
+"report.menu" = "分類ファイルレポート…";
+"share.unavailable" = "共有するファイルが見つかりません";
+"share.unavailableHint" = "フォルダを更新し、ファイルとアクセス権を確認してから選択し直してください。";
+"share.failed" = "ファイルを共有できませんでした";
+
+"quick.rename" = "名前を変更";
+"quick.export" = "形式・サイズ";
+"quick.watermark" = "透かし";
+"quick.share" = "共有";

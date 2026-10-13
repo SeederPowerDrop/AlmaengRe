@@ -1,0 +1,12 @@
+"일괄 변환 · 크기 변경" = "Conversión y cambio de tamaño por lotes";
+"크기 유지" = "Conservar tamaño";
+"긴 변 기준" = "Lado más largo";
+"비율 기준" = "Porcentaje";
+"이미지 크기" = "Tamaño de imagen";
+"픽셀" = "píxeles";
+"용량 줄이기 설정" = "Reducir peso";
+"현재 조정·자르기 후의 비율을 유지해 줄이며, 작은 이미지는 확대하지 않습니다." = "Reduce proporcionalmente tras los ajustes y el recorte actuales. No amplía imágenes pequeñas.";
+"용량 줄이기는 JPEG·긴 변 1920픽셀·품질 75%로 설정합니다. 결과 용량은 사진마다 다르며 더 커질 수도 있습니다." = "El ajuste usa JPEG, un lado máximo de 1920 píxeles y calidad del 75 %. El peso varía y puede aumentar.";
+"긴 변은 1~65536픽셀, 비율은 1~100%로 입력하세요." = "Introduce un lado de 1 a 65536 píxeles o un porcentaje del 1 al 100 %.";
+"이미지 크기를 변경하지 못했습니다." = "No se pudo cambiar el tamaño de la imagen.";
+"완료한 파일 공유…" = "Compartir archivos terminados…";

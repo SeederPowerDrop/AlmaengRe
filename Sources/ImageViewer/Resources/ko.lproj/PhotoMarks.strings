@@ -1,0 +1,135 @@
+/* Photo marking and keyboard classification. */
+"mode.title" = "분류";
+"mode.help" = "분류 ON에서 1–4, QWER, ASDF로 분류 표시를 붙이거나 해제합니다.";
+"mode.toggle" = "분류 모드 켜기/끄기";
+"mode.active" = "분류 모드";
+"mode.unavailable" = "사진·영상을 열면 분류할 수 있습니다.";
+"menu.title" = "사진 분류";
+"menu.edit" = "분류 이름·색상 편집…";
+"panel.title" = "사진 분류";
+"panel.hint" = "← → 항목 이동 · 1–4, QWER, ASDF로 분류";
+"panel.multipleHint" = "한 사진·영상에 여러 분류를 붙일 수 있습니다.";
+"panel.noPhoto" = "분류할 사진·영상을 열어 주세요.";
+"panel.loading" = "분류 정보를 불러오는 중…";
+"panel.close" = "분류 모드 종료";
+"labels.edit" = "분류 이름·색상 편집";
+"labels.title" = "키별 분류 이름과 색상";
+"labels.hint" = "키 자체에는 등급이나 동작이 정해져 있지 않으며, 처음 표시되는 이름은 예시입니다. 각 키의 분류 이름과 색상을 자유롭게 정하세요. 모든 폴더에 공통으로 적용되며, 바꿔도 사진에 붙인 분류는 유지됩니다.";
+"labels.safety" = "분류는 표시만 붙이거나 해제합니다. 원본 파일을 수정·삭제·이동·업로드하지 않습니다.";
+"labels.placeholder" = "분류 이름";
+"labels.unnamed" = "이름 없는 분류";
+"labels.keyFormat" = "%@ 키 분류 이름";
+"save" = "저장";
+"cancel" = "취소";
+"done" = "완료";
+"filter.title" = "분류";
+"filter.activeFormat" = "분류 %d";
+"filter.any" = "선택한 분류 중 하나라도";
+"filter.all" = "선택한 분류 모두";
+"filter.allPhotos" = "모든 사진";
+"filter.unmarked" = "분류하지 않은 사진";
+"filter.reset" = "분류 필터 해제";
+"filter.help" = "분류한 사진 모아 보기";
+"filter.empty" = "분류·검색 조건을 바꿔 보세요.";
+"badge.moreFormat" = "+%d";
+"badge.accessibilityFormat" = "분류: %@";
+"error.title" = "분류 정보를 저장할 수 없음";
+"storage.error" = "분류 정보를 처리하지 못했습니다.";
+"default.one" = "⭐";
+"default.two" = "⭐⭐";
+"default.three" = "⭐⭐⭐";
+"default.four" = "⭐⭐⭐⭐";
+"default.q" = "업로드";
+"default.w" = "보정";
+"default.e" = "삭제";
+"default.r" = "보류";
+"default.a" = "풍경";
+"default.s" = "인물";
+"default.d" = "사물";
+"default.f" = "동물";
+"panel.filterStable" = "분류 중에는 목록을 유지합니다. 종료하면 결과가 갱신됩니다.";
+
+/* Editable key assignments and detailed help. */
+"settings.title" = "사진 분류";
+"settings.hint" = "사진을 열기 전에도 분류 이름과 색상을 정할 수 있습니다. 저장하면 모든 폴더에 공통으로 적용되며, 앱을 다시 켜도 유지됩니다.";
+"labels.keyHelpFormat" = "%@ 키는 옆에 적힌 분류의 단축키입니다. 이름을 편집해 이 키로 표시할 분류를 정하세요.";
+"labels.editHelp" = "12개 키의 분류 이름과 색상을 자유롭게 정합니다. 모든 폴더에 공통으로 적용되며, 사진에 붙인 분류는 유지됩니다.";
+"labels.saveHelp" = "분류 이름과 색상을 저장해 모든 폴더에 적용합니다. 사진에 붙인 분류는 유지됩니다.";
+"labels.cancelHelp" = "편집한 이름과 색상을 저장하지 않고 창을 닫습니다.";
+"labels.previewTitle" = "키별 분류";
+"labels.previewFormat" = "%@ → %@";
+"mark.addHelpFormat" = "%@ → %@: 분류 ON에서 키를 누르거나 클릭해 붙이고, 다시 누르면 해제합니다. 여러 분류를 함께 붙일 수 있으며 원본 파일은 바뀌지 않습니다.";
+"mark.removeHelpFormat" = "%@ → %@: 붙어 있는 분류입니다. 분류 ON에서 키를 누르거나 클릭해 해제합니다. 다른 분류와 원본 파일은 유지됩니다.";
+"mode.detailHelp" = "⌘⇧M으로 분류를 켜거나 끕니다. ON에서는 선택한 사진·영상 전체에 1–4, QWER, ASDF 또는 분류 패널로 분류를 붙입니다. 체크박스·⌘클릭으로 여러 항목을 고르고 ⇧클릭으로 범위를 선택합니다. 각 카드의 분류 버튼은 그 항목 하나에만 적용됩니다. OFF에서는 일반 보기 단축키를 사용합니다. 이미지 비교에서는 분류 적용을 A만·B만·둘 다로 따로 고릅니다.";
+"labels.settingsLink" = "분류 이름·색상 편집…";
+"labels.revert" = "변경 취소";
+"labels.revertHelp" = "설정 창을 닫지 않고 저장된 분류 이름과 색상으로 되돌립니다. 저장하지 않은 변경은 취소됩니다.";
+
+/* Shared tag colors. */
+"colors.title" = "색상";
+"colors.keyFormat" = "%@ 키 분류 색상";
+"colors.help" = "고른 색상은 분류 패널·메뉴·썸네일에 공통으로 적용됩니다. 이름과 함께 저장됩니다.";
+"color.red" = "빨강";
+"color.orange" = "주황";
+"color.yellow" = "노랑";
+"color.green" = "초록";
+"color.teal" = "청록";
+"color.blue" = "파랑";
+"color.indigo" = "남색";
+"color.purple" = "보라";
+"color.pink" = "분홍";
+"color.gray" = "회색";
+
+/* Independent tag filters for comparison panes. */
+"comparison.open" = "현재 사진으로 분류 비교";
+"comparison.openHelp" = "현재 열린 원본 목록을 A와 B에 엽니다. 검색·형식·지도 영역은 유지하고, 분류는 각 영역에서 따로 고릅니다.";
+"comparison.filter" = "분류 선택";
+"comparison.allPhotos" = "모든 사진";
+"comparison.titleFormat" = "%@ 영역의 분류";
+"comparison.selectionHelp" = "이 영역에서 볼 분류를 여러 개 고르세요. 양쪽에 같은 사진이 포함될 수도 있습니다.";
+"comparison.empty" = "이 조건에 맞는 사진이 없습니다.";
+"comparison.emptyHelp" = "분류 조건을 바꾸거나 공통 검색·형식·지도 영역을 확인하세요.";
+"comparison.reset" = "이 영역의 분류 조건 해제";
+
+"mode.on" = "분류 ON";
+
+"mode.off" = "분류 OFF";
+
+"card.title" = "분류";
+
+"card.help" = "이 사진·영상의 분류를 선택합니다.";
+
+"card.accessibilityFormat" = "%@ 분류";
+
+"card.assignedFormat" = "%d개 분류";
+
+"target.title" = "분류 적용";
+
+"target.first" = "A만";
+
+"target.second" = "B만";
+
+"target.both" = "둘 다";
+
+"target.help" = "분류 키와 아래 버튼을 적용할 사진을 선택합니다. 사진 이동 대상과는 별도입니다.";
+
+"target.mixed" = "일부 사진에 적용됨";
+"panel.gridHint" = "← → 항목 · ↑ ↓ 행 이동 · 1–4, QWER, ASDF로 분류";
+"panel.viewerGridHint" = "← → 페이지 · ↑ ↓ 행 이동 · 1–4, QWER, ASDF로 분류";
+
+"panel.selectionFormat" = "선택한 %d개에 분류 적용";
+
+"panel.selectionHint" = "체크박스·⌘클릭으로 추가 선택 · ⇧클릭으로 범위 선택. 분류 키와 패널은 선택한 항목 전체에, 카드의 분류는 해당 항목에만 적용됩니다.";
+
+"selection.help" = "선택에 추가하거나 제외합니다. 분류 키와 패널 버튼은 선택한 사진·영상 전체에 적용됩니다.";
+
+"selection.accessibilityFormat" = "%@ 선택";
+
+"panel.noSelection" = "분류할 항목을 선택하세요.";
+
+/* Independent tag inheritance for new copies and exports. */
+"inheritance.title" = "복사본·내보낸 파일의 분류";
+"inheritance.copy" = "복사한 파일에 원본 분류 적용";
+"inheritance.export" = "편집 후 내보낸 파일에 원본 분류 적용";
+"inheritance.defaults" = "기본값은 모두 꺼짐입니다. 변경 사항은 즉시 저장되며, 이후 앱에서 복사하거나 내보내는 파일에 적용됩니다.";
+"inheritance.originals" = "파일을 이동하거나 휴지통에서 복원하면 이 설정과 관계없이 원본의 분류를 유지합니다.";

@@ -1,0 +1,14 @@
+"export.menu" = "批量转换格式、调整尺寸与压缩…";
+"share.menu" = "共享文件…";
+"map.area" = "区域照片操作";
+"map.photo" = "此照片操作";
+"map.location" = "此位置的全部照片操作";
+"report.menu" = "分类文件报告…";
+"share.unavailable" = "找不到要共享的文件";
+"share.unavailableHint" = "请刷新文件夹，检查文件和访问权限，然后重新选择。";
+"share.failed" = "无法共享文件";
+
+"quick.rename" = "重命名";
+"quick.export" = "格式与尺寸";
+"quick.watermark" = "水印";
+"quick.share" = "共享";

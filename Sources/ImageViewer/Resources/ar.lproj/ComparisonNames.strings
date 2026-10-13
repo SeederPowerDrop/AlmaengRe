@@ -1,0 +1,16 @@
+"editor.open" = "أسماء المقارنة…";
+"editor.title" = "أسماء المقارنة";
+"editor.left" = "اسم اليسار";
+"editor.right" = "اسم اليمين";
+"editor.top" = "اسم الأعلى";
+"editor.bottom" = "اسم الأسفل";
+"automatic.label" = "الاسم التلقائي: %@";
+"editor.help" = "اترك الحقل فارغًا لاستخدام اسم المجلد. يُميَّز المجلد نفسه باستخدام A/B. لا تتغير أسماء المجلدات الفعلية.";
+"editor.reset" = "استخدام الأسماء التلقائية";
+"action.cancel" = "إلغاء";
+"action.save" = "حفظ";
+"target.only" = "%@ فقط";
+"target.left" = "%@ · اليسار";
+"target.right" = "%@ · اليمين";
+"target.top" = "%@ · الأعلى";
+"target.bottom" = "%@ · الأسفل";

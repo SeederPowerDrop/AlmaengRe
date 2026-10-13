@@ -1,0 +1,6 @@
+"grid.playAll" = "Lire les vidéos affichées";
+"grid.playSelected" = "Lire la sélection (%d)";
+"grid.pauseAll" = "Mettre toutes les vidéos en pause";
+"grid.select" = "Sélectionner la vidéo à lire";
+"grid.play" = "Lire la vidéo";
+"grid.pause" = "Mettre la vidéo en pause";

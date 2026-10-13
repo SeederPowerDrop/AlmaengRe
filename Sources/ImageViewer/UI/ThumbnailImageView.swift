@@ -12,13 +12,26 @@ struct ThumbnailRequest: Hashable, Sendable {
     asset == other.asset && adjustments == other.adjustments && prefersHDR == other.prefersHDR
   }
 
-  var needsPreciseImage: Bool { prefersPreciseImage && maxPixelSize >= 512 }
+  var needsPreciseImage: Bool {
+    guard prefersPreciseImage && maxPixelSize >= 512 else { return false }
+    // The RAW thumbnail path already supplies an adequately sized embedded image
+    // or decodes the source. Decoding the same sensor data again for every grid
+    // cell adds work without improving its unedited SDR thumbnail.
+    return !ImageFormatRegistry.cameraRAWExtensions.contains(asset.fileExtension)
+      || !adjustments.isIdentity || prefersHDR
+  }
+}
+
+private struct ThumbnailLoadIdentity: Hashable {
+  let request: ThumbnailRequest
+  let defersLoading: Bool
 }
 
 private struct ThumbnailLoadResult {
   let request: ThumbnailRequest
   /// nil이면 현재 요청이 디코딩에 실패했다는 뜻입니다.
   let image: CGImage?
+  var errorMessage: String? = nil
 }
 
 /// SwiftUI가 셀 상태를 재사용하더라도 가장 최근 요청만 결과를 기록하게 합니다.
@@ -53,6 +66,7 @@ struct ThumbnailImageView: View {
   var adjustments: ImageAdjustments = .identity
   var prefersHDR = false
   var prefersPreciseImage = false
+  var defersLoading = false
 
   @State private var result: ThumbnailLoadResult?
   /// 몽땅보기 번호 배치에만 사용합니다. 크기 알림 때문에 추가 디코딩하지 않습니다.
@@ -90,8 +104,7 @@ struct ThumbnailImageView: View {
             .antialiased(true)
             .aspectRatio(contentMode: .fit)
         } else {
-          Image(systemName: "exclamationmark.triangle")
-            .foregroundStyle(.secondary)
+          failurePlaceholder(message: result.errorMessage)
         }
       } else {
         ProgressView()
@@ -105,8 +118,14 @@ struct ThumbnailImageView: View {
       requestGate.invalidate()
       result = nil
     }
-    .task(id: request) {
+    .task(id: ThumbnailLoadIdentity(request: request, defersLoading: defersLoading)) {
       guard !Task.isCancelled else { return }
+      // Retain displayed pixels while the grid resizes. Only the final slider
+      // position should enqueue new RAW decodes, including newly visible cells.
+      guard !defersLoading else {
+        requestGate.invalidate()
+        return
+      }
       let requested = request
       let generation = requestGate.begin(requested)
       if result?.request.hasSameContent(as: requested) != true {
@@ -151,9 +170,38 @@ struct ThumbnailImageView: View {
         guard !Task.isCancelled, requestGate.accepts(generation, for: requested) else { return }
         // 정밀 디코딩만 실패했다면 이미 표시한 빠른 미리보기는 유지합니다.
         if result?.request.hasSameContent(as: requested) != true || result?.image == nil {
-          result = ThumbnailLoadResult(request: requested, image: nil)
+          let message = await MediaLoadFailure.message(for: error, url: requested.asset.url)
+          guard !Task.isCancelled, requestGate.accepts(generation, for: requested),
+            let message else { return }
+          if result?.request.hasSameContent(as: requested) != true || result?.image == nil {
+            result = ThumbnailLoadResult(request: requested, image: nil, errorMessage: message)
+          }
         }
       }
+    }
+  }
+
+  private func failurePlaceholder(message: String?) -> some View {
+    let reason = message ?? L10n.text("이미지를 표시할 수 없음")
+    return GeometryReader { geometry in
+      VStack(spacing: geometry.size.height < 64 ? 2 : 6) {
+        if geometry.size.height >= 64 {
+          Image(systemName: "exclamationmark.triangle")
+            .font(.body)
+            .accessibilityHidden(true)
+        }
+        Text(reason)
+          .font(.caption2)
+          .multilineTextAlignment(.center)
+          .lineLimit(geometry.size.height < 64 ? 2 : 3)
+          .fixedSize(horizontal: false, vertical: false)
+      }
+      .foregroundStyle(.secondary)
+      .padding(geometry.size.height < 64 ? 3 : 8)
+      .frame(width: geometry.size.width, height: geometry.size.height)
+      .help(reason)
+      .accessibilityElement(children: .ignore)
+      .accessibilityLabel(reason)
     }
   }
 }

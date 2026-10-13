@@ -1,0 +1,14 @@
+"export.menu" = "Stapelverarbeitung: Format, Größe und Komprimierung…";
+"share.menu" = "Dateien teilen…";
+"map.area" = "Aktionen für Fotos im Bereich";
+"map.photo" = "Dieses Foto";
+"map.location" = "Alle Fotos an diesem Ort";
+"report.menu" = "Dateibericht zu Markierungen…";
+"share.unavailable" = "Dateien zum Teilen sind nicht verfügbar";
+"share.unavailableHint" = "Aktualisiere den Ordner, prüfe Dateien und Zugriffsrechte und wähle sie erneut aus.";
+"share.failed" = "Dateien können nicht geteilt werden";
+
+"quick.rename" = "Umbenennen";
+"quick.export" = "Format & Größe";
+"quick.watermark" = "Wasserzeichen";
+"quick.share" = "Teilen";

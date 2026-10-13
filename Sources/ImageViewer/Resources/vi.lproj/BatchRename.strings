@@ -1,0 +1,11 @@
+"classification.mode" = "Dùng tên phân loại";
+"classification.label" = "Phân loại dùng để đặt tên";
+"classification.choose" = "Hãy chọn một phân loại.";
+"classification.unavailable" = "Không thể tải thông tin phân loại. Hãy đóng cửa sổ này và kiểm tra trạng thái lưu phân loại.";
+"classification.emptyName" = "Phân loại này chưa có tên. Hãy đặt tên rồi thử lại.";
+"classification.noMatches" = "Không có tệp đã chọn nào thuộc phân loại này.";
+"classification.help" = "Chỉ đổi tên các tệp thuộc phân loại đã chọn, theo thứ tự trong danh sách. Ví dụ: Tải lên01, Tải lên02. Khi có từ 100 tệp phù hợp, số thứ tự bắt đầu từ 001 và tự tăng số chữ số khi cần.";
+"classification.scope" = "Sẽ xử lý %d tệp phù hợp trong tổng số %d tệp đã chọn. Các tệp còn lại không thay đổi.";
+"classification.unnamed" = "Phân loại chưa đặt tên";
+"classification.option" = "%@ · %@ (%d tệp)";
+"numbering.help" = "Số được thêm trước phần mở rộng theo thứ tự hiện tại của danh sách. Để đổi định dạng ảnh, hãy dùng «%@».";

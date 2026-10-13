@@ -1,0 +1,11 @@
+"classification.mode" = "Markierungsnamen verwenden";
+"classification.label" = "Zu verwendende Markierung";
+"classification.choose" = "Wähle eine Markierung.";
+"classification.unavailable" = "Die Markierungsinformationen konnten nicht geladen werden. Schließe dieses Fenster und prüfe den Markierungsspeicher.";
+"classification.emptyName" = "Diese Markierung hat keinen Namen. Benenne sie und versuche es erneut.";
+"classification.noMatches" = "Keine der ausgewählten Dateien hat diese Markierung.";
+"classification.help" = "Nur Dateien mit der gewählten Markierung werden in Listenreihenfolge umbenannt, zum Beispiel Hochladen01, Hochladen02. Ab 100 passenden Dateien beginnt die Nummerierung bei 001 und wird bei Bedarf erweitert.";
+"classification.scope" = "%d passende Dateien von %d ausgewählten Dateien werden verarbeitet. Andere Dateien bleiben unverändert.";
+"classification.unnamed" = "Unbenannte Markierung";
+"classification.option" = "%@ · %@ (%d Dateien)";
+"numbering.help" = "Die Nummern werden in der aktuellen Listenreihenfolge vor der Dateiendung eingefügt. Um das Bildformat zu ändern, verwende „%@“.";

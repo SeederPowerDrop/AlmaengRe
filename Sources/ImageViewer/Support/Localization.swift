@@ -2,7 +2,13 @@ import Foundation
 
 /// 앱의 동적 문자열과 오류 문구를 SwiftPM 및 .app 번들 모두에서 현지화합니다.
 enum L10n {
-  static let supportedLocalizations = ["ko", "en", "zh-Hans", "ja", "fr", "es", "ar", "vi"]
+  static let supportedLocalizations = ["ko", "en", "ja", "zh-Hans", "vi", "es", "fr", "de", "ru", "ar"]
+
+  /// Match the app's selected language, rather than the user's region format.
+  static var languageIdentifier: String {
+    Bundle.preferredLocalizations(from: supportedLocalizations,
+      forPreferences: activeBundle.preferredLocalizations).first ?? "ko"
+  }
 
   static func text(_ key: String) -> String {
     activeBundle.localizedString(forKey: key, value: key, table: nil)
@@ -17,11 +23,11 @@ enum L10n {
   }
 
   /// 테스트와 언어별 미리보기가 시스템 언어를 바꾸지 않고 리소스를 확인할 수 있게 합니다.
-  static func text(_ key: String, localeIdentifier: String) -> String {
+  static func text(_ key: String, localeIdentifier: String, table: String? = nil) -> String {
     guard let languageBundle = languageBundle(for: localeIdentifier) else {
       return key
     }
-    return languageBundle.localizedString(forKey: key, value: key, table: nil)
+    return languageBundle.localizedString(forKey: key, value: key, table: table)
   }
 
   /// 번역 파일 간 누락을 자동 테스트할 수 있도록 실제 리소스의 키 집합을 반환합니다.

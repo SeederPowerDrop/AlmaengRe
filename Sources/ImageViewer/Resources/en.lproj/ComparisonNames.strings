@@ -1,0 +1,16 @@
+"editor.open" = "Comparison Names…";
+"editor.title" = "Comparison Names";
+"editor.left" = "Left name";
+"editor.right" = "Right name";
+"editor.top" = "Top name";
+"editor.bottom" = "Bottom name";
+"automatic.label" = "Automatic name: %@";
+"editor.help" = "Leave blank to use folder names. The same folder is distinguished by A/B. Actual folder names do not change.";
+"editor.reset" = "Use Automatic Names";
+"action.cancel" = "Cancel";
+"action.save" = "Save";
+"target.only" = "Only %@";
+"target.left" = "%@ · Left";
+"target.right" = "%@ · Right";
+"target.top" = "%@ · Top";
+"target.bottom" = "%@ · Bottom";

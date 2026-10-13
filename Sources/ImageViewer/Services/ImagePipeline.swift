@@ -4,12 +4,15 @@ import CoreImage.CIFilterBuiltins
 import ImageIO
 
 enum ImagePipelineError: LocalizedError {
+  case emptyFile(URL)
   case unsupported(URL)
   case decodingFailed(URL)
   case renderingFailed(URL)
 
   var errorDescription: String? {
     switch self {
+    case .emptyFile(let url):
+      L10n.format("‘%@’은 비어 있는 파일입니다(0바이트). 원본이나 백업에서 다시 복사해 주세요.", url.lastPathComponent)
     case .unsupported(let url):
       L10n.format("지원 코덱으로 ‘%@’을 열 수 없습니다.", url.lastPathComponent)
     case .decodingFailed(let url):
@@ -87,12 +90,17 @@ actor ImagePipeline {
 
   func metadata(for url: URL) async throws -> ImageMetadata {
     try Task.checkCancellation()
+    let file = ImageFileVersion(url: url)
+    guard file.byteCount != 0 else { throw ImagePipelineError.emptyFile(url) }
     let decoder = metadataDecoder
     return try await governor.value(
-      for: ImageResourceWorkKey(namespace: metadataNamespace, key: ImageFileVersion(url: url)),
+      for: ImageResourceWorkKey(namespace: metadataNamespace, key: file),
       url: url
     ) { _ in
-      try await decoder.metadata(for: url)
+      if MediaFormatRegistry.isVideo(url) {
+        return try await VideoMediaReader.metadata(for: url)
+      }
+      return try await decoder.metadata(for: url)
     }
   }
 
@@ -105,11 +113,18 @@ actor ImagePipeline {
     priority: ImageWorkPriority = .visible
   ) async throws -> RenderedFrame {
     try Task.checkCancellation()
+    if MediaFormatRegistry.isVideo(url), maxPixelSize == nil || !adjustments.isIdentity {
+      // A movie poster is for display only. Image export and image adjustments
+      // must not silently turn the selected video into a single still image.
+      throw ImagePipelineError.unsupported(url)
+    }
     await registerCacheClientIfNeeded()
     let key = FrameCacheKey(
       file: ImageFileVersion(url: url), frameIndex: max(0, frameIndex),
       pixelSize: maxPixelSize.map(ImageLoadingPolicy.pixelBucket),
       adjustments: adjustments, prefersHDR: prefersHDR, generation: generation)
+    // Use fresh file information, so restoring an empty file needs no cache reset.
+    guard key.file.byteCount != 0 else { throw ImagePipelineError.emptyFile(url) }
     if let frame = cache.value(for: key) { return frame }
 
     let workers = workers
@@ -117,6 +132,10 @@ actor ImagePipeline {
     let frame = try await governor.value(
       for: ImageResourceWorkKey(namespace: renderNamespace, key: key), url: url, priority: priority
     ) { slot in
+      if MediaFormatRegistry.isVideo(key.file.url) {
+        return try await VideoMediaReader.posterFrame(for: key.file.url,
+          maxPixelSize: key.pixelSize ?? 512)
+      }
       let decoder = key.needsSerialDecoder ? largeImageDecoder : workers[slot]
       return try await decoder.renderFrame(
         url: key.file.url, frameIndex: key.frameIndex, maxPixelSize: key.pixelSize,
@@ -145,6 +164,11 @@ actor ImagePipeline {
     generation &+= 1
     cache.removeAll()
     await clearDecoderCaches()
+  }
+
+  func cacheSnapshot() -> ImageCacheSnapshot {
+    ImageCacheSnapshot(entryCount: cache.count, byteCount: cache.totalCost,
+      byteLimit: cache.costLimit)
   }
 
   private func registerCacheClientIfNeeded() async {
@@ -568,6 +592,14 @@ private actor ImageDecoder {
     case 3: image = image.oriented(.left)
     default: break
     }
+    if adjustments.isFlippedHorizontally || adjustments.isFlippedVertically {
+      let extent = image.extent
+      image = image.transformed(by: CGAffineTransform(
+        a: adjustments.isFlippedHorizontally ? -1 : 1, b: 0, c: 0,
+        d: adjustments.isFlippedVertically ? -1 : 1,
+        tx: adjustments.isFlippedHorizontally ? extent.minX + extent.maxX : 0,
+        ty: adjustments.isFlippedVertically ? extent.minY + extent.maxY : 0))
+    }
     if let crop = adjustments.effectiveCrop {
       image = image.cropped(to: crop.coreImageRect(in: image.extent))
     }
@@ -630,18 +662,21 @@ private actor ImageDecoder {
     if adjustments.brightness != 0 || adjustments.contrast != 1 || adjustments.saturation != 1 {
       let controls = CIFilter.colorControls()
       controls.inputImage = image
-      controls.brightness = Float(adjustments.brightness)
-      controls.contrast = Float(adjustments.contrast)
-      controls.saturation = Float(adjustments.saturation)
+      controls.brightness = Float(adjustmentValue(adjustments.brightness, range: -1...1))
+      controls.contrast = Float(adjustmentValue(adjustments.contrast, range: 0.25...2, fallback: 1))
+      controls.saturation = Float(adjustmentValue(adjustments.saturation, range: 0...2, fallback: 1))
       if let output = controls.outputImage { image = output }
     }
 
-    if adjustments.highlights != 0 {
+    if adjustments.highlights != 0 || adjustments.shadows != 0 {
       let highlights = CIFilter.highlightShadowAdjust()
       highlights.inputImage = image
-      highlights.highlightAmount = Float(max(0, min(2, 1 + adjustments.highlights)))
+      highlights.highlightAmount = Float(1 + adjustmentValue(adjustments.highlights, range: -1...1))
+      highlights.shadowAmount = Float(adjustmentValue(adjustments.shadows, range: -1...1))
       if let output = highlights.outputImage { image = output }
     }
+
+    image = AdvancedImageProcessor.apply(adjustments, to: image)
 
     if adjustments.isInverted {
       let invert = CIFilter.colorInvert()
@@ -661,8 +696,8 @@ private actor ImageDecoder {
     return image
   }
 
-  private func adjustmentValue(_ value: Double, range: ClosedRange<Double>) -> Double {
-    value.isFinite ? min(range.upperBound, max(range.lowerBound, value)) : 0
+  private func adjustmentValue(_ value: Double, range: ClosedRange<Double>, fallback: Double = 0) -> Double {
+    value.isFinite ? min(range.upperBound, max(range.lowerBound, value)) : fallback
   }
 
   private func animationDuration(

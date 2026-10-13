@@ -6,6 +6,49 @@ import UniformTypeIdentifiers
 @testable import ImageViewer
 
 struct ImagePipelineLoadingTests {
+  @Test("Empty RAW files report missing data rather than an unsupported codec")
+  func emptyRAWFile() async throws {
+    let url = temporaryURL().deletingPathExtension().appendingPathExtension("DNG")
+    defer { try? FileManager.default.removeItem(at: url) }
+    try Data().write(to: url)
+    let pipeline = ImagePipeline()
+    do {
+      _ = try await pipeline.renderFrame(url: url, maxPixelSize: 512,
+        adjustments: .identity, prefersHDR: true)
+      Issue.record("An empty RAW file produced pixels")
+    } catch ImagePipelineError.emptyFile(let failedURL) {
+      #expect(failedURL == url)
+    }
+    do {
+      _ = try await pipeline.metadata(for: url)
+      Issue.record("An empty RAW file produced metadata")
+    } catch ImagePipelineError.emptyFile(let failedURL) {
+      #expect(failedURL == url)
+    }
+  }
+
+  @Test("A cached image replaced by an empty file is rejected and can be restored")
+  func emptyFileRestoration() async throws {
+    let url = temporaryURL()
+    defer { try? FileManager.default.removeItem(at: url) }
+    let pipeline = ImagePipeline()
+    try writePNG(url: url, width: 80, height: 40)
+    _ = try await pipeline.renderFrame(url: url, maxPixelSize: 256,
+      adjustments: .identity, prefersHDR: false)
+    try Data().write(to: url)
+    do {
+      _ = try await pipeline.renderFrame(url: url, maxPixelSize: 256,
+        adjustments: .identity, prefersHDR: false)
+      Issue.record("Cached pixels concealed an empty source")
+    } catch ImagePipelineError.emptyFile { }
+    try writePNG(url: url, width: 40, height: 80)
+    let restored = try await pipeline.renderFrame(url: url, maxPixelSize: 256,
+      adjustments: .identity, prefersHDR: false)
+    #expect(restored.image.width == 40 && restored.image.height == 80)
+    let metadata = try await pipeline.metadata(for: url)
+    #expect(metadata.pixelWidth == 40 && metadata.pixelHeight == 80)
+  }
+
   @Test("Apple Silicon concurrency adapts to available cores and memory")
   func hardwareConcurrencyBudget() {
     let gib: UInt64 = 1_024 * 1_024 * 1_024

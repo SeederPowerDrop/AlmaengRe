@@ -1,0 +1,16 @@
+"editor.open" = "Tên so sánh…";
+"editor.title" = "Tên so sánh";
+"editor.left" = "Tên bên trái";
+"editor.right" = "Tên bên phải";
+"editor.top" = "Tên phía trên";
+"editor.bottom" = "Tên phía dưới";
+"automatic.label" = "Tên tự động: %@";
+"editor.help" = "Để trống để dùng tên thư mục. Cùng một thư mục được phân biệt bằng A/B. Tên thư mục thật không thay đổi.";
+"editor.reset" = "Dùng tên tự động";
+"action.cancel" = "Hủy";
+"action.save" = "Lưu";
+"target.only" = "Chỉ %@";
+"target.left" = "%@ · Trái";
+"target.right" = "%@ · Phải";
+"target.top" = "%@ · Trên";
+"target.bottom" = "%@ · Dưới";

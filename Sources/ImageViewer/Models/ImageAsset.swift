@@ -8,14 +8,39 @@ struct ImageAsset: Identifiable, Hashable, Sendable {
   let url: URL
   let byteCount: Int64?
   let modificationDate: Date?
+  var creationDate: Date? = nil
+  var location: ImageLocation? = nil
+  /// Includes a negative GPS lookup so changing a map filter never reopens every file.
+  var hasReadLocation = false
+  var archiveOrigin: ArchiveImageOrigin? = nil
+  /// Captured off the main thread; rendering never reads the file system for marks.
+  var photoMarkIdentity: String? = nil
+  /// Filled only when sorting by embedded metadata; no decoded pixels are retained.
+  var sortMetadata: LibrarySortMetadata? = nil
+  var sortMetadataVersion: LibrarySortFileVersion? = nil
+
+  var photoMarkID: String { photoMarkIdentity ?? sessionID }
+
+  var isReadOnly: Bool { archiveOrigin != nil }
+  var isVideo: Bool { archiveOrigin == nil && MediaFormatRegistry.isVideo(url) }
+  var sessionID: String {
+    guard let archiveOrigin else { return url.standardizedFileURL.absoluteString }
+    return archiveOrigin.archiveURL.standardizedFileURL.absoluteString + "#" + archiveOrigin.entryPath
+  }
+  func replacingURL(_ url: URL) -> ImageAsset {
+    ImageAsset(url: url, byteCount: byteCount, modificationDate: modificationDate,
+      creationDate: creationDate, location: location, hasReadLocation: hasReadLocation,
+      archiveOrigin: archiveOrigin, photoMarkIdentity: photoMarkIdentity,
+      sortMetadata: sortMetadata, sortMetadataVersion: sortMetadataVersion)
+  }
 
   /// URL은 폴더를 다시 읽어도 안정적으로 같은 파일을 가리키므로 식별자로 씁니다.
   var id: URL { url }
 
-  var filename: String { url.lastPathComponent }
+  var filename: String { archiveOrigin.map { ($0.entryPath as NSString).lastPathComponent } ?? url.lastPathComponent }
 
   var fileExtension: String {
-    url.pathExtension.lowercased()
+    (filename as NSString).pathExtension.lowercased()
   }
 
   var formattedFileSize: String {
@@ -58,7 +83,7 @@ struct ImageMetadata: Equatable, Sendable {
 }
 
 /// EXIF GPS 값을 플랫폼 지도 링크로 전달하기 위한 불변 좌표입니다.
-struct ImageLocation: Equatable, Sendable {
+struct ImageLocation: Hashable, Codable, Sendable {
   let latitude: Double
   let longitude: Double
   var altitude: Double?
@@ -113,5 +138,41 @@ enum MapService: String, CaseIterable, Identifiable, Sendable {
     case .apple: L10n.text("Apple 지도")
     case .google: L10n.text("Google 지도")
     }
+  }
+}
+
+/// An archive member keeps a stable logical identity while its pixels live in a private cache.
+struct ArchiveImageOrigin: Codable, Hashable, Sendable {
+  let archiveURL: URL
+  let entryPath: String
+  private var lease: ArchiveImageLease?
+  init(archiveURL: URL, entryPath: String, lease: ArchiveImageLease? = nil) {
+    self.archiveURL = archiveURL; self.entryPath = entryPath; self.lease = lease
+  }
+  private enum CodingKeys: String, CodingKey { case archiveURL, entryPath }
+  static func == (lhs: Self, rhs: Self) -> Bool {
+    lhs.archiveURL == rhs.archiveURL && lhs.entryPath == rhs.entryPath
+  }
+  func hash(into hasher: inout Hasher) { hasher.combine(archiveURL); hasher.combine(entryPath) }
+}
+
+/// Copies of an asset retain this lease, so an in-flight render can outlive its opened list.
+final class ArchiveImageLease: @unchecked Sendable {
+  private static let sharedCleanupQueue = DispatchQueue(
+    label: "ImageViewer.archiveCleanup", qos: .utility)
+  let directory: URL
+  private let cleanupQueue: DispatchQueue
+
+  init(directory: URL, cleanupQueue: DispatchQueue = ArchiveImageLease.sharedCleanupQueue) {
+    self.directory = directory
+    self.cleanupQueue = cleanupQueue
+  }
+
+  deinit {
+    // The last asset is often released while the UI replaces its library. Unlinking
+    // thousands of extracted files must not run on that thread. Only the path survives
+    // the lease; serial cleanup does not retain images or spawn competing disk jobs.
+    let directory = directory
+    cleanupQueue.async { try? FileManager.default.removeItem(at: directory) }
   }
 }

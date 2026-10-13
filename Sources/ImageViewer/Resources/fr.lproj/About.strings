@@ -1,0 +1,23 @@
+/* About follows the app language; Korean is the original and fallback. */
+"subtitle" = "Une visionneuse d’images macOS que chacun peut utiliser librement.";
+"opening" = "En cherchant une bonne visionneuse d’images pour Mac, j’ai fini par en créer une grâce au vibe coding. Cette application s’inspire de plusieurs visionneuses d’images pour Windows et Mac.";
+"story" = "J’aimerais aussi raconter l’origine du nom de l’application, choisi après mûre réflexion. Enfant, je me passionnais pour un programme appelé 알맹이3, créé par le laboratoire de logiciels d’An Il-jun (www.aijsoft.com). Avec le recul, c’était un programme assez rudimentaire, mais ses diverses fonctions me fascinaient. Je me souviens surtout du texte dans lequel son développeur expliquait lui-même pourquoi il avait créé 알맹이 et ce qui le rendait particulier.\n\nAujourd’hui, je ne sais pas où se trouve ce développeur ni ce qu’il est devenu. Il ne me reste qu’un vague souvenir : il me semble qu’il avait émigré en Australie. Pour rendre hommage à ce programme et à l’esprit qui l’animait, j’ai nommé cette application 알맹Re.";
+"philosophy" = "De même que les connaissances que nous partageons peuvent être le point de départ de quelqu’un, j’espère que les outils que je crée ouvriront de nouvelles possibilités à d’autres. J’aimerais que chacun puisse profiter gratuitement et simplement des fonctions essentielles à l’usage d’un ordinateur. Je souhaite que les humains comme l’IA puissent utiliser librement les outils numériques de base, pour apprendre et créer ensemble.";
+"thanks" = "Merci.";
+"closing" = "Et ERW FWS WRG";
+"close" = "Fermer";
+"windowTitle" = "À propos de 알맹Re";
+"profile" = "Image de profil du développeur";
+"confirm" = "OK";
+"licenses" = "Licences open source";
+"back" = "Retour à la présentation";
+"guide" = "Utilisation de base";
+"supportTitle" = "Soutenir le projet";
+"supportMessage" = "Je crée des outils que chacun peut utiliser gratuitement, dans l’esprit de transmettre à mon tour l’aide que j’ai reçue. S’ils vous sont utiles, vous pouvez soutenir mon travail par un petit don.";
+"bitcoinDescription" = "Vous pouvez faire un don en scannant le code QR avec BlueWallet ou un autre portefeuille Bitcoin, ou en utilisant l’adresse ci-dessous.";
+"bitcoinAddress" = "Adresse de don Bitcoin";
+"bitcoinQR" = "Code QR de l’adresse de don Bitcoin";
+"copyAddress" = "Copier l’adresse";
+"addressCopied" = "Adresse copiée.";
+"openWallet" = "Ouvrir dans le portefeuille";
+"walletUnavailable" = "Copiez l’adresse Bitcoin et collez-la dans votre portefeuille.";

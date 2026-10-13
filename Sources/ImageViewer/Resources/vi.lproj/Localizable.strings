@@ -44,6 +44,9 @@
 "집중 모드 전환" = "Chuyển đổi chế độ tập trung";
 "집중 보기 종료" = "Thoát chế độ tập trung";
 "집중 보기 종료 (Esc)" = "Thoát chế độ tập trung (Esc)";
+
+"조작창 숨기기" = "Ẩn thanh điều khiển";
+"조작창 표시" = "Hiện thanh điều khiển";
 "몽땅보기로 돌아가기 (Esc)" = "Trở lại Xem tất cả (Esc)";
 "전체 화면" = "Toàn màn hình";
 "이전 이미지/페이지" = "Ảnh/trang trước";
@@ -427,8 +430,8 @@
 "전자 앨범 반복 재생" = "Lặp lại album ảnh";
 "%d초 간격" = "Mỗi %d giây";
 "전자 앨범 재생 완료" = "Đã phát xong album ảnh";
-"1~300초. 사진이 표시된 뒤 시간을 셉니다. 집중 보기를 나가거나 다른 앱으로 전환하면 일시정지합니다." = "1–300 giây, tính từ khi ảnh xuất hiện. Thoát chế độ tập trung hoặc chuyển ứng dụng sẽ tạm dừng phát.";
-"탐색 → 전자 앨범 또는 집중 보기 하단의 재생 버튼으로 시작합니다. 두 장 이상의 사진이 필요합니다." = "Bắt đầu từ Điều hướng → Album ảnh hoặc nút phát trong chế độ tập trung. Cần ít nhất hai ảnh.";
+"1~300초. 사진은 표시된 뒤 시간을 세고, 영상은 끝까지 재생한 뒤 넘어갑니다. 집중 보기를 나가거나 다른 앱으로 전환하면 일시정지합니다." = "1–300 giây, tính từ khi ảnh xuất hiện. Video phát đến hết trước khi chuyển tiếp. Thoát chế độ tập trung hoặc chuyển ứng dụng sẽ tạm dừng phát.";
+"탐색 → 전자 앨범 또는 집중 보기 하단의 재생 버튼으로 시작합니다. 사진 두 장 이상 또는 영상이 있으면 재생할 수 있습니다." = "Bắt đầu từ Điều hướng → Album ảnh hoặc nút phát trong chế độ tập trung. Cần ít nhất hai ảnh hoặc một video.";
 "현재 이미지를 바탕화면으로 설정" = "Đặt ảnh hiện tại làm hình nền";
 "사진 전체 맞춤" = "Hiển thị toàn bộ ảnh";
 "화면 채우기" = "Lấp đầy màn hình";
@@ -446,6 +449,16 @@
 "바탕화면 이미지 준비 중…" = "Đang chuẩn bị hình nền…";
 "바탕화면에 적용" = "Áp dụng hình nền";
 /* 독립적인 두 폴더 비교 */
+/* Comparison positions and unmatched filenames */
+"A · 왼쪽" = "A · Trái";
+"A · 위" = "A · Trên";
+"B · 오른쪽" = "B · Phải";
+"B · 아래" = "B · Dưới";
+"이 폴더에 같은 이름의 사진이 없습니다." = "Không có ảnh cùng tên trong thư mục này.";
+"폴더는 그대로 열려 있습니다. 파일명과 관계없이 보려면 목록 순서로 전환하세요." = "Thư mục vẫn đang mở. Chuyển sang thứ tự danh sách để so sánh ảnh bất kể tên tệp.";
+"목록 순서로 비교" = "So sánh theo thứ tự danh sách";
+"양쪽 폴더를 목록 순서대로 비교합니다. 각 칸의 사진을 따로 고를 수 있습니다." = "So sánh hai thư mục theo thứ tự danh sách. Bạn có thể chọn ảnh riêng cho từng khung.";
+
 "이미지 비교" = "So sánh ảnh";
 "이미지 비교 전환" = "Bật/tắt so sánh ảnh";
 "A · 왼쪽/위" = "A · Trái/Trên";
@@ -562,3 +575,278 @@
 "처음부터 반복" = "Lặp lại từ đầu";
 "비교 이미지 썸네일" = "Ảnh thu nhỏ để so sánh";
 "썸네일 표시" = "Hiện ảnh thu nhỏ";
+
+/* Library navigation, comparison matching and local AI upscaling. */
+"%d / %d개" = "%d / %d mục";
+"AI 확대" = "Phóng to bằng AI";
+"AI 확대 결과" = "Kết quả phóng to bằng AI";
+"AI 확대 모델을 찾을 수 없습니다. 앱을 다시 설치해 주세요." = "Không tìm thấy mô hình phóng to bằng AI. Vui lòng cài đặt lại ứng dụng.";
+"AI 확대 모델이 올바른 결과를 반환하지 않았습니다." = "Mô hình phóng to bằng AI trả về kết quả không hợp lệ.";
+"AI 확대 사본 저장" = "Lưu bản sao đã phóng to bằng AI";
+"AI 확대 사본을 저장하지 못했습니다." = "Không thể lưu bản sao đã phóng to bằng AI.";
+"AI 확대 실행" = "Bắt đầu phóng to bằng AI";
+"AI 확대 중… %d%%" = "Đang phóng to bằng AI… %d%%";
+"AI 확대…" = "Phóng to bằng AI…";
+"AI 확대용 이미지 데이터를 만들지 못했습니다." = "Không thể chuẩn bị dữ liệu hình ảnh để phóng to bằng AI.";
+"AI로 2배 확대하고 사본으로 저장합니다." = "Phóng to gấp 2 lần bằng AI và lưu bản sao.";
+"AI로 더 크게 보기" = "Xem lớn hơn bằng AI";
+"Finder에서 보기" = "Hiển thị trong Finder";
+"GPS 남 → 북" = "GPS Nam → Bắc";
+"GPS 동 → 서" = "GPS Đông → Tây";
+"GPS 북 → 남" = "GPS Bắc → Nam";
+"GPS 서 → 동" = "GPS Tây → Đông";
+"PNG 사본 저장…" = "Lưu bản sao PNG…";
+"QuickSRNet으로 가로·세로를 2배 확대합니다. 모든 처리는 이 Mac에서 이루어집니다." = "QuickSRNet tăng gấp đôi chiều rộng và chiều cao. Mọi xử lý diễn ra trên máy Mac này.";
+"ZIP 안의 이미지는 읽기 전용입니다. 새 파일로 내보낸 뒤 수정하세요." = "Hình ảnh trong ZIP chỉ có thể đọc. Hãy xuất thành tệp mới trước khi chỉnh sửa.";
+"같은 파일명" = "Tên tệp trùng khớp";
+"검색 결과 수" = "Số kết quả tìm kiếm";
+"검색 결과 없음" = "Không có kết quả tìm kiếm";
+"검색 지우기" = "Xóa tìm kiếm";
+"검색·필터 초기화" = "Đặt lại tìm kiếm và bộ lọc";
+"검색어나 이미지 형식 필터를 바꿔 보세요." = "Hãy thử đổi từ khóa tìm kiếm hoặc bộ lọc định dạng hình ảnh.";
+"결과는 SDR · sRGB입니다. 투명도는 유지하며, 움직이는 이미지는 첫 프레임만 확대합니다. 원본은 변경하지 않습니다." = "Kết quả sử dụng SDR và sRGB. Độ trong suốt được giữ nguyên; ảnh động chỉ phóng to khung hình đầu tiên. Ảnh gốc không bị thay đổi.";
+"기타 형식" = "Định dạng khác";
+"다시 실행" = "Chạy lại";
+"닫기" = "Đóng";
+"대응 이미지 없음" = "Không có hình ảnh tương ứng";
+"모든 형식" = "Tất cả định dạng";
+"목록 순서" = "Thứ tự danh sách";
+"미리보기" = "Xem trước";
+"비교 %1$@" = "So sánh %1$@";
+"사본을 저장했습니다." = "Đã lưu bản sao.";
+"생성일 오래된순" = "Ngày tạo: cũ nhất trước";
+"생성일 최신순" = "Ngày tạo: mới nhất trước";
+"수정일 오래된순" = "Ngày sửa: cũ nhất trước";
+"수정일 최신순" = "Ngày sửa: mới nhất trước";
+"실제 픽셀" = "Điểm ảnh thực tế";
+"실행을 누르면 확대 결과를 미리 보고 PNG 사본으로 저장할 수 있습니다." = "Bắt đầu phóng to để xem trước kết quả và lưu bản sao PNG.";
+"용량 작은순" = "Dung lượng: nhỏ nhất trước";
+"용량 큰순" = "Dung lượng: lớn nhất trước";
+"원본 이미지가 변경되었습니다. 다시 실행해 주세요." = "Ảnh gốc đã thay đổi. Vui lòng chạy lại.";
+"원본 파일을 덮어쓸 수 없습니다. 다른 이름을 선택해 주세요." = "Không thể ghi đè tệp gốc. Hãy chọn tên khác.";
+"원본과 비교" = "So sánh với ảnh gốc";
+"이 이미지는 AI 확대의 메모리 한도를 넘습니다. 더 작은 사본을 사용해 주세요." = "Hình ảnh này vượt quá giới hạn bộ nhớ để phóng to bằng AI. Hãy dùng bản sao nhỏ hơn.";
+"이름 내림차순" = "Tên: giảm dần";
+"이름 오름차순" = "Tên: tăng dần";
+"이미지 맞추기" = "Ghép cặp hình ảnh";
+"이미지 목록을 정리할 수 없음" = "Không thể cập nhật danh sách hình ảnh";
+"이미지 엔진 작업을 완료하지 못했습니다: %@" = "Công cụ xử lý ảnh không thể hoàn tất thao tác: %@";
+"이미지 크기를 확인할 수 없습니다." = "Không thể xác định kích thước hình ảnh.";
+"이미지 형식 필터" = "Bộ lọc định dạng hình ảnh";
+"이미지를 먼저 열어 주세요." = "Hãy mở một hình ảnh trước.";
+"이전 보기를 복원하지 못했습니다. 열기에서 폴더를 다시 선택하세요." = "Không thể khôi phục chế độ xem trước đó. Dùng Mở để chọn lại thư mục.";
+"이전 비교 복원" = "Khôi phục lần so sánh trước";
+"정렬" = "Sắp xếp";
+"즐겨찾는 폴더" = "Thư mục yêu thích";
+"즐겨찾는 폴더를 열 수 없음" = "Không thể mở thư mục yêu thích";
+"즐겨찾는 폴더에 고정" = "Ghim vào thư mục yêu thích";
+"즐겨찾는 폴더에서 해제" = "Bỏ ghim khỏi thư mục yêu thích";
+"파일 이름 검색" = "Tìm theo tên tệp";
+"형식 %d" = "Định dạng: %d";
+"확장자를 제외한 같은 이름을 짝지으며, 없는 쪽은 빈칸으로 표시합니다." = "Ghép các tên giống nhau không tính phần mở rộng; bên không có ảnh tương ứng sẽ để trống.";
+
+/* Histogram, editing tools and photo maps */
+"GPS 사진 %lld장" = "%lld ảnh có vị trí";
+"GPS 정보가 저장된 사진이 이 지도에 표시됩니다." = "Ảnh có thông tin GPS đã lưu sẽ xuất hiện trên bản đồ này.";
+"RGB 히스토그램" = "Biểu đồ RGB";
+"SDR 미리보기 · 투명도 가중" = "Xem trước SDR · Có trọng số theo độ đục";
+"강도" = "Cường độ";
+"강한 대비" = "Tương phản mạnh";
+"그림자" = "Vùng tối";
+"노랑" = "Vàng";
+"다섯 제어점을 위아래로 드래그하세요." = "Kéo năm điểm điều khiển lên hoặc xuống.";
+"다음 이미지" = "Ảnh tiếp theo";
+"명도" = "Độ sáng màu";
+"명료도" = "Độ rõ";
+"모든 위치" = "Tất cả vị trí";
+"미리보기에서 RGB가 모두 0 또는 255인 픽셀의 투명도 가중 비율입니다." = "Tỷ lệ pixel xem trước có cả ba kênh RGB bằng 0 hoặc 255, được tính trọng số theo độ đục.";
+"반경" = "Bán kính";
+"보라" = "Tím";
+"보정된 sRGB 미리보기의 256구간 분포입니다. 휘도는 0.2126R + 0.7152G + 0.0722B로 계산하며 HDR 원본 분포와 다를 수 있습니다." = "Phân bố của bản xem trước sRGB đã chỉnh sửa trên 256 mức. Độ chói được tính theo 0.2126R + 0.7152G + 0.0722B và có thể khác phân bố của ảnh HDR gốc.";
+"분석할 불투명 픽셀이 없습니다." = "Không có pixel hiển thị để phân tích.";
+"블랙 포인트" = "Điểm đen";
+"빨강" = "Đỏ";
+"사각형" = "Hình chữ nhật";
+"사진 보기" = "Xem ảnh";
+"사진 위치 Apple 지도" = "Vị trí ảnh trên Bản đồ Apple";
+"사진 핀을 눌러 미리 보고, 영역을 선택해 사진을 모아 보세요." = "Nhấp vào ghim ảnh để xem trước, hoặc chọn một vùng để xem các ảnh trong vùng đó.";
+"선택 %lld장" = "Đã chọn %lld ảnh";
+"선택 사진 보기" = "Xem ảnh đã chọn";
+"선형" = "Tuyến tính";
+"시네마 나이트" = "Điện ảnh ban đêm";
+"시네마 틸 오렌지" = "Điện ảnh xanh ngọc và cam";
+"시네마 페이드" = "Điện ảnh phai màu";
+"안개 제거" = "Khử sương mù";
+"영역 선택 해제" = "Bỏ chọn vùng";
+"완전 검정 %.1f%%" = "Đen hoàn toàn %.1f%%";
+"완전 흰색 %.1f%%" = "Trắng hoàn toàn %.1f%%";
+"위치 읽는 중 %lld / %lld" = "Đang đọc vị trí %lld / %lld";
+"위치 정보가 있는 사진이 없습니다" = "Không có ảnh có thông tin vị trí";
+"위치 필터를 해제하고 폴더의 사진을 다시 표시합니다." = "Xóa bộ lọc vị trí và hiển thị lại ảnh trong thư mục.";
+"이전 이미지" = "Ảnh trước";
+"자유 영역" = "Vùng vẽ tự do";
+"자홍" = "Đỏ tía";
+"제어점" = "Điểm điều khiển";
+"제어점 %d" = "Điểm điều khiển %d";
+"주황" = "Cam";
+"중간 대비" = "Tương phản vừa";
+"지도 보기" = "Xem bản đồ";
+"지도 영역 해제" = "Xóa vùng bản đồ";
+"지도 위를 드래그해 사각형 영역을 선택하세요." = "Kéo trên bản đồ để chọn một vùng hình chữ nhật.";
+"지도 위에 원하는 영역을 그리세요. 끝점은 자동으로 연결됩니다." = "Vẽ vùng mong muốn trên bản đồ. Các điểm cuối sẽ tự động nối với nhau.";
+"지도 이동" = "Di chuyển bản đồ";
+"지도에서 중심부터 바깥으로 드래그해 반경을 선택하세요." = "Kéo từ tâm ra ngoài trên bản đồ để chọn bán kính.";
+"채널" = "Kênh";
+"청록" = "Xanh ngọc";
+"초록" = "Xanh lá";
+"출력" = "Đầu ra";
+"컬러 믹서" = "Bộ trộn màu";
+"컬러 믹서 초기화" = "Đặt lại bộ trộn màu";
+"텍스처" = "Kết cấu";
+"텍스처는 작은 디테일을, 명료도는 넓은 윤곽을 강조합니다. 안개 제거는 어두운 톤과 대비를 조절합니다." = "Kết cấu nhấn mạnh chi tiết nhỏ; độ rõ nhấn mạnh các đường nét lớn hơn. Khử sương mù điều chỉnh tông tối và độ tương phản.";
+"톤 조정" = "Điều chỉnh tông màu";
+"톤 커브" = "Đường cong tông màu";
+"톤 커브 초기화" = "Đặt lại đường cong tông màu";
+"파랑" = "Xanh dương";
+"프레즌스" = "Độ nổi bật";
+"프레즌스 초기화" = "Đặt lại độ nổi bật";
+"필름 룩" = "Phong cách phim";
+"현재 지도 영역" = "Vùng bản đồ hiện tại";
+"휘도 히스토그램" = "Biểu đồ độ chói";
+"흰색" = "Vùng trắng";
+"히스토그램" = "Biểu đồ tần suất";
+"히스토그램 계산 중" = "Đang tính biểu đồ";
+"히스토그램 채널" = "Kênh biểu đồ";
+"히스토그램을 불러올 수 없습니다." = "Không thể tải biểu đồ.";
+"반경 (km)" = "Bán kính (km)";
+
+/* Image editing flips */
+"좌우 반전하기" = "Lật ngang";
+"상하 반전하기" = "Lật dọc";
+"현재 보이는 사진의 왼쪽과 오른쪽을 뒤집습니다. 다시 누르면 원래대로 돌아옵니다." = "Lật trái và phải của ảnh đang hiển thị. Nhấn lại để hoàn tác thao tác lật.";
+"현재 보이는 사진의 위와 아래를 뒤집습니다. 다시 누르면 원래대로 돌아옵니다." = "Lật trên và dưới của ảnh đang hiển thị. Nhấn lại để hoàn tác thao tác lật.";
+
+/* Viewer page navigation */
+"%@ · %d장씩 이동" = "%@ · %d ảnh mỗi lần";
+"%@로 한 화면에 설정한 %d장씩 넘깁니다. 분류 모드에서도 사용할 수 있습니다." = "Dùng %@ để chuyển theo nhóm %d ảnh đã đặt cho mỗi màn hình. Cũng dùng được trong chế độ phân loại.";
+"이전 %d장 보기 (%@)" = "Xem %d ảnh trước (%@)";
+"다음 %d장 보기 (%@)" = "Xem %d ảnh tiếp theo (%@)";
+
+/* Minimal start screen */
+"Mac에 꼭 필요한 도구, 누구나 자유롭게." = "Công cụ thiết yếu cho Mac, ai cũng được tự do sử dụng.";
+
+/* App information */
+"알맹Re 정보" = "Giới thiệu 알맹Re";
+"앱 소개" = "Giới thiệu";
+
+/* Map selection and photo previews */
+"선택한 영역의 사진" = "Ảnh trong khu vực đã chọn";
+"사진 %lld장 보기" = "Xem %lld ảnh";
+"이 영역에는 사진이 없습니다." = "Không có ảnh trong khu vực này.";
+"영역을 넓히거나 다른 위치를 선택해 보세요." = "Thử mở rộng khu vực hoặc chọn vị trí khác.";
+"선택 영역의 사진을 찾는 중…" = "Đang tìm ảnh trong khu vực đã chọn…";
+"이 위치의 사진 %lld장" = "%lld ảnh tại vị trí này";
+
+/* Comparison navigation target and shorter-side looping */
+"이미지 넘기기" = "Chuyển ảnh";
+"A만" = "Chỉ A";
+"양쪽" = "Cả hai";
+"B만" = "Chỉ B";
+"적은 쪽 반복" = "Lặp bên ít ảnh hơn";
+"방향키로 넘길 대상" = "Bên chuyển bằng phím mũi tên";
+"방향키와 공통 이동 버튼으로 넘길 사진을 고릅니다. A/B만 선택하면 목록 순서로 전환합니다." = "Chọn ảnh để chuyển bằng phím mũi tên và nút điều hướng chung. Chọn Chỉ A hoặc Chỉ B sẽ chuyển sang thứ tự danh sách.";
+"잠금에 맞춰 이동 대상이 바뀝니다. 잠금을 모두 풀면 양쪽으로 돌아갑니다." = "Bên được chuyển thay đổi theo trạng thái khóa. Mở khóa cả hai bên để trở lại Cả hai.";
+"켜면 적은 쪽은 처음부터 반복하고, 끄면 마지막 이미지에 머뭅니다. 많은 쪽의 끝까지 함께 넘깁니다." = "Khi bật, bên ít ảnh hơn sẽ lặp lại từ đầu; khi tắt, bên đó giữ nguyên ảnh cuối. Cả hai cùng chuyển cho đến khi bên nhiều ảnh hơn đến cuối.";
+"파일명 비교에서는 같은 이름의 쌍으로 이동합니다. 반복은 목록 순서에서 사용할 수 있습니다." = "So sánh theo tên tệp sẽ chuyển qua các cặp có cùng tên. Chế độ lặp có thể dùng với thứ tự danh sách.";
+"이동 대상: %@" = "Bên chuyển ảnh: %@";
+"잠금에 따라 자동 선택" = "Tự chọn theo trạng thái khóa";
+
+/* Native basic usage and online documentation */
+"기본 사용법" = "Cách sử dụng cơ bản";
+"상세 사용설명서 (GitHub)" = "Hướng dẫn chi tiết (GitHub)";
+"basicUsage.intro" = "Tìm hiểu nhanh các chức năng cơ bản của 알맹Re.";
+"basicUsage.settingsButton" = "Cài đặt…";
+"basicUsage.open.title" = "Mở ảnh, thư mục hoặc ZIP";
+"basicUsage.open.body" = "Dùng Mở… (%@) để mở ảnh, thư mục hoặc ZIP, hoặc kéo chúng từ Finder. Ảnh trong ZIP chỉ có thể đọc.";
+"basicUsage.browse.title" = "Chuyển giữa các ảnh";
+"basicUsage.browse.body" = "Ảnh trước / tiếp theo: %@ / %@. Thay đổi số ảnh trên mỗi màn hình bằng các điều khiển xem. ↑/↓ chọn hàng trong Xem tất cả hoặc trong trang hiện tại của Trình xem nhiều mục, với Phân loại ON hay OFF. Di chuyển dừng ở hàng đầu và hàng cuối. Với Phân loại ON hay OFF, ←/→ chuyển cả trang trong Trình xem hoặc từng mục trong Xem tất cả.";
+"basicUsage.browse.pages" = "Trong trình xem, %@ chuyển từng màn hình ảnh.";
+"basicUsage.view.title" = "Thu phóng và đổi chế độ xem";
+"basicUsage.view.body" = "Phóng to / thu nhỏ: %@ / %@. Vừa cửa sổ: %@. Kích thước thực: %@. Tìm ảnh trong Xem tất cả (%@), hoặc dùng Chế độ tập trung (%@) để tập trung vào ảnh. Di chuyển ảnh chỉ cho phép một khoảng nhỏ ở mép; trục nhỏ hơn khung xem luôn được căn giữa.";
+"basicUsage.compare.title" = "So sánh hai danh sách ảnh";
+"basicUsage.compare.body" = "Mở A và B trong So sánh ảnh (%@), rồi chọn một bên theo tên hiển thị hoặc Cả hai trong Chuyển ảnh. Khóa sẽ giữ nguyên ảnh, mức thu phóng và vị trí của khung đó; đối tượng chuyển ảnh thay đổi theo trạng thái khóa. Dùng nút nhãn dưới tên mỗi khung để chọn nhiều nhãn độc lập và so sánh các nhóm ảnh khác nhau.";
+"basicUsage.tags.title" = "Gắn nhãn ảnh và video";
+"basicUsage.tags.body" = "Khi Phân loại ON (⇧⌘M), dùng 1–4 · QWER · ASDF để đổi nhiều nhãn của mục hiện tại. Mỗi nút Nhãn trong Trình xem hoặc Xem tất cả chỉ áp dụng cho ảnh hay video đó. OFF khôi phục phím tắt thông thường. Tên và màu có thể sửa; “Xóa” và “Tải lên” chỉ là nhãn, không thao tác lên tệp. Trong So sánh ảnh, chọn riêng Chỉ A, Chỉ B hoặc Cả hai tại Áp dụng nhãn.";
+"basicUsage.map.title" = "Chọn vùng trên bản đồ";
+"basicUsage.map.body" = "Chọn tối đa ba vùng để duyệt ảnh có vị trí trong Trình xem hoặc Xem tất cả. Thanh màu xanh cho biết số vùng và số ảnh. Quay lại bản đồ khôi phục vị trí và mức thu phóng cuối; Xóa vùng bản đồ chỉ bỏ bộ lọc vị trí.";
+"basicUsage.edit.title" = "Chỉnh sửa và lưu bản sao";
+"basicUsage.edit.body" = "Dùng nút thanh trượt để cắt, xoay, lật và chỉnh màu. Xuất (%@) bản sao trước khi đóng ứng dụng. Nút i hiển thị thông tin ảnh và siêu dữ liệu.";
+"basicUsage.settings.title" = "Tùy chỉnh theo cách của bạn";
+"basicUsage.settings.body" = "Thay đổi cách xem, tải ảnh và phím tắt trong Cài đặt. Các phím có thể tùy chỉnh trong hướng dẫn này phản ánh cài đặt hiện tại. Xem hướng dẫn chi tiết trên GitHub để biết đầy đủ chức năng và cách dùng.";
+
+"basicUsage.compare.names" = "Tên so sánh… đặt tên riêng mà không đổi tên thư mục thật; để trống sẽ dùng tên thư mục, hoặc A/B khi cùng một thư mục.";
+
+/* AI upscaling preview inspection */
+"aiPreview.fit" = "Vừa cửa sổ";
+"aiPreview.actual" = "100% · Điểm ảnh thực tế";
+"aiPreview.actualHelp" = "Hiển thị một điểm ảnh của kết quả AI trên một điểm ảnh màn hình. Tệp ảnh không thay đổi.";
+"aiPreview.hint" = "+/− hoặc chụm/mở ngón tay để thu phóng · Kéo hoặc cuộn để di chuyển";
+"aiPreview.compareHint" = "Kéo đường phân chia sang trái hoặc phải để so sánh cùng một chi tiết.";
+"aiPreview.original" = "Ảnh gốc (hiển thị 2×)";
+"aiPreview.result" = "Kết quả phóng to bằng AI";
+"aiPreview.split" = "Đường phân chia so sánh";
+"aiPreview.direction" = "Hướng so sánh";
+"aiPreview.leftRight" = "Trái / phải";
+"aiPreview.topBottom" = "Trên / dưới";
+"aiPreview.horizontalSplit" = "Đường phân chia so sánh trên / dưới";
+"aiPreview.verticalSplit" = "Đường phân chia so sánh trái / phải";
+"aiPreview.zoomIn" = "Phóng to bản xem trước";
+"aiPreview.zoomOut" = "Thu nhỏ bản xem trước";
+"aiPreview.zoom" = "Độ thu phóng bản xem trước";
+"aiPreview.percent" = "%@%%";
+"aiPreview.basicUsage" = "Trong Phóng to bằng AI, điều chỉnh thu phóng và kéo đường phân chia để so sánh ảnh gốc với kết quả, rồi lưu bản sao PNG.";
+
+/* Branded home and recent-photo history */
+"home.subtitle" = "Ngắm những khoảnh khắc trong ảnh và video, rồi sắp xếp theo cách của bạn.";
+"home.recent" = "Thư mục đã mở gần đây";
+"home.recent.detail" = "Tối đa 3 thư mục đã mở gần đây, mới nhất trước, mỗi thư mục có tối đa 4 hình ảnh bạn vừa xem hoặc thao tác.";
+"home.empty" = "Chưa có thư mục gần đây";
+"home.empty.detail" = "Mở thư mục hoặc tệp để có thể tiếp tục xem từ đây.";
+"home.resume" = "Tiếp tục phiên trước";
+"home.show" = "Trang chủ";
+"home.remove" = "Xóa khỏi danh sách";
+"home.clear" = "Xóa danh sách";
+"home.clear.help" = "Chỉ xóa lịch sử thư mục và tệp gần đây. Không xóa tệp gốc.";
+"home.preview.unavailable" = "Không có bản xem trước";
+"home.open.failed" = "Không thể mở ảnh gần đây";
+"home.open.missing" = "Không tìm thấy hoặc không thể truy cập tệp. Hãy chọn lại bằng Mở.";
+"home.remove.label" = "Xóa “%@” khỏi danh sách";
+"home.open.label" = "Mở lại “%@”";
+"home.folder.open" = "Mở thư mục";
+"home.folder.open.label" = "Mở lại thư mục “%@”";
+"home.folder.remove" = "Xóa thư mục khỏi lịch sử";
+"home.folder.remove.label" = "Xóa thư mục “%@” khỏi lịch sử gần đây";
+"home.folder.empty" = "Hình ảnh bạn xem hoặc thao tác trong thư mục này sẽ xuất hiện ở đây.";
+"home.folder.count" = "%d hình ảnh";
+"home.archive.open" = "Mở ZIP";
+"home.folder.failed" = "Không thể mở thư mục";
+"home.folder.missing" = "Thư mục có thể đã được di chuyển hoặc ổ đĩa không khả dụng. Hãy chọn lại bằng Mở.";
+"home.basicUsage" = "Từ Trang chủ, dùng Tiếp tục phiên trước hoặc mở lại một trong bảy ảnh gần đây. Xóa danh sách chỉ xóa lịch sử và giữ nguyên tệp gốc.";
+
+/* Home quote attribution */
+"home.quote.source" = "Bản gốc và nguồn";
+"home.quote.translation" = "Bản dịch của AlmaengRe";
+
+"appearance.title" = "Giao diện";
+"appearance.system" = "Hệ thống";
+"appearance.light" = "Sáng";
+"appearance.dark" = "Tối";
+"appearance.help" = "Chế độ Hệ thống tự động theo cài đặt giao diện của macOS.";
+
+"%@ 영상을 재생할 수 없어 전자 앨범을 일시정지했습니다." = "Album ảnh đã tạm dừng vì không thể phát video %@.";
+"‘%@’은 비어 있는 파일입니다(0바이트). 원본이나 백업에서 다시 복사해 주세요." = "‘%@’ là tệp trống (0 byte). Hãy sao chép lại từ bản gốc hoặc bản sao lưu.";
+
+"지원 이미지 모두 연결" = "Liên kết mọi định dạng ảnh được hỗ trợ";
+"Finder에서 이미지를 열면 한 장 보기로 시작합니다. 이미지·영상·폴더를 창에 끌어 놓아도 열 수 있습니다." = "Ảnh mở từ Finder sẽ hiển thị ở chế độ xem từng ảnh. Bạn cũng có thể kéo ảnh, video và thư mục vào cửa sổ để mở.";
+"연결 확인이 필요한 형식: %@" = "Định dạng cần kiểm tra liên kết: %@";
+"이미지·영상·폴더를 여기에 놓으세요." = "Thả ảnh, video hoặc thư mục vào đây.";

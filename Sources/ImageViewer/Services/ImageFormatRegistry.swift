@@ -16,20 +16,29 @@ enum ImageFormatRegistry {
     return Set(identifiers.compactMap { $0 as? String })
   }()
 
-  /// macOS 15의 Image I/O와 자체 QOI/PCX 디코더가 실제로 시도할 수 있는 확장자입니다.
-  static let knownExtensions: Set<String> = [
-    "jpg", "jpeg", "jpe", "jfif", "png", "apng", "gif", "webp",
-    "heic", "heif", "heics", "hif", "avif", "avifs", "jxl",
-    "jp2", "j2k", "jpf", "jpx", "tif", "tiff", "bmp", "dib",
-    "ico", "cur", "icns", "tga", "targa", "dds", "exr", "hdr",
-    "rgbe", "pnm", "pbm", "pgm", "ppm", "pfm", "psd", "psb",
-    "svg", "svgz", "qoi", "pcx", "ktx", "ktx2", "astc", "pvr",
-    "sgi", "rgb", "rgba", "bw", "pict", "pic", "mpo",
+  /// Include every filename alias exported by this Mac's actual Image I/O decoders.
+  /// This also allows those formats inside ZIP files, whose extraction uses the whitelist.
+  static let nativeFilenameExtensions: Set<String> = Set(readableTypeIdentifiers.flatMap {
+    UTType($0)?.tags[.filenameExtension] ?? []
+  }.map { $0.lowercased() })
+
+  static let cameraRAWExtensions: Set<String> = [
     "raw", "dng", "cr2", "cr3", "crw", "nef", "nefx", "nrw",
     "arw", "sr2", "srf", "orf", "rw2", "raf", "pef", "iiq",
     "3fr", "fff", "rwl", "x3f", "erf", "mrw", "mos", "kdc",
     "dcr", "mef", "bay", "cap",
   ]
+
+  /// macOS 15의 Image I/O와 자체 QOI/PCX 디코더가 실제로 시도할 수 있는 확장자입니다.
+  static let knownExtensions: Set<String> = Set([
+    "jpg", "jpeg", "jpe", "jfif", "jif", "jfi", "png", "apng", "gif", "webp",
+    "heic", "heif", "heics", "hif", "avif", "avifs", "jxl",
+    "jp2", "j2k", "jpf", "jpx", "jpc", "j2c", "tif", "tiff", "bmp", "dib",
+    "ico", "cur", "icns", "tga", "targa", "dds", "exr", "hdr",
+    "rgbe", "pnm", "pbm", "pgm", "ppm", "pfm", "psd", "psb",
+    "svg", "svgz", "qoi", "pcx", "ktx", "ktx2", "astc", "pvr",
+    "sgi", "rgb", "rgba", "bw", "pict", "pic", "mpo",
+  ]).union(cameraRAWExtensions).union(nativeFilenameExtensions)
 
   static func canAttemptToDecode(_ url: URL) -> Bool {
     guard !url.hasDirectoryPath else { return false }

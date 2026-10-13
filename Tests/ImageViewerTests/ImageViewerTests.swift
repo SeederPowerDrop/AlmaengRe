@@ -213,9 +213,9 @@ struct ImageViewerTests {
     #expect(formats.allSatisfy { !$0.typeIdentifiers.isEmpty && !$0.filenameExtensions.isEmpty })
   }
 
-  @Test("8개 언어가 같은 번역 키와 확정된 알맹Re 이름을 제공한다")
+  @Test("10개 언어가 같은 번역 키와 확정된 알맹Re 이름을 제공한다")
   func localizationResources() {
-    #expect(L10n.supportedLocalizations == ["ko", "en", "zh-Hans", "ja", "fr", "es", "ar", "vi"])
+    #expect(L10n.supportedLocalizations == ["ko", "en", "ja", "zh-Hans", "vi", "es", "fr", "de", "ru", "ar"])
 
     let koreanKeys = L10n.keys(localeIdentifier: "ko")
     #expect(koreanKeys.count >= 260)

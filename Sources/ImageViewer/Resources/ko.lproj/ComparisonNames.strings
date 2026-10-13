@@ -1,0 +1,16 @@
+"editor.open" = "비교 이름…";
+"editor.title" = "비교 이름";
+"editor.left" = "왼쪽 이름";
+"editor.right" = "오른쪽 이름";
+"editor.top" = "위쪽 이름";
+"editor.bottom" = "아래쪽 이름";
+"automatic.label" = "자동 이름: %@";
+"editor.help" = "비워 두면 폴더 이름을 사용합니다. 같은 폴더는 A/B로 구분합니다. 실제 폴더 이름은 바뀌지 않습니다.";
+"editor.reset" = "자동 이름으로";
+"action.cancel" = "취소";
+"action.save" = "저장";
+"target.only" = "%@만";
+"target.left" = "%@ · 왼쪽";
+"target.right" = "%@ · 오른쪽";
+"target.top" = "%@ · 위";
+"target.bottom" = "%@ · 아래";

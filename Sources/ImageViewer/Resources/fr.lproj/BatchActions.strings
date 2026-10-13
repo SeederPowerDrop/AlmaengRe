@@ -1,0 +1,14 @@
+"export.menu" = "Convertir, redimensionner et compresser…";
+"share.menu" = "Partager les fichiers…";
+"map.area" = "Photos de la zone";
+"map.photo" = "Cette photo";
+"map.location" = "Toutes les photos de ce lieu";
+"report.menu" = "Rapport des fichiers classés…";
+"share.unavailable" = "Fichiers à partager introuvables";
+"share.unavailableHint" = "Actualisez le dossier, vérifiez les fichiers et les autorisations, puis sélectionnez-les à nouveau.";
+"share.failed" = "Impossible de partager les fichiers";
+
+"quick.rename" = "Renommer";
+"quick.export" = "Format et taille";
+"quick.watermark" = "Filigrane";
+"quick.share" = "Partager";

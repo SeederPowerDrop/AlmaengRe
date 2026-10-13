@@ -111,6 +111,31 @@ struct ImageWorkSchedulerTests {
     #expect(await probe.starts.map(\.label) == [1])
   }
 
+  @Test("빠른 탐색 미리보기는 대기 중인 정밀 이미지보다 먼저 처리한다")
+  func prioritizesInteractivePreviewWithoutInterruptingActiveDecoder() async throws {
+    let scheduler = ImageWorkScheduler<Int, Int>(maxConcurrentTasks: 1)
+    let probe = ControlledImageWork()
+    let blocker = request(0, scheduler: scheduler, probe: probe)
+    try await probe.waitForStarts(1)
+    let fullImage = request(1, scheduler: scheduler, probe: probe)
+    try await waitFor(scheduler, running: 1, queued: 1, waiters: 2)
+    let preview = request(2, priority: .interactivePreview, scheduler: scheduler, probe: probe)
+    try await waitFor(scheduler, running: 1, queued: 2, waiters: 3)
+    #expect(await probe.starts.map(\.label) == [0])
+
+    await probe.release(0)
+    #expect(try await blocker.value == 0)
+    try await probe.waitForStarts(2)
+    #expect(await probe.starts.map(\.label) == [0, 2])
+    await probe.release(2)
+    #expect(try await preview.value == 2)
+    try await probe.waitForStarts(3)
+    await probe.release(1)
+    #expect(try await fullImage.value == 1)
+    #expect(await probe.maximumRunning == 1)
+    try await waitFor(scheduler, running: 0, queued: 0, waiters: 0)
+  }
+
   @Test("취소를 무시하는 디코더가 끝날 때까지 슬롯을 유지하며 같은 이미지의 재요청을 분리한다")
   func preservesSlotAndSeparatesReplacementAfterCancellation() async throws {
     let scheduler = ImageWorkScheduler<Int, Int>(maxConcurrentTasks: 1)

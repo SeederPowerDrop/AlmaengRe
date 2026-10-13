@@ -1,0 +1,11 @@
+"classification.mode" = "Use a classification name";
+"classification.label" = "Classification to use";
+"classification.choose" = "Choose a classification.";
+"classification.unavailable" = "Classification information could not be loaded. Close this window and check classification storage.";
+"classification.emptyName" = "This classification has no name. Name it and try again.";
+"classification.noMatches" = "None of the selected files has this classification.";
+"classification.help" = "Only files with the chosen classification are renamed, in list order. For example: Upload01, Upload02. With 100 or more matching files, numbering starts at 001 and expands as needed.";
+"classification.scope" = "%d matching files will be processed out of %d selected files. Other files stay unchanged.";
+"classification.unnamed" = "Unnamed classification";
+"classification.option" = "%@ · %@ (%d files)";
+"numbering.help" = "Numbers are added before the extension in the current list order. To change the image format, use “%@”.";

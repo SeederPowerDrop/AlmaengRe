@@ -1,0 +1,6 @@
+"grid.playAll" = "播放当前画面的所有视频";
+"grid.playSelected" = "播放所选视频（%d）";
+"grid.pauseAll" = "暂停所有视频";
+"grid.select" = "选择要播放的视频";
+"grid.play" = "播放视频";
+"grid.pause" = "暂停视频";

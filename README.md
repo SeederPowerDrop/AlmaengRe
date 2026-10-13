@@ -2,7 +2,13 @@
 
 빠르고 단정한 macOS용 무료 오픈 소스 이미지 뷰어입니다. 반디뷰의 이미지 중심 흐름에서 영감을 받되, SwiftUI·트랙패드·Apple 컬러 파이프라인에 맞게 새로 설계합니다.
 
-현재 버전은 **0.10.2 개발 기반(MVP)** 입니다. 폴더 탐색부터 이미지 비교, 전자 앨범, 바탕화면 설정, 이미지 정보 수정, 잘라내기와 비파괴 보정, 형식 변환까지 지원하며, 초대형 이미지 타일 렌더링과 배포 서명 등은 후속 마일스톤에서 강화합니다.
+현재 공개 버전은 **1.0 (빌드 50)** 입니다. **macOS 14 이상**, **Apple Silicon·Intel 공용(Universal 2)** 앱입니다.
+
+**[알맹Re 1.0 DMG 다운로드](https://github.com/SeederPowerDrop/AlmaengRe/releases/download/v1.0/AlmaengRe-1.0-macos-universal.dmg)** · [릴리스와 변경 내역](https://github.com/SeederPowerDrop/AlmaengRe/releases/tag/v1.0) · [SHA-256 체크섬](https://github.com/SeederPowerDrop/AlmaengRe/releases/download/v1.0/SHA256SUMS.txt)
+
+DMG 안의 **알맹Re.app**을 **Applications**로 옮겨 설치합니다. 현재 배포본은 ad-hoc 서명이며 **Apple Developer ID 서명·공증은 적용되지 않았습니다**. 인터넷에서 받은 앱은 macOS 보안 정책에 따라 첫 실행이 제한될 수 있습니다. Intel용 실행 파일은 포함되어 있지만 실제 Intel Mac에서의 실행은 아직 검증하지 못했습니다.
+
+이번 버전에는 Finder에서 간단히 이미지 열기와 기본 이미지 앱 연결, 이미지·영상·폴더 드래그 앤 드롭, 최근 3개 폴더와 폴더별 최근 4개 파일, 다중 영상 재생·음소거 개선, 형식·메타데이터·날짜 검색, 분류 이력 CSV 내보내기가 포함됩니다. 설명서 갱신은 일시 중단되어 아래 기존 설명서는 0.13.1 기준으로 보존하고 있습니다.
 
 ## 사용설명서 / User guides
 
@@ -78,24 +84,25 @@ The **0.13.1 development app** provides its interface and in-app Basic Usage in 
 
 Image I/O 밖의 QOI와 PCX는 자체 디코더로 보완하고, SVG/SVGZ는 AppKit 표현 폴백을 사용합니다. BPG와 Clip Studio `.clip`은 아직 포함되지 않았습니다. 자세한 범위와 원칙은 [포맷 문서](docs/FORMAT_SUPPORT.md)를 참고하세요.
 
-## 실행
+## 소스에서 빌드
 
-요구 환경은 macOS 14 이상과 Xcode 16 이상입니다.
-
-```bash
-swift run
-```
-
-또는 Finder에서 `Package.swift`를 Xcode로 열고 `ImageViewer` 실행 대상을 선택하세요.
-
-일반 `.app` 번들을 만들려면 다음을 실행합니다.
+macOS 14 이상, Swift 6 / Xcode 16 이상, Rust 툴체인이 필요합니다. Universal 2 빌드에는 두 Rust 타깃을 설치합니다.
 
 ```bash
-./scripts/build-app.sh
-open "dist/알맹Re.app"
+rustup target add aarch64-apple-darwin x86_64-apple-darwin
+IMAGEVIEWER_DEFER_GUIDE_CHECK=1 ./scripts/build-app.sh release universal
+./scripts/build-dmg.sh "$PWD/dist/알맹Re.app" "$PWD/dist/AlmaengRe-1.0-macos-universal.dmg"
 ```
 
-기본 결과는 Apple Silicon과 Intel을 함께 지원하는 Universal 2 앱이며, 릴리스 빌드는 같은 버전의 GitHub 배포용 ZIP도 생성합니다. 빠른 로컬 빌드만 필요하면 `./scripts/build-app.sh debug native`를 사용하세요. 스크립트 결과는 로컬 실행용 ad-hoc 서명이며, GitHub Release로 배포할 때는 Apple Developer ID 서명과 공증이 별도로 필요합니다.
+`IMAGEVIEWER_DEFER_GUIDE_CHECK=1`은 설명서 작업 중단 지시에 따라 기존 설명서와 검토 지문을 유지합니다. 앱 빌드와 코드 테스트는 계속 실행합니다. 빠른 로컬 앱 빌드는 `IMAGEVIEWER_DEFER_GUIDE_CHECK=1 ./scripts/build-app.sh debug native`로 만듭니다.
+
+```bash
+./scripts/build-rust-engine.sh native
+swift test --no-parallel
+cargo test --manifest-path Engine/almeng-core/Cargo.toml --locked
+```
+
+스크립트 결과는 ad-hoc 서명입니다. Developer ID 서명과 Apple 공증은 이 빌드 스크립트에서 수행하지 않습니다.
 
 ## 기본 단축키
 

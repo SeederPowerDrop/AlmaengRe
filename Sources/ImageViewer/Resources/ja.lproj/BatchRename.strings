@@ -1,0 +1,11 @@
+"classification.mode" = "分類名を使う";
+"classification.label" = "名前に使う分類";
+"classification.choose" = "分類を選択してください。";
+"classification.unavailable" = "分類情報を読み込めませんでした。このウインドウを閉じ、分類の保存状態を確認してください。";
+"classification.emptyName" = "この分類には名前がありません。分類名を設定してからやり直してください。";
+"classification.noMatches" = "選択したファイルに、この分類のファイルはありません。";
+"classification.help" = "選んだ分類のファイルだけを一覧の順番で変更します。例：アップロード01、アップロード02。対象が100件以上の場合は001から始まり、必要に応じて桁数が増えます。";
+"classification.scope" = "選択した%d件がこの分類の対象です。選択全体は%d件で、残りのファイルは変更しません。";
+"classification.unnamed" = "名前のない分類";
+"classification.option" = "%@ · %@（%d件）";
+"numbering.help" = "現在の一覧順に、拡張子の前へ連番を付けます。画像形式を変更するには「%@」を使います。";

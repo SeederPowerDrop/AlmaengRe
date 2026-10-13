@@ -7,6 +7,9 @@ import Testing
 struct ImageEditingLocalizationTests {
   private let editingKeys: Set<String> = [
     "구도", "잘라내기…", "자르기 해제", "왼쪽 90°", "오른쪽 90°", "빛", "휘도", "노출",
+    "좌우 반전하기", "상하 반전하기",
+    "현재 보이는 사진의 왼쪽과 오른쪽을 뒤집습니다. 다시 누르면 원래대로 돌아옵니다.",
+    "현재 보이는 사진의 위와 아래를 뒤집습니다. 다시 누르면 원래대로 돌아옵니다.",
     "색상", "색조", "색온도", "색선명도", "디테일", "선명도", "노이즈 감소", "잘라내기",
     "드래그해서 영역을 선택하고 모서리로 크기를 조절하세요.", "비율", "자유", "원본 비율",
     "전체 선택", "적용", "영역 이동", "왼쪽 위 모서리", "오른쪽 위 모서리", "왼쪽 아래 모서리",
@@ -14,9 +17,9 @@ struct ImageEditingLocalizationTests {
     "미리보기를 불러올 수 없음", "차갑게", "따뜻하게",
   ]
 
-  @Test("8개 언어에 모든 편집 조절과 자르기 접근성 문구가 있다")
+  @Test("10개 언어에 모든 편집 조절과 자르기 접근성 문구가 있다")
   func editingControlsAreLocalized() {
-    let supported = Set(["ko", "en", "zh-Hans", "ja", "fr", "es", "ar", "vi"])
+    let supported = Set(["ko", "en", "ja", "zh-Hans", "vi", "es", "fr", "de", "ru", "ar"])
     #expect(Set(L10n.supportedLocalizations) == supported)
 
     for locale in L10n.supportedLocalizations {

@@ -1,0 +1,23 @@
+/* About follows the app language; Korean is the original and fallback. */
+"subtitle" = "Trình xem ảnh macOS mà ai cũng có thể tự do sử dụng.";
+"opening" = "Trong lúc tìm một trình xem ảnh ưng ý cho Mac, tôi đã quyết định tự làm một ứng dụng bằng vibe coding. Ứng dụng này được lấy cảm hứng từ nhiều trình xem ảnh trên Windows và Mac.";
+"story" = "Tôi cũng muốn kể về nguồn gốc cái tên đã khiến mình suy nghĩ khá lâu. Hồi nhỏ, tôi từng mê mẩn một chương trình có tên 알맹이3, do 안일준 프로그램 연구소 (Phòng nghiên cứu phần mềm An Il-jun, www.aijsoft.com) tạo ra. Giờ nhìn lại, chương trình ấy có phần thô sơ, nhưng những tính năng bên trong đã cuốn hút tôi. Đặc biệt, những lời giới thiệu do chính nhà phát triển viết về lý do tạo ra chương trình và các điểm nổi bật của nó vẫn đọng lại trong tôi suốt nhiều năm.\n\nGiờ đây, tôi không biết người ấy đang ở đâu và sống ra sao. Tôi chỉ còn nhớ mang máng rằng có lẽ họ đã chuyển đến Úc. Để tri ân chương trình năm ấy và tâm huyết đằng sau nó, tôi đã đặt tên ứng dụng này là 알맹Re.";
+"philosophy" = "Cũng như kiến thức chúng ta chia sẻ có thể giúp ai đó bắt đầu, tôi hy vọng những công cụ mình tạo ra sẽ mở thêm nhiều khả năng cho người khác. Tôi mong ai cũng có thể sử dụng những chức năng cơ bản cần thiết trên máy tính một cách miễn phí và thuận tiện. Tôi cũng mong cả con người lẫn AI đều có thể tự do sử dụng các công cụ số cơ bản, cùng nhau học hỏi và sáng tạo.";
+"thanks" = "Xin cảm ơn.";
+"closing" = "Và ERW FWS WRG";
+"close" = "Đóng";
+"windowTitle" = "Giới thiệu 알맹Re";
+"profile" = "Ảnh đại diện của nhà phát triển";
+"confirm" = "OK";
+"licenses" = "Giấy phép mã nguồn mở";
+"back" = "Quay lại phần giới thiệu";
+"guide" = "Cách sử dụng cơ bản";
+"supportTitle" = "Ủng hộ dự án";
+"supportMessage" = "Với mong muốn tiếp nối sự giúp đỡ mình đã nhận được, tôi tạo ra những công cụ mà ai cũng có thể dùng miễn phí. Nếu ứng dụng hữu ích với bạn, một khoản đóng góp nhỏ sẽ là nguồn động viên quý giá.";
+"bitcoinDescription" = "Bạn có thể quét mã QR bằng ví Bitcoin như BlueWallet hoặc gửi đóng góp đến địa chỉ bên dưới.";
+"bitcoinAddress" = "Địa chỉ nhận đóng góp Bitcoin";
+"bitcoinQR" = "Mã QR của địa chỉ nhận đóng góp Bitcoin";
+"copyAddress" = "Sao chép địa chỉ";
+"addressCopied" = "Đã sao chép địa chỉ.";
+"openWallet" = "Mở trong ví";
+"walletUnavailable" = "Vui lòng sao chép địa chỉ Bitcoin rồi dán vào ví bạn đang sử dụng.";

@@ -1,0 +1,11 @@
+"classification.mode" = "분류 이름으로 바꾸기";
+"classification.label" = "이름에 사용할 분류";
+"classification.choose" = "분류를 선택해 주세요.";
+"classification.unavailable" = "분류 정보를 불러올 수 없습니다. 창을 닫고 분류 저장 상태를 확인해 주세요.";
+"classification.emptyName" = "이 분류의 이름이 비어 있습니다. 분류 이름을 지정한 뒤 다시 시도해 주세요.";
+"classification.noMatches" = "선택한 파일 중 이 분류에 해당하는 파일이 없습니다.";
+"classification.help" = "고른 분류에 해당하는 파일만 현재 목록 순서로 이름을 바꿉니다. 예: 업로드01, 업로드02. 대상이 100개 이상이면 001부터 시작하며, 필요한 만큼 자릿수가 늘어납니다.";
+"classification.scope" = "이 분류에 해당하는 %d개 파일이 대상입니다. 전체 선택: %d개. 나머지 파일은 변경하지 않습니다.";
+"classification.unnamed" = "이름 없는 분류";
+"classification.option" = "%@ · %@ (%d개)";
+"numbering.help" = "번호는 현재 목록 순서로 확장자 앞에 붙습니다. 다른 이미지 형식으로 바꾸려면 ‘%@’를 사용하세요.";

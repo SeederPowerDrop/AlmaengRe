@@ -1,0 +1,6 @@
+"grid.playAll" = "Play visible videos";
+"grid.playSelected" = "Play selected (%d)";
+"grid.pauseAll" = "Pause all videos";
+"grid.select" = "Select video for playback";
+"grid.play" = "Play video";
+"grid.pause" = "Pause video";

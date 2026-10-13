@@ -1,0 +1,12 @@
+"일괄 변환 · 크기 변경" = "Chuyển đổi và đổi kích thước hàng loạt";
+"크기 유지" = "Giữ kích thước";
+"긴 변 기준" = "Cạnh dài nhất";
+"비율 기준" = "Tỷ lệ phần trăm";
+"이미지 크기" = "Kích thước ảnh";
+"픽셀" = "pixel";
+"용량 줄이기 설정" = "Thiết lập giảm dung lượng";
+"현재 조정·자르기 후의 비율을 유지해 줄이며, 작은 이미지는 확대하지 않습니다." = "Thu nhỏ theo đúng tỷ lệ sau các điều chỉnh và cắt hiện tại. Không phóng to ảnh nhỏ.";
+"용량 줄이기는 JPEG·긴 변 1920픽셀·품질 75%로 설정합니다. 결과 용량은 사진마다 다르며 더 커질 수도 있습니다." = "Thiết lập dùng JPEG, cạnh dài 1920 pixel và chất lượng 75%. Dung lượng tùy ảnh và có thể tăng.";
+"긴 변은 1~65536픽셀, 비율은 1~100%로 입력하세요." = "Nhập cạnh dài từ 1–65536 pixel hoặc tỷ lệ từ 1–100%.";
+"이미지 크기를 변경하지 못했습니다." = "Không thể đổi kích thước ảnh.";
+"완료한 파일 공유…" = "Chia sẻ tệp đã hoàn tất…";

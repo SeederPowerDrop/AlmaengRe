@@ -4,6 +4,7 @@ import SwiftUI
 struct BottomControlBar: View {
   @ObservedObject var store: AppStore
   @ObservedObject var shortcuts: ShortcutStore
+  var onHideControls: (() -> Void)? = nil
 
   var body: some View {
     ViewThatFits(in: .horizontal) {
@@ -12,7 +13,7 @@ struct BottomControlBar: View {
     }
     .padding(.horizontal, 12)
     .padding(.vertical, 8)
-    .background(ViewerTheme.chrome)
+    .background(ViewerTheme.chromeGradient)
   }
 
   private func controls(compact: Bool) -> some View {
@@ -22,13 +23,14 @@ struct BottomControlBar: View {
         separator
         HStack(spacing: 2) {
           Button { store.navigatePage(-1) } label: { Image(systemName: "chevron.left") }
-            .help("이전 이미지/페이지")
+            .help(pageNavigationHelp(direction: -1))
           Text(store.positionDescription)
             .font(.system(size: 11, weight: .medium).monospacedDigit())
             .frame(minWidth: 58)
           Button { store.navigatePage(1) } label: { Image(systemName: "chevron.right") }
-            .help("다음 이미지/페이지")
+            .help(pageNavigationHelp(direction: 1))
         }
+        .modifier(ViewerControlGroup())
         Spacer(minLength: 12)
         HStack(spacing: 2) {
           Button { store.zoomOut() } label: { Image(systemName: "minus") }.help("축소")
@@ -42,6 +44,7 @@ struct BottomControlBar: View {
             .frame(minWidth: 42)
           Button { store.zoomIn() } label: { Image(systemName: "plus") }.help("확대")
         }
+        .modifier(ViewerControlGroup())
         separator
         Button { store.setFitToWindow() } label: {
           if compact { Image(systemName: "arrow.down.right.and.arrow.up.left") }
@@ -69,7 +72,26 @@ struct BottomControlBar: View {
     .buttonStyle(ViewerToolButtonStyle())
   }
 
-  private var returnButton: some View {
+  private func pageNavigationHelp(direction: Int) -> String {
+    if store.presentationMode == .viewer, store.imagesPerPage > 1,
+      let binding = shortcuts.viewerPageBinding(direction: direction) {
+      return L10n.format(direction < 0 ? "이전 %d장 보기 (%@)" : "다음 %d장 보기 (%@)",
+        store.imagesPerPage, binding.displayText)
+    }
+    return L10n.text(direction < 0 ? "이전 이미지/페이지" : "다음 이미지/페이지")
+  }
+
+  @ViewBuilder private var returnButton: some View {
+    if store.isFocusMode, let onHideControls {
+      Button(action: onHideControls) { Image(systemName: "xmark") }
+        .help("조작창 숨기기")
+        .accessibilityLabel("조작창 숨기기")
+    } else {
+      navigationReturnButton
+    }
+  }
+
+  private var navigationReturnButton: some View {
     Button {
       if store.comparisonLayout != .off { store.setComparisonLayout(.off) }
       else if store.isFocusMode { store.exitFocusMode() }

@@ -3,6 +3,8 @@ import Foundation
 enum ImageWorkPriority: Int, Comparable, Sendable {
   case prefetch
   case visible
+  /// A small first bitmap unblocks navigation before metadata or full-size rendering.
+  case interactivePreview
 
   static func < (lhs: Self, rhs: Self) -> Bool {
     lhs.rawValue < rhs.rawValue

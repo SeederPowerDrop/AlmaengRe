@@ -69,12 +69,18 @@ struct FolderTreeNavigationTests {
 
   @Test("빠른 연속 탐색에서 취소된 폴더의 목록이나 빈 폴더 결과가 마지막 폴더를 덮지 않는다")
   func latestFolderWins() async throws {
+    let initial = try fixture(count: 1)
     let a = try fixture(count: 48), b = try fixture(count: 2), empty = try fixture(count: 0)
-    defer { remove([a, b, empty]) }
+    defer { remove([initial, a, b, empty]) }
     let suite = "FolderTreeLatestTests.\(UUID())"
     let defaults = try #require(UserDefaults(suiteName: suite))
     defer { defaults.removePersistentDomain(forName: suite) }
     let store = AppStore(defaults: defaults, monitorsSystemResources: false)
+    // Home deliberately starts a newly opened folder in the viewer. Enter the
+    // workspace first so this exercises rapid tree navigation from an overview.
+    store.open(urls: [initial])
+    try await wait { !store.isLoading }
+    #expect(!store.showsHome && store.assets.count == 1)
     store.presentationMode = .overview
 
     store.openFolderFromTree(a)
@@ -107,11 +113,11 @@ struct FolderTreeNavigationTests {
 
     comparison.activeSide = .first
     store.openFolderFromTree(a)
-    try await wait { !comparison.first.isLoading }
+    try await wait { !comparison.first.isLoading && !comparison.isMatching }
     #expect(comparison.first.assets.count == 2 && comparison.second.assets.isEmpty)
     comparison.activeSide = .second
     store.openFolderFromTree(b)
-    try await wait { !comparison.second.isLoading }
+    try await wait { !comparison.second.isLoading && !comparison.isMatching }
     #expect(sameFolder(comparison.first.folderURL, a) && sameFolder(comparison.second.folderURL, b))
     #expect(comparison.second.assets.count == 4)
 
@@ -127,7 +133,7 @@ struct FolderTreeNavigationTests {
     comparison.activeSide = .second
     #expect(store.canOpenFolderFromTree)
     store.openFolderFromTree(a)
-    try await wait { !comparison.second.isLoading }
+    try await wait { !comparison.second.isLoading && !comparison.isMatching }
     #expect(comparison.second.assets.count == 2 && sameFolder(comparison.second.folderURL, a))
     #expect(comparison.first.currentAsset == lockedAsset)
     #expect(store.presentationMode == .folderComparison)

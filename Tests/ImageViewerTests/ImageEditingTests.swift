@@ -182,7 +182,7 @@ struct ImageEditingTests {
     store.select(index: 0)
     store.rotateClockwise()
     store.select(index: 1)
-    store.applyCrop(crop, to: capturedAsset, relativeToQuarterTurns: 0)
+    store.applyCrop(crop, to: capturedAsset, relativeTo: .identity)
     #expect(store.currentAsset == otherAsset)
     #expect(store.adjustments(for: capturedAsset).normalizedQuarterTurns == 1)
     #expect(store.adjustments(for: capturedAsset).crop == crop.rotatedClockwise())
@@ -191,7 +191,7 @@ struct ImageEditingTests {
     store.open(urls: [directory])
     try await waitForLoad(store)
     #expect(store.assets == [otherAsset])
-    store.applyCrop(.full, to: capturedAsset, relativeToQuarterTurns: 0)
+    store.applyCrop(.full, to: capturedAsset, relativeTo: .identity)
     #expect(store.adjustments(for: capturedAsset).crop == crop.rotatedClockwise())
     #expect(store.currentAdjustments.isIdentity)
   }

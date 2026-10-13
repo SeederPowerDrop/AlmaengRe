@@ -1,0 +1,135 @@
+/* Photo marking and keyboard classification. */
+"mode.title" = "分類";
+"mode.help" = "分類 ON で1–4、QWER、ASDFを使い、分類を付け外しします。";
+"mode.toggle" = "分類モードの切り替え";
+"mode.active" = "分類モード";
+"mode.unavailable" = "写真・動画を開くと分類できます。";
+"menu.title" = "写真の分類";
+"menu.edit" = "分類名・色を編集…";
+"panel.title" = "写真の分類";
+"panel.hint" = "← → 項目を移動 · 1–4、QWER、ASDFで分類";
+"panel.multipleHint" = "1つの写真・動画に複数の分類を付けられます。";
+"panel.noPhoto" = "分類する写真・動画を開いてください。";
+"panel.loading" = "分類を読み込み中…";
+"panel.close" = "分類モードを終了";
+"labels.edit" = "分類名・色を編集";
+"labels.title" = "キーごとの分類名と色";
+"labels.hint" = "キー自体に評価や操作は決まっておらず、最初の名前は例です。各キーの分類名と色を自由に設定できます。すべてのフォルダに共通で適用され、変更しても写真の分類は保持されます。";
+"labels.safety" = "分類は印の付け外しだけです。元のファイルを編集・削除・移動・アップロードしません。";
+"labels.placeholder" = "分類名";
+"labels.unnamed" = "名前のない分類";
+"labels.keyFormat" = "%@キーの分類名";
+"save" = "保存";
+"cancel" = "キャンセル";
+"done" = "完了";
+"filter.title" = "分類";
+"filter.activeFormat" = "分類 %d";
+"filter.any" = "選んだ分類のいずれか";
+"filter.all" = "選んだ分類のすべて";
+"filter.allPhotos" = "すべての写真";
+"filter.unmarked" = "未分類の写真";
+"filter.reset" = "分類フィルタを解除";
+"filter.help" = "分類した写真をまとめて表示";
+"filter.empty" = "分類や検索条件を変更してください。";
+"badge.moreFormat" = "+%d";
+"badge.accessibilityFormat" = "分類：%@";
+"error.title" = "分類を保存できません";
+"storage.error" = "分類データを処理できませんでした。";
+"default.one" = "⭐";
+"default.two" = "⭐⭐";
+"default.three" = "⭐⭐⭐";
+"default.four" = "⭐⭐⭐⭐";
+"default.q" = "アップロード";
+"default.w" = "補正";
+"default.e" = "削除";
+"default.r" = "保留";
+"default.a" = "風景";
+"default.s" = "人物";
+"default.d" = "物";
+"default.f" = "動物";
+"panel.filterStable" = "分類中は一覧を維持します。分類モードを終了すると結果が更新されます。";
+
+/* Editable key assignments and detailed help. */
+"settings.title" = "写真の分類";
+"settings.hint" = "写真を開く前でも分類名と色を設定できます。保存するとすべてのフォルダに適用され、アプリを再起動しても保持されます。";
+"labels.keyHelpFormat" = "%@キーは隣に表示された分類のショートカットです。名前を編集して、このキーで付ける分類を決められます。";
+"labels.editHelp" = "12個のキーの分類名と色を自由に設定できます。すべてのフォルダに適用され、写真の分類は保持されます。";
+"labels.saveHelp" = "分類名と色を保存して、すべてのフォルダに適用します。写真の分類は保持されます。";
+"labels.cancelHelp" = "名前と色の変更を保存せずに編集画面を閉じます。";
+"labels.previewTitle" = "キーごとの分類";
+"labels.previewFormat" = "%@ → %@";
+"mark.addHelpFormat" = "%@ → %@：分類 ONでキーを押すかクリックして付け、もう一度で外します。複数の分類を付けられ、元のファイルは変わりません。";
+"mark.removeHelpFormat" = "%@ → %@：この分類は付いています。分類 ONでキーを押すかクリックして外します。他の分類と元のファイルは変わりません。";
+"mode.detailHelp" = "⌘⇧Mで分類を切り替えます。ONでは1–4、QWER、ASDFまたは分類パネルで選択した写真・動画すべてを分類します。チェックボックス・⌘クリックで複数選択、⇧クリックで範囲選択ができます。各カードの分類メニューはその項目だけに適用されます。OFFでは通常の表示ショートカットを使用します。画像比較では適用先をAのみ・Bのみ・両方から選びます。";
+"labels.settingsLink" = "分類名・色を編集…";
+"labels.revert" = "変更を取り消す";
+"labels.revertHelp" = "設定画面を閉じずに、保存済みの分類名と色に戻します。未保存の変更は取り消されます。";
+
+/* Shared tag colors. */
+"colors.title" = "色";
+"colors.keyFormat" = "%@ キーの分類色";
+"colors.help" = "選んだ色は分類パネル・メニュー・サムネイルに共通で適用され、名前と一緒に保存されます。";
+"color.red" = "赤";
+"color.orange" = "オレンジ";
+"color.yellow" = "黄";
+"color.green" = "緑";
+"color.teal" = "青緑";
+"color.blue" = "青";
+"color.indigo" = "藍";
+"color.purple" = "紫";
+"color.pink" = "ピンク";
+"color.gray" = "グレー";
+
+/* Independent tag filters for comparison panes. */
+"comparison.open" = "現在の写真を分類で比較";
+"comparison.openHelp" = "現在開いている元の一覧をAとBに開きます。検索・形式・地図範囲を維持し、分類は各ペインで個別に選びます。";
+"comparison.filter" = "分類を選択";
+"comparison.allPhotos" = "すべての写真";
+"comparison.titleFormat" = "%@ペインの分類";
+"comparison.selectionHelp" = "このペインに表示する分類を複数選びます。両側に同じ写真が含まれる場合もあります。";
+"comparison.empty" = "この条件に合う写真はありません。";
+"comparison.emptyHelp" = "分類条件を変えるか、共通の検索・形式・地図範囲を確認してください。";
+"comparison.reset" = "このペインの分類条件を解除";
+
+"mode.on" = "分類 ON";
+
+"mode.off" = "分類 OFF";
+
+"card.title" = "分類";
+
+"card.help" = "この写真・動画の分類を選びます。";
+
+"card.accessibilityFormat" = "%@ の分類";
+
+"card.assignedFormat" = "分類 %d 個";
+
+"target.title" = "分類の適用先";
+
+"target.first" = "A のみ";
+
+"target.second" = "B のみ";
+
+"target.both" = "両方";
+
+"target.help" = "分類キーと下のボタンを適用する写真を選びます。画像を切り替える対象とは別の設定です。";
+
+"target.mixed" = "一部の写真に適用済み";
+"panel.gridHint" = "← → 項目 · ↑ ↓ 行 · 1–4、QWER、ASDFで分類";
+"panel.viewerGridHint" = "← → ページ · ↑ ↓ 行 · 1–4、QWER、ASDFで分類";
+
+"panel.selectionFormat" = "選択した %d 項目に分類を適用";
+
+"panel.selectionHint" = "チェックボックス・⌘クリックで追加選択、⇧クリックで範囲選択。分類キーとパネルは選択項目すべてに、各カードの分類メニューはその項目だけに適用されます。";
+
+"selection.help" = "この項目を選択に追加・解除します。分類キーとパネルのボタンは選択した写真・動画すべてに適用されます。";
+
+"selection.accessibilityFormat" = "%@ を選択";
+
+"panel.noSelection" = "分類する項目を選択してください。";
+
+/* Independent tag inheritance for new copies and exports. */
+"inheritance.title" = "コピー・書き出したファイルの分類";
+"inheritance.copy" = "コピーしたファイルに元の分類を適用";
+"inheritance.export" = "編集後に書き出したファイルに元の分類を適用";
+"inheritance.defaults" = "どちらも初期設定ではオフです。変更はすぐに保存され、以降このアプリでコピー・書き出しするファイルに適用されます。";
+"inheritance.originals" = "元のファイルを移動したり、ゴミ箱から戻したりした場合は、この設定にかかわらず分類が保持されます。";

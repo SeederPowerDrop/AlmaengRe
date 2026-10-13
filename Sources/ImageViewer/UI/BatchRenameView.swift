@@ -4,22 +4,34 @@ import SwiftUI
 struct BatchRenameView: View {
   @ObservedObject var store: AppStore
   @Environment(\.dismiss) private var dismiss
+  private let assets: [ImageAsset]
   private let urls: [URL]
   @State private var options = BatchRenameOptions()
   @State private var startNumberText = "1"
   @State private var numberStepText = "1"
+  @State private var classifications: BatchRenameClassifications?
   @State private var plan: BatchRenamePlan?
-  @State private var previewOptions: BatchRenameOptions?
+  @State private var previewRequest: PreviewRequest?
   @State private var errorMessage: String?
 
   init(store: AppStore) {
     self.store = store
-    urls = store.selectedAssets.map(\.url)
+    assets = store.batchAssets
+    urls = assets.map(\.url)
   }
 
   private var numbersAreValid: Bool {
-    !options.addsNumber || ((Int(startNumberText).map { $0 >= 0 } ?? false)
+    options.nameMode == .classification || !options.addsNumber || ((Int(startNumberText).map { $0 >= 0 } ?? false)
       && (Int(numberStepText).map { $0 >= 1 } ?? false))
+  }
+
+  private struct PreviewRequest: Hashable, Sendable {
+    let options: BatchRenameOptions
+    let classifications: BatchRenameClassifications?
+  }
+
+  private var currentRequest: PreviewRequest {
+    PreviewRequest(options: options, classifications: classifications)
   }
 
   var body: some View {
@@ -38,9 +50,22 @@ struct BatchRenameView: View {
             Text("현재 이름 유지").tag(BatchRenameOptions.NameMode.keep)
             Text("새 이름 사용").tag(BatchRenameOptions.NameMode.replace)
             Text("문구 찾아 바꾸기").tag(BatchRenameOptions.NameMode.replaceText)
+            Text(BatchRenameL10n.text("classification.mode")).tag(BatchRenameOptions.NameMode.classification)
           }.labelsHidden()
         }
-        if options.nameMode == .replace {
+        if options.nameMode == .classification {
+          GridRow {
+            Text(BatchRenameL10n.text("classification.label"))
+            Picker(BatchRenameL10n.text("classification.label"), selection: $options.classificationSlot) {
+              Text(BatchRenameL10n.text("classification.choose")).tag(Optional<PhotoMarkSlot>.none)
+              ForEach(PhotoMarkSlot.allCases, id: \.self) { slot in
+                Text(classificationTitle(slot)).tag(Optional(slot))
+              }
+            }
+            .labelsHidden()
+            .disabled(classifications == nil)
+          }
+        } else if options.nameMode == .replace {
           GridRow {
             Text("새 이름")
             TextField("확장자를 제외한 이름", text: $options.newName)
@@ -55,29 +80,31 @@ struct BatchRenameView: View {
             TextField("바꿀 문구", text: $options.replacementText)
           }
         }
-        GridRow {
-          Text("앞에 붙일 문구")
-          TextField("예: 여행_", text: $options.prefix)
-        }
-        GridRow {
-          Text("뒤에 붙일 문구")
-          TextField("예: _보정", text: $options.suffix)
-        }
-        GridRow {
-          Text("일련번호")
-          Toggle("이름 뒤에 번호 붙이기", isOn: $options.addsNumber)
-        }
-        if options.addsNumber {
+        if options.nameMode != .classification {
           GridRow {
-            Text("번호 설정")
-            HStack(spacing: 12) {
-              numberField("시작 번호", text: $startNumberText)
-              numberField("증가 간격", text: $numberStepText)
-              Picker("자릿수", selection: $options.numberDigits) {
-                ForEach(1...20, id: \.self) { count in Text("\(count)").tag(count) }
+            Text("앞에 붙일 문구")
+            TextField("예: 여행_", text: $options.prefix)
+          }
+          GridRow {
+            Text("뒤에 붙일 문구")
+            TextField("예: _보정", text: $options.suffix)
+          }
+          GridRow {
+            Text("일련번호")
+            Toggle("이름 뒤에 번호 붙이기", isOn: $options.addsNumber)
+          }
+          if options.addsNumber {
+            GridRow {
+              Text("번호 설정")
+              HStack(spacing: 12) {
+                numberField("시작 번호", text: $startNumberText)
+                numberField("증가 간격", text: $numberStepText)
+                Picker("자릿수", selection: $options.numberDigits) {
+                  ForEach(1...20, id: \.self) { count in Text("\(count)").tag(count) }
+                }
+                .frame(width: 110)
+                numberField("구분자", text: $options.numberSeparator)
               }
-              .frame(width: 110)
-              numberField("구분자", text: $options.numberSeparator)
             }
           }
         }
@@ -99,8 +126,12 @@ struct BatchRenameView: View {
       .textFieldStyle(.roundedBorder)
       .disabled(store.isRenaming)
 
-      Text("번호는 현재 목록 순서로 확장자 앞에 붙습니다. 다른 이미지 형식으로 바꾸려면 ‘형식 일괄 변환’을 사용하세요.")
+      Text(BatchRenameL10n.format("numbering.help", BatchActionsL10n.text("export.menu")))
         .font(.caption).foregroundStyle(.secondary)
+      if options.nameMode == .classification {
+        Text(BatchRenameL10n.text("classification.help"))
+          .font(.caption).foregroundStyle(.secondary)
+      }
       if !numbersAreValid {
         Text("시작 번호는 0 이상, 증가 값은 1 이상, 자릿수는 1~20으로 입력해 주세요.")
           .font(.caption).foregroundStyle(.red)
@@ -110,7 +141,7 @@ struct BatchRenameView: View {
       HStack {
         Text("변경 미리보기").font(.headline)
         Spacer()
-        if let plan, previewOptions == options {
+        if let plan, previewRequest == currentRequest {
           Text(L10n.format("%d개 변경", plan.changedCount))
             .foregroundStyle(.secondary)
         } else {
@@ -118,6 +149,13 @@ struct BatchRenameView: View {
         }
       }
       if let plan {
+        if let issue = plan.issue {
+          Text(issue).font(.caption).foregroundStyle(.red)
+        }
+        if options.nameMode == .classification, plan.issue == nil {
+          Text(BatchRenameL10n.format("classification.scope", plan.entries.count, urls.count))
+            .font(.caption).foregroundStyle(.secondary)
+        }
         Table(plan.entries) {
           TableColumn("현재 이름") { entry in
             Text(entry.sourceURL.lastPathComponent)
@@ -135,7 +173,7 @@ struct BatchRenameView: View {
             .help(entry.issue ?? entry.destinationURL.path)
           }
         }
-        .opacity(previewOptions == options ? 1 : 0.45)
+        .opacity(previewRequest == currentRequest ? 1 : 0.45)
       } else {
         Color.clear.frame(maxWidth: .infinity, maxHeight: .infinity)
       }
@@ -152,7 +190,7 @@ struct BatchRenameView: View {
           else { Text("이름 변경 적용") }
         }
         .keyboardShortcut(.defaultAction)
-        .disabled(store.isRenaming || !numbersAreValid || previewOptions != options || plan?.canApply != true)
+        .disabled(store.isRenaming || !numbersAreValid || previewRequest != currentRequest || plan?.canApply != true)
       }
     }
     .padding(20)
@@ -164,21 +202,35 @@ struct BatchRenameView: View {
     .onChange(of: numberStepText) { _, text in
       if let number = Int(text) { options.numberStep = number }
     }
-    .task(id: options) {
-      let snapshot = options
-      previewOptions = nil
+    .task {
+      await store.photoMarks.waitUntilReady()
+      guard !Task.isCancelled, store.photoMarks.isReady else { return }
+      classifications = BatchRenameClassifications(
+        labels: Dictionary(uniqueKeysWithValues: PhotoMarkSlot.allCases.map { ($0, store.photoMarks.label(for: $0)) }),
+        marksByURL: Dictionary(assets.map { ($0.url, store.photoMarks.marks(for: $0)) }, uniquingKeysWith: { $0.union($1) }))
+    }
+    .task(id: currentRequest) {
+      let snapshot = currentRequest
+      previewRequest = nil
       let preview = await Task.detached(priority: .userInitiated) {
-        BatchRenamePlanner.plan(urls: urls, options: snapshot)
+        BatchRenamePlanner.plan(urls: urls, options: snapshot.options, classifications: snapshot.classifications)
       }.value
       guard !Task.isCancelled else { return }
       plan = preview
-      previewOptions = snapshot
+      previewRequest = snapshot
     }
     .alert("이름을 변경할 수 없음", isPresented: Binding(
       get: { errorMessage != nil }, set: { if !$0 { errorMessage = nil } }
     )) {
       Button("확인", role: .cancel) {}
     } message: { Text(errorMessage ?? "") }
+  }
+
+  private func classificationTitle(_ slot: PhotoMarkSlot) -> String {
+    let label = classifications?.labels[slot] ?? slot.defaultLabel
+    let visibleLabel = label.isEmpty ? BatchRenameL10n.text("classification.unnamed") : label
+    let count = classifications?.marksByURL.values.filter { $0.contains(slot) }.count ?? 0
+    return BatchRenameL10n.format("classification.option", slot.keyLabel, visibleLabel, count)
   }
 
   private func numberField(_ title: LocalizedStringKey, text: Binding<String>) -> some View {
@@ -190,21 +242,21 @@ struct BatchRenameView: View {
   }
 
   private func apply() {
-    guard let plan, numbersAreValid, previewOptions == options, plan.canApply else { return }
+    guard let plan, numbersAreValid, previewRequest == currentRequest, plan.canApply else { return }
     Task {
       do {
         try await store.renameSelectedFiles(using: plan)
         dismiss()
       } catch {
         errorMessage = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
-        previewOptions = nil
+        previewRequest = nil
         self.plan = nil
         // Keep the sheet open, requiring a fresh preview after a filesystem conflict.
-        let snapshot = options
+        let snapshot = currentRequest
         self.plan = await Task.detached {
-          BatchRenamePlanner.plan(urls: urls, options: snapshot)
+          BatchRenamePlanner.plan(urls: urls, options: snapshot.options, classifications: snapshot.classifications)
         }.value
-        previewOptions = snapshot
+        previewRequest = snapshot
       }
     }
   }

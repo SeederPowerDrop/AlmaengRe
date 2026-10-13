@@ -1,0 +1,23 @@
+/* About follows the app language; Korean is the original and fallback. */
+"subtitle" = "Un visor de imágenes para macOS que cualquiera puede usar libremente.";
+"opening" = "Buscando un buen visor de imágenes para Mac, acabé creando uno mediante vibe coding. Esta aplicación se inspira en varios visores de imágenes de Windows y Mac.";
+"story" = "También quiero contar el origen del nombre de la aplicación, que elegí después de pensarlo mucho. Durante mi infancia me fascinaba un programa llamado 알맹이3, creado por el laboratorio de software de An Il-jun (www.aijsoft.com). Visto hoy, era un programa algo rudimentario, pero sus distintas funciones me cautivaban. Sobre todo, recuerdo la explicación que su desarrollador había escrito sobre por qué creó 알맹이 y qué lo hacía especial.\n\nHoy no sé dónde está ese desarrollador ni cómo le va. Solo me queda el vago recuerdo de que quizá emigró a Australia. Para rendir homenaje a aquel programa y al espíritu con el que fue creado, llamé a esta aplicación 알맹Re.";
+"philosophy" = "Así como el conocimiento que compartimos puede ser el punto de partida de alguien, espero que las herramientas que creo también amplíen las posibilidades de otras personas. Me gustaría que cualquiera pudiera disfrutar, de forma gratuita y sencilla, de las funciones básicas que necesita para usar un ordenador. Ojalá tanto las personas como la IA puedan utilizar libremente las herramientas digitales básicas y seguir aprendiendo y creando juntas.";
+"thanks" = "Gracias.";
+"closing" = "Y ERW FWS WRG";
+"close" = "Cerrar";
+"windowTitle" = "Acerca de 알맹Re";
+"profile" = "Imagen de perfil del desarrollador";
+"confirm" = "Aceptar";
+"licenses" = "Licencias de código abierto";
+"back" = "Volver a la presentación";
+"guide" = "Uso básico";
+"supportTitle" = "Apoyar el proyecto";
+"supportMessage" = "Creo herramientas que cualquiera pueda usar gratis, con el deseo de compartir la ayuda que he recibido. Si te han resultado útiles, puedes apoyar mi trabajo con una pequeña donación.";
+"bitcoinDescription" = "Puedes hacer una donación escaneando el código QR con BlueWallet u otra cartera de Bitcoin, o enviándola a la dirección que aparece a continuación.";
+"bitcoinAddress" = "Dirección para donaciones en Bitcoin";
+"bitcoinQR" = "Código QR de la dirección para donaciones en Bitcoin";
+"copyAddress" = "Copiar dirección";
+"addressCopied" = "Dirección copiada.";
+"openWallet" = "Abrir en la cartera";
+"walletUnavailable" = "Copia la dirección de Bitcoin y pégala en tu cartera.";

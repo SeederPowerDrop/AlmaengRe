@@ -32,6 +32,10 @@ enum ShortcutAction: String, CaseIterable, Identifiable, Codable, Sendable {
 
   var id: Self { self }
 
+  var helpDescription: String {
+    ShortcutHelpL10n.text("action.\(rawValue).help")
+  }
+
   var title: String {
     switch self {
     case .previousPage: L10n.text("이전 이미지/페이지")
@@ -72,7 +76,7 @@ enum ShortcutAction: String, CaseIterable, Identifiable, Codable, Sendable {
     case .zoomIn: KeyBinding(key: "=")
     case .zoomOut: KeyBinding(key: "-")
     case .fitToWindow: KeyBinding(key: "0")
-    case .actualPixels: KeyBinding(key: "1")
+    case .actualPixels: KeyBinding(key: "1", modifiers: [.command])
     case .toggleOverview: KeyBinding(key: "g")
     case .toggleFocus: KeyBinding(key: "f")
     case .fewerImages: KeyBinding(key: "[")
@@ -164,25 +168,35 @@ final class ShortcutStore: ObservableObject {
   @Published private(set) var bindings: [ShortcutAction: KeyBinding]
 
   private let defaultsKey = "ImageViewer.ShortcutBindings.v1"
+  private let actualPixelsMigrationKey = "ImageViewer.ActualPixelsCommandShortcutMigration.v1"
   private let defaults: UserDefaults
 
   init(defaults: UserDefaults = .standard) {
     self.defaults = defaults
     let fallback = Dictionary(
       uniqueKeysWithValues: ShortcutAction.allCases.map { ($0, $0.defaultBinding) })
-    guard let data = defaults.data(forKey: defaultsKey),
-      let saved = try? JSONDecoder().decode([String: KeyBinding].self, from: data)
-    else {
-      bindings = fallback
-      return
-    }
-
     bindings = fallback
-    for (rawAction, binding) in saved {
-      if let action = ShortcutAction(rawValue: rawAction) {
-        bindings[action] = binding
+    if let data = defaults.data(forKey: defaultsKey),
+      let saved = try? JSONDecoder().decode([String: KeyBinding].self, from: data) {
+      for (rawAction, binding) in saved {
+        if let action = ShortcutAction(rawValue: rawAction) {
+          bindings[action] = binding
+        }
+      }
+      if !defaults.bool(forKey: actualPixelsMigrationKey) {
+        let previousDefault = KeyBinding(key: "1")
+        let savedActualPixels = saved[ShortcutAction.actualPixels.rawValue] ?? previousDefault
+        if savedActualPixels == previousDefault {
+          let newDefault = ShortcutAction.actualPixels.defaultBinding
+          let isOccupied = bindings.contains { $0.key != .actualPixels && $0.value == newDefault }
+          // Preserve a user's existing Command-1 assignment. Run only once so
+          // explicitly choosing plain 1 later survives the next app launch.
+          bindings[.actualPixels] = isOccupied ? previousDefault : newDefault
+          persist()
+        }
       }
     }
+    defaults.set(true, forKey: actualPixelsMigrationKey)
   }
 
   func binding(for action: ShortcutAction) -> KeyBinding {
@@ -221,6 +235,38 @@ final class ShortcutStore: ObservableObject {
       let binding = binding(for: action)
       return binding.key == key && binding.modifiers == modifiers
     }
+  }
+
+  /// Option arrows also turn multi-image viewer pages. Comparison-only bindings
+  /// use the same keys in their own screen; other user assignments take priority.
+  func viewerPageBinding(direction: Int) -> KeyBinding? {
+    guard direction != 0 else { return nil }
+    let candidate = KeyBinding(key: direction < 0 ? "left" : "right", modifiers: [.option])
+    let occupied = ShortcutAction.allCases.contains { action in
+      switch action {
+      case .previousFirstFolder, .nextFirstFolder, .previousSecondFolder, .nextSecondFolder:
+        return false
+      default:
+        return binding(for: action) == candidate
+      }
+    }
+    return occupied ? nil : candidate
+  }
+
+  func viewerPageDirection(matching event: NSEvent) -> Int? {
+    guard event.type == .keyDown, Self.modifiers(from: event) == [.option] else { return nil }
+    let direction: Int
+    switch event.keyCode {
+    case 123: direction = -1
+    case 124: direction = 1
+    default: return nil
+    }
+    return viewerPageBinding(direction: direction) == nil ? nil : direction
+  }
+
+  /// The convenience Space tap never replaces a user's assigned shortcut.
+  var hasPlainSpaceBinding: Bool {
+    ShortcutAction.allCases.contains { binding(for: $0) == KeyBinding(key: "space") }
   }
 
   var conflictingActions: Set<ShortcutAction> {

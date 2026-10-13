@@ -25,14 +25,20 @@ struct InspectorView: View {
           case .information:
             informationPanel
           case .editing:
-            editingPanel
+            if store.currentAsset?.isVideo == true {
+              Text(MotionMediaL10n.text("video.editHint"))
+              Button(MotionMediaL10n.text("editor.open")) { store.presentMotionMedia() }
+                .disabled(!store.canOpenMotionMedia)
+            } else {
+              editingPanel
+            }
           }
         }
         .padding(18)
         .frame(maxWidth: .infinity, alignment: .leading)
       }
     }
-    .frame(width: 304)
+    .frame(width: 330)
     .background(ViewerTheme.sidebar)
     .controlSize(.small)
     .tint(ViewerTheme.accent)
@@ -44,21 +50,27 @@ struct InspectorView: View {
         asset: request.asset, adjustments: request.adjustments,
         pipeline: store.pipeline, prefersHDR: store.prefersHDR
       ) { crop in
-        store.applyCrop(crop, to: request.asset,
-          relativeToQuarterTurns: request.adjustments.normalizedQuarterTurns)
+        store.applyCrop(crop, to: request.asset, relativeTo: request.adjustments)
       }
     }
   }
 
   private var panelHeader: some View {
     HStack(spacing: 8) {
-      Label(panel.title, systemImage: panel == .information ? "info.circle" : "slider.horizontal.3")
+      Image(systemName: panel == .information ? "info.circle" : "slider.horizontal.3")
+        .font(.system(size: 12, weight: .medium))
+        .foregroundStyle(ViewerTheme.accent)
+        .frame(width: 25, height: 25)
+        .background(ViewerTheme.selection, in: RoundedRectangle(cornerRadius: 7))
+        .accessibilityHidden(true)
+      Text(panel.title)
         .font(.system(size: 12, weight: .semibold))
       Spacer(minLength: 8)
       Button { store.toggleInspector(panel) } label: {
         Image(systemName: "xmark")
           .font(.system(size: 10, weight: .semibold))
           .frame(width: 22, height: 22)
+          .background(ViewerTheme.controlFill, in: RoundedRectangle(cornerRadius: 6))
           .contentShape(Rectangle())
       }
       .buttonStyle(.plain)
@@ -69,15 +81,21 @@ struct InspectorView: View {
     .padding(.leading, 18)
     .padding(.trailing, 10)
     .padding(.vertical, 10)
-    .background(ViewerTheme.chrome)
+    .background(ViewerTheme.chromeGradient)
   }
 
   private var selectedImageHeader: some View {
     HStack(alignment: .top, spacing: 10) {
       Image(systemName: "photo")
-        .font(.system(size: 17, weight: .light))
+        .font(.system(size: 15, weight: .regular))
         .foregroundStyle(.secondary)
-        .frame(width: 22, height: 22)
+        .frame(width: 32, height: 32)
+        .background(ViewerTheme.controlFill, in: RoundedRectangle(cornerRadius: 8))
+        .overlay {
+          RoundedRectangle(cornerRadius: 8)
+            .strokeBorder(ViewerTheme.controlBorder, lineWidth: 1)
+        }
+        .accessibilityHidden(true)
       Text(store.currentAsset?.filename ?? "—")
         .font(.system(size: 12, weight: .medium))
         .lineLimit(3)
@@ -92,7 +110,7 @@ struct InspectorView: View {
           Image(systemName: "square.and.pencil")
         }
         .buttonStyle(.borderless)
-        .disabled(store.currentAsset == nil || store.currentMetadata == nil)
+        .disabled(store.currentAsset == nil || store.currentAsset?.isVideo == true || store.currentMetadata == nil)
         .help("파일 및 내장 메타데이터 수정")
         .accessibilityLabel("수정")
       }
@@ -101,6 +119,12 @@ struct InspectorView: View {
 
   private var informationPanel: some View {
     VStack(alignment: .leading, spacing: 20) {
+      if store.currentAsset?.isVideo != true { histogram }
+      if let location = store.currentMetadata?.location {
+        Divider()
+        locationInformation(location)
+      }
+      Divider()
       basicInformation
 
       if hasCameraInformation {
@@ -108,18 +132,13 @@ struct InspectorView: View {
         cameraInformation
       }
 
-      if let location = store.currentMetadata?.location {
-        Divider()
-        locationInformation(location)
-      }
     }
     .font(.caption)
   }
 
   private var basicInformation: some View {
     VStack(alignment: .leading, spacing: 10) {
-      Text("파일 및 이미지")
-        .font(.system(size: 12, weight: .semibold))
+      sectionHeading("파일 및 이미지", systemImage: "doc.text.image")
         .padding(.bottom, 2)
 
       informationRow("크기", store.currentMetadata?.dimensionsDescription ?? "확인 중")
@@ -168,15 +187,16 @@ struct InspectorView: View {
           .textSelection(.enabled)
           .lineLimit(4)
           .truncationMode(.middle)
-          .padding(.top, 3)
+          .padding(8)
+          .frame(maxWidth: .infinity, alignment: .leading)
+          .background(ViewerTheme.controlFill, in: RoundedRectangle(cornerRadius: 6))
       }
     }
   }
 
   private var cameraInformation: some View {
     VStack(alignment: .leading, spacing: 10) {
-      Text("카메라 / EXIF")
-        .font(.system(size: 12, weight: .semibold))
+      sectionHeading("카메라 / EXIF", systemImage: "camera")
         .padding(.bottom, 2)
 
       if let make = store.currentMetadata?.cameraMake {
@@ -214,9 +234,10 @@ struct InspectorView: View {
 
   private func locationInformation(_ location: ImageLocation) -> some View {
     VStack(alignment: .leading, spacing: 9) {
-      Label("촬영 위치", systemImage: "location.fill")
-        .font(.system(size: 12, weight: .semibold))
+      sectionHeading("촬영 위치", systemImage: "location")
 
+      PhotoLocationMapView(location: location)
+        .id(location)
       informationRow("좌표", location.coordinateDescription)
       if let altitude = location.altitude {
         informationRow("고도", "\(decimal(altitude)) m")
@@ -245,19 +266,29 @@ struct InspectorView: View {
 
   private var editingPanel: some View {
     VStack(alignment: .leading, spacing: 20) {
+      histogram
       compositionControls
       Divider()
       adjustmentControls
       Divider()
+      AdvancedEditingControls(store: store)
+      Divider()
       exportControls
+    }
+  }
+
+  @ViewBuilder
+  private var histogram: some View {
+    if let asset = store.currentAsset {
+      ImageHistogramView(asset: asset, adjustments: store.currentAdjustments,
+        pipeline: store.pipeline)
     }
   }
 
   private var adjustmentControls: some View {
     VStack(alignment: .leading, spacing: 13) {
       HStack {
-        Label("비파괴 조정", systemImage: "slider.horizontal.3")
-          .font(.system(size: 12, weight: .semibold))
+        sectionHeading("비파괴 조정", systemImage: "slider.horizontal.3")
         Spacer()
         Button("초기화") { store.resetAdjustments() }
           .font(.caption)
@@ -302,8 +333,7 @@ struct InspectorView: View {
 
   private var compositionControls: some View {
     VStack(alignment: .leading, spacing: 10) {
-      Label("구도", systemImage: "crop.rotate")
-        .font(.system(size: 12, weight: .semibold))
+      sectionHeading("구도", systemImage: "crop.rotate")
       HStack {
         Button {
           store.pauseSlideshow()
@@ -325,6 +355,21 @@ struct InspectorView: View {
           Label("오른쪽 90°", systemImage: "rotate.right")
         }
       }
+      HStack {
+        Button { store.flipHorizontally() } label: {
+          Label("좌우 반전하기", systemImage: "arrow.left.and.right.righttriangle.left.righttriangle.right")
+        }
+        .help("현재 보이는 사진의 왼쪽과 오른쪽을 뒤집습니다. 다시 누르면 원래대로 돌아옵니다.")
+        Button { store.flipVertically() } label: {
+          Label {
+            Text("상하 반전하기")
+          } icon: {
+            Image(systemName: "arrow.left.and.right.righttriangle.left.righttriangle.right")
+              .rotationEffect(.degrees(90))
+          }
+        }
+        .help("현재 보이는 사진의 위와 아래를 뒤집습니다. 다시 누르면 원래대로 돌아옵니다.")
+      }
     }
     .controlSize(.small)
     .disabled(store.currentAsset == nil)
@@ -332,8 +377,7 @@ struct InspectorView: View {
 
   private var exportControls: some View {
     VStack(alignment: .leading, spacing: 12) {
-      Label("다른 형식으로 저장", systemImage: "square.and.arrow.up")
-        .font(.system(size: 12, weight: .semibold))
+      sectionHeading("다른 형식으로 저장", systemImage: "square.and.arrow.up")
 
       Picker("형식", selection: $store.exportFormat) {
         ForEach(ExportFormat.available) { format in
@@ -371,6 +415,11 @@ struct InspectorView: View {
       Text("원본은 수정하지 않으며 현재 조정값을 새 파일에 적용합니다.")
         .font(.caption)
         .foregroundStyle(.secondary)
+      Button {
+        if let url = store.currentAsset?.url { store.presentWatermark(urls: [url]) }
+      } label: {
+        Label(WatermarkL10n.text("menu"), systemImage: "signature")
+      }.disabled(store.currentAsset.map { !store.canExportBatchImages(urls: [$0.url]) } ?? true)
     }
   }
 
@@ -392,6 +441,18 @@ struct InspectorView: View {
       || metadata.software != nil || metadata.artist != nil || metadata.capturedAt != nil
       || metadata.exposureTime != nil || metadata.aperture != nil || metadata.iso != nil
       || metadata.focalLength != nil
+  }
+
+  private func sectionHeading(_ title: String, systemImage: String) -> some View {
+    HStack(spacing: 7) {
+      Image(systemName: systemImage)
+        .font(.system(size: 12, weight: .medium))
+        .foregroundStyle(ViewerTheme.accent)
+        .frame(width: 16)
+        .accessibilityHidden(true)
+      Text(L10n.text(title))
+        .font(.system(size: 12, weight: .semibold))
+    }
   }
 
   private func informationRow(_ title: String, _ value: String) -> some View {

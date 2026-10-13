@@ -1,0 +1,135 @@
+/* Photo marking and keyboard classification. */
+"mode.title" = "分类";
+"mode.help" = "分类 ON 时，用 1–4、QWER 和 ASDF 切换分类标记。";
+"mode.toggle" = "切换分类模式";
+"mode.active" = "分类模式";
+"mode.unavailable" = "打开照片或视频即可分类。";
+"menu.title" = "照片分类";
+"menu.edit" = "编辑分类名称与颜色…";
+"panel.title" = "照片分类";
+"panel.hint" = "← → 浏览项目 · 1–4、QWER、ASDF 分类";
+"panel.multipleHint" = "一张照片或一个视频可添加多个分类。";
+"panel.noPhoto" = "请打开要分类的照片或视频。";
+"panel.loading" = "正在载入分类…";
+"panel.close" = "退出分类模式";
+"labels.edit" = "编辑分类名称与颜色";
+"labels.title" = "各按键的分类名称与颜色";
+"labels.hint" = "按键本身没有固定的评级或操作，初始名称仅为示例。您可以自由设置各按键的分类名称与颜色。所有文件夹共用这些设置，更改后照片已有的分类仍会保留。";
+"labels.safety" = "分类仅添加或移除标记，不会编辑、删除、移动或上传原始文件。";
+"labels.placeholder" = "分类名称";
+"labels.unnamed" = "未命名分类";
+"labels.keyFormat" = "%@ 键的分类名称";
+"save" = "保存";
+"cancel" = "取消";
+"done" = "完成";
+"filter.title" = "分类";
+"filter.activeFormat" = "分类 %d";
+"filter.any" = "任一所选分类";
+"filter.all" = "全部所选分类";
+"filter.allPhotos" = "所有照片";
+"filter.unmarked" = "未分类照片";
+"filter.reset" = "清除分类筛选";
+"filter.help" = "按分类查看照片";
+"filter.empty" = "请尝试调整分类或搜索条件。";
+"badge.moreFormat" = "+%d";
+"badge.accessibilityFormat" = "分类：%@";
+"error.title" = "无法保存照片分类";
+"storage.error" = "无法处理照片分类数据。";
+"default.one" = "⭐";
+"default.two" = "⭐⭐";
+"default.three" = "⭐⭐⭐";
+"default.four" = "⭐⭐⭐⭐";
+"default.q" = "上传";
+"default.w" = "调整";
+"default.e" = "删除";
+"default.r" = "待定";
+"default.a" = "风景";
+"default.s" = "人物";
+"default.d" = "物品";
+"default.f" = "动物";
+"panel.filterStable" = "分类时列表保持不变。退出分类模式后，结果会更新。";
+
+/* Editable key assignments and detailed help. */
+"settings.title" = "照片分类";
+"settings.hint" = "无需打开照片即可设置分类名称与颜色。保存后将应用于所有文件夹，并在重新启动应用后保留。";
+"labels.keyHelpFormat" = "%@ 键是旁边所示分类的快捷键。编辑名称即可指定此按键要标记的分类。";
+"labels.editHelp" = "自由设置 12 个按键对应的分类名称与颜色。更改应用于所有文件夹，照片已有的分类仍会保留。";
+"labels.saveHelp" = "保存分类名称与颜色并应用于所有文件夹。照片已有的分类仍会保留。";
+"labels.cancelHelp" = "关闭编辑窗口，不保存名称与颜色的更改。";
+"labels.previewTitle" = "按键对应的分类";
+"labels.previewFormat" = "%@ → %@";
+"mark.addHelpFormat" = "%@ → %@：分类 ON 时，按键或点击可添加，再次操作可移除。可添加多个分类，原始文件保持不变。";
+"mark.removeHelpFormat" = "%@ → %@：已添加此分类。分类 ON 时，按键或点击可移除，其他分类和原始文件保持不变。";
+"mode.detailHelp" = "⌘⇧M 开启或关闭分类。开启后，使用 1–4、QWER、ASDF 或分类面板为全部所选照片和视频分类。使用复选框或 ⌘ 单击选择多个项目，⇧ 单击选择范围。各卡片的分类菜单仅作用于该项目。关闭后使用普通查看快捷键。在图像比较中，可选择仅 A、仅 B 或两者作为分类目标。";
+"labels.settingsLink" = "编辑分类名称与颜色…";
+"labels.revert" = "撤销更改";
+"labels.revertHelp" = "恢复已保存的分类名称与颜色，不关闭设置窗口。尚未保存的更改将被撤销。";
+
+/* Shared tag colors. */
+"colors.title" = "颜色";
+"colors.keyFormat" = "%@ 键的分类颜色";
+"colors.help" = "所选颜色统一应用于分类面板、菜单和缩略图，并与名称一起保存。";
+"color.red" = "红色";
+"color.orange" = "橙色";
+"color.yellow" = "黄色";
+"color.green" = "绿色";
+"color.teal" = "青绿色";
+"color.blue" = "蓝色";
+"color.indigo" = "靛蓝色";
+"color.purple" = "紫色";
+"color.pink" = "粉色";
+"color.gray" = "灰色";
+
+/* Independent tag filters for comparison panes. */
+"comparison.open" = "按分类对比当前照片";
+"comparison.openHelp" = "在A和B中打开当前的原始列表。保留搜索、格式和地图范围筛选，并分别选择各窗格的分类。";
+"comparison.filter" = "选择分类";
+"comparison.allPhotos" = "所有照片";
+"comparison.titleFormat" = "%@窗格的分类";
+"comparison.selectionHelp" = "选择此窗格要显示的多个分类。同一照片也可能同时出现在两侧。";
+"comparison.empty" = "没有符合这些条件的照片。";
+"comparison.emptyHelp" = "请更改分类条件，或检查共用的搜索、格式和地图范围筛选。";
+"comparison.reset" = "清除此窗格的分类条件";
+
+"mode.on" = "分类 ON";
+
+"mode.off" = "分类 OFF";
+
+"card.title" = "分类";
+
+"card.help" = "选择此照片或视频的分类。";
+
+"card.accessibilityFormat" = "%@ 的分类";
+
+"card.assignedFormat" = "%d 个分类";
+
+"target.title" = "分类应用于";
+
+"target.first" = "仅 A";
+
+"target.second" = "仅 B";
+
+"target.both" = "两侧";
+
+"target.help" = "选择分类键和下方按钮作用的照片。此设置与图片切换目标相互独立。";
+
+"target.mixed" = "已应用于部分照片";
+"panel.gridHint" = "← → 项目 · ↑ ↓ 行 · 1–4、QWER、ASDF 分类";
+"panel.viewerGridHint" = "← → 页面 · ↑ ↓ 行 · 1–4、QWER、ASDF 分类";
+
+"panel.selectionFormat" = "为所选 %d 项应用分类";
+
+"panel.selectionHint" = "使用复选框或 ⌘ 单击追加选择，⇧ 单击选择范围。分类按键和面板作用于全部所选项目；卡片的分类菜单只作用于该项目。";
+
+"selection.help" = "将此项目加入或移出选择。分类按键和面板按钮作用于全部所选照片和视频。";
+
+"selection.accessibilityFormat" = "选择 %@";
+
+"panel.noSelection" = "请选择要分类的项目。";
+
+/* Independent tag inheritance for new copies and exports. */
+"inheritance.title" = "副本与导出文件的分类";
+"inheritance.copy" = "将原有分类应用到复制的文件";
+"inheritance.export" = "将原有分类应用到编辑后导出的文件";
+"inheritance.defaults" = "这两个选项默认均关闭。更改会立即保存，并应用于此后通过本应用复制或导出的文件。";
+"inheritance.originals" = "移动原文件或从废纸篓恢复原文件时，其分类会保留，不受这些选项影响。";

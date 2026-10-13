@@ -11,7 +11,7 @@ actor BatchRenamer {
 
   func apply(_ plan: BatchRenamePlan) throws -> [URL: URL] {
     guard plan.canApply else {
-      throw BatchRenameError.invalidPlan(plan.entries.compactMap(\.issue).first ?? L10n.text("변경할 파일 이름이 없습니다."))
+      throw BatchRenameError.invalidPlan(plan.issue ?? plan.entries.compactMap(\.issue).first ?? L10n.text("변경할 파일 이름이 없습니다."))
     }
     var checked = plan.entries
     BatchRenamePlanner.validateDestinations(&checked)

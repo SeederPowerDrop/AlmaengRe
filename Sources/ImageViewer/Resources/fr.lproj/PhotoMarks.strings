@@ -1,0 +1,135 @@
+/* Photo marking and keyboard classification. */
+"mode.title" = "Marquage";
+"mode.help" = "Avec Marquage ON, 1–4, QWER et ASDF ajoutent ou retirent les étiquettes.";
+"mode.toggle" = "Activer/désactiver le marquage";
+"mode.active" = "Mode marquage";
+"mode.unavailable" = "Ouvrez une photo ou vidéo à marquer.";
+"menu.title" = "Étiquettes des photos";
+"menu.edit" = "Modifier les noms et couleurs…";
+"panel.title" = "Étiquettes des photos";
+"panel.hint" = "← → Parcourir · 1–4, QWER, ASDF : étiquettes";
+"panel.multipleHint" = "Une photo ou vidéo peut porter plusieurs étiquettes.";
+"panel.noPhoto" = "Ouvrez une photo ou vidéo à marquer.";
+"panel.loading" = "Chargement des étiquettes…";
+"panel.close" = "Quitter le mode marquage";
+"labels.edit" = "Modifier les noms et couleurs";
+"labels.title" = "Noms et couleurs par touche";
+"labels.hint" = "Les touches n’ont ni note ni action prédéfinie ; les noms initiaux sont des exemples. Choisissez le nom et la couleur de chaque étiquette. Ces réglages sont communs à tous les dossiers et leur modification conserve les étiquettes des photos.";
+"labels.safety" = "Les étiquettes ajoutent ou retirent des marques sans modifier, supprimer, déplacer ni téléverser les fichiers originaux.";
+"labels.placeholder" = "Nom de l’étiquette";
+"labels.unnamed" = "Étiquette sans nom";
+"labels.keyFormat" = "Nom de l’étiquette de la touche %@";
+"save" = "Enregistrer";
+"cancel" = "Annuler";
+"done" = "Terminé";
+"filter.title" = "Étiquettes";
+"filter.activeFormat" = "Étiquettes %d";
+"filter.any" = "Au moins une étiquette choisie";
+"filter.all" = "Toutes les étiquettes choisies";
+"filter.allPhotos" = "Toutes les photos";
+"filter.unmarked" = "Photos sans étiquette";
+"filter.reset" = "Effacer le filtre par étiquette";
+"filter.help" = "Regrouper les photos par étiquette";
+"filter.empty" = "Essayez de modifier les filtres ou la recherche.";
+"badge.moreFormat" = "+%d";
+"badge.accessibilityFormat" = "Étiquettes : %@";
+"error.title" = "Impossible d’enregistrer les étiquettes";
+"storage.error" = "Impossible d’accéder aux données des étiquettes.";
+"default.one" = "⭐";
+"default.two" = "⭐⭐";
+"default.three" = "⭐⭐⭐";
+"default.four" = "⭐⭐⭐⭐";
+"default.q" = "Téléverser";
+"default.w" = "Retoucher";
+"default.e" = "Supprimer";
+"default.r" = "En attente";
+"default.a" = "Paysage";
+"default.s" = "Personnes";
+"default.d" = "Objets";
+"default.f" = "Animaux";
+"panel.filterStable" = "La liste reste en place pendant le marquage. Les résultats sont actualisés à la sortie de ce mode.";
+
+/* Editable key assignments and detailed help. */
+"settings.title" = "Étiquettes photo";
+"settings.hint" = "Définissez les noms et couleurs avant d’ouvrir des photos. Enregistrez pour les appliquer à tous les dossiers et les conserver au prochain lancement.";
+"labels.keyHelpFormat" = "%@ est le raccourci de l’étiquette indiquée à côté. Modifiez son nom pour choisir ce que cette touche marque.";
+"labels.editHelp" = "Choisissez les noms et couleurs des étiquettes pour les 12 touches. Les changements s’appliquent à tous les dossiers et conservent les étiquettes des photos.";
+"labels.saveHelp" = "Enregistrer les noms et couleurs pour tous les dossiers. Les étiquettes des photos sont conservées.";
+"labels.cancelHelp" = "Fermer l’éditeur sans enregistrer les changements de noms ou de couleurs.";
+"labels.previewTitle" = "Étiquettes des touches";
+"labels.previewFormat" = "%@ → %@";
+"mark.addHelpFormat" = "%@ → %@ : avec Marquage ON, appuyez sur la touche ou cliquez pour ajouter, puis recommencez pour retirer. Plusieurs étiquettes peuvent coexister ; les originaux restent inchangés.";
+"mark.removeHelpFormat" = "%@ → %@ : étiquette attribuée. Avec Marquage ON, appuyez sur la touche ou cliquez pour la retirer. Les autres étiquettes et les originaux restent inchangés.";
+"mode.detailHelp" = "⌘⇧M active ou désactive l’étiquetage. Lorsqu’il est actif, 1–4, QWER, ASDF ou le panneau appliquent les étiquettes à toutes les photos et vidéos sélectionnées. Utilisez les cases ou ⌘-clic pour sélectionner plusieurs éléments et ⇧-clic pour une plage. Le menu de chaque carte agit uniquement sur cet élément. Sinon, les raccourcis de visualisation habituels s’appliquent. Dans Comparaison d’images, choisissez A seulement, B seulement ou Les deux.";
+"labels.settingsLink" = "Modifier les noms et couleurs…";
+"labels.revert" = "Annuler les modifications";
+"labels.revertHelp" = "Rétablir les noms et couleurs enregistrés sans fermer les réglages. Les changements non enregistrés sont annulés.";
+
+/* Shared tag colors. */
+"colors.title" = "Couleur";
+"colors.keyFormat" = "Couleur de l’étiquette pour %@";
+"colors.help" = "La couleur choisie apparaît dans les panneaux, menus et vignettes des étiquettes. Elle est enregistrée avec le nom.";
+"color.red" = "Rouge";
+"color.orange" = "Orange";
+"color.yellow" = "Jaune";
+"color.green" = "Vert";
+"color.teal" = "Bleu sarcelle";
+"color.blue" = "Bleu";
+"color.indigo" = "Indigo";
+"color.purple" = "Violet";
+"color.pink" = "Rose";
+"color.gray" = "Gris";
+
+/* Independent tag filters for comparison panes. */
+"comparison.open" = "Comparer les photos actuelles par étiquette";
+"comparison.openHelp" = "Ouvrez la collection source actuelle dans A et B. Conservez les filtres de recherche, de format et de zone cartographique, puis choisissez les étiquettes séparément pour chaque volet.";
+"comparison.filter" = "Choisir les étiquettes";
+"comparison.allPhotos" = "Toutes les photos";
+"comparison.titleFormat" = "Étiquettes du volet %@";
+"comparison.selectionHelp" = "Choisissez plusieurs étiquettes à afficher dans ce volet. Une même photo peut apparaître des deux côtés.";
+"comparison.empty" = "Aucune photo ne correspond à ces critères.";
+"comparison.emptyHelp" = "Modifiez les étiquettes ou vérifiez les filtres communs de recherche, de format et de zone cartographique.";
+"comparison.reset" = "Effacer le filtre d’étiquettes de ce volet";
+
+"mode.on" = "Marquage ON";
+
+"mode.off" = "Marquage OFF";
+
+"card.title" = "Étiquettes";
+
+"card.help" = "Choisir les étiquettes de cette photo ou vidéo.";
+
+"card.accessibilityFormat" = "Étiquettes de %@";
+
+"card.assignedFormat" = "%d étiquettes";
+
+"target.title" = "Appliquer à";
+
+"target.first" = "A seul";
+
+"target.second" = "B seul";
+
+"target.both" = "Les deux";
+
+"target.help" = "Choisissez les photos visées par les touches et boutons d’étiquettes ci-dessous. Ce choix est indépendant de la navigation.";
+
+"target.mixed" = "Appliqué à certaines photos";
+"panel.gridHint" = "← → Éléments · ↑ ↓ Lignes · 1–4, QWER, ASDF : étiquettes";
+"panel.viewerGridHint" = "← → Pages · ↑ ↓ Lignes · 1–4, QWER, ASDF : étiquettes";
+
+"panel.selectionFormat" = "Appliquer aux %d éléments sélectionnés";
+
+"panel.selectionHint" = "Cases ou ⌘-clic : ajouter à la sélection ; ⇧-clic : sélectionner une plage. Les touches et le panneau agissent sur toute la sélection ; le menu d’une carte agit uniquement sur cet élément.";
+
+"selection.help" = "Ajouter cet élément à la sélection ou le retirer. Les touches et boutons du panneau agissent sur toutes les photos et vidéos sélectionnées.";
+
+"selection.accessibilityFormat" = "Sélectionner %@";
+
+"panel.noSelection" = "Sélectionnez les éléments à étiqueter.";
+
+/* Independent tag inheritance for new copies and exports. */
+"inheritance.title" = "Étiquettes des copies et des exports";
+"inheritance.copy" = "Appliquer les étiquettes d’origine aux fichiers copiés";
+"inheritance.export" = "Appliquer les étiquettes d’origine aux fichiers exportés après retouche";
+"inheritance.defaults" = "Ces deux options sont désactivées par défaut. Les modifications sont enregistrées immédiatement et s’appliquent aux prochains fichiers copiés ou exportés par l’app.";
+"inheritance.originals" = "Déplacer un original ou le restaurer depuis la corbeille conserve ses étiquettes, quels que soient ces réglages.";

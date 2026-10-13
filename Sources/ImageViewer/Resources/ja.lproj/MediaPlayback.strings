@@ -1,0 +1,6 @@
+"grid.playAll" = "表示中の動画をすべて再生";
+"grid.playSelected" = "選択した動画を再生 (%d)";
+"grid.pauseAll" = "動画をすべて一時停止";
+"grid.select" = "再生する動画を選択";
+"grid.play" = "動画を再生";
+"grid.pause" = "動画を一時停止";

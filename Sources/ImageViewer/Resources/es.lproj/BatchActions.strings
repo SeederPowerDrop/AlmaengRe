@@ -1,0 +1,14 @@
+"export.menu" = "Convertir, redimensionar y comprimir…";
+"share.menu" = "Compartir archivos…";
+"map.area" = "Fotos del área";
+"map.photo" = "Esta foto";
+"map.location" = "Todas las fotos de este lugar";
+"report.menu" = "Informe de archivos clasificados…";
+"share.unavailable" = "No se encuentran los archivos para compartir";
+"share.unavailableHint" = "Actualiza la carpeta, comprueba los archivos y los permisos y vuelve a seleccionarlos.";
+"share.failed" = "No se pudieron compartir los archivos";
+
+"quick.rename" = "Renombrar";
+"quick.export" = "Formato y tamaño";
+"quick.watermark" = "Marca de agua";
+"quick.share" = "Compartir";

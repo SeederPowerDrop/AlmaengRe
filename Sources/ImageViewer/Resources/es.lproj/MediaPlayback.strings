@@ -1,0 +1,6 @@
+"grid.playAll" = "Reproducir vídeos visibles";
+"grid.playSelected" = "Reproducir selección (%d)";
+"grid.pauseAll" = "Pausar todos los vídeos";
+"grid.select" = "Seleccionar vídeo para reproducir";
+"grid.play" = "Reproducir vídeo";
+"grid.pause" = "Pausar vídeo";

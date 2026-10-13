@@ -1,0 +1,23 @@
+/* About follows the app language; Korean is the original and fallback. */
+"subtitle" = "人人都能自由使用的 macOS 图像查看器。";
+"opening" = "在为 Mac 寻找一款称心的图像查看器时，我决定通过氛围编程（vibe coding）亲手做一个。这款应用的灵感来自 Windows 和 Mac 上的多款图像查看器。";
+"story" = "我也想讲讲这个经过一番斟酌才定下的应用名称的由来。小时候，我曾深深着迷于 안일준 프로그램 연구소（An Il-jun 软件研究所，www.aijsoft.com）开发的一款名为“알맹이3”的软件。现在回想起来，它有些朴素，但其中的各种功能让我着迷。尤其是开发者亲自写下的制作缘由和功能介绍，一直留在我的记忆里。\n\n如今，我不知道那位开发者身在何处、过得怎样，只依稀记得他似乎移民去了澳大利亚。为了向当年的那款软件和那份心意致敬，我将这款应用命名为“알맹Re”。";
+"philosophy" = "正如分享的知识可能成为他人迈出第一步的契机，我也希望自己制作的工具能为他人打开更多可能。希望每个人都能免费、方便地使用电脑所需的基本功能。也希望人类与 AI 都能自由使用基本的数字工具，共同学习，共同创造。";
+"thanks" = "谢谢。";
+"closing" = "还有 ERW FWS WRG";
+"close" = "关闭";
+"windowTitle" = "关于 알맹Re";
+"profile" = "开发者头像";
+"confirm" = "确定";
+"licenses" = "开源许可证";
+"back" = "返回介绍";
+"guide" = "基本用法";
+"supportTitle" = "支持开发";
+"supportMessage" = "怀着将自己得到的帮助传递下去的心意，我制作人人都能免费使用的工具。如果这款应用对您有用，欢迎通过小额捐赠给予支持。";
+"bitcoinDescription" = "您可以使用 BlueWallet 等 Bitcoin 钱包扫描二维码，或向下方地址捐赠。";
+"bitcoinAddress" = "Bitcoin 捐赠地址";
+"bitcoinQR" = "Bitcoin 捐赠地址二维码";
+"copyAddress" = "复制地址";
+"addressCopied" = "地址已复制。";
+"openWallet" = "在钱包中打开";
+"walletUnavailable" = "请复制 Bitcoin 地址并粘贴到您使用的钱包中。";

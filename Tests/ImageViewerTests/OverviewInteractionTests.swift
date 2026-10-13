@@ -53,7 +53,7 @@ struct OverviewInteractionTests {
     #expect(OverviewMarqueeGeometry.hits(in: .zero, frames: frames).isEmpty)
   }
 
-  @Test("8개 언어에 번호 설정과 드래그 안내가 존재한다")
+  @Test("10개 언어에 번호 설정과 드래그 안내가 존재한다")
   func localization() {
     for locale in L10n.supportedLocalizations {
       for key in ["몽땅보기 번호 표시", "번호가 이미지 면적의 ¼ 이상을 차지하면 사진 밖 카드의 왼쪽 위로 옮깁니다.",

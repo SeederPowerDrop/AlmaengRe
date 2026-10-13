@@ -1,0 +1,15 @@
+"empty" = "Diese Datei ist leer (0 Byte). Kopiere sie erneut vom Original oder aus einem Backup.";
+"missing" = "Die Datei wurde nicht gefunden. Sie wurde möglicherweise verschoben oder gelöscht, oder ihr Laufwerk ist nicht verbunden.";
+"permission" = "Keine Berechtigung zum Lesen dieser Datei. Öffne den Ordner erneut, um den Zugriff zu erlauben.";
+"notDownloaded" = "Diese Datei wurde noch nicht auf dein Gerät geladen. Schließe den Download im Finder ab.";
+"unavailable" = "Die Datei kann nicht gelesen werden. Prüfe ihr Laufwerk und den Dateizugriff.";
+"unsupported" = "Dieses Format oder dieser Codec wird nicht unterstützt.";
+"unreadableData" = "Die Dateidaten können nicht gelesen werden. Die Datei ist möglicherweise beschädigt oder hat ein nicht unterstütztes Format.";
+"noVideoTrack" = "Diese Datei enthält keine anzeigbare Videospur.";
+"protected" = "Geschützte Videos können nicht wiedergegeben werden.";
+"invalidVideo" = "Die Dauer oder die Anzeigeinformationen des Videos sind ungültig.";
+"rendering" = "Das Bild konnte nicht angezeigt werden. Öffne es erneut.";
+"resource" = "Ein für die Anzeige benötigtes Gerät oder der nötige Speicher ist nicht verfügbar. Versuche es gleich noch einmal.";
+"tooLarge" = "Dieses Bild ist zu groß und überschreitet die sichere Speichergrenze.";
+"unknown" = "Das Laden ist fehlgeschlagen, die Ursache ist unbekannt. Öffne die Datei erneut.";
+"preview.title" = "Vorschau nicht verfügbar";

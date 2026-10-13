@@ -1,0 +1,23 @@
+/* About follows the app language; Korean is the original and fallback. */
+"subtitle" = "Ein macOS-Bildbetrachter, den alle frei nutzen können.";
+"opening" = "Auf der Suche nach einem guten Bildbetrachter für den Mac habe ich schließlich selbst einen mit Vibe Coding entwickelt. Dabei haben mich verschiedene Bildbetrachter für Windows und Mac inspiriert.";
+"story" = "Ich möchte auch erzählen, wie der Name der App nach langem Überlegen entstanden ist. Als Kind war ich von einem Programm namens 알맹이3 begeistert, das aus dem Softwarelabor von An Il-jun (www.aijsoft.com) stammte. Rückblickend war es recht schlicht, doch seine vielen Funktionen faszinierten mich. Besonders in Erinnerung geblieben ist mir der Text, in dem der Entwickler selbst beschrieb, warum er 알맹이 geschaffen hatte und was das Programm auszeichnete.\n\nHeute weiß ich nicht, wo der Entwickler ist und wie es ihm geht. Ich habe nur noch die vage Erinnerung, dass er wohl nach Australien ausgewandert ist. Um dieses Programm und den Geist dahinter zu würdigen, habe ich diese App 알맹Re genannt.";
+"philosophy" = "So wie geteiltes Wissen für jemanden zum Ausgangspunkt werden kann, hoffe ich, dass auch meine Werkzeuge anderen neue Möglichkeiten eröffnen. Ich wünsche mir, dass alle die grundlegenden Funktionen, die sie am Computer brauchen, kostenlos und unkompliziert nutzen können. Menschen und KI sollen grundlegende digitale Werkzeuge frei verwenden können, um gemeinsam zu lernen und Neues zu schaffen.";
+"thanks" = "Danke.";
+"closing" = "Und ERW FWS WRG";
+"close" = "Schließen";
+"windowTitle" = "Über 알맹Re";
+"profile" = "Profilbild des Entwicklers";
+"confirm" = "OK";
+"licenses" = "Open-Source-Lizenzen";
+"back" = "Zurück zur Vorstellung";
+"guide" = "Grundlagen";
+"supportTitle" = "Projekt unterstützen";
+"supportMessage" = "Ich entwickle Werkzeuge, die alle kostenlos nutzen können, um die Hilfe, die ich erhalten habe, weiterzugeben. Wenn sie dir nützlich sind, kannst du meine Arbeit mit einer kleinen Spende unterstützen.";
+"bitcoinDescription" = "Du kannst mit BlueWallet oder einer anderen Bitcoin-Wallet den QR-Code scannen oder an die unten angegebene Adresse spenden.";
+"bitcoinAddress" = "Bitcoin-Spendenadresse";
+"bitcoinQR" = "QR-Code der Bitcoin-Spendenadresse";
+"copyAddress" = "Adresse kopieren";
+"addressCopied" = "Adresse kopiert.";
+"openWallet" = "In Wallet öffnen";
+"walletUnavailable" = "Kopiere die Bitcoin-Adresse und füge sie in deine Wallet ein.";

@@ -44,6 +44,9 @@
 "집중 모드 전환" = "Activer/désactiver le mode concentration";
 "집중 보기 종료" = "Quitter le mode concentration";
 "집중 보기 종료 (Esc)" = "Quitter le mode concentration (Échap.)";
+
+"조작창 숨기기" = "Masquer les commandes";
+"조작창 표시" = "Afficher les commandes";
 "몽땅보기로 돌아가기 (Esc)" = "Revenir à « Tout voir » (Échap.)";
 "전체 화면" = "Plein écran";
 "이전 이미지/페이지" = "Image/page précédente";
@@ -427,8 +430,8 @@
 "전자 앨범 반복 재생" = "Lire l’album en boucle";
 "%d초 간격" = "Toutes les %d secondes";
 "전자 앨범 재생 완료" = "Lecture de l’album terminée";
-"1~300초. 사진이 표시된 뒤 시간을 셉니다. 집중 보기를 나가거나 다른 앱으로 전환하면 일시정지합니다." = "1 à 300 secondes, à partir de l’affichage de la photo. Quitter la vue Concentration ou changer d’app met la lecture en pause.";
-"탐색 → 전자 앨범 또는 집중 보기 하단의 재생 버튼으로 시작합니다. 두 장 이상의 사진이 필요합니다." = "Démarrez via Navigation → Album photo ou le bouton de lecture de la vue Concentration. Au moins deux photos sont nécessaires.";
+"1~300초. 사진은 표시된 뒤 시간을 세고, 영상은 끝까지 재생한 뒤 넘어갑니다. 집중 보기를 나가거나 다른 앱으로 전환하면 일시정지합니다." = "1 à 300 secondes après l’affichage de chaque photo. Les vidéos sont lues jusqu’à la fin avant de passer à la suite. Quitter la vue Concentration ou changer d’app met la lecture en pause.";
+"탐색 → 전자 앨범 또는 집중 보기 하단의 재생 버튼으로 시작합니다. 사진 두 장 이상 또는 영상이 있으면 재생할 수 있습니다." = "Lancez la lecture via Navigation → Album photo ou le bouton de lecture en vue Concentration. Il faut au moins deux photos ou une vidéo.";
 "현재 이미지를 바탕화면으로 설정" = "Utiliser l’image actuelle comme fond d’écran";
 "사진 전체 맞춤" = "Afficher toute la photo";
 "화면 채우기" = "Remplir l’écran";
@@ -446,6 +449,16 @@
 "바탕화면 이미지 준비 중…" = "Préparation du fond d’écran…";
 "바탕화면에 적용" = "Appliquer le fond d’écran";
 /* 독립적인 두 폴더 비교 */
+/* Comparison positions and unmatched filenames */
+"A · 왼쪽" = "A · Gauche";
+"A · 위" = "A · Haut";
+"B · 오른쪽" = "B · Droite";
+"B · 아래" = "B · Bas";
+"이 폴더에 같은 이름의 사진이 없습니다." = "Ce dossier ne contient aucune photo du même nom.";
+"폴더는 그대로 열려 있습니다. 파일명과 관계없이 보려면 목록 순서로 전환하세요." = "Le dossier est toujours ouvert. Passez à l’ordre de la liste pour comparer les photos indépendamment de leur nom de fichier.";
+"목록 순서로 비교" = "Comparer dans l’ordre de la liste";
+"양쪽 폴더를 목록 순서대로 비교합니다. 각 칸의 사진을 따로 고를 수 있습니다." = "Comparez les deux dossiers dans l’ordre de la liste. Vous pouvez choisir une photo indépendamment dans chaque volet.";
+
 "이미지 비교" = "Comparaison d’images";
 "이미지 비교 전환" = "Activer/désactiver la comparaison d’images";
 "A · 왼쪽/위" = "A · Gauche/Haut";
@@ -562,3 +575,278 @@
 "처음부터 반복" = "Reprendre au début";
 "비교 이미지 썸네일" = "Vignettes des images comparées";
 "썸네일 표시" = "Afficher les vignettes";
+
+/* Library navigation, comparison matching and local AI upscaling. */
+"%d / %d개" = "%d / %d éléments";
+"AI 확대" = "Agrandissement IA";
+"AI 확대 결과" = "Résultat de l’agrandissement IA";
+"AI 확대 모델을 찾을 수 없습니다. 앱을 다시 설치해 주세요." = "Le modèle d’agrandissement IA est introuvable. Réinstallez l’application.";
+"AI 확대 모델이 올바른 결과를 반환하지 않았습니다." = "Le modèle d’agrandissement IA a renvoyé un résultat non valide.";
+"AI 확대 사본 저장" = "Enregistrer la copie agrandie par IA";
+"AI 확대 사본을 저장하지 못했습니다." = "Impossible d’enregistrer la copie agrandie par IA.";
+"AI 확대 실행" = "Lancer l’agrandissement IA";
+"AI 확대 중… %d%%" = "Agrandissement IA… %d%%";
+"AI 확대…" = "Agrandissement IA…";
+"AI 확대용 이미지 데이터를 만들지 못했습니다." = "Impossible de préparer les données d’image pour l’agrandissement IA.";
+"AI로 2배 확대하고 사본으로 저장합니다." = "Agrandissez 2× avec l’IA et enregistrez une copie.";
+"AI로 더 크게 보기" = "Voir en plus grand avec l’IA";
+"Finder에서 보기" = "Afficher dans le Finder";
+"GPS 남 → 북" = "GPS Sud → Nord";
+"GPS 동 → 서" = "GPS Est → Ouest";
+"GPS 북 → 남" = "GPS Nord → Sud";
+"GPS 서 → 동" = "GPS Ouest → Est";
+"PNG 사본 저장…" = "Enregistrer une copie PNG…";
+"QuickSRNet으로 가로·세로를 2배 확대합니다. 모든 처리는 이 Mac에서 이루어집니다." = "QuickSRNet double la largeur et la hauteur. Tout le traitement s’effectue sur ce Mac.";
+"ZIP 안의 이미지는 읽기 전용입니다. 새 파일로 내보낸 뒤 수정하세요." = "Les images d’une archive ZIP sont en lecture seule. Exportez un nouveau fichier avant de le modifier.";
+"같은 파일명" = "Noms identiques";
+"검색 결과 수" = "Nombre de résultats";
+"검색 결과 없음" = "Aucun résultat";
+"검색 지우기" = "Effacer la recherche";
+"검색·필터 초기화" = "Réinitialiser la recherche et les filtres";
+"검색어나 이미지 형식 필터를 바꿔 보세요." = "Essayez une autre recherche ou un autre filtre de format.";
+"결과는 SDR · sRGB입니다. 투명도는 유지하며, 움직이는 이미지는 첫 프레임만 확대합니다. 원본은 변경하지 않습니다." = "Le résultat est en SDR et sRGB. La transparence est conservée ; seule la première image des animations est agrandie. L’original reste inchangé.";
+"기타 형식" = "Autres formats";
+"다시 실행" = "Relancer";
+"닫기" = "Fermer";
+"대응 이미지 없음" = "Aucune image correspondante";
+"모든 형식" = "Tous les formats";
+"목록 순서" = "Ordre de la liste";
+"미리보기" = "Aperçu";
+"비교 %1$@" = "Comparaison %1$@";
+"사본을 저장했습니다." = "Copie enregistrée.";
+"생성일 오래된순" = "Date de création : anciennes d’abord";
+"생성일 최신순" = "Date de création : récentes d’abord";
+"수정일 오래된순" = "Date de modification : anciennes d’abord";
+"수정일 최신순" = "Date de modification : récentes d’abord";
+"실제 픽셀" = "Pixels réels";
+"실행을 누르면 확대 결과를 미리 보고 PNG 사본으로 저장할 수 있습니다." = "Lancez l’agrandissement pour prévisualiser le résultat et enregistrer une copie PNG.";
+"용량 작은순" = "Taille : petites d’abord";
+"용량 큰순" = "Taille : grandes d’abord";
+"원본 이미지가 변경되었습니다. 다시 실행해 주세요." = "L’image source a changé. Relancez l’agrandissement.";
+"원본 파일을 덮어쓸 수 없습니다. 다른 이름을 선택해 주세요." = "Le fichier original ne peut pas être écrasé. Choisissez un autre nom.";
+"원본과 비교" = "Comparer à l’original";
+"이 이미지는 AI 확대의 메모리 한도를 넘습니다. 더 작은 사본을 사용해 주세요." = "Cette image dépasse la limite de mémoire de l’agrandissement IA. Utilisez une copie plus petite.";
+"이름 내림차순" = "Nom : décroissant";
+"이름 오름차순" = "Nom : croissant";
+"이미지 맞추기" = "Associer les images";
+"이미지 목록을 정리할 수 없음" = "Impossible d’actualiser la liste d’images";
+"이미지 엔진 작업을 완료하지 못했습니다: %@" = "Le moteur d’image n’a pas pu terminer l’opération : %@";
+"이미지 크기를 확인할 수 없습니다." = "Impossible de déterminer les dimensions de l’image.";
+"이미지 형식 필터" = "Filtre de format d’image";
+"이미지를 먼저 열어 주세요." = "Ouvrez d’abord une image.";
+"이전 보기를 복원하지 못했습니다. 열기에서 폴더를 다시 선택하세요." = "Impossible de restaurer la vue précédente. Utilisez Ouvrir pour sélectionner à nouveau le dossier.";
+"이전 비교 복원" = "Restaurer la comparaison précédente";
+"정렬" = "Trier";
+"즐겨찾는 폴더" = "Dossiers favoris";
+"즐겨찾는 폴더를 열 수 없음" = "Impossible d’ouvrir le dossier favori";
+"즐겨찾는 폴더에 고정" = "Épingler aux favoris";
+"즐겨찾는 폴더에서 해제" = "Détacher des favoris";
+"파일 이름 검색" = "Rechercher un nom de fichier";
+"형식 %d" = "Formats : %d";
+"확장자를 제외한 같은 이름을 짝지으며, 없는 쪽은 빈칸으로 표시합니다." = "Associe les noms sans extension ; le côté sans image correspondante reste vide.";
+
+/* Histogram, editing tools and photo maps */
+"GPS 사진 %lld장" = "%lld photos géolocalisées";
+"GPS 정보가 저장된 사진이 이 지도에 표시됩니다." = "Les photos contenant des données GPS s’affichent sur cette carte.";
+"RGB 히스토그램" = "Histogramme RVB";
+"SDR 미리보기 · 투명도 가중" = "Aperçu SDR · Pondéré par l’opacité";
+"강도" = "Intensité";
+"강한 대비" = "Contraste élevé";
+"그림자" = "Ombres";
+"노랑" = "Jaune";
+"다섯 제어점을 위아래로 드래그하세요." = "Faites glisser les cinq points de contrôle vers le haut ou le bas.";
+"다음 이미지" = "Image suivante";
+"명도" = "Luminosité";
+"명료도" = "Clarté";
+"모든 위치" = "Tous les lieux";
+"미리보기에서 RGB가 모두 0 또는 255인 픽셀의 투명도 가중 비율입니다." = "Pourcentage pondéré par l’opacité des pixels de l’aperçu dont les canaux RVB valent tous 0 ou tous 255.";
+"반경" = "Rayon";
+"보라" = "Violet";
+"보정된 sRGB 미리보기의 256구간 분포입니다. 휘도는 0.2126R + 0.7152G + 0.0722B로 계산하며 HDR 원본 분포와 다를 수 있습니다." = "Distribution de l’aperçu sRGB retouché sur 256 niveaux. La luminance est calculée selon 0.2126R + 0.7152G + 0.0722B et peut différer de la distribution HDR d’origine.";
+"분석할 불투명 픽셀이 없습니다." = "Aucun pixel visible à analyser.";
+"블랙 포인트" = "Point noir";
+"빨강" = "Rouge";
+"사각형" = "Rectangle";
+"사진 보기" = "Voir la photo";
+"사진 위치 Apple 지도" = "Lieu de la photo dans Plans Apple";
+"사진 핀을 눌러 미리 보고, 영역을 선택해 사진을 모아 보세요." = "Cliquez sur un repère pour afficher un aperçu, ou sélectionnez une zone pour regrouper ses photos.";
+"선택 %lld장" = "%lld sélectionnées";
+"선택 사진 보기" = "Voir les photos sélectionnées";
+"선형" = "Linéaire";
+"시네마 나이트" = "Cinéma nuit";
+"시네마 틸 오렌지" = "Cinéma bleu sarcelle et orange";
+"시네마 페이드" = "Cinéma estompé";
+"안개 제거" = "Correction du voile";
+"영역 선택 해제" = "Effacer la sélection de zone";
+"완전 검정 %.1f%%" = "Noir pur %.1f%%";
+"완전 흰색 %.1f%%" = "Blanc pur %.1f%%";
+"위치 읽는 중 %lld / %lld" = "Lecture des positions %lld / %lld";
+"위치 정보가 있는 사진이 없습니다" = "Aucune photo avec des données de localisation";
+"위치 필터를 해제하고 폴더의 사진을 다시 표시합니다." = "Désactiver le filtre de localisation et réafficher les photos du dossier.";
+"이전 이미지" = "Image précédente";
+"자유 영역" = "Zone à main levée";
+"자홍" = "Magenta";
+"제어점" = "Point de contrôle";
+"제어점 %d" = "Point de contrôle %d";
+"주황" = "Orange";
+"중간 대비" = "Contraste moyen";
+"지도 보기" = "Vue carte";
+"지도 영역 해제" = "Effacer la zone de carte";
+"지도 위를 드래그해 사각형 영역을 선택하세요." = "Faites glisser sur la carte pour sélectionner une zone rectangulaire.";
+"지도 위에 원하는 영역을 그리세요. 끝점은 자동으로 연결됩니다." = "Dessinez une zone sur la carte. Les extrémités se rejoignent automatiquement.";
+"지도 이동" = "Déplacer la carte";
+"지도에서 중심부터 바깥으로 드래그해 반경을 선택하세요." = "Faites glisser du centre vers l’extérieur sur la carte pour définir un rayon.";
+"채널" = "Canal";
+"청록" = "Turquoise";
+"초록" = "Vert";
+"출력" = "Sortie";
+"컬러 믹서" = "Mélangeur de couleurs";
+"컬러 믹서 초기화" = "Réinitialiser le mélangeur de couleurs";
+"텍스처" = "Texture";
+"텍스처는 작은 디테일을, 명료도는 넓은 윤곽을 강조합니다. 안개 제거는 어두운 톤과 대비를 조절합니다." = "La texture accentue les petits détails, la clarté les contours plus larges. La correction du voile ajuste les tons foncés et le contraste.";
+"톤 조정" = "Réglages des tons";
+"톤 커브" = "Courbe des tonalités";
+"톤 커브 초기화" = "Réinitialiser les courbes";
+"파랑" = "Bleu";
+"프레즌스" = "Présence";
+"프레즌스 초기화" = "Réinitialiser la présence";
+"필름 룩" = "Rendus argentiques";
+"현재 지도 영역" = "Zone de carte actuelle";
+"휘도 히스토그램" = "Histogramme de luminance";
+"흰색" = "Blancs";
+"히스토그램" = "Histogramme";
+"히스토그램 계산 중" = "Calcul de l’histogramme";
+"히스토그램 채널" = "Canal de l’histogramme";
+"히스토그램을 불러올 수 없습니다." = "Impossible de charger l’histogramme.";
+"반경 (km)" = "Rayon (km)";
+
+/* Image editing flips */
+"좌우 반전하기" = "Retourner horizontalement";
+"상하 반전하기" = "Retourner verticalement";
+"현재 보이는 사진의 왼쪽과 오른쪽을 뒤집습니다. 다시 누르면 원래대로 돌아옵니다." = "Inversez la gauche et la droite de la photo affichée. Cliquez à nouveau pour annuler le retournement.";
+"현재 보이는 사진의 위와 아래를 뒤집습니다. 다시 누르면 원래대로 돌아옵니다." = "Inversez le haut et le bas de la photo affichée. Cliquez à nouveau pour annuler le retournement.";
+
+/* Viewer page navigation */
+"%@ · %d장씩 이동" = "%@ · %d photos à la fois";
+"%@로 한 화면에 설정한 %d장씩 넘깁니다. 분류 모드에서도 사용할 수 있습니다." = "Utilisez %@ pour parcourir les photos par groupes de %d, selon le nombre défini par écran. Disponible aussi en mode marquage.";
+"이전 %d장 보기 (%@)" = "Voir les %d photos précédentes (%@)";
+"다음 %d장 보기 (%@)" = "Voir les %d photos suivantes (%@)";
+
+/* Minimal start screen */
+"Mac에 꼭 필요한 도구, 누구나 자유롭게." = "Les outils essentiels pour Mac, en libre accès pour tous.";
+
+/* App information */
+"알맹Re 정보" = "À propos de 알맹Re";
+"앱 소개" = "À propos";
+
+/* Map selection and photo previews */
+"선택한 영역의 사진" = "Photos de la zone sélectionnée";
+"사진 %lld장 보기" = "Voir %lld photos";
+"이 영역에는 사진이 없습니다." = "Aucune photo dans cette zone.";
+"영역을 넓히거나 다른 위치를 선택해 보세요." = "Essayez une zone plus grande ou choisissez un autre lieu.";
+"선택 영역의 사진을 찾는 중…" = "Recherche des photos dans la zone sélectionnée…";
+"이 위치의 사진 %lld장" = "%lld photos à cet endroit";
+
+/* Comparison navigation target and shorter-side looping */
+"이미지 넘기기" = "Navigation des images";
+"A만" = "A seul";
+"양쪽" = "Les deux";
+"B만" = "B seul";
+"적은 쪽 반복" = "Boucler le côté le plus court";
+"방향키로 넘길 대상" = "Cible des touches fléchées";
+"방향키와 공통 이동 버튼으로 넘길 사진을 고릅니다. A/B만 선택하면 목록 순서로 전환합니다." = "Choisissez les photos à faire défiler avec les flèches et les boutons de navigation communs. A seul ou B seul active l’ordre de la liste.";
+"잠금에 맞춰 이동 대상이 바뀝니다. 잠금을 모두 풀면 양쪽으로 돌아갑니다." = "La cible de navigation suit les verrouillages. Déverrouillez les deux côtés pour revenir à Les deux.";
+"켜면 적은 쪽은 처음부터 반복하고, 끄면 마지막 이미지에 머뭅니다. 많은 쪽의 끝까지 함께 넘깁니다." = "Lorsque cette option est activée, le côté le plus court reprend au début. Sinon, il reste sur sa dernière image. Les deux avancent jusqu’à la fin du côté le plus long.";
+"파일명 비교에서는 같은 이름의 쌍으로 이동합니다. 반복은 목록 순서에서 사용할 수 있습니다." = "La comparaison par nom de fichier parcourt les paires de même nom. La répétition est disponible dans l’ordre de la liste.";
+"이동 대상: %@" = "Cible de navigation : %@";
+"잠금에 따라 자동 선택" = "Sélection automatique selon les verrouillages";
+
+/* Native basic usage and online documentation */
+"기본 사용법" = "Utilisation de base";
+"상세 사용설명서 (GitHub)" = "Guide détaillé (GitHub)";
+"basicUsage.intro" = "Découvrez rapidement les fonctions essentielles d’알맹Re.";
+"basicUsage.settingsButton" = "Réglages…";
+"basicUsage.open.title" = "Ouvrir des images, dossiers ou ZIP";
+"basicUsage.open.body" = "Utilisez Ouvrir… (%@) pour ouvrir des images, dossiers ou ZIP, ou faites-les glisser depuis le Finder. Les images d’un ZIP sont en lecture seule.";
+"basicUsage.browse.title" = "Parcourir les photos";
+"basicUsage.browse.body" = "Précédente / suivante : %@ / %@. Les commandes d’affichage permettent de choisir le nombre d’images par écran. ↑/↓ sélectionne une ligne dans Tout voir ou dans la page actuelle de la Visionneuse à plusieurs éléments, avec Marquage ON ou OFF. Le déplacement s’arrête aux première et dernière lignes. Avec Marquage ON ou OFF, ←/→ avance d’une page dans la Visionneuse ou d’un élément dans Tout voir.";
+"basicUsage.browse.pages" = "Dans la visionneuse, %@ permet de passer d’un écran à l’autre.";
+"basicUsage.view.title" = "Zoomer et changer de vue";
+"basicUsage.view.body" = "Agrandir / réduire : %@ / %@. Adapter à la fenêtre : %@. Taille réelle : %@. Retrouvez vos photos dans Tout voir (%@) ou utilisez le Mode concentration (%@). Le déplacement est limité à une petite marge aux bords ; les axes plus petits que le volet restent centrés.";
+"basicUsage.compare.title" = "Comparer deux listes d’images";
+"basicUsage.compare.body" = "Ouvrez A et B dans Comparaison d’images (%@), puis choisissez un côté par son nom ou Les deux dans Navigation des images. Un verrou fixe l’image, le zoom et la position du panneau ; la cible de navigation suit les verrous. Le bouton d’étiquettes sous le nom de chaque volet permet de choisir plusieurs étiquettes indépendamment et de comparer des groupes de photos différents.";
+"basicUsage.tags.title" = "Marquer les photos et vidéos";
+"basicUsage.tags.body" = "Avec Marquage ON (⇧⌘M), 1–4 · QWER · ASDF modifient les étiquettes de l’élément actuel. Dans Visionneuse ou Tout voir, chaque bouton Étiquettes concerne seulement sa photo ou vidéo. OFF rétablit les raccourcis ordinaires. Noms et couleurs sont modifiables ; « Supprimer » et « Téléverser » restent de simples marques. En Comparaison d’images, choisissez A seul, B seul ou Les deux sous Appliquer à.";
+"basicUsage.map.title" = "Choisir des zones sur la carte";
+"basicUsage.map.body" = "Choisissez jusqu’à trois zones pour parcourir les photos localisées dans la Visionneuse ou Tout voir. Le bandeau bleu indique le nombre de zones et de photos. Retour à la carte retrouve la dernière position et le zoom ; Effacer la zone de carte retire seulement le filtre de lieu.";
+"basicUsage.edit.title" = "Modifier et enregistrer une copie";
+"basicUsage.edit.body" = "Le bouton à curseurs permet de recadrer, pivoter, retourner et ajuster les couleurs. Exportez (%@) une copie avant de fermer l’app. Le bouton i affiche les informations et métadonnées de la photo.";
+"basicUsage.settings.title" = "Adapter l’app à vos habitudes";
+"basicUsage.settings.body" = "Modifiez l’affichage, le chargement et les raccourcis dans les réglages. Les touches personnalisables de cette aide reflètent vos réglages actuels. Consultez le guide détaillé sur GitHub pour toutes les fonctions et instructions.";
+
+"basicUsage.compare.names" = "Noms de comparaison… définit des alias sans renommer les dossiers ; laissez vide pour leurs noms, ou A/B pour un même dossier.";
+
+/* AI upscaling preview inspection */
+"aiPreview.fit" = "Ajuster à la fenêtre";
+"aiPreview.actual" = "100% · Pixels réels";
+"aiPreview.actualHelp" = "Affiche un pixel du résultat IA par pixel de l’écran. Le fichier image reste inchangé.";
+"aiPreview.hint" = "+/− ou pincement pour zoomer · Glisser ou faire défiler pour déplacer";
+"aiPreview.compareHint" = "Déplacez la séparation à gauche ou à droite pour comparer le même détail.";
+"aiPreview.original" = "Original (affiché à 2×)";
+"aiPreview.result" = "Résultat de l’agrandissement IA";
+"aiPreview.split" = "Séparation de comparaison";
+"aiPreview.direction" = "Sens de comparaison";
+"aiPreview.leftRight" = "Gauche / droite";
+"aiPreview.topBottom" = "Haut / bas";
+"aiPreview.horizontalSplit" = "Séparation de comparaison haut / bas";
+"aiPreview.verticalSplit" = "Séparation de comparaison gauche / droite";
+"aiPreview.zoomIn" = "Agrandir l’aperçu";
+"aiPreview.zoomOut" = "Réduire l’aperçu";
+"aiPreview.zoom" = "Zoom de l’aperçu";
+"aiPreview.percent" = "%@%%";
+"aiPreview.basicUsage" = "Dans Agrandissement IA, ajustez le zoom et déplacez la séparation pour comparer l’original au résultat, puis enregistrez une copie PNG.";
+
+/* Branded home and recent-photo history */
+"home.subtitle" = "Explorez les instants de vos photos et vidéos, et classez-les à votre façon.";
+"home.recent" = "Dossiers récemment ouverts";
+"home.recent.detail" = "Jusqu’à 3 dossiers, du plus récemment ouvert au plus ancien, avec jusqu’à 4 images consultées ou utilisées en dernier dans chacun.";
+"home.empty" = "Aucun dossier récent";
+"home.empty.detail" = "Ouvrez un dossier ou un fichier pour le retrouver ici et reprendre votre travail.";
+"home.resume" = "Reprendre la session précédente";
+"home.show" = "Accueil";
+"home.remove" = "Retirer de la liste";
+"home.clear" = "Vider la liste";
+"home.clear.help" = "Efface uniquement l’historique des dossiers et fichiers récents. Les fichiers originaux ne sont pas supprimés.";
+"home.preview.unavailable" = "Aucun aperçu";
+"home.open.failed" = "Impossible d’ouvrir la photo récente";
+"home.open.missing" = "Le fichier est introuvable ou inaccessible. Sélectionnez-le à nouveau avec Ouvrir.";
+"home.remove.label" = "Retirer « %@ » de la liste";
+"home.open.label" = "Rouvrir « %@ »";
+"home.folder.open" = "Ouvrir le dossier";
+"home.folder.open.label" = "Rouvrir le dossier « %@ »";
+"home.folder.remove" = "Retirer le dossier de l’historique";
+"home.folder.remove.label" = "Retirer le dossier « %@ » de l’historique récent";
+"home.folder.empty" = "Les images que vous consultez ou utilisez dans ce dossier apparaîtront ici.";
+"home.folder.count" = "Images : %d";
+"home.archive.open" = "Ouvrir le ZIP";
+"home.folder.failed" = "Impossible d’ouvrir le dossier";
+"home.folder.missing" = "Le dossier a peut-être été déplacé ou son disque est indisponible. Sélectionnez-le à nouveau avec Ouvrir.";
+"home.basicUsage" = "Depuis l’accueil, choisissez Reprendre la session précédente ou l’une des sept photos récentes. Vider la liste efface uniquement l’historique et conserve les fichiers originaux.";
+
+/* Home quote attribution */
+"home.quote.source" = "Texte original et source";
+"home.quote.translation" = "Traduction par AlmaengRe";
+
+"appearance.title" = "Apparence";
+"appearance.system" = "Système";
+"appearance.light" = "Clair";
+"appearance.dark" = "Sombre";
+"appearance.help" = "Le mode Système suit automatiquement l’apparence de macOS.";
+
+"%@ 영상을 재생할 수 없어 전자 앨범을 일시정지했습니다." = "L’album photo est en pause, car la vidéo %@ n’a pas pu être lue.";
+"‘%@’은 비어 있는 파일입니다(0바이트). 원본이나 백업에서 다시 복사해 주세요." = "« %@ » est un fichier vide (0 octet). Copiez-le à nouveau depuis l’original ou une sauvegarde.";
+
+"지원 이미지 모두 연결" = "Associer tous les formats d’image pris en charge";
+"Finder에서 이미지를 열면 한 장 보기로 시작합니다. 이미지·영상·폴더를 창에 끌어 놓아도 열 수 있습니다." = "Les images ouvertes depuis le Finder s’affichent une par une. Vous pouvez aussi ouvrir des images, des vidéos et des dossiers en les déposant dans la fenêtre.";
+"연결 확인이 필요한 형식: %@" = "Formats dont l’association doit être vérifiée : %@";
+"이미지·영상·폴더를 여기에 놓으세요." = "Déposez ici des images, des vidéos ou des dossiers.";

@@ -1,4 +1,6 @@
+import CoreGraphics
 import Foundation
+import ImageIO
 import Testing
 
 @testable import ImageViewer
@@ -87,11 +89,35 @@ struct DisplayQualitySettingsTests {
   }
 
   @Test("비교 전환과 AA 끄기는 배율·위치를 보존하고 Esc는 비교부터 종료한다")
-  func comparisonLifecycle() throws {
+  func comparisonLifecycle() async throws {
     let suite = "ImageViewer.ComparisonTests.\(UUID().uuidString)"
     let defaults = try #require(UserDefaults(suiteName: suite))
     defer { defaults.removePersistentDomain(forName: suite) }
-    let store = AppStore(defaults: defaults, monitorsSystemResources: false)
+    let directory = FileManager.default.temporaryDirectory
+      .appendingPathComponent("comparison-lifecycle-\(UUID())", isDirectory: true)
+    try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+    defer { try? FileManager.default.removeItem(at: directory) }
+    let photoURL = directory.appendingPathComponent("synthetic.png")
+    let context = try #require(CGContext(data: nil, width: 8, height: 4,
+      bitsPerComponent: 8, bytesPerRow: 0, space: CGColorSpaceCreateDeviceRGB(),
+      bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue))
+    context.setFillColor(CGColor(red: 0.2, green: 0.6, blue: 0.9, alpha: 1))
+    context.fill(CGRect(x: 0, y: 0, width: 8, height: 4))
+    let image = try #require(context.makeImage())
+    let destination = try #require(CGImageDestinationCreateWithURL(
+      photoURL as CFURL, "public.png" as CFString, 1, nil))
+    CGImageDestinationAddImage(destination, image, nil)
+    try #require(CGImageDestinationFinalize(destination))
+    let marksURL = directory.appendingPathComponent("marks.sqlite")
+    let store = AppStore(defaults: defaults, monitorsSystemResources: false,
+      photoMarkDatabaseURL: marksURL)
+    store.open(urls: [photoURL])
+    let deadline = ContinuousClock.now.advanced(by: .seconds(5))
+    while (store.isLoading || store.isFiltering), ContinuousClock.now < deadline {
+      try await Task.sleep(for: .milliseconds(10))
+    }
+    try #require(!store.isLoading && !store.isFiltering && store.assets.count == 1)
+    try #require(!store.showsHome)
     store.zoom = 4
     store.panOffset = CGSize(width: 37, height: -24)
     store.baseScaleMode = .actualPixels
@@ -106,7 +132,8 @@ struct DisplayQualitySettingsTests {
     #expect(store.zoom == 4)
     #expect(store.panOffset == CGSize(width: 37, height: -24))
     #expect(store.baseScaleMode == .actualPixels)
-    #expect(AppStore(defaults: defaults, monitorsSystemResources: false).comparisonLayout == .off)
+    #expect(AppStore(defaults: defaults, monitorsSystemResources: false,
+      photoMarkDatabaseURL: marksURL).comparisonLayout == .off)
 
     #expect(store.handleEscapeKey())
     #expect(store.comparisonLayout == .off)
@@ -126,7 +153,8 @@ struct DisplayQualitySettingsTests {
     store.perform(.toggleAntialiasing)
     #expect(!store.isAntialiasingEnabled)
     #expect(store.comparisonLayout == .off)
-    #expect(!AppStore(defaults: defaults, monitorsSystemResources: false).isAntialiasingEnabled)
+    #expect(!AppStore(defaults: defaults, monitorsSystemResources: false,
+      photoMarkDatabaseURL: marksURL).isAntialiasingEnabled)
   }
 
   @Test("비교 칸은 구분선을 제외한 같은 크기를 쓰며 작은 창에서도 양수다")
@@ -176,5 +204,22 @@ struct DisplayQualitySettingsTests {
     let hdrRequest = ThumbnailRequest(
       asset: asset, maxPixelSize: 2_048, adjustments: .identity, prefersHDR: true)
     #expect(!hdrRequest.hasSameContent(as: large))
+  }
+
+  @Test("RAW 몽땅보기는 충분한 썸네일 뒤 원본을 중복 디코딩하지 않고 편집·HDR은 보강한다")
+  func rawThumbnailAvoidsDuplicateSourceDecode() {
+    let asset = ImageAsset(url: URL(fileURLWithPath: "/raw/photo.DNG"),
+      byteCount: 33_000_000, modificationDate: .distantPast)
+    for pixels in [512, 1_024, 2_048] {
+      let request = ThumbnailRequest(asset: asset, maxPixelSize: pixels,
+        adjustments: .identity, prefersHDR: false, prefersPreciseImage: true)
+      #expect(!request.needsPreciseImage)
+    }
+    var adjusted = ImageAdjustments.identity
+    adjusted.brightness = 0.2
+    #expect(ThumbnailRequest(asset: asset, maxPixelSize: 1_024,
+      adjustments: adjusted, prefersHDR: false, prefersPreciseImage: true).needsPreciseImage)
+    #expect(ThumbnailRequest(asset: asset, maxPixelSize: 1_024,
+      adjustments: .identity, prefersHDR: true, prefersPreciseImage: true).needsPreciseImage)
   }
 }

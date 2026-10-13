@@ -1,0 +1,135 @@
+/* Photo marking and keyboard classification. */
+"mode.title" = "Phân loại";
+"mode.help" = "Khi Phân loại ON, dùng 1–4, QWER và ASDF để bật/tắt nhãn.";
+"mode.toggle" = "Bật/tắt chế độ phân loại";
+"mode.active" = "Chế độ phân loại";
+"mode.unavailable" = "Mở ảnh hoặc video để gắn nhãn.";
+"menu.title" = "Nhãn ảnh";
+"menu.edit" = "Sửa tên và màu nhãn…";
+"panel.title" = "Nhãn ảnh";
+"panel.hint" = "← → Chuyển mục · 1–4, QWER, ASDF: nhãn";
+"panel.multipleHint" = "Một ảnh hoặc video có thể có nhiều nhãn.";
+"panel.noPhoto" = "Mở ảnh hoặc video cần phân loại.";
+"panel.loading" = "Đang tải nhãn ảnh…";
+"panel.close" = "Thoát chế độ phân loại";
+"labels.edit" = "Sửa tên và màu nhãn";
+"labels.title" = "Tên và màu nhãn theo phím";
+"labels.hint" = "Các phím không có mức đánh giá hay thao tác cố định; tên ban đầu chỉ là ví dụ. Chọn tên và màu cho từng nhãn. Các thiết lập dùng chung cho mọi thư mục; thay đổi không làm mất nhãn đã gắn cho ảnh.";
+"labels.safety" = "Nhãn chỉ thêm hoặc bỏ dấu, không sửa, xóa, di chuyển hay tải tệp gốc lên mạng.";
+"labels.placeholder" = "Tên nhãn";
+"labels.unnamed" = "Nhãn chưa đặt tên";
+"labels.keyFormat" = "Tên nhãn cho phím %@";
+"save" = "Lưu";
+"cancel" = "Hủy";
+"done" = "Xong";
+"filter.title" = "Nhãn";
+"filter.activeFormat" = "Nhãn %d";
+"filter.any" = "Có bất kỳ nhãn đã chọn nào";
+"filter.all" = "Có tất cả nhãn đã chọn";
+"filter.allPhotos" = "Tất cả ảnh";
+"filter.unmarked" = "Ảnh chưa gắn nhãn";
+"filter.reset" = "Bỏ bộ lọc nhãn";
+"filter.help" = "Xem ảnh theo nhãn";
+"filter.empty" = "Hãy thử thay đổi bộ lọc nhãn hoặc điều kiện tìm kiếm.";
+"badge.moreFormat" = "+%d";
+"badge.accessibilityFormat" = "Nhãn: %@";
+"error.title" = "Không thể lưu nhãn ảnh";
+"storage.error" = "Không thể truy cập dữ liệu nhãn ảnh.";
+"default.one" = "⭐";
+"default.two" = "⭐⭐";
+"default.three" = "⭐⭐⭐";
+"default.four" = "⭐⭐⭐⭐";
+"default.q" = "Tải lên";
+"default.w" = "Chỉnh sửa";
+"default.e" = "Xóa";
+"default.r" = "Chờ xử lý";
+"default.a" = "Phong cảnh";
+"default.s" = "Người";
+"default.d" = "Đồ vật";
+"default.f" = "Động vật";
+"panel.filterStable" = "Danh sách giữ nguyên trong lúc phân loại. Kết quả sẽ cập nhật khi thoát chế độ phân loại.";
+
+/* Editable key assignments and detailed help. */
+"settings.title" = "Nhãn ảnh";
+"settings.hint" = "Đặt tên và màu nhãn trước khi mở ảnh. Lưu để áp dụng cho mọi thư mục và giữ lại khi mở ứng dụng lần sau.";
+"labels.keyHelpFormat" = "%@ là phím tắt cho nhãn bên cạnh. Sửa tên nhãn để chọn nội dung mà phím này đánh dấu.";
+"labels.editHelp" = "Chọn tên và màu nhãn cho 12 phím. Thay đổi áp dụng cho mọi thư mục và giữ nguyên nhãn đã gắn cho ảnh.";
+"labels.saveHelp" = "Lưu tên và màu nhãn cho mọi thư mục. Nhãn đã gắn cho ảnh được giữ nguyên.";
+"labels.cancelHelp" = "Đóng cửa sổ chỉnh sửa mà không lưu thay đổi tên hoặc màu.";
+"labels.previewTitle" = "Nhãn theo phím";
+"labels.previewFormat" = "%@ → %@";
+"mark.addHelpFormat" = "%@ → %@: khi Phân loại ON, nhấn phím hoặc bấm để thêm; lặp lại để bỏ. Có thể gắn nhiều nhãn và tệp gốc không đổi.";
+"mark.removeHelpFormat" = "%@ → %@: nhãn này đã được gắn. Khi Phân loại ON, nhấn phím hoặc bấm để bỏ. Các nhãn khác và tệp gốc được giữ nguyên.";
+"mode.detailHelp" = "⌘⇧M bật hoặc tắt chế độ gắn nhãn. Khi bật, dùng 1–4, QWER, ASDF hoặc bảng nhãn cho toàn bộ ảnh và video đã chọn. Dùng ô chọn hoặc ⌘-nhấp để chọn nhiều mục, ⇧-nhấp để chọn một khoảng. Menu trên mỗi thẻ chỉ áp dụng cho mục đó. Khi tắt, các phím tắt xem thông thường được sử dụng. Trong So sánh ảnh, chọn Chỉ A, Chỉ B hoặc Cả hai.";
+"labels.settingsLink" = "Sửa tên và màu nhãn…";
+"labels.revert" = "Hủy thay đổi";
+"labels.revertHelp" = "Khôi phục tên và màu nhãn đã lưu mà không đóng Cài đặt. Các thay đổi chưa lưu sẽ bị hủy.";
+
+/* Shared tag colors. */
+"colors.title" = "Màu";
+"colors.keyFormat" = "Màu nhãn cho phím %@";
+"colors.help" = "Màu đã chọn xuất hiện trong bảng nhãn, menu và ảnh thu nhỏ. Màu được lưu cùng với tên.";
+"color.red" = "Đỏ";
+"color.orange" = "Cam";
+"color.yellow" = "Vàng";
+"color.green" = "Xanh lá";
+"color.teal" = "Xanh mòng két";
+"color.blue" = "Xanh dương";
+"color.indigo" = "Chàm";
+"color.purple" = "Tím";
+"color.pink" = "Hồng";
+"color.gray" = "Xám";
+
+/* Independent tag filters for comparison panes. */
+"comparison.open" = "So sánh ảnh hiện tại theo nhãn";
+"comparison.openHelp" = "Mở danh sách gốc hiện tại trong A và B. Giữ bộ lọc tìm kiếm, định dạng và vùng bản đồ, rồi chọn nhãn riêng cho từng khung.";
+"comparison.filter" = "Chọn nhãn";
+"comparison.allPhotos" = "Tất cả ảnh";
+"comparison.titleFormat" = "Nhãn của khung %@";
+"comparison.selectionHelp" = "Chọn nhiều nhãn để hiển thị trong khung này. Cùng một ảnh có thể xuất hiện ở cả hai bên.";
+"comparison.empty" = "Không có ảnh khớp với các điều kiện này.";
+"comparison.emptyHelp" = "Đổi điều kiện nhãn hoặc kiểm tra bộ lọc chung về tìm kiếm, định dạng và vùng bản đồ.";
+"comparison.reset" = "Xóa bộ lọc nhãn của khung này";
+
+"mode.on" = "Phân loại ON";
+
+"mode.off" = "Phân loại OFF";
+
+"card.title" = "Nhãn";
+
+"card.help" = "Chọn nhãn cho ảnh hoặc video này.";
+
+"card.accessibilityFormat" = "Nhãn của %@";
+
+"card.assignedFormat" = "%d nhãn";
+
+"target.title" = "Áp dụng nhãn";
+
+"target.first" = "Chỉ A";
+
+"target.second" = "Chỉ B";
+
+"target.both" = "Cả hai";
+
+"target.help" = "Chọn ảnh nhận thao tác từ phím phân loại và các nút bên dưới. Lựa chọn này độc lập với đối tượng chuyển ảnh.";
+
+"target.mixed" = "Đã áp dụng cho một số ảnh";
+"panel.gridHint" = "← → Mục · ↑ ↓ Hàng · 1–4, QWER, ASDF: nhãn";
+"panel.viewerGridHint" = "← → Trang · ↑ ↓ Hàng · 1–4, QWER, ASDF: nhãn";
+
+"panel.selectionFormat" = "Áp dụng nhãn cho %d mục đã chọn";
+
+"panel.selectionHint" = "Ô chọn hoặc ⌘-nhấp để thêm mục; ⇧-nhấp để chọn một khoảng. Phím nhãn và bảng áp dụng cho toàn bộ mục đã chọn; menu trên thẻ chỉ áp dụng cho mục đó.";
+
+"selection.help" = "Thêm hoặc bỏ mục này khỏi vùng chọn. Phím nhãn và nút trên bảng áp dụng cho toàn bộ ảnh và video đã chọn.";
+
+"selection.accessibilityFormat" = "Chọn %@";
+
+"panel.noSelection" = "Chọn các mục để gắn nhãn.";
+
+/* Independent tag inheritance for new copies and exports. */
+"inheritance.title" = "Nhãn cho bản sao và tệp xuất";
+"inheritance.copy" = "Áp dụng nhãn gốc cho tệp được sao chép";
+"inheritance.export" = "Áp dụng nhãn gốc cho tệp xuất sau khi chỉnh sửa";
+"inheritance.defaults" = "Cả hai tùy chọn đều tắt theo mặc định. Thay đổi được lưu ngay và áp dụng cho các tệp được ứng dụng sao chép hoặc xuất từ thời điểm đó.";
+"inheritance.originals" = "Di chuyển tệp gốc hoặc khôi phục từ Thùng rác sẽ giữ nguyên nhãn, bất kể các tùy chọn này.";

@@ -1,0 +1,14 @@
+"export.menu" = "Đổi định dạng, kích thước và nén hàng loạt…";
+"share.menu" = "Chia sẻ tệp…";
+"map.area" = "Ảnh trong vùng";
+"map.photo" = "Ảnh này";
+"map.location" = "Tất cả ảnh tại vị trí này";
+"report.menu" = "Báo cáo tệp phân loại…";
+"share.unavailable" = "Không tìm thấy tệp để chia sẻ";
+"share.unavailableHint" = "Làm mới thư mục, kiểm tra tệp và quyền truy cập, rồi chọn lại.";
+"share.failed" = "Không thể chia sẻ tệp";
+
+"quick.rename" = "Đổi tên";
+"quick.export" = "Định dạng, kích thước";
+"quick.watermark" = "Dấu chìm";
+"quick.share" = "Chia sẻ";

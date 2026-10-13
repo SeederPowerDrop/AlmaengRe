@@ -1,0 +1,135 @@
+/* Photo marking and keyboard classification. */
+"mode.title" = "Markieren";
+"mode.help" = "Bei Markieren AN schalten 1–4, QWER und ASDF die Markierungen um.";
+"mode.toggle" = "Markierungsmodus umschalten";
+"mode.active" = "Markierungsmodus";
+"mode.unavailable" = "Öffne ein Foto oder Video zum Markieren.";
+"menu.title" = "Fotomarkierungen";
+"menu.edit" = "Markierungsnamen und -farben bearbeiten…";
+"panel.title" = "Fotomarkierungen";
+"panel.hint" = "← → Blättern · 1–4, QWER, ASDF: Markierungen";
+"panel.multipleHint" = "Ein Foto oder Video kann mehrere Markierungen haben.";
+"panel.noPhoto" = "Öffne ein Foto oder Video zum Markieren.";
+"panel.loading" = "Fotomarkierungen werden geladen…";
+"panel.close" = "Markierungsmodus beenden";
+"labels.edit" = "Markierungsnamen und -farben bearbeiten";
+"labels.title" = "Markierungsnamen und -farben nach Taste";
+"labels.hint" = "Die Tasten haben keine festgelegte Bewertung oder Aktion; die anfänglichen Namen sind Beispiele. Wähle für jede Markierung einen Namen und eine Farbe. Diese Einstellungen gelten für alle Ordner. Vorhandene Fotomarkierungen bleiben bei Änderungen erhalten.";
+"labels.safety" = "Markierungen setzen oder entfernen nur Kennzeichen. Originaldateien werden nicht bearbeitet, gelöscht, verschoben oder hochgeladen.";
+"labels.placeholder" = "Markierungsname";
+"labels.unnamed" = "Unbenannte Markierung";
+"labels.keyFormat" = "Markierungsname für %@";
+"save" = "Sichern";
+"cancel" = "Abbrechen";
+"done" = "Fertig";
+"filter.title" = "Markierungen";
+"filter.activeFormat" = "Markierungen %d";
+"filter.any" = "Mindestens eine gewählte Markierung";
+"filter.all" = "Alle gewählten Markierungen";
+"filter.allPhotos" = "Alle Fotos";
+"filter.unmarked" = "Nicht markierte Fotos";
+"filter.reset" = "Markierungsfilter aufheben";
+"filter.help" = "Fotos nach Markierung zusammenstellen";
+"filter.empty" = "Ändere die Markierungs- oder Suchfilter.";
+"badge.moreFormat" = "+%d";
+"badge.accessibilityFormat" = "Markierungen: %@";
+"error.title" = "Fotomarkierungen können nicht gesichert werden";
+"storage.error" = "Auf die Fotomarkierungsdaten konnte nicht zugegriffen werden.";
+"default.one" = "⭐";
+"default.two" = "⭐⭐";
+"default.three" = "⭐⭐⭐";
+"default.four" = "⭐⭐⭐⭐";
+"default.q" = "Hochladen";
+"default.w" = "Bearbeiten";
+"default.e" = "Löschen";
+"default.r" = "Zurückstellen";
+"default.a" = "Landschaft";
+"default.s" = "Personen";
+"default.d" = "Objekte";
+"default.f" = "Tiere";
+"panel.filterStable" = "Die Liste bleibt beim Markieren unverändert. Die Ergebnisse werden beim Verlassen des Markierungsmodus aktualisiert.";
+
+/* Editable key assignments and detailed help. */
+"settings.title" = "Fotomarkierungen";
+"settings.hint" = "Lege Markierungsnamen und -farben fest, bevor du Fotos öffnest. Sichere sie, um sie auf alle Ordner anzuwenden und für die nächste Sitzung zu behalten.";
+"labels.keyHelpFormat" = "%@ ist der Kurzbefehl für den danebenstehenden Markierungsnamen. Bearbeite den Namen, um festzulegen, wofür diese Taste steht.";
+"labels.editHelp" = "Wähle Markierungsnamen und -farben für die 12 Tasten. Änderungen gelten für alle Ordner. Vorhandene Fotomarkierungen bleiben erhalten.";
+"labels.saveHelp" = "Sichert Markierungsnamen und -farben für alle Ordner. Vorhandene Fotomarkierungen bleiben erhalten.";
+"labels.cancelHelp" = "Schließt den Editor, ohne Änderungen an Namen oder Farben zu sichern.";
+"labels.previewTitle" = "Tastenzuweisungen";
+"labels.previewFormat" = "%@ → %@";
+"mark.addHelpFormat" = "%@ → %@: Bei Markieren AN setzt ein Tastendruck oder Klick die Markierung; Wiederholen entfernt sie. Mehrere Markierungen sind möglich, Originaldateien bleiben unverändert.";
+"mark.removeHelpFormat" = "%@ → %@: Diese Markierung ist gesetzt. Bei Markieren AN entfernt ein Tastendruck oder Klick sie. Andere Markierungen und Originaldateien bleiben unverändert.";
+"mode.detailHelp" = "⌘⇧M schaltet Markierungen ein oder aus. Wenn aktiviert, markieren 1–4, QWER, ASDF oder das Bedienfeld alle ausgewählten Fotos und Videos. Kontrollkästchen oder ⌘-Klick wählen mehrere Elemente aus, ⇧-Klick einen Bereich. Das Kartenmenü wirkt nur auf das jeweilige Element. Wenn deaktiviert, gelten die normalen Anzeige-Tastenkürzel. Im Bildvergleich wählen Sie Nur A, Nur B oder Beide.";
+"labels.settingsLink" = "Markierungsnamen und -farben bearbeiten…";
+"labels.revert" = "Änderungen zurücknehmen";
+"labels.revertHelp" = "Stellt die gesicherten Markierungsnamen und -farben wieder her, ohne die Einstellungen zu schließen. Nicht gesicherte Änderungen werden verworfen.";
+
+/* Shared tag colors. */
+"colors.title" = "Farbe";
+"colors.keyFormat" = "Markierungsfarbe für %@";
+"colors.help" = "Deine Farbe erscheint in Markierungsbereichen, Menüs und Miniaturen. Sie wird mit dem Namen gesichert.";
+"color.red" = "Rot";
+"color.orange" = "Orange";
+"color.yellow" = "Gelb";
+"color.green" = "Grün";
+"color.teal" = "Türkis";
+"color.blue" = "Blau";
+"color.indigo" = "Indigo";
+"color.purple" = "Violett";
+"color.pink" = "Rosa";
+"color.gray" = "Grau";
+
+/* Independent tag filters for comparison panes. */
+"comparison.open" = "Aktuelle Fotos nach Markierung vergleichen";
+"comparison.openHelp" = "Öffnet die aktuelle Quellsammlung in A und B. Such-, Format- und Kartenbereichsfilter bleiben erhalten. Wähle Markierungen für jeden Bereich getrennt aus.";
+"comparison.filter" = "Markierungen wählen";
+"comparison.allPhotos" = "Alle Fotos";
+"comparison.titleFormat" = "Markierungen für Bereich %@";
+"comparison.selectionHelp" = "Wähle mehrere Markierungen aus, die in diesem Bereich angezeigt werden sollen. Dasselbe Foto kann auf beiden Seiten erscheinen.";
+"comparison.empty" = "Keine Fotos entsprechen diesen Bedingungen.";
+"comparison.emptyHelp" = "Ändere die Markierungen oder prüfe die gemeinsamen Such-, Format- und Kartenbereichsfilter.";
+"comparison.reset" = "Markierungsfilter dieses Bereichs aufheben";
+
+"mode.on" = "Markieren AN";
+
+"mode.off" = "Markieren AUS";
+
+"card.title" = "Markierungen";
+
+"card.help" = "Wähle Markierungen für dieses Foto oder Video.";
+
+"card.accessibilityFormat" = "Markierungen für %@";
+
+"card.assignedFormat" = "%d Markierungen";
+
+"target.title" = "Anwenden auf";
+
+"target.first" = "Nur A";
+
+"target.second" = "Nur B";
+
+"target.both" = "Beide";
+
+"target.help" = "Wähle, auf welche Fotos die Markierungstasten und die Schaltflächen unten wirken. Dies ist unabhängig vom Blätterziel.";
+
+"target.mixed" = "Auf einige Fotos angewendet";
+"panel.gridHint" = "← → Elemente · ↑ ↓ Zeilen · 1–4, QWER, ASDF: Markierungen";
+"panel.viewerGridHint" = "← → Seiten · ↑ ↓ Zeilen · 1–4, QWER, ASDF: Markierungen";
+
+"panel.selectionFormat" = "Auf %d ausgewählte Elemente anwenden";
+
+"panel.selectionHint" = "Kontrollkästchen oder ⌘-Klick: Auswahl erweitern; ⇧-Klick: Bereich auswählen. Tasten und Bedienfeld wirken auf die ganze Auswahl, das Kartenmenü nur auf das jeweilige Element.";
+
+"selection.help" = "Dieses Element zur Auswahl hinzufügen oder daraus entfernen. Markierungstasten und Bedienfeld wirken auf alle ausgewählten Fotos und Videos.";
+
+"selection.accessibilityFormat" = "%@ auswählen";
+
+"panel.noSelection" = "Wählen Sie Elemente zum Markieren aus.";
+
+/* Independent tag inheritance for new copies and exports. */
+"inheritance.title" = "Tags für Kopien und Exporte";
+"inheritance.copy" = "Ursprüngliche Tags auf kopierte Dateien übertragen";
+"inheritance.export" = "Ursprüngliche Tags auf nach der Bearbeitung exportierte Dateien übertragen";
+"inheritance.defaults" = "Beide Optionen sind standardmäßig deaktiviert. Änderungen werden sofort gespeichert und gelten für Dateien, die die App anschließend kopiert oder exportiert.";
+"inheritance.originals" = "Beim Verschieben eines Originals oder Wiederherstellen aus dem Papierkorb bleiben seine Tags unabhängig von diesen Optionen erhalten.";

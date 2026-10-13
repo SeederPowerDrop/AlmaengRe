@@ -1,0 +1,16 @@
+"editor.open" = "对比名称…";
+"editor.title" = "对比名称";
+"editor.left" = "左侧名称";
+"editor.right" = "右侧名称";
+"editor.top" = "上方名称";
+"editor.bottom" = "下方名称";
+"automatic.label" = "自动名称：%@";
+"editor.help" = "留空时使用文件夹名称。同一文件夹以A/B区分。实际文件夹名称不会改变。";
+"editor.reset" = "使用自动名称";
+"action.cancel" = "取消";
+"action.save" = "保存";
+"target.only" = "仅%@";
+"target.left" = "%@ · 左侧";
+"target.right" = "%@ · 右侧";
+"target.top" = "%@ · 上方";
+"target.bottom" = "%@ · 下方";

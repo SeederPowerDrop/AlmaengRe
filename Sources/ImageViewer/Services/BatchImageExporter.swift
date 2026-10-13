@@ -4,6 +4,8 @@ import Foundation
 struct BatchExportItem: Identifiable, Sendable {
   let sourceURL: URL
   let destinationURL: URL
+  var destinationAsset: ImageAsset? = nil
+  var destinationReference: PhotoMarkFileReference? = nil
 
   var id: URL { sourceURL }
 }
@@ -58,6 +60,7 @@ actor BatchImageExporter {
     destinationFolder: URL,
     format: ExportFormat
   ) throws -> [BatchExportItem] {
+    try Task.checkCancellation()
     try validateFolder(destinationFolder)
     guard urls.allSatisfy(\.isFileURL) else {
       throw BatchImageExportError.nonFileURL
@@ -65,13 +68,22 @@ actor BatchImageExporter {
 
     // 대소문자 구분 볼륨에서도 다른 Mac으로 옮길 때 충돌할 이름은 피합니다.
     var reservedNames = try existingNames(in: destinationFolder)
-    let sourcePaths = Set(urls.map(pathKey))
+    let sourcePaths = try Set(urls.map { url in
+      try Task.checkCancellation()
+      return pathKey(url)
+    })
     var seenSources = Set<URL>()
+    // A burst or a set of albums can contain thousands of identically named photos.
+    // Resume after the last allocated suffix instead of probing 1...N for each one.
+    var nextNumbers: [String: Int] = [:]
     var items: [BatchExportItem] = []
     for sourceURL in urls where seenSources.insert(sourceURL.standardizedFileURL).inserted {
+      try Task.checkCancellation()
       let stem = sourceURL.deletingPathExtension().lastPathComponent
-      var number = 1
+      let stemKey = nameKey(stem)
+      var number = nextNumbers[stemKey] ?? 1
       while true {
+        try Task.checkCancellation()
         let suffix = number == 1 ? "" : "-\(number)"
         let filename = "\(stem)\(suffix).\(format.fileExtension)"
         try validateFilename(filename)
@@ -80,6 +92,7 @@ actor BatchImageExporter {
         if !reservedNames.contains(key), !sourcePaths.contains(pathKey(destinationURL)) {
           reservedNames.insert(key)
           items.append(BatchExportItem(sourceURL: sourceURL, destinationURL: destinationURL))
+          nextNumbers[stemKey] = number + 1
           break
         }
         number += 1
@@ -88,11 +101,32 @@ actor BatchImageExporter {
     return items
   }
 
+  /// Cancellation of a dismissed or superseded SwiftUI preview must reach its worker.
+  /// Awaiting an unstructured task's value alone does not cancel that task.
+  static func planInBackground(
+    urls: [URL], destinationFolder: URL, format: ExportFormat
+  ) async throws -> [BatchExportItem] {
+    try Task.checkCancellation()
+    let worker = Task.detached(priority: .userInitiated) {
+      try plan(urls: urls, destinationFolder: destinationFolder, format: format)
+    }
+    return try await withTaskCancellationHandler {
+      let items = try await worker.value
+      try Task.checkCancellation()
+      return items
+    } onCancel: {
+      worker.cancel()
+    }
+  }
+
   func export(
     items: [BatchExportItem],
     format: ExportFormat,
     quality: Double,
+    resize: BatchResizeOptions = .original,
+    watermark: WatermarkOptions = .disabled,
     adjustments: [URL: ImageAdjustments],
+    photoMarkSourceURLs: Set<URL> = [],
     progress: @Sendable (Int, Int) -> Void
   ) async -> BatchExportResult {
     var completed: [BatchExportItem] = []
@@ -116,13 +150,16 @@ actor BatchImageExporter {
           destinationURL: temporaryURL,
           format: format,
           quality: quality,
-          adjustments: adjustments[item.sourceURL] ?? .identity
+          adjustments: adjustments[item.sourceURL] ?? .identity,
+          resize: resize,
+          watermark: watermark
         )
         try Task.checkCancellation()
         // 미리보기 뒤 추가된 파일이나 대소문자·유니코드 변형도 다시 검사합니다.
         try Self.validate(item, format: format, sourcePaths: sourcePaths)
         try Self.publish(temporaryURL, to: item.destinationURL)
-        completed.append(item)
+        completed.append(photoMarkSourceURLs.contains(item.sourceURL.standardizedFileURL)
+          ? Self.captureCompletedItem(item) : item)
       } catch is CancellationError {
         wasCancelled = true
         break
@@ -162,6 +199,23 @@ actor BatchImageExporter {
     }
   }
 
+  /// Capture identity immediately after publication, before another export can
+  /// fail because a removable destination disappeared. Only opt-in, marked
+  /// sources need a bookmark; the usual export does no extra tracking work.
+  static func captureCompletedItem(_ item: BatchExportItem) -> BatchExportItem {
+    guard let snapshot = try? BatchFileOperationSourceSnapshot.capture(item.destinationURL),
+      let identity = PhotoMarkFileIdentity.read(item.destinationURL) else { return item }
+    let asset = ImageAsset(url: item.destinationURL, byteCount: snapshot.size,
+      modificationDate: Date(timeIntervalSince1970: Double(snapshot.modifiedSeconds)
+        + Double(snapshot.modifiedNanoseconds) / 1_000_000_000),
+      creationDate: Date(timeIntervalSince1970: Double(identity.birthSeconds)
+        + Double(identity.birthNanoseconds) / 1_000_000_000), photoMarkIdentity: identity.key)
+    guard let reference = PhotoMarkFileReference.capture(for: asset),
+      (try? BatchFileOperationSourceSnapshot.capture(item.destinationURL)) == snapshot else { return item }
+    return BatchExportItem(sourceURL: item.sourceURL, destinationURL: item.destinationURL,
+      destinationAsset: asset, destinationReference: reference)
+  }
+
   private static func validateFolder(_ folder: URL) throws {
     guard folder.isFileURL,
       (try? folder.resourceValues(forKeys: [.isDirectoryKey]).isDirectory) == true
@@ -179,7 +233,10 @@ actor BatchImageExporter {
   }
 
   private static func existingNames(in folder: URL) throws -> Set<String> {
-    Set(try FileManager.default.contentsOfDirectory(atPath: folder.path).map(nameKey))
+    try Set(FileManager.default.contentsOfDirectory(atPath: folder.path).map { filename in
+      try Task.checkCancellation()
+      return nameKey(filename)
+    })
   }
 
   private static func nameKey(_ name: String) -> String {

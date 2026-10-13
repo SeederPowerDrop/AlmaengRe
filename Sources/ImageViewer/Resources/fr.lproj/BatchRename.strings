@@ -1,0 +1,11 @@
+"classification.mode" = "Utiliser un nom de classement";
+"classification.label" = "Classement à utiliser";
+"classification.choose" = "Choisissez un classement.";
+"classification.unavailable" = "Impossible de charger les informations de classement. Fermez cette fenêtre et vérifiez leur enregistrement.";
+"classification.emptyName" = "Ce classement n’a pas de nom. Nommez-le, puis réessayez.";
+"classification.noMatches" = "Aucun fichier sélectionné ne porte ce classement.";
+"classification.help" = "Seuls les fichiers du classement choisi sont renommés, dans l’ordre de la liste. Exemple : Envoi01, Envoi02. À partir de 100 fichiers concernés, la numérotation commence à 001 et s’élargit si nécessaire.";
+"classification.scope" = "%d fichiers correspondants seront traités sur %d fichiers sélectionnés. Les autres restent inchangés.";
+"classification.unnamed" = "Classement sans nom";
+"classification.option" = "%@ · %@ (%d fichiers)";
+"numbering.help" = "Les numéros sont ajoutés avant l’extension, dans l’ordre de la liste actuelle. Pour changer le format d’image, utilisez « %@ ».";

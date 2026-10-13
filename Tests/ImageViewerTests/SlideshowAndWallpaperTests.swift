@@ -59,7 +59,8 @@ struct SlideshowAndWallpaperTests {
     #expect(store.currentIndex == 0 && store.isSlideshowPlaying)
     #expect(store.handleEscapeKey())
     #expect(!store.isSlideshowPlaying && !store.isFocusMode)
-    #expect(SlideshowSettings.nextIndex(after: 0, count: 1, repeats: true) == nil)
+    #expect(SlideshowSettings.nextIndex(after: 0, count: 1, repeats: true) == 0)
+    #expect(SlideshowSettings.nextIndex(after: 0, count: 1, repeats: false) == nil)
     #expect(SlideshowSettings.nextIndex(after: -1, count: 3, repeats: true) == nil)
   }
 
@@ -196,7 +197,7 @@ struct SlideshowAndWallpaperTests {
     }
   }
 
-  @Test("큰 화면도 출력 제한을 지키며 8개 언어와 새 단축키를 제공한다")
+  @Test("큰 화면도 출력 제한을 지키며 10개 언어와 새 단축키를 제공한다")
   func localizationAndSizing() {
     #expect(WallpaperService.pixelLimit(for: []) == 2048)
     #expect(WallpaperService.pixelLimit(for: [
@@ -212,8 +213,9 @@ struct SlideshowAndWallpaperTests {
       "전자 앨범 반복 재생",
       "%d초 간격",
       "전자 앨범 재생 완료",
-      "1~300초. 사진이 표시된 뒤 시간을 셉니다. 집중 보기를 나가거나 다른 앱으로 전환하면 일시정지합니다.",
-      "탐색 → 전자 앨범 또는 집중 보기 하단의 재생 버튼으로 시작합니다. 두 장 이상의 사진이 필요합니다.",
+      "1~300초. 사진은 표시된 뒤 시간을 세고, 영상은 끝까지 재생한 뒤 넘어갑니다. 집중 보기를 나가거나 다른 앱으로 전환하면 일시정지합니다.",
+      "탐색 → 전자 앨범 또는 집중 보기 하단의 재생 버튼으로 시작합니다. 사진 두 장 이상 또는 영상이 있으면 재생할 수 있습니다.",
+      "%@ 영상을 재생할 수 없어 전자 앨범을 일시정지했습니다.",
       "현재 이미지를 바탕화면으로 설정",
       "사진 전체 맞춤",
       "화면 채우기",

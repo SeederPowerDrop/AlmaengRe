@@ -3,9 +3,11 @@ import SwiftUI
 
 struct OverviewView: View {
   @ObservedObject var store: AppStore
-  @State private var cellFrames: [URL: CGRect] = [:]
+  @State private var cellFrames = OverviewCellFrameCache()
   @State private var selectionRectangle: CGRect?
   @State private var dragID: UUID?
+  @State private var isAdjustingThumbnailSize = false
+  @State private var footerWidth: CGFloat = 0
   @GestureState private var isDragging = false
   @Namespace private var contentSpace
 
@@ -25,7 +27,8 @@ struct OverviewView: View {
           ScrollView {
             LazyVGrid(columns: columns(for: size), spacing: 16) {
               ForEach(Array(store.assets.enumerated()), id: \.element.id) { index, asset in
-                OverviewThumbnailCell(store: store, index: index, asset: asset, size: size)
+                OverviewThumbnailCell(store: store, index: index, asset: asset, size: size,
+                  isAdjustingSize: isAdjustingThumbnailSize)
                   .background {
                     GeometryReader { cell in
                       Color.clear.preference(
@@ -53,7 +56,7 @@ struct OverviewView: View {
               }
             }
             .onPreferenceChange(OverviewCellFramesKey.self) { frames in
-              cellFrames = frames
+              cellFrames.frames = frames
               updateMarqueeSelection()
             }
           }
@@ -67,74 +70,42 @@ struct OverviewView: View {
           }
           .onChange(of: geometry.size) { _, _ in cancelMarquee() }
         }
+        .onChange(of: OverviewGridNavigation.columnCount(
+          width: geometry.size.width, thumbnailSize: store.thumbnailSize), initial: true) { _, count in
+          store.overviewColumnCount = count
+        }
       }
 
       Divider()
 
-      ViewThatFits(in: .horizontal) {
-        HStack(spacing: 12) {
-          Image(systemName: "photo")
-          Slider(
-            value: $store.thumbnailSize,
-            in: OverviewThumbnailSizing.range
-          )
-          .frame(minWidth: 60, maxWidth: 160)
-          .accessibilityLabel(L10n.text("썸네일 크기"))
-          .accessibilityValue(L10n.format("%.1f pt", Double(store.thumbnailSize)))
-          Image(systemName: "photo.fill")
-          numberToggle
-          Text(L10n.format("%.1f pt", Double(store.thumbnailSize)))
-            .font(.caption.monospacedDigit())
-            .foregroundStyle(.secondary)
-            .frame(minWidth: 44, alignment: .trailing)
-          Spacer()
-          BatchActionsMenu(store: store)
-
-          Button {
-            store.presentBatchRename()
-          } label: {
-            Label(L10n.text("이름 변경"), systemImage: "pencil.line")
-          }
-          .disabled(!store.canStartBatchOperation)
-
-          Button {
-            store.presentBatchExport()
-          } label: {
-            Label(L10n.text("형식 변환"), systemImage: "photo.on.rectangle.angled")
-          }
-          .disabled(!store.canStartBatchOperation)
-
-          Text(store.positionDescription)
-            .monospacedDigit()
-            .foregroundStyle(.secondary)
+      OverviewFooterLayout {
+        overviewControls
+        ViewThatFits(in: .horizontal) {
+          BatchQuickActionsView(store: store)
+          BatchQuickActionsView(store: store, layout: .icons)
+          BatchQuickActionsView(store: store, layout: .twoRows)
         }
-
-        HStack(spacing: 10) {
-          Image(systemName: "photo")
-          Slider(
-            value: $store.thumbnailSize,
-            in: OverviewThumbnailSizing.range
-          )
-          .frame(minWidth: 40, maxWidth: 100)
-          .accessibilityLabel(L10n.text("썸네일 크기"))
-          .accessibilityValue(L10n.format("%.1f pt", Double(store.thumbnailSize)))
-          Spacer(minLength: 0)
-          numberToggle
-          BatchActionsMenu(store: store)
+      }
+      .background {
+        GeometryReader { geometry in
+          Color.clear.onChange(of: geometry.size.width, initial: true) { _, width in
+            footerWidth = width
+          }
         }
       }
       .font(.system(size: 12))
       .controlSize(.small)
-      .padding(.horizontal, 16)
-      .frame(height: 48)
-      .background(ViewerTheme.panel)
+      .padding(.horizontal, 12)
+      .padding(.vertical, 8)
+      .frame(maxWidth: .infinity)
+      .background(ViewerTheme.panelGradient)
     }
-    .background(ViewerTheme.chrome)
+    .background(ViewerTheme.chromeGradient)
     .onChange(of: store.thumbnailSize) { _, _ in cancelMarquee() }
     .onChange(of: store.showsOverviewNumbers) { _, _ in cancelMarquee() }
     .onChange(of: store.libraryRevision) { _, _ in
       cancelMarquee()
-      cellFrames = [:]
+      cellFrames.frames.removeAll(keepingCapacity: true)
     }
     .onChange(of: store.overviewSelectionSession?.id) { _, sessionID in
       if sessionID == nil { selectionRectangle = nil }
@@ -148,7 +119,53 @@ struct OverviewView: View {
         }
       }
     }
-    .onDisappear { cancelMarquee() }
+    .onDisappear {
+      cancelMarquee()
+      isAdjustingThumbnailSize = false
+    }
+  }
+
+  private var overviewControls: some View {
+    HStack(spacing: 8) {
+      Image(systemName: "photo")
+        .accessibilityHidden(true)
+      // Keep one control and a stable track while the grid and footer are remeasured.
+      // Replacing ViewThatFits candidates during a drag loses native slider tracking.
+      Slider(value: $store.thumbnailSize, in: OverviewThumbnailSizing.range) { editing in
+        isAdjustingThumbnailSize = editing
+      }
+        // Only the available pane width changes the track, never its current value.
+        .frame(width: min(140, max(40, footerWidth - 100)))
+        .accessibilityLabel(L10n.text("썸네일 크기"))
+        .accessibilityValue(L10n.format("%.1f pt", Double(store.thumbnailSize)))
+        .accessibilityIdentifier("overview.thumbnailSize")
+      numberToggle
+      if footerWidth >= 360 {
+        Text(L10n.format("%.1f pt", Double(store.thumbnailSize)))
+          .font(.caption.monospacedDigit())
+          .foregroundStyle(.secondary)
+          .frame(width: 60, alignment: .trailing)
+      }
+      Spacer(minLength: 0)
+      if footerWidth >= 360 {
+        ViewThatFits(in: .horizontal) {
+          HStack(spacing: 8) {
+            BatchActionsMenu(store: store)
+            Text(store.positionDescription)
+              .font(.system(size: 11, weight: .medium))
+              .monospacedDigit()
+              .foregroundStyle(.secondary)
+              .padding(.horizontal, 8)
+              .padding(.vertical, 4)
+              .background(ViewerTheme.controlFill, in: RoundedRectangle(cornerRadius: 5))
+              .fixedSize()
+          }
+          BatchActionsMenu(store: store, compact: true)
+        }
+      } else {
+        BatchActionsMenu(store: store, compact: true)
+      }
+    }
   }
 
   private var numberToggle: some View {
@@ -180,7 +197,7 @@ struct OverviewView: View {
   private func updateMarqueeSelection() {
     guard let dragID, let selectionRectangle else { return }
     store.updateOverviewSelection(
-      dragID, hits: OverviewMarqueeGeometry.hits(in: selectionRectangle, frames: cellFrames))
+      dragID, hits: OverviewMarqueeGeometry.hits(in: selectionRectangle, frames: cellFrames.frames))
   }
 
   private func cancelMarquee() {
@@ -204,6 +221,54 @@ struct OverviewView: View {
       proxy.scrollTo(target, anchor: .center)
     }
   }
+}
+
+/// Wrap the action row without removing/recreating the slider during layout changes.
+private struct OverviewFooterLayout: Layout {
+  private let horizontalSpacing: CGFloat = 12
+  private let verticalSpacing: CGFloat = 8
+
+  private func sizes(width: CGFloat, subviews: Subviews) -> (controls: CGSize, actions: CGSize, wraps: Bool) {
+    let controls = subviews[0].sizeThatFits(.unspecified)
+    let actions = subviews[1].sizeThatFits(.unspecified)
+    let wraps = controls.width + horizontalSpacing + actions.width > width
+    if wraps {
+      let proposal = ProposedViewSize(width: width, height: nil)
+      return (subviews[0].sizeThatFits(proposal), subviews[1].sizeThatFits(proposal), true)
+    }
+    return (
+      subviews[0].sizeThatFits(ProposedViewSize(width: width - actions.width - horizontalSpacing, height: nil)),
+      actions, false)
+  }
+
+  func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+    let idealWidth = subviews[0].sizeThatFits(.unspecified).width
+      + horizontalSpacing + subviews[1].sizeThatFits(.unspecified).width
+    let width = proposal.width ?? idealWidth
+    let measured = sizes(width: width, subviews: subviews)
+    return CGSize(width: width, height: measured.wraps
+      ? measured.controls.height + verticalSpacing + measured.actions.height
+      : max(measured.controls.height, measured.actions.height))
+  }
+
+  func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
+    let measured = sizes(width: bounds.width, subviews: subviews)
+    subviews[0].place(
+      at: CGPoint(x: bounds.minX, y: measured.wraps ? bounds.minY : bounds.midY - measured.controls.height / 2),
+      anchor: .topLeading, proposal: ProposedViewSize(measured.controls))
+    subviews[1].place(
+      at: CGPoint(x: bounds.maxX, y: measured.wraps
+        ? bounds.minY + measured.controls.height + verticalSpacing : bounds.midY - measured.actions.height / 2),
+      anchor: .topTrailing, proposal: ProposedViewSize(measured.actions))
+  }
+}
+
+/// Hit-test geometry is not display state. Keep the latest positions for the
+/// marquee without invalidating the whole grid whenever a cell finishes loading
+/// or moves during scrolling/resizing. The visible selection rectangle stays in State.
+@MainActor
+private final class OverviewCellFrameCache {
+  var frames: [URL: CGRect] = [:]
 }
 
 private struct OverviewCellFramesKey: PreferenceKey {
