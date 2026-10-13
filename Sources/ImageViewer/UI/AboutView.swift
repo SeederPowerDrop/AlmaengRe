@@ -5,6 +5,12 @@ import SwiftUI
 struct AboutView: View {
   static let windowID = "about-almaeng-re"
 
+  // Fit the introduction to its contents, including restored windows that used
+  // to be small enough to hide the support cards below a scroll view.
+  static var windowWidth: CGFloat {
+    min(1_000, (NSScreen.main?.visibleFrame.width ?? 1_040) - 40)
+  }
+
   @Environment(\.dismiss) private var dismiss
   @Environment(\.openWindow) private var openWindow
   @State private var showsBitcoin = false
@@ -47,8 +53,8 @@ struct AboutView: View {
     .overlay { Rectangle().strokeBorder(Color(red: 0.10, green: 0.28, blue: 0.65), lineWidth: 1) }
     .background(AboutWindowChrome(title: showsLicenses ? text("licenses") : text("windowTitle")))
     .environment(\.layoutDirection, layoutDirection)
-    .frame(minWidth: 720, idealWidth: 820, maxWidth: .infinity,
-      minHeight: 540, idealHeight: 800, maxHeight: .infinity)
+    .frame(width: Self.windowWidth)
+    .fixedSize(horizontal: false, vertical: true)
     .ignoresSafeArea()
   }
 
@@ -88,48 +94,50 @@ struct AboutView: View {
   }
 
   private var introduction: some View {
-    ScrollView {
-      VStack(alignment: .leading, spacing: 14) {
-        HStack(alignment: .top, spacing: 24) {
-          Group {
-            if let profile = Self.profile {
-              Image(nsImage: profile).resizable().scaledToFit()
-            }
+    VStack(alignment: .leading, spacing: 12) {
+      HStack(alignment: .top, spacing: 22) {
+        Group {
+          if let profile = Self.profile {
+            Image(nsImage: profile).resizable().scaledToFit()
           }
-          .frame(width: 144, height: 144)
-          .padding(4)
-          .background(.white)
-          .overlay { RetroBevel(inset: true) }
-          .accessibilityLabel(text("profile"))
-
-          VStack(alignment: .leading, spacing: 14) {
-            VStack(alignment: .leading, spacing: 8) {
-              Text(verbatim: appHeading)
-                .font(.system(size: 22, weight: .bold))
-              Text(verbatim: text("subtitle"))
-                .foregroundStyle(RetroAboutTheme.secondaryText)
-            }
-            ViewThatFits(in: .horizontal) {
-              HStack(spacing: 16) { introductionLinks }
-                .foregroundStyle(RetroAboutTheme.link)
-              VStack(alignment: .leading, spacing: 8) { introductionLinks }
-                .foregroundStyle(RetroAboutTheme.link)
-            }
-            paragraph("opening")
-          }
-          .frame(maxWidth: .infinity, alignment: .leading)
         }
+        .frame(width: 120, height: 120)
+        .padding(4)
+        .background(.white)
+        .overlay { RetroBevel(inset: true) }
+        .accessibilityLabel(text("profile"))
 
-        paragraph("story")
-        paragraph("philosophy")
+        VStack(alignment: .leading, spacing: 12) {
+          VStack(alignment: .leading, spacing: 8) {
+            Text(verbatim: appHeading)
+              .font(.system(size: 22, weight: .bold))
+            Text(verbatim: text("subtitle"))
+              .foregroundStyle(RetroAboutTheme.secondaryText)
+          }
+          ViewThatFits(in: .horizontal) {
+            HStack(spacing: 16) { introductionLinks }
+              .foregroundStyle(RetroAboutTheme.link)
+            VStack(alignment: .leading, spacing: 8) { introductionLinks }
+              .foregroundStyle(RetroAboutTheme.link)
+          }
+          paragraph("opening")
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+      }
+
+      paragraph("story")
+      paragraph("philosophy")
+      VStack(alignment: .leading, spacing: 4) {
         paragraph("thanks")
         paragraph("closing")
-        supportSection
       }
-      .font(.system(size: 13))
-      .padding(24)
+      supportSection
     }
-    .frame(maxWidth: .infinity, maxHeight: .infinity)
+    .font(.system(size: 13))
+    .padding(.horizontal, 24)
+    .padding(.top, 20)
+    .padding(.bottom, 12)
+    .fixedSize(horizontal: false, vertical: true)
   }
 
   private var appHeading: String {
@@ -152,13 +160,13 @@ struct AboutView: View {
 
   private func paragraph(_ key: String) -> some View {
     Text(verbatim: text(key))
-      .lineSpacing(4)
+      .lineSpacing(3)
       .fixedSize(horizontal: false, vertical: true)
       .textSelection(.enabled)
   }
 
   private var supportSection: some View {
-    VStack(alignment: .leading, spacing: 14) {
+    VStack(alignment: .leading, spacing: 10) {
       Rectangle().fill(RetroAboutTheme.separator).frame(height: 1)
         .padding(.vertical, 4)
       Text(verbatim: text("supportTitle"))
@@ -182,10 +190,20 @@ struct AboutView: View {
             expanded: showsBitcoin)
         }
         .accessibilityValue(showsBitcoin ? text("bitcoinDescription") : "Bitcoin (BTC)")
+        .popover(isPresented: $showsBitcoin, arrowEdge: .bottom) {
+          bitcoinDetails
+            .font(.system(size: 13))
+            .foregroundStyle(RetroAboutTheme.text)
+            .frame(width: 540)
+            .padding(12)
+            .background(RetroAboutTheme.paper)
+            .environment(\.layoutDirection, layoutDirection)
+            .fixedSize(horizontal: false, vertical: true)
+        }
       }
+      .fixedSize(horizontal: false, vertical: true)
       .buttonStyle(.plain)
       .environment(\.layoutDirection, .leftToRight)
-      if showsBitcoin { bitcoinDetails }
     }
   }
 
@@ -193,9 +211,11 @@ struct AboutView: View {
     subtitle: String? = nil, expanded: Bool? = nil) -> some View {
     HStack(spacing: 10) {
       Image(systemName: symbol)
-        .font(.system(size: 21, weight: .medium))
+        .resizable()
+        .scaledToFit()
         .foregroundStyle(Color(white: 0.15))
-        .frame(width: 38, height: 38)
+        .frame(width: 24, height: 24)
+        .frame(width: 40, height: 40)
         .background(tint, in: RoundedRectangle(cornerRadius: 8))
         .accessibilityHidden(true)
       VStack(alignment: .leading, spacing: 3) {
@@ -214,7 +234,7 @@ struct AboutView: View {
     }
     .foregroundStyle(RetroAboutTheme.cardText)
     .padding(12)
-    .frame(maxWidth: .infinity, minHeight: 70, alignment: .leading)
+    .frame(maxWidth: .infinity, minHeight: 76, alignment: .leading)
     .background(RetroAboutTheme.card, in: RoundedRectangle(cornerRadius: 6))
     .overlay { RoundedRectangle(cornerRadius: 6).strokeBorder(RetroAboutTheme.cardBorder, lineWidth: 1) }
     .contentShape(RoundedRectangle(cornerRadius: 6))
@@ -319,7 +339,8 @@ struct AboutView: View {
         .overlay { RetroBevel(inset: true) }
     }
     .padding(24)
-    .frame(maxWidth: .infinity, maxHeight: .infinity)
+    .frame(maxWidth: .infinity)
+    .frame(height: 540)
   }
 }
 

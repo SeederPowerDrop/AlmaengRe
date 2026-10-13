@@ -46,8 +46,8 @@ struct ImageViewerApp: App {
       AboutView()
     }
     .windowStyle(.hiddenTitleBar)
-    .windowResizability(.contentMinSize)
-    .defaultSize(width: 820, height: 800)
+    .windowResizability(.contentSize)
+    .defaultSize(width: AboutView.windowWidth, height: 720)
     .defaultPosition(.center)
     .commandsRemoved()
   }
