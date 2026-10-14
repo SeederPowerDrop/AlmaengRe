@@ -268,7 +268,7 @@ struct RootView: View {
       }
       if store.isPhotoMarking {
         Divider()
-        PhotoMarkPanel(store: store, marks: store.photoMarks)
+        PhotoMarkPanel(store: store, marks: store.photoMarks, shortcuts: shortcuts)
       }
     }
   }
@@ -343,7 +343,7 @@ struct RootView: View {
         .background(ViewerTheme.controlFill.opacity(0.65), in: Capsule())
       Spacer(minLength: 12)
       if store.presentationMode == .viewer {
-        viewerPageHint
+        ViewerPageNavigationHint(store: store, shortcuts: shortcuts)
         Picker("한 화면 이미지 수", selection: Binding(
           get: { store.imagesPerPage }, set: { store.setImagesPerPage($0) }
         )) {
@@ -370,23 +370,6 @@ struct RootView: View {
     .background(ViewerTheme.chromeGradient)
   }
 
-  @ViewBuilder private var viewerPageHint: some View {
-    let keys = [-1, 1].compactMap { shortcuts.viewerPageBinding(direction: $0)?.displayText }
-      .joined(separator: " / ")
-    if store.imagesPerPage > 1, !keys.isEmpty {
-      let help = L10n.format("%@로 한 화면에 설정한 %d장씩 넘깁니다. 분류 모드에서도 사용할 수 있습니다.",
-        keys, store.imagesPerPage)
-      ViewThatFits(in: .horizontal) {
-        Text(L10n.format("%@ · %d장씩 이동", keys, store.imagesPerPage)).fixedSize()
-        Text(verbatim: keys).fixedSize()
-      }
-      .font(.system(size: 10))
-      .foregroundStyle(.secondary)
-      .help(help)
-      .accessibilityElement(children: .ignore)
-      .accessibilityLabel(help)
-    }
-  }
 
   private var viewerContent: some View {
     Group {

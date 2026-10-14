@@ -117,8 +117,12 @@ struct BottomControlBar: View {
   private func pageNavigationHelp(direction: Int) -> String {
     if store.presentationMode == .viewer, store.imagesPerPage > 1,
       let binding = shortcuts.viewerPageBinding(direction: direction) {
-      return L10n.format(direction < 0 ? "이전 %d장 보기 (%@)" : "다음 %d장 보기 (%@)",
-        store.imagesPerPage, binding.displayText)
+      let pageHelp = L10n.format(direction < 0 ? "이전 %d장 보기 (%@)" : "다음 %d장 보기 (%@)",
+        store.imagesPerPage, "\u{2066}\(binding.displayText)\u{2069}")
+      guard let selectionHelp = ViewerNavigationHintText.selectionHelp(shortcuts: shortcuts) else {
+        return pageHelp
+      }
+      return pageHelp + "\n" + selectionHelp
     }
     return L10n.text(direction < 0 ? "이전 이미지/페이지" : "다음 이미지/페이지")
   }

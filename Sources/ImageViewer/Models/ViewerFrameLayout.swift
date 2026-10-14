@@ -167,6 +167,15 @@ struct ViewerFrameLayoutConfiguration: Codable, Equatable, Sendable {
     return result
   }
 
+  /// Moves one frame through physical row-major order and wraps within this page.
+  /// Source indices stay stable even when the user has swapped visual positions.
+  func selectionTarget(from sourceSlot: Int, direction: Int) -> Int {
+    let slots = normalized(count: count).visualSlots
+    guard direction != 0, let position = slots.firstIndex(of: sourceSlot) else { return sourceSlot }
+    let next = (position + (direction < 0 ? -1 : 1) + slots.count) % slots.count
+    return slots[next]
+  }
+
   /// Follows the displayed row and nearest physical column even after swaps and
   /// unequal resizing. It never wraps past the top or bottom of the page.
   func rowTarget(from sourceSlot: Int, direction: Int, in size: CGSize? = nil) -> Int {

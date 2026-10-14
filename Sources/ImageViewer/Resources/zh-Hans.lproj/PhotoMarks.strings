@@ -116,7 +116,7 @@
 
 "target.mixed" = "已应用于部分照片";
 "panel.gridHint" = "← → 项目 · ↑ ↓ 行 · 1–4、QWER、ASDF 分类";
-"panel.viewerGridHint" = "← → 页面 · ↑ ↓ 行 · 1–4、QWER、ASDF 分类";
+"panel.viewerGridHint" = "%@ 页面 · ↑ ↓ 行 · 1–4、QWER、ASDF 分类";
 
 "panel.selectionFormat" = "为所选 %d 项应用分类";
 
@@ -134,3 +134,6 @@
 "inheritance.export" = "将原有分类应用到编辑后导出的文件";
 "inheritance.defaults" = "这两个选项默认均关闭。更改会立即保存，并应用于此后通过本应用复制或导出的文件。";
 "inheritance.originals" = "移动原文件或从废纸篓恢复原文件时，其分类会保留，不受这些选项影响。";
+
+"panel.viewerSelectionHint" = "%@ 选择照片";
+"panel.viewerSelectionHelp" = "使用 %@ 在当前页内逐个选择照片或视频。到达一端时，会循环到同一页的另一端。先开启分类模式，再按 1–4、QWER、ASDF 键为选中项目分类。";

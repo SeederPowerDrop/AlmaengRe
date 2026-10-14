@@ -116,7 +116,7 @@
 
 "target.mixed" = "Appliqué à certaines photos";
 "panel.gridHint" = "← → Éléments · ↑ ↓ Lignes · 1–4, QWER, ASDF : étiquettes";
-"panel.viewerGridHint" = "← → Pages · ↑ ↓ Lignes · 1–4, QWER, ASDF : étiquettes";
+"panel.viewerGridHint" = "%@ Pages · ↑ ↓ Lignes · 1–4, QWER, ASDF : étiquettes";
 
 "panel.selectionFormat" = "Appliquer aux %d éléments sélectionnés";
 
@@ -134,3 +134,6 @@
 "inheritance.export" = "Appliquer les étiquettes d’origine aux fichiers exportés après retouche";
 "inheritance.defaults" = "Ces deux options sont désactivées par défaut. Les modifications sont enregistrées immédiatement et s’appliquent aux prochains fichiers copiés ou exportés par l’app.";
 "inheritance.originals" = "Déplacer un original ou le restaurer depuis la corbeille conserve ses étiquettes, quels que soient ces réglages.";
+
+"panel.viewerSelectionHint" = "%@ Sélectionner une photo";
+"panel.viewerSelectionHelp" = "Utilisez %@ pour sélectionner les photos ou vidéos une par une sur la page actuelle. À chaque extrémité, la sélection reprend à l’autre bout de la même page. Activez le mode marquage, puis utilisez 1–4, QWER ou ASDF pour marquer l’élément sélectionné.";

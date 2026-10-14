@@ -31,7 +31,7 @@ struct LocalizedControlsLayoutTests {
     let shortcuts = ShortcutStore(defaults: defaults)
     defer { store.folderComparison.cancelLoads() }
     store.presentationMode = .viewer
-    store.imagesPerPage = 6
+    store.imagesPerPage = width == 660 ? 3 : 10
     let video = ImageAsset(url: temporary.appendingPathComponent("synthetic-video.mp4"),
       byteCount: 1_024, modificationDate: nil)
     let playback = VideoGridPlaybackState()
@@ -39,11 +39,18 @@ struct LocalizedControlsLayoutTests {
     playback.toggleSelection(video.id)
 
     let gutter: CGFloat = 40
-    let height: CGFloat = 1_100
+    let height: CGFloat = 1_400
     let root = VStack(spacing: 20) {
+      HStack(spacing: 12) {
+        ViewerPageNavigationHint(store: store, shortcuts: shortcuts)
+          .frame(width: 110, alignment: .trailing)
+        Spacer(minLength: 0)
+        ViewerPageNavigationHint(store: store, shortcuts: shortcuts)
+      }.padding(.horizontal, 16)
       LibraryControlsView(store: store).padding(.horizontal, 16)
       VideoGridPlaybackControls(state: playback, visibleAssets: [video])
       BottomControlBar(store: store, shortcuts: shortcuts)
+      PhotoMarkPanel(store: store, marks: store.photoMarks, shortcuts: shortcuts)
       FolderComparisonView(store: store, shortcuts: shortcuts, comparison: store.folderComparison)
         .frame(height: 700)
       Spacer(minLength: 0)

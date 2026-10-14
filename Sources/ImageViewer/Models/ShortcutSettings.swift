@@ -237,9 +237,14 @@ final class ShortcutStore: ObservableObject {
     }
   }
 
-  /// Option arrows also turn multi-image viewer pages. Comparison-only bindings
-  /// use the same keys in their own screen; other user assignments take priority.
   func viewerPageBinding(direction: Int) -> KeyBinding? {
+    guard direction != 0 else { return nil }
+    return binding(for: direction < 0 ? .previousPage : .nextPage)
+  }
+
+  /// Option arrows select a photo within the visible viewer page. Comparison-only
+  /// bindings use the same keys in their own screen; other assignments take priority.
+  func viewerSelectionBinding(direction: Int) -> KeyBinding? {
     guard direction != 0 else { return nil }
     let candidate = KeyBinding(key: direction < 0 ? "left" : "right", modifiers: [.option])
     let occupied = ShortcutAction.allCases.contains { action in
@@ -253,7 +258,7 @@ final class ShortcutStore: ObservableObject {
     return occupied ? nil : candidate
   }
 
-  func viewerPageDirection(matching event: NSEvent) -> Int? {
+  func viewerSelectionDirection(matching event: NSEvent) -> Int? {
     guard event.type == .keyDown, Self.modifiers(from: event) == [.option] else { return nil }
     let direction: Int
     switch event.keyCode {
@@ -261,7 +266,7 @@ final class ShortcutStore: ObservableObject {
     case 124: direction = 1
     default: return nil
     }
-    return viewerPageBinding(direction: direction) == nil ? nil : direction
+    return viewerSelectionBinding(direction: direction) == nil ? nil : direction
   }
 
   /// The convenience Space tap never replaces a user's assigned shortcut.

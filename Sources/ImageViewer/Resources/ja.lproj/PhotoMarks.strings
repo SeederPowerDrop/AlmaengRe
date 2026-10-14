@@ -116,7 +116,7 @@
 
 "target.mixed" = "一部の写真に適用済み";
 "panel.gridHint" = "← → 項目 · ↑ ↓ 行 · 1–4、QWER、ASDFで分類";
-"panel.viewerGridHint" = "← → ページ · ↑ ↓ 行 · 1–4、QWER、ASDFで分類";
+"panel.viewerGridHint" = "%@ ページ · ↑ ↓ 行 · 1–4、QWER、ASDFで分類";
 
 "panel.selectionFormat" = "選択した %d 項目に分類を適用";
 
@@ -134,3 +134,6 @@
 "inheritance.export" = "編集後に書き出したファイルに元の分類を適用";
 "inheritance.defaults" = "どちらも初期設定ではオフです。変更はすぐに保存され、以降このアプリでコピー・書き出しするファイルに適用されます。";
 "inheritance.originals" = "元のファイルを移動したり、ゴミ箱から戻したりした場合は、この設定にかかわらず分類が保持されます。";
+
+"panel.viewerSelectionHint" = "%@ 写真を選択";
+"panel.viewerSelectionHelp" = "%@ で現在のページ内の写真・動画を1つずつ選択します。端に達すると、同じページの反対側の端に移ります。分類モードをオンにしてから、1–4、QWER、ASDFキーで選択した項目を分類できます。";

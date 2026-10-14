@@ -3,39 +3,42 @@ import Testing
 
 @testable import ImageViewer
 
-@Suite("여러 장 보기의 방향키와 Option 페이지 단축키")
+@Suite("여러 장 보기의 페이지 이동과 Option 사진 선택")
 @MainActor
 struct ViewerPageShortcutTests {
-  @Test("분류 중에도 기본 좌우와 Option 좌우는 선택한 카드가 아닌 화면을 기준으로 넘긴다")
-  func sevenPhotoPagesAndMarkingFocus() async throws {
+  @Test("기본 좌우는 페이지를 넘기고 Option 좌우는 현재 페이지의 사진만 고른다",
+    arguments: [false, true])
+  func pageNavigationAndSinglePhotoSelection(marking: Bool) async throws {
     let fixture = try Fixture(count: 23)
     let store = fixture.makeStore()
     defer { fixture.cleanup(store) }
     try await openPhotos(store, fixture: fixture)
     let shortcuts = ShortcutStore(defaults: fixture.defaults)
     store.setImagesPerPage(7)
+    store.isPhotoMarking = marking
     #expect(store.pageStartIndex == 0 && store.visibleAssets.count == 7)
 
     #expect(store.handleViewerKeyDown(try key(124, modifiers: .option), shortcuts: shortcuts))
-    expectPage(store, start: 7, visibleCount: 7)
+    expectSelection(store, index: 1, page: 0, visibleCount: 7)
     #expect(store.handleViewerKeyDown(try key(123, modifiers: .option), shortcuts: shortcuts))
-    expectPage(store, start: 0, visibleCount: 7)
+    expectSelection(store, index: 0, page: 0, visibleCount: 7)
 
-    store.isPhotoMarking = true
     store.select(index: 1)
     let focusedSecondPhoto = try #require(store.currentAsset)
     #expect(store.handleViewerKeyDown(try key(124), shortcuts: shortcuts))
     expectPage(store, start: 7, visibleCount: 7)
     store.select(index: 8)
     #expect(store.handleViewerKeyDown(try key(124, modifiers: .option), shortcuts: shortcuts))
-    // Page navigation starts from the visible page, not the focused second tile.
+    expectSelection(store, index: 9, page: 7, visibleCount: 7)
+    // Plain page navigation still starts from the page, not the focused tile.
+    #expect(store.handleViewerKeyDown(try key(124), shortcuts: shortcuts))
     expectPage(store, start: 14, visibleCount: 7)
     #expect(store.handleViewerKeyDown(try key(123), shortcuts: shortcuts))
     expectPage(store, start: 7, visibleCount: 7)
     #expect(store.handleViewerKeyDown(try key(123, modifiers: .option), shortcuts: shortcuts))
-    expectPage(store, start: 0, visibleCount: 7)
+    expectSelection(store, index: 13, page: 7, visibleCount: 7)
     #expect(store.handleViewerKeyDown(try key(124, modifiers: .option, repeating: true), shortcuts: shortcuts))
-    expectPage(store, start: 7, visibleCount: 7)
+    expectSelection(store, index: 7, page: 7, visibleCount: 7)
     #expect(store.photoMarks.marks(for: focusedSecondPhoto).isEmpty)
     #expect(store.photoMarks.marksByAssetID.isEmpty)
   }
@@ -48,7 +51,7 @@ struct ViewerPageShortcutTests {
     try await openPhotos(store, fixture: fixture)
     let shortcuts = ShortcutStore(defaults: fixture.defaults)
     store.setImagesPerPage(6)
-    store.viewerColumnCount = 3
+    store.frameLayout.setColumns(3, count: 6)
     store.select(index: 2)
     let markedPhoto = try #require(store.currentAsset)
     store.photoMarks.toggle(.one, for: markedPhoto)
@@ -81,43 +84,47 @@ struct ViewerPageShortcutTests {
     try await openPhotos(store, fixture: fixture)
     let shortcuts = ShortcutStore(defaults: fixture.defaults)
     store.setImagesPerPage(7)
-    let modifierCases: [NSEvent.ModifierFlags] = [[], .option]
     for marking in [false, true] {
       store.isPhotoMarking = marking
-      for modifiers in modifierCases {
-        for wraps in [false, true] {
-          store.wrapsNavigation = wraps
-          store.select(index: 0)
-          let forward = wraps
-            ? (count == 23 ? [7, 14, 21, 0, 7] : [7, 14, 0, 7, 14])
-            : [7, 14, count - 7, count - 7, count - 7]
-          for expected in forward {
-            #expect(store.handleViewerKeyDown(try key(124, modifiers: modifiers), shortcuts: shortcuts))
-            expectPage(store, start: expected, visibleCount: min(7, count - expected))
-          }
-          store.select(index: 0)
-          #expect(store.handleViewerKeyDown(try key(123, modifiers: modifiers), shortcuts: shortcuts))
-          expectPage(store, start: wraps ? count - 7 : 0, visibleCount: 7)
+      for wraps in [false, true] {
+        store.wrapsNavigation = wraps
+        store.select(index: 0)
+        let forward = wraps
+          ? (count == 23 ? [7, 14, 21, 0, 7] : [7, 14, 0, 7, 14])
+          : [7, 14, count - 7, count - 7, count - 7]
+        for expected in forward {
+          #expect(store.handleViewerKeyDown(try key(124), shortcuts: shortcuts))
+          expectPage(store, start: expected, visibleCount: min(7, count - expected))
         }
+        store.select(index: 0)
+        #expect(store.handleViewerKeyDown(try key(123), shortcuts: shortcuts))
+        expectPage(store, start: wraps ? count - 7 : 0, visibleCount: 7)
       }
     }
   }
 
-  @Test("별도로 지정한 일반 단축키가 Option 페이지 이동보다 우선한다")
-  func customBindingsTakePriority() async throws {
+  @Test("별도로 지정한 일반 단축키가 Option 사진 선택보다 우선하고 페이지 키 안내를 갱신한다",
+    arguments: [false, true])
+  func customBindingsTakePriority(marking: Bool) async throws {
     let fixture = try Fixture(count: 23)
     let store = fixture.makeStore()
     defer { fixture.cleanup(store) }
     try await openPhotos(store, fixture: fixture)
     let shortcuts = ShortcutStore(defaults: fixture.defaults)
     store.setImagesPerPage(7)
+    store.isPhotoMarking = marking
     let right = KeyBinding(key: "right", modifiers: .option)
     let left = KeyBinding(key: "left", modifiers: .option)
-    #expect(shortcuts.viewerPageBinding(direction: 1) == right)
-    #expect(shortcuts.viewerPageBinding(direction: -1) == left)
+    #expect(shortcuts.viewerPageBinding(direction: 1) == KeyBinding(key: "right"))
+    #expect(shortcuts.viewerPageBinding(direction: -1) == KeyBinding(key: "left"))
+    #expect(shortcuts.viewerSelectionBinding(direction: 1) == right)
+    #expect(shortcuts.viewerSelectionBinding(direction: -1) == left)
+    #expect(shortcuts.viewerPageBinding(direction: 0) == nil)
+    #expect(shortcuts.viewerSelectionBinding(direction: 0) == nil)
     shortcuts.setBinding(right, for: .zoomIn)
-    #expect(shortcuts.viewerPageBinding(direction: 1) == nil)
-    #expect(shortcuts.viewerPageBinding(direction: -1) == left)
+    #expect(shortcuts.viewerSelectionBinding(direction: 1) == nil)
+    #expect(shortcuts.viewerSelectionBinding(direction: -1) == left)
+    #expect(shortcuts.viewerPageBinding(direction: 1) == KeyBinding(key: "right"))
     #expect(store.handleViewerKeyDown(try key(124, modifiers: .option), shortcuts: shortcuts))
     #expect(store.zoom > 1 && store.pageStartIndex == 0)
 
@@ -125,27 +132,150 @@ struct ViewerPageShortcutTests {
     store.navigatePage(1)
     store.navigatePage(1)
     shortcuts.setBinding(right, for: .previousPage)
-    #expect(shortcuts.viewerPageBinding(direction: 1) == nil)
+    #expect(shortcuts.viewerSelectionBinding(direction: 1) == nil)
+    #expect(shortcuts.viewerPageBinding(direction: -1) == right)
     #expect(store.handleViewerKeyDown(try key(124, modifiers: .option), shortcuts: shortcuts))
     expectPage(store, start: 7, visibleCount: 7)
 
     shortcuts.reset()
-    shortcuts.setBinding(KeyBinding(key: "k", modifiers: [.command, .shift]), for: .nextPage)
+    let customNext = KeyBinding(key: "k", modifiers: [.command, .shift])
+    shortcuts.setBinding(customNext, for: .nextPage)
     #expect(store.handleViewerKeyDown(try key(40, modifiers: [.command, .shift], characters: "K"),
       shortcuts: shortcuts))
     expectPage(store, start: 14, visibleCount: 7)
-    #expect(shortcuts.viewerPageBinding(direction: 1) == right)
+    #expect(shortcuts.viewerPageBinding(direction: 1) == customNext)
+    #expect(shortcuts.viewerSelectionBinding(direction: 1) == right)
     // All four A/B commands belong to comparison mode and do not reserve this alias.
     for action in [ShortcutAction.previousFirstFolder, .nextFirstFolder,
       .previousSecondFolder, .nextSecondFolder] {
       shortcuts.setBinding(right, for: action)
     }
-    #expect(shortcuts.viewerPageBinding(direction: 1) == right)
+    #expect(shortcuts.viewerSelectionBinding(direction: 1) == right)
     #expect(store.handleViewerKeyDown(try key(124, modifiers: .option), shortcuts: shortcuts))
-    expectPage(store, start: 21, visibleCount: 2)
+    expectSelection(store, index: 15, page: 14, visibleCount: 7)
   }
 
-  @Test("페이지 별칭은 여러 장 일반 뷰어의 Option 좌우에만 적용된다")
+  @Test("위치를 바꾼 프레임의 표시 순서로 한 장씩 순환하고 다른 페이지로 나가지 않는다",
+    arguments: [false, true], [false, true])
+  func selectionFollowsReorderedFrames(marking: Bool, wraps: Bool) async throws {
+    let fixture = try Fixture(count: 12)
+    let store = fixture.makeStore()
+    defer { fixture.cleanup(store) }
+    try await openPhotos(store, fixture: fixture)
+    let shortcuts = ShortcutStore(defaults: fixture.defaults)
+    store.setImagesPerPage(4)
+    store.isPhotoMarking = marking
+    store.wrapsNavigation = wraps
+    store.navigatePage(1)
+    store.frameLayout.swap(0, with: 3, count: 4)
+    let visible = store.visibleAssets
+    try #require(store.frameLayout.configuration(for: 4).visualSlots == [3, 1, 2, 0])
+    store.select(index: 7)
+    for expected in [5, 6, 4, 7, 5] {
+      #expect(store.handleViewerKeyDown(try key(124, modifiers: .option), shortcuts: shortcuts))
+      expectSelection(store, index: expected, page: 4, visibleCount: 4)
+      #expect(store.visibleAssets == visible)
+    }
+    for expected in [7, 4, 6, 5, 7] {
+      #expect(store.handleViewerKeyDown(try key(123, modifiers: .option), shortcuts: shortcuts))
+      expectSelection(store, index: expected, page: 4, visibleCount: 4)
+    }
+    #expect(store.photoMarks.marksByAssetID.isEmpty)
+  }
+
+  @Test("Option 선택은 여러 파일 선택을 해제하고 분류 ON일 때 새로 고른 사진에만 즉시 분류한다",
+    arguments: [false, true])
+  func selectionClearsBatchAndTargetsClassification(marking: Bool) async throws {
+    let fixture = try Fixture(count: 12)
+    let store = fixture.makeStore()
+    defer { fixture.cleanup(store) }
+    try await openPhotos(store, fixture: fixture)
+    let shortcuts = ShortcutStore(defaults: fixture.defaults)
+    store.setImagesPerPage(4)
+    store.navigatePage(1)
+    store.frameLayout.swap(0, with: 3, count: 4)
+    store.isPhotoMarking = marking
+    store.beginTrackingViewerPresentation()
+    defer { store.endTrackingViewerPresentation() }
+    for (slot, asset) in store.visibleAssets.enumerated() {
+      store.recordPresentedAsset(asset, slot: slot, requestedAsset: asset)
+    }
+    store.selectForBatch(index: 6, modifiers: [])
+    store.selectForBatch(index: 7, modifiers: .command)
+    try #require(store.selectedURLs == [store.assets[6].url, store.assets[7].url])
+    #expect(store.handleViewerKeyDown(try key(124, modifiers: .option), shortcuts: shortcuts))
+    expectSelection(store, index: 5, page: 4, visibleCount: 4)
+    try #require(store.canMarkPhoto(store.assets[5]) == marking)
+    _ = store.handleViewerKeyDown(try key(18, characters: "1"), shortcuts: shortcuts)
+    _ = store.handleViewerKeyDown(try key(18, repeating: true, characters: "1"), shortcuts: shortcuts)
+    for (index, asset) in store.assets.enumerated() {
+      let expected: Set<PhotoMarkSlot> = marking && index == 5 ? [.one] : []
+      #expect(store.photoMarks.marks(for: asset) == expected)
+    }
+    expectSelection(store, index: 5, page: 4, visibleCount: 4)
+  }
+
+  @Test("일곱 장 보기의 마지막 두 장도 재배치한 표시 순서로 순환한다", arguments: [false, true])
+  func shortFinalPageCyclesOnlyItsTwoFrames(marking: Bool) async throws {
+    let fixture = try Fixture(count: 23)
+    let store = fixture.makeStore()
+    defer { fixture.cleanup(store) }
+    try await openPhotos(store, fixture: fixture)
+    let shortcuts = ShortcutStore(defaults: fixture.defaults)
+    store.setImagesPerPage(7)
+    store.isPhotoMarking = marking
+    store.wrapsNavigation = true
+    for _ in 0..<3 {
+      #expect(store.handleViewerKeyDown(try key(124), shortcuts: shortcuts))
+    }
+    expectPage(store, start: 21, visibleCount: 2)
+    store.frameLayout.swap(0, with: 1, count: 2)
+    try #require(store.frameLayout.configuration(for: 2).visualSlots == [1, 0])
+    for wraps in [false, true] {
+      store.wrapsNavigation = wraps
+      store.select(index: 22)
+      store.selectAllAssets()
+      for code in [UInt16(124), 124, 123, 123] {
+        let expected = store.currentIndex == 22 ? 21 : 22
+        #expect(store.handleViewerKeyDown(try key(code, modifiers: .option), shortcuts: shortcuts))
+        expectSelection(store, index: expected, page: 21, visibleCount: 2)
+      }
+    }
+    #expect(store.photoMarks.marksByAssetID.isEmpty)
+  }
+
+  @Test("마지막 한 장은 제자리에 머물며 확대를 유지하고 여러 파일 선택만 정리한다",
+    arguments: [false, true])
+  func oneRemainingFrameKeepsViewportAndClearsBatch(marking: Bool) async throws {
+    let fixture = try Fixture(count: 22)
+    let store = fixture.makeStore()
+    defer { fixture.cleanup(store) }
+    try await openPhotos(store, fixture: fixture)
+    let shortcuts = ShortcutStore(defaults: fixture.defaults)
+    store.setImagesPerPage(7)
+    store.isPhotoMarking = marking
+    store.wrapsNavigation = true
+    for _ in 0..<3 {
+      #expect(store.handleViewerKeyDown(try key(124), shortcuts: shortcuts))
+    }
+    expectPage(store, start: 21, visibleCount: 1)
+    for wraps in [false, true] {
+      store.wrapsNavigation = wraps
+      for code in [UInt16(123), 124] {
+        store.selectAllAssets()
+        try #require(store.selectedURLs.count == 22)
+        #expect(store.handleViewerKeyDown(try key(code, modifiers: .option), shortcuts: shortcuts))
+        expectSelection(store, index: 21, page: 21, visibleCount: 1)
+        store.zoom = 2.5
+        store.panOffset = CGSize(width: 12, height: -9)
+        #expect(store.handleViewerKeyDown(try key(code, modifiers: .option), shortcuts: shortcuts))
+        expectSelection(store, index: 21, page: 21, visibleCount: 1)
+        #expect(store.zoom == 2.5 && store.panOffset == CGSize(width: 12, height: -9))
+      }
+    }
+  }
+
+  @Test("사진 선택 별칭은 여러 장 일반 뷰어의 정확한 Option 좌우에만 적용된다")
   func aliasScopeAndExactModifiers() async throws {
     let fixture = try Fixture(count: 23)
     let store = fixture.makeStore()
@@ -162,13 +292,21 @@ struct ViewerPageShortcutTests {
       [.option, .shift], [.option, .command], [.option, .control],
     ]
     for modifiers in modifierCombinations {
-      _ = store.handleViewerKeyDown(try key(124, modifiers: modifiers), shortcuts: shortcuts)
+      let event = try key(124, modifiers: modifiers)
+      #expect(shortcuts.viewerSelectionDirection(matching: event) == nil)
+      _ = store.handleViewerKeyDown(event, shortcuts: shortcuts)
       #expect(store.pageStartIndex == 0 && store.currentIndex == 0)
     }
     for code in [UInt16(125), 126] {
-      _ = store.handleViewerKeyDown(try key(code, modifiers: .option), shortcuts: shortcuts)
+      let event = try key(code, modifiers: .option)
+      #expect(shortcuts.viewerSelectionDirection(matching: event) == nil)
+      _ = store.handleViewerKeyDown(event, shortcuts: shortcuts)
       #expect(store.pageStartIndex == 0 && store.currentIndex == 0)
     }
+    #expect(shortcuts.viewerSelectionDirection(matching: try key(124, modifiers: .option)) == 1)
+    #expect(shortcuts.viewerSelectionDirection(matching: try key(123, modifiers: .option)) == -1)
+    #expect(shortcuts.viewerSelectionDirection(matching: try key(124)) == nil)
+    #expect(shortcuts.viewerSelectionDirection(matching: try key(124, modifiers: .option, type: .keyUp)) == nil)
     for mode in [PresentationMode.overview, .map] {
       store.presentationMode = mode
       try await ready(store)
@@ -177,7 +315,7 @@ struct ViewerPageShortcutTests {
     }
     store.presentationMode = .viewer
     #expect(store.handleViewerKeyDown(try key(124, modifiers: .option), shortcuts: shortcuts))
-    expectPage(store, start: 7, visibleCount: 7)
+    expectSelection(store, index: 1, page: 0, visibleCount: 7)
   }
 
   @Test("비교 화면에서는 Option 좌우가 여전히 A만 이동하고 Option Shift는 B만 이동한다")
@@ -210,7 +348,7 @@ struct ViewerPageShortcutTests {
     }
   }
 
-  @Test("텍스트 입력과 키를 놓는 이벤트는 페이지 이동으로 전달하지 않는다")
+  @Test("텍스트 입력과 키를 놓는 이벤트는 선택 이동으로 전달하지 않고 반복 누름은 한 장씩 고른다")
   func textEditingKeepsOptionArrows() async throws {
     let fixture = try Fixture(count: 23)
     let store = fixture.makeStore()
@@ -231,7 +369,15 @@ struct ViewerPageShortcutTests {
     #expect(routedEvents == 0 && store.pageStartIndex == 0)
     #expect(coordinator.handleKey(try key(124, modifiers: .option), isTextInput: false))
     #expect(routedEvents == 1)
-    expectPage(store, start: 7, visibleCount: 7)
+    expectSelection(store, index: 1, page: 0, visibleCount: 7)
+    for expected in 2...6 {
+      #expect(coordinator.handleKey(try key(124, modifiers: .option, repeating: true), isTextInput: false))
+      expectSelection(store, index: expected, page: 0, visibleCount: 7)
+    }
+    #expect(coordinator.handleKey(try key(124, modifiers: .option, repeating: true), isTextInput: false))
+    expectSelection(store, index: 0, page: 0, visibleCount: 7)
+    #expect(!coordinator.handleKey(try key(124, modifiers: .option, type: .keyUp), isTextInput: false))
+    #expect(store.photoMarks.marksByAssetID.isEmpty)
   }
 
   @Test("분류 중 로딩·필터·시트·경고·선택 드래그는 기본 좌우와 Option 이동을 막는다")
@@ -260,6 +406,9 @@ struct ViewerPageShortcutTests {
     store.showsPhotoMarkEditor = true
     expectBlocked()
     store.showsPhotoMarkEditor = false
+    store.showsPhotoMarkTrackingReport = true
+    expectBlocked()
+    store.showsPhotoMarkTrackingReport = false
     store.showsAIUpscaling = true
     expectBlocked()
     store.showsAIUpscaling = false
@@ -270,6 +419,12 @@ struct ViewerPageShortcutTests {
       adjustments: .identity, displays: [], currentDisplayID: 0)
     expectBlocked()
     store.wallpaperRequest = nil
+    store.motionMediaAsset = try #require(store.currentAsset)
+    expectBlocked()
+    store.motionMediaAsset = nil
+    store.frameLayout.isEditing = true
+    expectBlocked()
+    store.frameLayout.isEditing = false
 
     store.open(urls: [fixture.photos])
     try #require(store.isLoading)
@@ -288,11 +443,18 @@ struct ViewerPageShortcutTests {
     try #require(store.overviewSelectionSession?.id == selection)
     expectBlocked()
     store.cancelOverviewSelection(selection)
-    for forward in forwardEvents {
-      store.select(index: 0)
-      #expect(store.handleViewerKeyDown(forward, shortcuts: shortcuts))
-      expectPage(store, start: 7, visibleCount: 7)
-    }
+    store.select(index: 0)
+    #expect(store.handleViewerKeyDown(try key(124), shortcuts: shortcuts))
+    expectPage(store, start: 7, visibleCount: 7)
+    store.select(index: 0)
+    #expect(store.handleViewerKeyDown(try key(124, modifiers: .option), shortcuts: shortcuts))
+    expectSelection(store, index: 1, page: 0, visibleCount: 7)
+  }
+
+  private func expectSelection(_ store: AppStore, index: Int, page: Int, visibleCount: Int) {
+    #expect(store.currentIndex == index && store.pageStartIndex == page)
+    #expect(store.visibleAssets.count == visibleCount)
+    #expect(store.selectedURLs == [store.assets[index].url])
   }
 
   private func expectPage(_ store: AppStore, start: Int, visibleCount: Int) {
@@ -351,11 +513,13 @@ struct ViewerPageShortcutTests {
     }
 
     @MainActor func makeStore() -> AppStore {
-      AppStore(defaults: defaults, monitorsSystemResources: false)
+      AppStore(defaults: defaults, monitorsSystemResources: false,
+        photoMarkDatabaseURL: photos.appendingPathComponent("marks.sqlite"))
     }
 
     @MainActor func cleanup(_ store: AppStore) {
       store.folderComparison.cancelLoads()
+      store.photoMarks.flush()
       store.saveSessionNow()
       defaults.removePersistentDomain(forName: suite)
       try? FileManager.default.removeItem(at: photos)

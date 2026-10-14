@@ -7,6 +7,7 @@ import SwiftUI
 struct PhotoMarkPanel: View {
   @ObservedObject var store: AppStore
   @ObservedObject var marks: PhotoMarkStore
+  @ObservedObject var shortcuts: ShortcutStore
 
   private let columns = Array(repeating: GridItem(.flexible(minimum: 78), spacing: 6), count: 4)
 
@@ -106,10 +107,9 @@ struct PhotoMarkPanel: View {
         .truncationMode(.middle)
         .help(targetDescription)
         .accessibilityIdentifier("photoMark.targetSummary")
-      Text(PhotoMarkL10n.text(
-        store.presentationMode == .overview ? "panel.gridHint"
-          : store.presentationMode == .viewer && store.imagesPerPage > 1
-            ? "panel.viewerGridHint" : "panel.hint"))
+      Text(store.presentationMode == .viewer && store.imagesPerPage > 1
+        ? ViewerNavigationHintText.markingPanelHint(shortcuts: shortcuts)
+        : PhotoMarkL10n.text(store.presentationMode == .overview ? "panel.gridHint" : "panel.hint"))
         .font(.caption2)
         .foregroundStyle(.secondary)
         .fixedSize(horizontal: false, vertical: true)

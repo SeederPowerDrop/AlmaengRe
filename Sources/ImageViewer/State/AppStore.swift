@@ -1318,11 +1318,8 @@ final class AppStore: ObservableObject {
       return true
     }
     if presentationMode == .viewer, imagesPerPage > 1,
-      let direction = shortcuts.viewerPageDirection(matching: event) {
-      guard !assets.isEmpty, !isLoading, !isFiltering, !isExporting, !isSavingMetadata,
-        overviewSelectionSession == nil else { return true }
-      navigatePage(direction)
-      return true
+      let direction = shortcuts.viewerSelectionDirection(matching: event) {
+      return navigateViewerSelection(direction)
     }
     if presentationMode != .folderComparison,
       event.modifierFlags.intersection(.deviceIndependentFlagsMask) == .command,

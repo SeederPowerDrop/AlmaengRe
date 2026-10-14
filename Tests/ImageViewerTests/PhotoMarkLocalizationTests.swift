@@ -10,6 +10,7 @@ struct PhotoMarkLocalizationTests {
     let expectedKeys = PhotoMarkL10n.keys(localeIdentifier: "ko")
     let essentialKeys: Set<String> = [
       "panel.title", "panel.hint", "panel.multipleHint", "panel.close",
+      "panel.viewerGridHint", "panel.viewerSelectionHint", "panel.viewerSelectionHelp",
       "labels.title", "labels.hint", "labels.safety", "labels.keyFormat",
       "filter.title", "filter.activeFormat", "filter.any", "filter.all", "filter.unmarked",
       "filter.unmarkedTitle", "filter.reset", "filter.empty",
@@ -38,6 +39,9 @@ struct PhotoMarkLocalizationTests {
   @Test("접근성 이름과 개수 표시의 형식 인수가 언어마다 일치한다")
   func formatArgumentsRemainCompatible() {
     let placeholders = [
+      "panel.viewerGridHint": "%@",
+      "panel.viewerSelectionHint": "%@",
+      "panel.viewerSelectionHelp": "%@",
       "labels.keyFormat": "%@",
       "labels.keyHelpFormat": "%@",
       "colors.keyFormat": "%@",

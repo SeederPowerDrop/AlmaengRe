@@ -116,7 +116,7 @@
 
 "target.mixed" = "Đã áp dụng cho một số ảnh";
 "panel.gridHint" = "← → Mục · ↑ ↓ Hàng · 1–4, QWER, ASDF: nhãn";
-"panel.viewerGridHint" = "← → Trang · ↑ ↓ Hàng · 1–4, QWER, ASDF: nhãn";
+"panel.viewerGridHint" = "%@ Trang · ↑ ↓ Hàng · 1–4, QWER, ASDF: nhãn";
 
 "panel.selectionFormat" = "Áp dụng nhãn cho %d mục đã chọn";
 
@@ -134,3 +134,6 @@
 "inheritance.export" = "Áp dụng nhãn gốc cho tệp xuất sau khi chỉnh sửa";
 "inheritance.defaults" = "Cả hai tùy chọn đều tắt theo mặc định. Thay đổi được lưu ngay và áp dụng cho các tệp được ứng dụng sao chép hoặc xuất từ thời điểm đó.";
 "inheritance.originals" = "Di chuyển tệp gốc hoặc khôi phục từ Thùng rác sẽ giữ nguyên nhãn, bất kể các tùy chọn này.";
+
+"panel.viewerSelectionHint" = "%@ Chọn ảnh";
+"panel.viewerSelectionHelp" = "Dùng %@ để chọn từng ảnh hoặc video trên trang hiện tại. Khi đến đầu hoặc cuối trang, lựa chọn chuyển vòng sang đầu bên kia của cùng trang. Bật chế độ phân loại, rồi dùng các phím 1–4, QWER, ASDF để gắn nhãn cho mục đã chọn.";

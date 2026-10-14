@@ -116,7 +116,7 @@
 
 "target.mixed" = "Aplicada a algunas fotos";
 "panel.gridHint" = "← → Elementos · ↑ ↓ Filas · 1–4, QWER, ASDF: etiquetas";
-"panel.viewerGridHint" = "← → Páginas · ↑ ↓ Filas · 1–4, QWER, ASDF: etiquetas";
+"panel.viewerGridHint" = "%@ Páginas · ↑ ↓ Filas · 1–4, QWER, ASDF: etiquetas";
 
 "panel.selectionFormat" = "Aplicar a %d elementos seleccionados";
 
@@ -134,3 +134,6 @@
 "inheritance.export" = "Aplicar las etiquetas originales a los archivos exportados tras editarlos";
 "inheritance.defaults" = "Ambas opciones están desactivadas de forma predeterminada. Los cambios se guardan al instante y se aplican a los archivos que la app copie o exporte a partir de ese momento.";
 "inheritance.originals" = "Mover un original o restaurarlo desde la Papelera conserva sus etiquetas, independientemente de estas opciones.";
+
+"panel.viewerSelectionHint" = "%@ Seleccionar foto";
+"panel.viewerSelectionHelp" = "Usa %@ para seleccionar fotos o vídeos de uno en uno en la página actual. Al llegar a un extremo, la selección continúa desde el otro extremo de la misma página. Activa el modo de etiquetado y usa 1–4, QWER o ASDF para etiquetar el elemento seleccionado.";
