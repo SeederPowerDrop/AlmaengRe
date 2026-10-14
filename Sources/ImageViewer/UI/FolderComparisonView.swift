@@ -203,6 +203,22 @@ struct FolderComparisonView: View {
         .accessibilityIdentifier("comparison.zoomIn")
         Button("화면 맞춤") { comparison.setScale(.fit) }
           .accessibilityIdentifier("comparison.fit")
+        Menu {
+          Button("화면 맞춤") { comparison.setScale(.fit) }
+          Button(L10n.text("가로 맞춤")) { comparison.setScale(.fitWidth) }
+          Button(L10n.text("세로 맞춤")) { comparison.setScale(.fitHeight) }
+          Divider()
+          Button(L10n.text("가운데 정렬")) { comparison.centerImage() }
+        } label: {
+          Image(systemName: "chevron.down").font(.system(size: 10, weight: .semibold))
+            .frame(width: 18, height: 24)
+        }
+        .menuStyle(.borderlessButton)
+        .menuIndicator(.hidden)
+        .fixedSize()
+        .help(L10n.text("맞춤 옵션"))
+        .accessibilityLabel(L10n.text("맞춤 옵션"))
+        .accessibilityIdentifier("comparison.fitOptions")
         Button("1:1") { comparison.setScale(.actualPixels) }
           .help("실제 픽셀 크기")
           .accessibilityIdentifier("comparison.actualPixels")

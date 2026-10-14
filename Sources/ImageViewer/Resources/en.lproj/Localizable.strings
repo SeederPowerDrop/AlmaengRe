@@ -52,6 +52,16 @@
 "이전 이미지/페이지" = "Previous Image/Page";
 "다음 이미지/페이지" = "Next Image/Page";
 "화면 맞춤" = "Fit to Window";
+"가로 맞춤" = "Fit Width";
+"세로 맞춤" = "Fit Height";
+"프레임 맞춤" = "Fit to Frame";
+"가운데 정렬" = "Center Image";
+"맞춤 옵션" = "Fit Options";
+"이미지 전체를 화면 안에 맞춥니다." = "Fit the entire image within the window.";
+"이미지 너비를 화면에 맞춥니다." = "Fit the image width to the window.";
+"이미지 높이를 화면에 맞춥니다." = "Fit the image height to the window.";
+"각 이미지를 주어진 프레임 안에 맞춥니다." = "Fit each image within its frame.";
+"확대 배율을 유지하고 이미지를 가운데로 옮깁니다." = "Center the image while keeping the current zoom level.";
 "실제 크기" = "Actual Size";
 "실제 픽셀 크기" = "Actual Pixel Size";
 "확대" = "Zoom In";

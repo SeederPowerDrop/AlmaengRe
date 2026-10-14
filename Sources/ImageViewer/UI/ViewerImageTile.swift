@@ -40,6 +40,33 @@ struct ViewerImageTile: View {
   }
 
   var body: some View {
+    VStack(spacing: 0) {
+      // Give the filename and controls their natural height before measuring the
+      // image viewport. An overlay would hide the top edge of a fitted portrait.
+      filenameHeader(frame: loader.presentation?.frame)
+        .fixedSize(horizontal: false, vertical: true)
+      imageContent
+    }
+    .background(ViewerTheme.canvas)
+    .overlay {
+      if showsTileBoundary {
+        Rectangle()
+          .stroke(
+            highlightsSelection ? Color.accentColor.opacity(0.8) : Color.white.opacity(0.08),
+            lineWidth: highlightsSelection ? 2 : 1)
+      }
+    }
+    .clipped()
+    .contextMenu {
+      if let photoMarkStore {
+        // Retained pixels can still belong to the previously displayed file.
+        BatchAssetContextMenu(store: photoMarkStore,
+          url: loader.presentation?.request.asset.url ?? asset.url)
+      }
+    }
+  }
+
+  private var imageContent: some View {
     GeometryReader { geometry in
       let maxPixelSize = requestedPixelSize(for: geometry.size)
       let request = ViewerFrameRequest(
@@ -67,32 +94,10 @@ struct ViewerImageTile: View {
             .controlSize(.large)
         }
 
-        VStack(spacing: 0) {
-          filenameOverlay(frame: loader.presentation?.frame)
-          Spacer(minLength: 0)
-        }
       }
       // Enlarged pixels must not expand the ZStack's own clipping boundary.
       .frame(width: geometry.size.width, height: geometry.size.height)
-      .overlay {
-        // 단일 이미지는 캔버스와 자연스럽게 이어지게 하고, 다중 보기에서만
-        // 타일 구분선과 현재 이미지의 선택 강조를 그립니다.
-        if showsTileBoundary {
-          Rectangle()
-            .stroke(
-              highlightsSelection ? Color.accentColor.opacity(0.8) : Color.white.opacity(0.08),
-              lineWidth: highlightsSelection ? 2 : 1)
-        }
-      }
       .clipped()
-      .contextMenu {
-        if let photoMarkStore {
-          // Fast navigation can retain the previous frame while its replacement loads.
-          // File actions must refer to the pixels currently shown to the user.
-          BatchAssetContextMenu(store: photoMarkStore,
-            url: loader.presentation?.request.asset.url ?? asset.url)
-        }
-      }
       .overlay(alignment: .bottomLeading) {
         if let presentation = loader.presentation, presentation.frame.frameCount > 1,
           ["gif", "png", "apng", "webp"].contains(presentation.request.asset.fileExtension),
@@ -136,7 +141,7 @@ struct ViewerImageTile: View {
   }
 
   @ViewBuilder
-  private func filenameOverlay(frame: RenderedFrame?) -> some View {
+  private func filenameHeader(frame: RenderedFrame?) -> some View {
     if filenameDisplaySize.isVisible || onExitFocus != nil || photoMarkStore?.isPhotoMarking == true {
       HStack(spacing: 10) {
         if itemCount > 1, let photoMarkStore, photoMarkStore.isPhotoMarking,
@@ -230,29 +235,9 @@ struct ViewerImageTile: View {
   ) -> some View {
     let image = renderedFrame.image
     let pixelSize = CGSize(width: image.width, height: image.height)
-    let displayPixelSize =
-      baseScaleMode == .actualPixels
-      ? renderedFrame.sourcePixelSize ?? pixelSize : pixelSize
-    let availableWidth = max(container.width - 2, 1)
-    let availableHeight = max(container.height - 2, 1)
-
-    let baseScale: CGFloat =
-      switch baseScaleMode {
-      case .fit:
-        min(availableWidth / max(pixelSize.width, 1), availableHeight / max(pixelSize.height, 1))
-      case .actualPixels:
-        // 원본의 실제 치수로 100% 크기를 유지하고 제한된 비트맵은 표시용으로만 씁니다.
-        // 아직 원본 치수가 없는 빠른 미리보기는 화면 맞춤으로 먼저 표시합니다.
-        renderedFrame.sourcePixelSize != nil
-          ? 1 / max(1, displayScale)
-          : min(
-            availableWidth / max(pixelSize.width, 1), availableHeight / max(pixelSize.height, 1))
-      }
-
-    let baseImageSize = CGSize(
-      width: displayPixelSize.width * baseScale,
-      height: displayPixelSize.height * baseScale
-    )
+    let baseImageSize = ImageScaleGeometry.baseImageSize(mode: baseScaleMode,
+      pixelSize: pixelSize, sourcePixelSize: renderedFrame.sourcePixelSize,
+      viewportSize: container, displayScale: displayScale)
     let renderedSize = CGSize(
       width: baseImageSize.width * effectiveZoom,
       height: baseImageSize.height * effectiveZoom
@@ -268,7 +253,7 @@ struct ViewerImageTile: View {
     .onChange(of: PresentedImageSize(assetID: asset.id, geometry: panGeometry,
       scaleMode: baseScaleMode,
       isPanReference: isPanReference,
-      hasDefinitiveSize: baseScaleMode == .fit || renderedFrame.sourcePixelSize != nil), initial: true) { _, value in
+      hasDefinitiveSize: baseScaleMode != .actualPixels || renderedFrame.sourcePixelSize != nil), initial: true) { _, value in
       // A retained preview belongs to its displayed file, not the pending target.
       // Include identity so equally sized consecutive photos also report readiness.
       onBaseImageSizeChange(asset, value.geometry.baseImageSize)
@@ -291,24 +276,26 @@ struct ViewerImageTile: View {
           .padding(6)
           .background(.black)
           .padding(6)
-          // 파일명과 하단 조작부가 비교 설명을 가리지 않도록 위쪽에 여백을 둡니다.
-          .padding(
-            .top,
-            onExitFocus != nil
-              ? max(28, filenameDisplaySize.fontSize * 1.25)
-                + max(4, filenameDisplaySize.verticalPadding) * 2
-              : filenameDisplaySize.isVisible
-                ? filenameDisplaySize.fontSize + filenameDisplaySize.verticalPadding * 2 : 0)
       }
     }
   }
 
   private func requestedPixelSize(for tileSize: CGSize) -> Int {
-    ImageLoadingPolicy.requestedPixels(
-      tileSize: comparisonLayout.paneSize(in: tileSize),
+    let presentation = loader.presentation
+    // Retained pixels can belong to the previous photo or edit. Only refine the
+    // target's request using its own aspect ratio; full frames provide stable
+    // source dimensions, avoiding decode-size feedback when rounding thumbnails.
+    let frame = presentation?.request.asset.id == asset.id
+      && presentation?.request.adjustments == adjustments ? presentation?.frame : nil
+    let pixelSize = frame.map {
+      $0.sourcePixelSize ?? CGSize(width: $0.image.width, height: $0.image.height)
+    }
+    return ImageScaleGeometry.requestedPixels(
+      mode: baseScaleMode,
+      pixelSize: pixelSize,
+      viewportSize: comparisonLayout.paneSize(in: tileSize),
       displayScale: displayScale,
       zoom: committedZoom,
-      actualPixels: baseScaleMode == .actualPixels,
       itemCount: itemCount,
       physicalMemory: ProcessInfo.processInfo.physicalMemory
     )

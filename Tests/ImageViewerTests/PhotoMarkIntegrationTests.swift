@@ -91,7 +91,9 @@ struct PhotoMarkIntegrationTests {
     #expect(store.photoMarks.marks(for: original) == [.one, .q, .f])
 
     #expect(store.handleViewerKeyDown(try key(18, characters: "1", modifiers: .command), shortcuts: shortcuts))
-    #expect(store.baseScaleMode == .actualPixels)
+    // Multi-view keeps frame fitting even when the legacy 1:1 shortcut is used;
+    // the same shortcut's single-image behavior is verified before entering it.
+    #expect(store.baseScaleMode == .fit)
     #expect(store.photoMarks.marks(for: original) == [.one, .q, .f])
     store.setFitToWindow()
 
@@ -109,7 +111,7 @@ struct PhotoMarkIntegrationTests {
     #expect(!store.handleViewerKeyDown(try key(18, characters: "1"), shortcuts: shortcuts))
     #expect(store.baseScaleMode == .fit)
     #expect(store.handleViewerKeyDown(try key(18, characters: "1", modifiers: .command), shortcuts: shortcuts))
-    #expect(store.baseScaleMode == .actualPixels)
+    #expect(store.baseScaleMode == .fit)
     #expect(store.photoMarks.marks(for: original) == [.one, .q, .f])
   }
 

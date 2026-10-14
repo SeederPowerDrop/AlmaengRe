@@ -87,7 +87,7 @@ final class FolderComparisonViewport: ObservableObject {
   fileprivate func update(_ change: (inout Snapshot) -> Void) {
     var next = snapshot
     change(&next)
-    // Fit and 1:1 have different base sizes. Wait for the tile's authoritative
+    // Scaling modes have different base sizes. Wait for the tile's authoritative
     // geometry instead of clipping a restored position with the previous mode.
     if next.scaleMode != snapshot.scaleMode { next.viewportSize = nil }
     next.constrainPan()
@@ -957,7 +957,7 @@ final class FolderComparisonStore: ObservableObject {
 
   func canPan(on side: FolderComparisonSide) -> Bool {
     let target = pane(side)
-    return !target.isLocked && (target.zoom > 1 || target.scaleMode == .actualPixels)
+    return !target.isLocked && (target.zoom > 1 || target.scaleMode.canOverflowAtBaseScale)
   }
 
   /// 비교 모드에서는 설정과 관계없이 트랙패드 두 손가락 이동을 항상 제공합니다.
@@ -990,8 +990,21 @@ final class FolderComparisonStore: ObservableObject {
   func setScale(_ mode: BaseScaleMode) {
     let active = pane(activeSide)
     guard !active.isLocked else { return }
+    resetLiveInput()
     active.viewport.update { $0.scaleMode = mode; $0.zoom = 1; $0.normalizedPan = .zero }
     if linksViewport { copyActiveViewport() }
+  }
+
+  func centerImage() {
+    guard !pane(activeSide).isLocked else { return }
+    let sides = linksViewport ? FolderComparisonSide.allCases : [activeSide]
+    // Preserve the size currently on screen even if a pinch is still active.
+    // Centering must not replace a pane's fit mode or the locked reference.
+    let targets = sides.filter { !pane($0).isLocked }.map { ($0, effectiveZoom(on: $0)) }
+    resetLiveInput()
+    for (side, zoom) in targets {
+      pane(side).viewport.update { $0.zoom = zoom; $0.normalizedPan = .zero }
+    }
   }
 
   /// 값은 타일이 실제로 표시한 크기이며 원본을 별도로 디코딩하지 않습니다.
@@ -1169,6 +1182,7 @@ final class FolderComparisonStore: ObservableObject {
       ComparisonPaneSession(sources: pane.sessionSources, selectedID: pane.currentAsset?.sessionID,
         index: pane.index, zoom: Double(pane.zoom), panX: Double(pane.normalizedPan.width),
         panY: Double(pane.normalizedPan.height), actualPixels: pane.scaleMode == .actualPixels,
+        scaleMode: pane.scaleMode.rawValue,
         isLocked: pane.isLocked, customName: pane.customName, photoMarkFilter: pane.photoMarkFilter)
     }
     var result = ComparisonSession(first: snapshot(first), second: snapshot(second),
@@ -1234,7 +1248,8 @@ final class FolderComparisonStore: ObservableObject {
           $0.zoom = saved.zoom.isFinite ? clampedZoom(saved.zoom) : 1
           $0.normalizedPan = CGSize(width: saved.panX.isFinite ? saved.panX : 0,
             height: saved.panY.isFinite ? saved.panY : 0)
-          $0.scaleMode = saved.actualPixels ? .actualPixels : .fit
+          $0.scaleMode = BaseScaleMode.restored(rawValue: saved.scaleMode,
+            actualPixels: saved.actualPixels)
         }
         pane.isLocked = saved.isLocked && pane.currentAsset != nil
       }

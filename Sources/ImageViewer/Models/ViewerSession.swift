@@ -29,6 +29,8 @@ struct ComparisonPaneSession: Codable, Equatable, Sendable {
   var panX: Double = 0
   var panY: Double = 0
   var actualPixels: Bool = false
+  /// Nil in sessions created before width/height fitting was introduced.
+  var scaleMode: String? = nil
   var isLocked: Bool = false
   /// Optional for sessions written before comparison names were available.
   var customName: String? = nil
@@ -56,6 +58,8 @@ struct ViewerSession: Codable, Equatable, Sendable {
   var panX: Double = 0
   var panY: Double = 0
   var actualPixels: Bool = false
+  /// Preserve the legacy flag while allowing new fitting modes to round-trip.
+  var scaleMode: String? = nil
   var imagesPerPage: Int = 1
   var query = LibraryQuery()
   var comparison: ComparisonSession?

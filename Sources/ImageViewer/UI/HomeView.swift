@@ -80,6 +80,13 @@ struct HomeView: View {
             .font(.system(size: 13))
             .foregroundStyle(.secondary)
             .fixedSize(horizontal: false, vertical: true)
+          Button { openWindow(id: AboutView.windowID) } label: {
+            Label("앱 소개", systemImage: "info.circle")
+              .frame(minWidth: 90)
+          }
+          .buttonStyle(ViewerActionButtonStyle())
+          .accessibilityIdentifier("home.about")
+          .padding(.top, 4)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
 
@@ -100,12 +107,6 @@ struct HomeView: View {
             .accessibilityIdentifier("home.resume")
             .disabled(!store.canShowHome)
           }
-          Button { openWindow(id: AboutView.windowID) } label: {
-            Label("앱 소개", systemImage: "info.circle")
-              .frame(minWidth: 130)
-          }
-          .buttonStyle(ViewerActionButtonStyle())
-          .accessibilityIdentifier("home.about")
         }
       }
       Label(L10n.text("이미지·영상·폴더를 여기에 놓으세요."), systemImage: "square.and.arrow.down")

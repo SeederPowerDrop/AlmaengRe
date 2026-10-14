@@ -22,6 +22,8 @@ enum PresentationMode: String, CaseIterable, Identifiable, Sendable {
 
 enum BaseScaleMode: String, CaseIterable, Identifiable, Sendable {
   case fit
+  case fitWidth
+  case fitHeight
   case actualPixels
 
   var id: Self { self }
@@ -29,8 +31,68 @@ enum BaseScaleMode: String, CaseIterable, Identifiable, Sendable {
   var title: String {
     switch self {
     case .fit: L10n.text("화면 맞춤")
+    case .fitWidth: L10n.text("가로 맞춤")
+    case .fitHeight: L10n.text("세로 맞춤")
     case .actualPixels: L10n.text("실제 크기")
     }
+  }
+
+  /// Width/height fitting can overflow the other axis even at 100% zoom.
+  var canOverflowAtBaseScale: Bool { self != .fit }
+
+  static func restored(rawValue: String?, actualPixels: Bool) -> Self {
+    rawValue.flatMap(Self.init(rawValue:)) ?? (actualPixels ? .actualPixels : .fit)
+  }
+}
+
+/// Shared by the ordinary viewer and every comparison pane. Fitting preserves
+/// the displayed aspect ratio, including orientation and edits from the decoder.
+enum ImageScaleGeometry {
+  static func baseImageSize(
+    mode: BaseScaleMode, pixelSize: CGSize, sourcePixelSize: CGSize? = nil,
+    viewportSize: CGSize, displayScale: CGFloat = 1
+  ) -> CGSize {
+    guard isValid(pixelSize), isValid(viewportSize) else { return .zero }
+    let available = CGSize(width: max(1, viewportSize.width - 2),
+      height: max(1, viewportSize.height - 2))
+    if mode == .actualPixels, let sourcePixelSize, isValid(sourcePixelSize) {
+      let scale = displayScale.isFinite ? max(1, displayScale) : 1
+      return CGSize(width: sourcePixelSize.width / scale, height: sourcePixelSize.height / scale)
+    }
+    let ratio: CGFloat
+    switch mode {
+    case .fit, .actualPixels:
+      // A fast preview has no authoritative source dimensions for 1:1 yet.
+      ratio = min(available.width / pixelSize.width, available.height / pixelSize.height)
+    case .fitWidth:
+      ratio = available.width / pixelSize.width
+    case .fitHeight:
+      ratio = available.height / pixelSize.height
+    }
+    let size = CGSize(width: pixelSize.width * ratio, height: pixelSize.height * ratio)
+    return isValid(size) ? size : .zero
+  }
+
+  /// The long, clipped axis still needs enough pixels when fitting only one
+  /// dimension. The ordinary loading policy keeps the request within its budget.
+  static func requestedPixels(
+    mode: BaseScaleMode, pixelSize: CGSize?, viewportSize: CGSize,
+    displayScale: CGFloat, zoom: CGFloat, itemCount: Int, physicalMemory: UInt64
+  ) -> Int {
+    var targetSize = viewportSize
+    if mode == .fitWidth || mode == .fitHeight, let pixelSize, isValid(pixelSize) {
+      let displayed = baseImageSize(mode: mode, pixelSize: pixelSize,
+        viewportSize: viewportSize, displayScale: displayScale)
+      targetSize = CGSize(width: max(viewportSize.width, displayed.width),
+        height: max(viewportSize.height, displayed.height))
+    }
+    return ImageLoadingPolicy.requestedPixels(tileSize: targetSize,
+      displayScale: displayScale, zoom: zoom, actualPixels: mode == .actualPixels,
+      itemCount: itemCount, physicalMemory: physicalMemory)
+  }
+
+  private static func isValid(_ size: CGSize) -> Bool {
+    size.width.isFinite && size.height.isFinite && size.width > 0 && size.height > 0
   }
 }
 

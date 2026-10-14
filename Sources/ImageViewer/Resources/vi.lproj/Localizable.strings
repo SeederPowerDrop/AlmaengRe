@@ -52,6 +52,16 @@
 "이전 이미지/페이지" = "Ảnh/trang trước";
 "다음 이미지/페이지" = "Ảnh/trang tiếp theo";
 "화면 맞춤" = "Vừa cửa sổ";
+"가로 맞춤" = "Vừa chiều rộng";
+"세로 맞춤" = "Vừa chiều cao";
+"프레임 맞춤" = "Vừa khung";
+"가운데 정렬" = "Căn giữa ảnh";
+"맞춤 옵션" = "Tùy chọn vừa khung";
+"이미지 전체를 화면 안에 맞춥니다." = "Hiển thị toàn bộ ảnh vừa trong cửa sổ.";
+"이미지 너비를 화면에 맞춥니다." = "Điều chỉnh chiều rộng ảnh vừa với cửa sổ.";
+"이미지 높이를 화면에 맞춥니다." = "Điều chỉnh chiều cao ảnh vừa với cửa sổ.";
+"각 이미지를 주어진 프레임 안에 맞춥니다." = "Hiển thị mỗi ảnh vừa trong khung riêng.";
+"확대 배율을 유지하고 이미지를 가운데로 옮깁니다." = "Đưa ảnh vào giữa và giữ nguyên mức thu phóng hiện tại.";
 "실제 크기" = "Kích thước thực";
 "실제 픽셀 크기" = "Kích thước pixel thực";
 "확대" = "Phóng to";

@@ -46,13 +46,7 @@ struct BottomControlBar: View {
         }
         .modifier(ViewerControlGroup())
         separator
-        Button { store.setFitToWindow() } label: {
-          if compact { Image(systemName: "arrow.down.right.and.arrow.up.left") }
-          else { Text("화면 맞춤") }
-        }
-        .help("화면 맞춤")
-        Button { store.setActualPixels() } label: { Text(verbatim: "1:1") }
-          .help("실제 픽셀 크기")
+        fitControls(compact: compact)
         if !compact { separator; detailControls }
       }
       .fixedSize(horizontal: false, vertical: true)
@@ -70,6 +64,46 @@ struct BottomControlBar: View {
       }
     }
     .buttonStyle(ViewerToolButtonStyle())
+  }
+
+  private func fitControls(compact: Bool) -> some View {
+    HStack(spacing: 2) {
+      Button { store.setFitToWindow() } label: {
+        if compact { Image(systemName: "arrow.down.right.and.arrow.up.left") }
+        else { Text(verbatim: L10n.text(store.isMultiImageViewer ? "프레임 맞춤" : "화면 맞춤")) }
+      }
+      .help(L10n.text(store.isMultiImageViewer
+        ? "각 이미지를 주어진 프레임 안에 맞춥니다." : "이미지 전체를 화면 안에 맞춥니다."))
+      .accessibilityLabel(L10n.text(store.isMultiImageViewer ? "프레임 맞춤" : "화면 맞춤"))
+      .accessibilityIdentifier("viewer.fit")
+      Menu {
+        Button(L10n.text(store.isMultiImageViewer ? "프레임 맞춤" : "화면 맞춤")) {
+          store.setFitToWindow()
+        }
+        if !store.isMultiImageViewer {
+          Button(L10n.text("가로 맞춤")) { store.setScaleMode(.fitWidth) }
+            .help(L10n.text("이미지 너비를 화면에 맞춥니다."))
+          Button(L10n.text("세로 맞춤")) { store.setScaleMode(.fitHeight) }
+            .help(L10n.text("이미지 높이를 화면에 맞춥니다."))
+          Divider()
+        }
+        Button(L10n.text("가운데 정렬")) { store.centerImage() }
+          .help(L10n.text("확대 배율을 유지하고 이미지를 가운데로 옮깁니다."))
+      } label: {
+        Image(systemName: "chevron.down").font(.system(size: 10, weight: .semibold))
+          .frame(width: 18, height: 24)
+      }
+      .menuStyle(.borderlessButton)
+      .menuIndicator(.hidden)
+      .fixedSize()
+      .help(L10n.text("맞춤 옵션"))
+      .accessibilityLabel(L10n.text("맞춤 옵션"))
+      .accessibilityIdentifier("viewer.fitOptions")
+      if !store.isMultiImageViewer {
+        Button { store.setActualPixels() } label: { Text(verbatim: "1:1") }
+          .help("실제 픽셀 크기")
+      }
+    }
   }
 
   private func pageNavigationHelp(direction: Int) -> String {

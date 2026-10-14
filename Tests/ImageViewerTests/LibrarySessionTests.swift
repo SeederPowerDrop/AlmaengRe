@@ -82,6 +82,46 @@ struct LibrarySessionTests {
     #expect(restored.baseScaleMode == .actualPixels)
   }
 
+  @Test("가로·세로 맞춤과 위치는 단일 보기 재개에서 유지된다", arguments: [BaseScaleMode.fitWidth, .fitHeight])
+  func restoresFittedAxis(mode: BaseScaleMode) async throws {
+    let fixture = try makeFixture()
+    defer { try? FileManager.default.removeItem(at: fixture) }
+    let folder = try album(fixture, name: "fit", files: ["01.png"])
+    let defaults = makeDefaults()
+    let original = makeStore(defaults)
+    original.open(urls: [folder])
+    try await wait { !original.isLoading }
+    original.setScaleMode(mode)
+    original.zoom = 0.8
+    original.panOffset = CGSize(width: 17, height: -80)
+    original.saveSessionNow()
+    let saved = try #require(ViewerSessionPersistence(defaults: defaults).loadSession())
+    #expect(saved.scaleMode == mode.rawValue && !saved.actualPixels)
+    let restored = makeStore(defaults)
+    await restored.restoreLastSession()
+    #expect(restored.currentAsset?.filename == "01.png")
+    #expect(restored.baseScaleMode == mode && restored.zoom == 0.8)
+    #expect(restored.panOffset == CGSize(width: 17, height: -80))
+  }
+
+  @Test("다중 보기의 이전 실제 크기와 새 축 맞춤 세션은 프레임 맞춤으로 재개한다")
+  func restoresMultiViewerWithSupportedFit() async throws {
+    let fixture = try makeFixture()
+    defer { try? FileManager.default.removeItem(at: fixture) }
+    let folder = try album(fixture, name: "fit", files: ["01.png", "02.png"])
+    for mode in [String?.none, BaseScaleMode.fitWidth.rawValue, BaseScaleMode.fitHeight.rawValue] {
+      let defaults = makeDefaults()
+      ViewerSessionPersistence(defaults: defaults).save(ViewerSession(
+        sources: [SessionLocation(url: folder)], zoom: 2.5, panX: 100, panY: -80,
+        actualPixels: true, scaleMode: mode, imagesPerPage: 4))
+      let restored = makeStore(defaults)
+      await restored.restoreLastSession()
+      #expect(restored.assets.count == 2 && restored.isMultiImageViewer)
+      #expect(restored.baseScaleMode == .fit && restored.zoom == 1)
+      #expect(restored.panOffset == .zero)
+    }
+  }
+
   @Test("앱 재실행은 비교 모드·두 폴더·누락된 짝·활성 칸과 확대를 함께 복원한다")
   func restoresWholeComparisonSession() async throws {
     let fixture = try makeFixture()

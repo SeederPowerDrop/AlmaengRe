@@ -252,17 +252,24 @@ struct AppCommands: Commands {
         Divider()
         Button(
           L10n.format(
-            "%@  %@", ShortcutAction.fitToWindow.title,
+            "%@  %@", store.isMultiImageViewer ? L10n.text("프레임 맞춤") : ShortcutAction.fitToWindow.title,
             shortcuts.binding(for: .fitToWindow).displayText)
         ) {
           store.setFitToWindow()
         }
-        Button(
-          L10n.format(
-            "%@  %@", ShortcutAction.actualPixels.title,
-            shortcuts.binding(for: .actualPixels).displayText)
-        ) {
-          store.setActualPixels()
+        if !store.isMultiImageViewer {
+          Button(L10n.text("가로 맞춤")) { store.setScaleMode(.fitWidth) }
+          Button(L10n.text("세로 맞춤")) { store.setScaleMode(.fitHeight) }
+        }
+        Button(L10n.text("가운데 정렬")) { store.centerImage() }
+        if !store.isMultiImageViewer {
+          Button(
+            L10n.format(
+              "%@  %@", ShortcutAction.actualPixels.title,
+              shortcuts.binding(for: .actualPixels).displayText)
+          ) {
+            store.setActualPixels()
+          }
         }
       }.disabled(store.isVideoFullScreenPresented || store.showsHome || comparison.isEditingNames)
     }

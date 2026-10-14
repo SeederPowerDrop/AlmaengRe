@@ -52,6 +52,16 @@
 "이전 이미지/페이지" = "Image/page précédente";
 "다음 이미지/페이지" = "Image/page suivante";
 "화면 맞춤" = "Adapter à la fenêtre";
+"가로 맞춤" = "Ajuster à la largeur";
+"세로 맞춤" = "Ajuster à la hauteur";
+"프레임 맞춤" = "Ajuster au cadre";
+"가운데 정렬" = "Centrer l’image";
+"맞춤 옵션" = "Options d’ajustement";
+"이미지 전체를 화면 안에 맞춥니다." = "Ajuster l’image entière à la fenêtre.";
+"이미지 너비를 화면에 맞춥니다." = "Ajuster la largeur de l’image à celle de la fenêtre.";
+"이미지 높이를 화면에 맞춥니다." = "Ajuster la hauteur de l’image à celle de la fenêtre.";
+"각 이미지를 주어진 프레임 안에 맞춥니다." = "Ajuster chaque image à son cadre.";
+"확대 배율을 유지하고 이미지를 가운데로 옮깁니다." = "Centrer l’image en conservant le niveau de zoom actuel.";
 "실제 크기" = "Taille réelle";
 "실제 픽셀 크기" = "Taille réelle des pixels";
 "확대" = "Zoom avant";

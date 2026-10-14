@@ -136,6 +136,7 @@ final class AppStore: ObservableObject {
         slideshowPresentedAsset = nil
         isFocusMode = false
       }
+      normalizeMultiImageScale()
       prefetchAroundCurrentPosition()
       if presentationMode == .map { applyLibraryQuery() }
     }
@@ -143,7 +144,9 @@ final class AppStore: ObservableObject {
   @Published var baseScaleMode: BaseScaleMode = .fit {
     didSet { if oldValue != baseScaleMode { viewerPan.clearGeometry() } }
   }
-  @Published var imagesPerPage = 1
+  @Published var imagesPerPage = 1 {
+    didSet { normalizeMultiImageScale() }
+  }
   @Published var thumbnailSize: CGFloat {
     didSet {
       let normalized = OverviewThumbnailSizing.normalized(thumbnailSize)
@@ -858,8 +861,10 @@ final class AppStore: ObservableObject {
   }
 
   var canPan: Bool {
-    currentAsset?.isVideo != true && (zoom > 1 || baseScaleMode == .actualPixels)
+    currentAsset?.isVideo != true && (zoom > 1 || baseScaleMode.canOverflowAtBaseScale)
   }
+
+  var isMultiImageViewer: Bool { presentationMode == .viewer && imagesPerPage > 1 }
 
   var positionDescription: String {
     guard !assets.isEmpty else { return "0 / 0" }
@@ -1055,24 +1060,38 @@ final class AppStore: ObservableObject {
   func zoomOut() {
     if presentationMode == .folderComparison { folderComparison.updateZoom(1 / 1.25); return }
     zoom = max(0.1, zoom / 1.25)
-    if zoom <= 1 { panOffset = .zero }
+    if zoom <= 1, !baseScaleMode.canOverflowAtBaseScale { panOffset = .zero }
   }
 
   func setFitToWindow() {
-    if presentationMode == .folderComparison { folderComparison.setScale(.fit); return }
-    baseScaleMode = .fit
-    resetViewport()
+    setScaleMode(.fit)
   }
 
   func setActualPixels() {
-    if presentationMode == .folderComparison { folderComparison.setScale(.actualPixels); return }
-    baseScaleMode = .actualPixels
+    setScaleMode(.actualPixels)
+  }
+
+  func setScaleMode(_ mode: BaseScaleMode) {
+    if presentationMode == .folderComparison { folderComparison.setScale(mode); return }
+    baseScaleMode = isMultiImageViewer ? .fit : mode
+    resetViewport()
+  }
+
+  /// Bring the image back to the center without discarding its chosen scale.
+  func centerImage() {
+    if presentationMode == .folderComparison { folderComparison.centerImage(); return }
+    panOffset = .zero
+  }
+
+  private func normalizeMultiImageScale() {
+    guard isMultiImageViewer, baseScaleMode != .fit else { return }
+    baseScaleMode = .fit
     resetViewport()
   }
 
   func updateZoom(with magnification: CGFloat) {
     zoom = min(16, max(0.1, zoom * magnification))
-    if zoom <= 1 { panOffset = .zero }
+    if zoom <= 1, !baseScaleMode.canOverflowAtBaseScale { panOffset = .zero }
   }
 
   func updatePan(by translation: CGSize) {
@@ -2205,7 +2224,8 @@ final class AppStore: ObservableObject {
       presentationMode: presentationMode.rawValue,
       returnMode: comparisonReturnMode.rawValue,
       zoom: Double(zoom), panX: Double(panOffset.width), panY: Double(panOffset.height),
-      actualPixels: baseScaleMode == .actualPixels, imagesPerPage: imagesPerPage,
+      actualPixels: baseScaleMode == .actualPixels, scaleMode: baseScaleMode.rawValue,
+      imagesPerPage: imagesPerPage,
       query: libraryQuery, comparison: comparison))
   }
 
@@ -2265,9 +2285,12 @@ final class AppStore: ObservableObject {
         queryFocusID = session.selectedID ?? currentAsset?.sessionID
         selectedURLs = Set(assets.filter { session.selectedIDs.contains($0.sessionID) }.map(\.url))
         imagesPerPage = min(10, max(1, session.imagesPerPage))
-        baseScaleMode = session.actualPixels ? .actualPixels : .fit
-        zoom = session.zoom.isFinite ? min(16, max(0.1, session.zoom)) : 1
-        panOffset = CGSize(width: session.panX.isFinite ? session.panX : 0,
+        let savedScale = BaseScaleMode.restored(rawValue: session.scaleMode,
+          actualPixels: session.actualPixels)
+        let resetsScale = imagesPerPage > 1 && savedScale != .fit
+        baseScaleMode = resetsScale ? .fit : savedScale
+        zoom = resetsScale ? 1 : session.zoom.isFinite ? min(16, max(0.1, session.zoom)) : 1
+        panOffset = resetsScale ? .zero : CGSize(width: session.panX.isFinite ? session.panX : 0,
           height: session.panY.isFinite ? session.panY : 0)
         appliedQuery = options
         appliedShowsVideos = videos
