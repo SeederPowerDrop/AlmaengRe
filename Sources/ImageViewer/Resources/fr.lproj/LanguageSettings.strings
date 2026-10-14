@@ -1,0 +1,5 @@
+"title" = "Langue de l’app";
+"current" = "Langue actuelle";
+"open" = "Ouvrir les langues de macOS";
+"instructions" = "Dans Réglages Système → Général → Langue et région → Applications, ajoutez ou sélectionnez AlmaengRe, puis choisissez une langue.";
+"restart" = "Quittez puis rouvrez l’app pour appliquer la langue à tous les menus et fenêtres. Les langues non prises en charge utilisent le coréen.";

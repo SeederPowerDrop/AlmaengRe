@@ -46,14 +46,14 @@ struct FolderComparisonView: View {
   }
 
   private var toolbar: some View {
-    VStack(spacing: 10) {
+    VStack(alignment: .leading, spacing: 10) {
       ViewThatFits(in: .horizontal) {
         HStack(spacing: 18) {
           openAndLayoutControls
           Spacer(minLength: 12)
           viewportControls
         }
-        VStack(spacing: 12) {
+        VStack(alignment: .leading, spacing: 12) {
           HStack(spacing: 12) {
             openAndLayoutControls
             Spacer(minLength: 0)
@@ -86,9 +86,41 @@ struct FolderComparisonView: View {
 
   private var navigationControls: some View {
     VStack(alignment: .leading, spacing: 7) {
-      HStack(spacing: 12) {
-        Label("이미지 넘기기", systemImage: "arrow.left.arrow.right")
-          .font(.system(size: 12, weight: .medium))
+      ViewThatFits(in: .horizontal) {
+        HStack(spacing: 12) {
+          navigationLabel
+          navigationSelector
+        }
+        .fixedSize(horizontal: true, vertical: false)
+        VStack(alignment: .leading, spacing: 7) {
+          navigationLabel
+          navigationSelector
+        }
+      }
+      if hasLockedPane {
+        Label("잠금에 따라 자동 선택", systemImage: "lock.fill")
+          .font(.caption).foregroundStyle(.secondary)
+          .fixedSize(horizontal: false, vertical: true)
+      }
+      if comparison.navigationTarget == .both {
+        ViewThatFits(in: .horizontal) {
+          HStack(spacing: 10) { loopControl; loopDescription }
+            .fixedSize(horizontal: true, vertical: false)
+          VStack(alignment: .leading, spacing: 6) { loopControl; loopDescription }
+        }
+      }
+    }
+    .frame(minHeight: 56, alignment: .topLeading)
+  }
+
+  private var navigationLabel: some View {
+    Label("이미지 넘기기", systemImage: "arrow.left.arrow.right")
+      .font(.system(size: 12, weight: .medium))
+      .fixedSize(horizontal: true, vertical: false)
+  }
+
+  private var navigationSelector: some View {
+    HStack(spacing: 12) {
         ComparisonNavigationSelector(comparison: comparison)
         .frame(width: 330)
         .environment(\.layoutDirection, .leftToRight)
@@ -101,14 +133,11 @@ struct FolderComparisonView: View {
         }
         .help(ComparisonNamesL10n.text("editor.open"))
         .accessibilityLabel(ComparisonNamesL10n.text("editor.open"))
-        if hasLockedPane {
-          Label("잠금에 따라 자동 선택", systemImage: "lock.fill")
-            .font(.caption).foregroundStyle(.secondary)
-        }
-      }
-      if comparison.navigationTarget == .both {
-        HStack(spacing: 10) {
-          Toggle("적은 쪽 반복", isOn: Binding(
+    }
+  }
+
+  private var loopControl: some View {
+    Toggle("적은 쪽 반복", isOn: Binding(
             get: { comparison.endBehavior == .loop },
             set: { comparison.endBehavior = $0 ? .loop : .hold }))
             .toggleStyle(.switch)
@@ -117,27 +146,31 @@ struct FolderComparisonView: View {
             .help(L10n.text(comparison.alignment == .filename
               ? "파일명 비교에서는 같은 이름의 쌍으로 이동합니다. 반복은 목록 순서에서 사용할 수 있습니다."
               : "켜면 적은 쪽은 처음부터 반복하고, 끄면 마지막 이미지에 머뭅니다. 많은 쪽의 끝까지 함께 넘깁니다."))
-          Text(comparison.alignment == .filename
+  }
+
+  private var loopDescription: some View {
+    Text(comparison.alignment == .filename
             ? ComparisonAlignment.filename.title : comparison.endBehavior.title)
-            .font(.caption).foregroundStyle(.secondary)
-        }
-      }
-    }
-    .fixedSize(horizontal: true, vertical: false)
-    .frame(minHeight: 56, alignment: .topLeading)
+      .font(.caption).foregroundStyle(.secondary)
+      .fixedSize(horizontal: false, vertical: true)
   }
 
   private var hasLockedPane: Bool { comparison.first.isLocked || comparison.second.isLocked }
 
   private var matchingAndThumbnailControls: some View {
-    HStack(spacing: 16) {
-      matchingControls
-      Toggle("썸네일 표시", isOn: $comparison.showsThumbnails)
-        .toggleStyle(.checkbox)
-        .fixedSize()
+    ViewThatFits(in: .horizontal) {
+      HStack(spacing: 16) { matchingControls; thumbnailControl }
+        .fixedSize(horizontal: true, vertical: false)
+      VStack(alignment: .leading, spacing: 8) { matchingControls; thumbnailControl }
     }
     .controlSize(.regular)
     .font(.system(size: 13, weight: .medium))
+  }
+
+  private var thumbnailControl: some View {
+    Toggle("썸네일 표시", isOn: $comparison.showsThumbnails)
+      .toggleStyle(.checkbox)
+      .fixedSize()
   }
 
   private var matchingControls: some View {
@@ -158,32 +191,78 @@ struct FolderComparisonView: View {
   }
 
   private var openAndLayoutControls: some View {
-    HStack(spacing: 12) {
+    ViewThatFits(in: .horizontal) {
+      HStack(spacing: 12) {
+        openControls
+        Divider().frame(height: 20)
+        arrangementControl
+      }
+      .fixedSize(horizontal: true, vertical: false)
+      VStack(alignment: .leading, spacing: 10) {
+        openControls
+        arrangementControl
+      }
+    }
+  }
+
+  private var openControls: some View {
+    ViewThatFits(in: .horizontal) {
+      HStack(spacing: 12) { choosePairButton; compareMarksButton }
+        .fixedSize(horizontal: true, vertical: false)
+      VStack(alignment: .leading, spacing: 8) { choosePairButton; compareMarksButton }
+    }
+  }
+
+  private var choosePairButton: some View {
       Button { comparison.choosePair() } label: {
         Label("비교할 폴더 선택…", systemImage: "folder.badge.plus")
       }
+      .fixedSize(horizontal: true, vertical: false)
       .disabled(comparison.first.isLocked || comparison.second.isLocked)
+  }
+
+  private var compareMarksButton: some View {
       Button { store.compareCurrentCollectionByMarks() } label: {
         Label(PhotoMarkL10n.text("comparison.open"), systemImage: "tag")
       }
+      .fixedSize(horizontal: true, vertical: false)
       .disabled(!store.canCompareCurrentCollectionByMarks)
       .help(PhotoMarkL10n.text("comparison.openHelp"))
-      Divider().frame(height: 20)
+  }
+
+  private var arrangementControl: some View {
       Picker("비교 화면 배치", selection: $comparison.arrangement) {
         ForEach(FolderComparisonArrangement.allCases) { Text($0.title).tag($0) }
       }
       .pickerStyle(.segmented)
       .fixedSize()
-    }
   }
 
   private var viewportControls: some View {
-    HStack(spacing: 12) {
+    ViewThatFits(in: .horizontal) {
+      HStack(spacing: 12) {
+        linkedViewportControl
+        Divider().frame(height: 28)
+        zoomControls
+      }
+      .fixedSize(horizontal: true, vertical: false)
+      VStack(alignment: .leading, spacing: 8) {
+        linkedViewportControl
+        zoomControls
+      }
+    }
+    .controlSize(.regular)
+    .font(.system(size: 13, weight: .medium))
+  }
+
+  private var linkedViewportControl: some View {
       Toggle("확대·이동 함께", isOn: $comparison.linksViewport)
         .toggleStyle(.switch)
         .help("같은 위치를 함께 확대·이동합니다. 잠긴 칸은 유지합니다.")
         .fixedSize()
-      Divider().frame(height: 28)
+  }
+
+  private var zoomControls: some View {
       HStack(spacing: 8) {
         Button { comparison.updateZoom(1 / 1.25) } label: {
           Image(systemName: "minus.magnifyingglass")
@@ -202,6 +281,7 @@ struct FolderComparisonView: View {
         .accessibilityLabel("확대")
         .accessibilityIdentifier("comparison.zoomIn")
         Button("화면 맞춤") { comparison.setScale(.fit) }
+          .fixedSize(horizontal: true, vertical: false)
           .accessibilityIdentifier("comparison.fit")
         Menu {
           Button("화면 맞춤") { comparison.setScale(.fit) }
@@ -226,9 +306,6 @@ struct FolderComparisonView: View {
       .buttonStyle(ViewerActionButtonStyle())
       .disabled(comparison.pane(comparison.activeSide).isLocked
         || comparison.pane(comparison.activeSide).currentAsset == nil)
-    }
-    .controlSize(.regular)
-    .font(.system(size: 13, weight: .medium))
   }
 
   private var statusBar: some View {
@@ -360,6 +437,29 @@ private struct FolderComparisonPaneView: View {
   }
 
   private var folderControls: some View {
+    ViewThatFits(in: .horizontal) {
+      HStack(spacing: 9) {
+        sourceIdentity.frame(minWidth: 140)
+        Spacer(minLength: 4)
+        ComparisonZoomReadout(viewport: pane.viewport).fixedSize()
+        sourceActions
+      }
+      VStack(alignment: .leading, spacing: 8) {
+        HStack(spacing: 9) {
+          sourceIdentity
+          Spacer(minLength: 4)
+          ComparisonZoomReadout(viewport: pane.viewport).fixedSize()
+        }
+        HStack {
+          Spacer(minLength: 0)
+          sourceActions
+        }
+      }
+    }
+    .frame(minWidth: 220)
+  }
+
+  private var sourceIdentity: some View {
     HStack(spacing: 9) {
         Text(side == .first ? "A" : "B")
           .font(.system(size: 11, weight: .semibold, design: .rounded))
@@ -380,14 +480,19 @@ private struct FolderComparisonPaneView: View {
           .font(.system(size: 12, weight: .semibold))
           .lineLimit(1).truncationMode(.middle)
           .help([comparison.displayName(for: side), sourceLabelURL?.path].compactMap { $0 }.joined(separator: "\n"))
-        Spacer(minLength: 4)
-        ComparisonZoomReadout(viewport: pane.viewport)
-        lockButton
-        Button { comparison.chooseItems(for: side) } label: { Label("열기…", systemImage: "folder") }
-          .disabled(pane.isLocked)
-          .help(L10n.format("%@ 열기", sideTitle))
-      }
-      .frame(minWidth: 220)
+    }
+  }
+
+  private var sourceActions: some View {
+    HStack(spacing: 9) {
+      lockButton
+      Button { comparison.chooseItems(for: side) } label: { Label("열기…", systemImage: "folder") }
+        .disabled(pane.isLocked)
+        .help(L10n.format("%@ 열기", sideTitle))
+    }
+    // Action names must stay complete; only user-controlled folder names may
+    // truncate. Narrow A/B panes move these buttons together to a second row.
+    .fixedSize(horizontal: true, vertical: false)
   }
 
   private var navigationControls: some View {

@@ -4,14 +4,32 @@ struct LibraryControlsView: View {
   @ObservedObject var store: AppStore
 
   var body: some View {
+    ViewThatFits(in: .horizontal) {
+      HStack(spacing: 12) {
+        queryControls
+          .fixedSize(horizontal: true, vertical: false)
+        collectionControls
+      }
+      VStack(alignment: .leading, spacing: 10) {
+        queryControls
+        collectionControls
+      }
+    }
+  }
+
+  private var queryControls: some View {
+    LibraryQueryControls(query: $store.libraryQuery, isWorking: store.isFiltering,
+      availableExtensions: store.allAssets.map(\.fileExtension))
+      .disabled(store.isBatchBusy || store.batchSheet != nil || store.isSavingMetadata || store.isExporting)
+  }
+
+  private var collectionControls: some View {
     HStack(spacing: 12) {
-      LibraryQueryControls(query: $store.libraryQuery, isWorking: store.isFiltering,
-        availableExtensions: store.allAssets.map(\.fileExtension))
-        .disabled(store.isBatchBusy || store.batchSheet != nil || store.isSavingMetadata || store.isExporting)
       if store.presentationMode == .map && store.libraryQuery.geographicSelection != nil {
         Button { store.libraryQuery.geographicSelection = nil } label: {
           Label("지도 영역 해제", systemImage: "map.fill")
         }
+        .fixedSize(horizontal: true, vertical: false)
         .buttonStyle(ViewerActionButtonStyle())
         .help("위치 필터를 해제하고 폴더의 사진을 다시 표시합니다.")
         .disabled(store.isBatchBusy || store.isSavingMetadata || store.isExporting)
@@ -132,7 +150,21 @@ struct LibraryQueryControls: View {
   @State private var showsAdvancedSearch = false
 
   var body: some View {
-    HStack(spacing: 8) {
+    ViewThatFits(in: .horizontal) {
+      HStack(spacing: 8) {
+        filenameSearch
+        filterControls
+      }
+      VStack(alignment: .leading, spacing: 8) {
+        filenameSearch
+        filterControls
+      }
+    }
+    .controlSize(.small)
+    .frame(maxWidth: .infinity, alignment: .leading)
+  }
+
+  private var filenameSearch: some View {
       HStack(spacing: 5) {
         Image(systemName: "magnifyingglass")
           .foregroundStyle(isSearchFocused ? ViewerTheme.accent : Color.secondary)
@@ -160,6 +192,10 @@ struct LibraryQueryControls: View {
             lineWidth: isSearchFocused ? 1.25 : 0.75)
           .allowsHitTesting(false)
       }
+  }
+
+  private var filterControls: some View {
+    HStack(spacing: 8) {
       Menu {
         ForEach(Array(LibrarySort.groupedCases.enumerated()), id: \.offset) { _, group in
           Menu(group.title) {
@@ -189,6 +225,6 @@ struct LibraryQueryControls: View {
       }
       if isWorking { ProgressView().controlSize(.mini) }
     }
-    .controlSize(.small)
+    .fixedSize(horizontal: true, vertical: false)
   }
 }

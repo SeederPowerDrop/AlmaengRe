@@ -2,13 +2,13 @@
 
 빠르고 단정한 macOS용 무료 오픈 소스 이미지 뷰어입니다. 반디뷰의 이미지 중심 흐름에서 영감을 받되, SwiftUI·트랙패드·Apple 컬러 파이프라인에 맞게 새로 설계합니다.
 
-현재 공개 버전은 **1.0.2 (빌드 52)** 입니다. **macOS 14 이상**, **Apple Silicon·Intel 공용(Universal 2)** 앱입니다.
+현재 공개 버전은 **1.0.3 (빌드 53)** 입니다. **macOS 14 이상**, **Apple Silicon·Intel 공용(Universal 2)** 앱입니다.
 
-**[알맹Re 1.0.2 DMG 다운로드](https://github.com/SeederPowerDrop/AlmaengRe/releases/download/v1.0.2/AlmaengRe-1.0.2-macos-universal.dmg)** · [릴리스와 변경 내역](https://github.com/SeederPowerDrop/AlmaengRe/releases/tag/v1.0.2) · [SHA-256 체크섬](https://github.com/SeederPowerDrop/AlmaengRe/releases/download/v1.0.2/SHA256SUMS.txt)
+**[알맹Re 1.0.3 DMG 다운로드](https://github.com/SeederPowerDrop/AlmaengRe/releases/download/v1.0.3/AlmaengRe-1.0.3-macos-universal.dmg)** · [릴리스와 변경 내역](https://github.com/SeederPowerDrop/AlmaengRe/releases/tag/v1.0.3) · [SHA-256 체크섬](https://github.com/SeederPowerDrop/AlmaengRe/releases/download/v1.0.3/SHA256SUMS.txt)
 
 DMG 안의 **알맹Re.app**을 **Applications**로 옮겨 설치합니다. 현재 배포본은 ad-hoc 서명이며 **Apple Developer ID 서명·공증은 적용되지 않았습니다**. 인터넷에서 받은 앱은 macOS 보안 정책에 따라 첫 실행이 제한될 수 있습니다. Intel용 실행 파일은 포함되어 있지만 실제 Intel Mac에서의 실행은 아직 검증하지 못했습니다.
 
-1.0.2에서는 일반 보기와 이미지 비교에 가로·세로 맞춤과 가운데 정렬을 추가했습니다. 다중보기는 프레임 맞춤과 가운데 정렬로 간소화하고, 시작 화면의 앱 소개 버튼을 앱 이름 아래로 옮겼습니다. 정보창의 스크롤 없는 소개·후원 카드와 BlueWallet 팝오버는 유지합니다.
+1.0.3에서는 일반 설정에 현재 앱 언어와 macOS 언어 설정 연결을 추가했습니다. 지원하는 10개 언어에서 긴 버튼 문구, 단축키 제목, 좁은 이미지 비교 조작부의 잘림과 불필요한 줄바꿈을 개선했습니다. 홈·정보창·뷰어 조작부를 라이트·다크 모드와 아랍어 RTL로 검증했습니다.
 
 이번 버전에는 Finder에서 간단히 이미지 열기와 기본 이미지 앱 연결, 이미지·영상·폴더 드래그 앤 드롭, 최근 3개 폴더와 폴더별 최근 4개 파일, 다중 영상 재생·음소거 개선, 형식·메타데이터·날짜 검색, 분류 이력 CSV 내보내기가 포함됩니다. 설명서 갱신은 일시 중단되어 아래 기존 설명서는 0.13.1 기준으로 보존하고 있습니다.
 
@@ -93,7 +93,7 @@ macOS 14 이상, Swift 6 / Xcode 16 이상, Rust 툴체인이 필요합니다. U
 ```bash
 rustup target add aarch64-apple-darwin x86_64-apple-darwin
 IMAGEVIEWER_DEFER_GUIDE_CHECK=1 ./scripts/build-app.sh release universal
-./scripts/build-dmg.sh "$PWD/dist/알맹Re.app" "$PWD/dist/AlmaengRe-1.0.2-macos-universal.dmg"
+./scripts/build-dmg.sh "$PWD/dist/알맹Re.app" "$PWD/dist/AlmaengRe-1.0.3-macos-universal.dmg"
 ```
 
 `IMAGEVIEWER_DEFER_GUIDE_CHECK=1`은 설명서 작업 중단 지시에 따라 기존 설명서와 검토 지문을 유지합니다. 앱 빌드와 코드 테스트는 계속 실행합니다. 빠른 로컬 앱 빌드는 `IMAGEVIEWER_DEFER_GUIDE_CHECK=1 ./scripts/build-app.sh debug native`로 만듭니다.

@@ -1,3 +1,4 @@
+import AppKit
 import SwiftUI
 
 struct SettingsView: View {
@@ -32,6 +33,8 @@ struct SettingsView: View {
     .padding(18)
     .background(ViewerTheme.chromeGradient)
     .tint(ViewerTheme.accent)
+    .environment(\.layoutDirection,
+      L10n.languageIdentifier == "ar" ? .rightToLeft : .leftToRight)
     .alert(
       "기본 앱을 변경할 수 없음",
       isPresented: Binding(
@@ -47,6 +50,33 @@ struct SettingsView: View {
 
   private var generalSettings: some View {
     Form {
+      Section(LanguageSettings.text("title")) {
+        VStack(alignment: .leading, spacing: 10) {
+          HStack(spacing: 8) {
+            Text(LanguageSettings.text("current"))
+              .foregroundStyle(.secondary)
+            Text(LanguageSettings.languageName())
+              .fontWeight(.medium)
+          }
+          .accessibilityIdentifier("settings.currentLanguage")
+
+          Button(action: LanguageSettings.openSystemSettings) {
+            Label(LanguageSettings.text("open"), systemImage: "globe")
+              .fixedSize(horizontal: true, vertical: false)
+          }
+          .accessibilityIdentifier("settings.language")
+
+          Text(LanguageSettings.text("instructions"))
+            .font(.caption)
+            .foregroundStyle(.secondary)
+            .fixedSize(horizontal: false, vertical: true)
+          Text(LanguageSettings.text("restart"))
+            .font(.caption)
+            .foregroundStyle(.secondary)
+            .fixedSize(horizontal: false, vertical: true)
+        }
+      }
+
       Section("화면") {
         Picker(L10n.text("appearance.title"), selection: $appearance.mode) {
           ForEach(AppAppearance.allCases) { mode in
@@ -200,19 +230,34 @@ struct SettingsView: View {
         .help(PhotoMarkL10n.text("labels.editHelp"))
       }
 
-      ScrollView {
-        Grid(alignment: .leading, horizontalSpacing: 14, verticalSpacing: 9) {
-          ForEach(ShortcutAction.allCases) { action in
-            ShortcutRow(
-              action: action,
-              shortcuts: shortcuts,
-              hasConflict: shortcuts.conflictingActions.contains(action)
-            )
+      GeometryReader { geometry in
+        let titleColumnWidth = shortcutTitleColumnWidth(availableWidth: geometry.size.width)
+        ScrollView {
+          Grid(alignment: .leading, horizontalSpacing: 14, verticalSpacing: 9) {
+            ForEach(ShortcutAction.allCases) { action in
+              ShortcutRow(
+                action: action,
+                shortcuts: shortcuts,
+                hasConflict: shortcuts.conflictingActions.contains(action),
+                titleColumnWidth: titleColumnWidth
+              )
+            }
           }
+          .padding(.vertical, 4)
         }
-        .padding(.vertical, 4)
       }
     }
+  }
+
+  private func shortcutTitleColumnWidth(availableWidth: CGFloat) -> CGFloat {
+    let font = NSFont.systemFont(ofSize: NSFont.systemFontSize)
+    let widestTitle = ShortcutAction.allCases.map {
+      ($0.title as NSString).size(withAttributes: [.font: font]).width
+    }.max() ?? 190
+    // Reserve the key picker, four modifier buttons, status icon, six grid
+    // gaps and the scroll bar. Every row shares one measured title column.
+    let maximumWidth = min(340, max(0, availableWidth - 342))
+    return min(maximumWidth, max(190, ceil(widestTitle) + 2))
   }
 
   private var fileAssociationSettings: some View {
@@ -228,20 +273,28 @@ struct SettingsView: View {
           .foregroundStyle(.secondary)
       }
 
-      HStack {
-        Button("지원 이미지 모두 연결") {
-          associations.selectAll()
-          applySelectedAssociations()
+      VStack(alignment: .leading, spacing: 8) {
+        HStack {
+          Button("지원 이미지 모두 연결") {
+            associations.selectAll()
+            applySelectedAssociations()
+          }
+          .buttonStyle(.borderedProminent)
+          .fixedSize(horizontal: true, vertical: false)
+          Spacer(minLength: 8)
+          Button {
+            associations.refresh()
+          } label: {
+            Image(systemName: "arrow.clockwise")
+          }
+          .accessibilityLabel("상태 새로고침")
+          .help("상태 새로고침")
         }
-        .buttonStyle(.borderedProminent)
-        Button("모두 선택") { associations.selectAll() }
-        Button("선택 해제") { associations.clearSelection() }
-        Spacer()
-        Button {
-          associations.refresh()
-        } label: {
-          Label("상태 새로고침", systemImage: "arrow.clockwise")
+        HStack {
+          Button("모두 선택") { associations.selectAll() }
+          Button("선택 해제") { associations.clearSelection() }
         }
+        .fixedSize(horizontal: true, vertical: false)
       }
       .disabled(associations.isApplying)
 
@@ -338,12 +391,16 @@ private struct ShortcutRow: View {
   let action: ShortcutAction
   @ObservedObject var shortcuts: ShortcutStore
   let hasConflict: Bool
+  let titleColumnWidth: CGFloat
 
   var body: some View {
     GridRow {
       Text(action.title)
-        .frame(width: 190, alignment: .leading)
+        .lineLimit(1)
+        .truncationMode(.tail)
+        .frame(width: titleColumnWidth, alignment: .leading)
         .help(actionHelp)
+        .accessibilityLabel(action.title)
         .accessibilityHint(action.helpDescription)
 
       Picker("", selection: keyBinding) {

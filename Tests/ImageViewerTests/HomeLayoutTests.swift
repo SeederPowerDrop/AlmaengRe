@@ -9,8 +9,9 @@ import Testing
 @Suite("최근 폴더 홈 화면 배치", .serialized)
 @MainActor
 struct HomeLayoutTests {
-  @Test("긴 이름과 합성 미리보기를 밝은·어두운 실제 홈 화면으로 렌더한다", arguments: [false, true])
-  func recentFoldersRenderAtMinimumWindow(isDark: Bool) async throws {
+  @Test("10개 언어의 긴 이름·이어서 보기·합성 미리보기를 밝은·어두운 홈 화면으로 렌더한다",
+    arguments: L10n.supportedLocalizations, [false, true])
+  func recentFoldersRenderAtMinimumWindow(language: String, isDark: Bool) async throws {
     _ = NSApplication.shared
     let suite = "HomeLayoutTests.\(UUID())"
     let defaults = try #require(UserDefaults(suiteName: suite))
@@ -23,9 +24,12 @@ struct HomeLayoutTests {
     }
     let folders = try syntheticFolders()
     defaults.set(try JSONEncoder().encode(folders), forKey: RecentPhotoStore.defaultsKey)
+    let session = ViewerSession(sources: [SessionLocation(url: temporary)], selectedID: nil)
+    ViewerSessionPersistence(defaults: defaults).save(session)
     let store = AppStore(defaults: defaults, monitorsSystemResources: false,
       photoMarkDatabaseURL: temporary.appendingPathComponent("marks.sqlite"))
     defer { store.clearRecentPhotos() }
+    try #require(store.canResumeWorkspace)
     try #require(store.recentPhotos.folders.count == 3)
     try #require(store.recentPhotos.folders.prefix(2).allSatisfy { $0.photos.count == 5 })
     try #require(store.recentPhotos.folders.last?.photos.isEmpty == true)
@@ -33,7 +37,7 @@ struct HomeLayoutTests {
     try #require(store.recentPhotos.homeFolders.prefix(2).allSatisfy { $0.photos.count == 4 })
 
     let size = CGSize(width: 960, height: 800)
-    let root = HomeView(store: store)
+    let root = HomeView(store: store, localeIdentifier: language)
       .environment(\.colorScheme, isDark ? .dark : .light)
       .frame(width: size.width, height: size.height)
     let host = NSHostingView(rootView: root)
@@ -56,7 +60,7 @@ struct HomeLayoutTests {
     host.displayIfNeeded()
     let bitmap = try #require(host.bitmapImageRepForCachingDisplay(in: host.bounds))
     host.cacheDisplay(in: host.bounds, to: bitmap)
-    try export(bitmap, isDark: isDark)
+    try export(bitmap, language: language, isDark: isDark)
 
     #expect(bitmap.pixelsWide >= Int(size.width) && bitmap.pixelsHigh >= Int(size.height))
     let png = try #require(bitmap.representation(using: .png, properties: [:]))
@@ -68,7 +72,7 @@ struct HomeLayoutTests {
       "The home surface must follow the requested appearance")
     #expect(store.assets.isEmpty && store.currentFolderURL == nil && store.showsHome,
       "Rendering persisted previews must not load synthetic source folders")
-    print("HOME_LAYOUT scheme=\(isDark ? "dark" : "light") viewport=960x800 pngBytes=\(png.count)")
+    print("HOME_LAYOUT language=\(language) scheme=\(isDark ? "dark" : "light") viewport=960x800 pngBytes=\(png.count)")
   }
 
   private func syntheticFolders() throws -> [RecentFolder] {
@@ -123,13 +127,13 @@ struct HomeLayoutTests {
       properties: [.compressionFactor: 0.8]))
   }
 
-  private func export(_ bitmap: NSBitmapImageRep, isDark: Bool) throws {
+  private func export(_ bitmap: NSBitmapImageRep, language: String, isDark: Bool) throws {
     guard let path = ProcessInfo.processInfo.environment["IMAGEVIEWER_HOME_LAYOUT_OUTPUT"],
       !path.isEmpty else { return }
     let directory = URL(fileURLWithPath: path, isDirectory: true)
     try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
     let data = try #require(bitmap.representation(using: .png, properties: [:]))
-    try data.write(to: directory.appendingPathComponent(isDark ? "home-dark.png" : "home-light.png"))
+    try data.write(to: directory.appendingPathComponent("home-\(language)-\(isDark ? "dark" : "light").png"))
   }
 
 }

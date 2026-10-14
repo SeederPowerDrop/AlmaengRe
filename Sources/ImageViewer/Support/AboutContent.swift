@@ -4,7 +4,7 @@ import Foundation
 
 enum AboutContent {
   static var languageIdentifier: String {
-    languageIdentifier(for: Locale.preferredLanguages)
+    L10n.languageIdentifier
   }
 
   static func languageIdentifier(for preferences: [String]) -> String {

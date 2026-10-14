@@ -4,8 +4,14 @@ struct HomeView: View {
   @Environment(\.openWindow) private var openWindow
   @ObservedObject var store: AppStore
   @ObservedObject private var recentPhotos: RecentPhotoStore
+  private let localeIdentifier: String?
+  private var formattingLocale: Locale { localeIdentifier.map(Locale.init(identifier:)) ?? .current }
+  private var strings: HomeStrings {
+    HomeStrings(languageIdentifier: localeIdentifier ?? L10n.languageIdentifier, locale: formattingLocale)
+  }
 
-  init(store: AppStore) {
+  init(store: AppStore, localeIdentifier: String? = nil) {
+    self.localeIdentifier = localeIdentifier
     self.store = store
     _recentPhotos = ObservedObject(wrappedValue: store.recentPhotos)
   }
@@ -28,7 +34,7 @@ struct HomeView: View {
             recentHeading
             if !recentPhotos.homeFolders.isEmpty {
               ForEach(recentPhotos.homeFolders) { folder in
-                RecentFolderCard(folder: folder, isBusy: !store.canShowHome,
+                RecentFolderCard(folder: folder, strings: strings, isBusy: !store.canShowHome,
                   open: { Task { await store.openRecentFolder(folder) } },
                   remove: { store.removeRecentFolder(folder.id) },
                   openPhoto: { photo in Task { await store.openRecentPhoto(photo) } },
@@ -45,6 +51,8 @@ struct HomeView: View {
       }
       .background(ViewerTheme.chromeGradient)
     }
+    .environment(\.locale, formattingLocale)
+    .environment(\.layoutDirection, strings.languageIdentifier == "ar" ? .rightToLeft : .leftToRight)
     .accessibilityIdentifier("home.screen")
   }
 
@@ -76,12 +84,13 @@ struct HomeView: View {
                 .background(ViewerTheme.selection, in: Capsule())
             }
           }
-          Text(verbatim: L10n.text("home.subtitle"))
+          Text(verbatim: strings.text("home.subtitle"))
             .font(.system(size: 13))
             .foregroundStyle(.secondary)
             .fixedSize(horizontal: false, vertical: true)
           Button { openWindow(id: AboutView.windowID) } label: {
-            Label("앱 소개", systemImage: "info.circle")
+            Label(strings.text("앱 소개"), systemImage: "info.circle")
+              .fixedSize(horizontal: true, vertical: false)
               .frame(minWidth: 90)
           }
           .buttonStyle(ViewerActionButtonStyle())
@@ -92,7 +101,8 @@ struct HomeView: View {
 
         VStack(alignment: .trailing, spacing: 8) {
           Button { store.chooseItems() } label: {
-            Label("열기…", systemImage: "folder.badge.plus")
+            Label(strings.text("열기…"), systemImage: "folder.badge.plus")
+              .fixedSize(horizontal: true, vertical: false)
               .frame(minWidth: 130)
           }
           .buttonStyle(ViewerActionButtonStyle(prominent: true))
@@ -100,7 +110,8 @@ struct HomeView: View {
           .disabled(!store.canShowHome)
           if store.canResumeWorkspace {
             Button { Task { await store.resumeWorkspace() } } label: {
-              Text(verbatim: L10n.text("home.resume"))
+              Text(verbatim: strings.text("home.resume"))
+                .fixedSize(horizontal: true, vertical: false)
                 .frame(minWidth: 130)
             }
             .buttonStyle(ViewerActionButtonStyle())
@@ -109,7 +120,7 @@ struct HomeView: View {
           }
         }
       }
-      Label(L10n.text("이미지·영상·폴더를 여기에 놓으세요."), systemImage: "square.and.arrow.down")
+      Label(strings.text("이미지·영상·폴더를 여기에 놓으세요."), systemImage: "square.and.arrow.down")
         .font(.system(size: 12))
         .foregroundStyle(.secondary)
         .accessibilityIdentifier("home.dropHint")
@@ -126,7 +137,7 @@ struct HomeView: View {
   @ViewBuilder
   private var inspiration: some View {
     if let quote = HomeInspiration.launchQuote,
-      let localized = quote.localized(for: L10n.languageIdentifier) {
+      let localized = quote.localized(for: strings.languageIdentifier) {
       VStack(alignment: .leading, spacing: 7) {
         Text(verbatim: localized.text)
           .font(.system(size: 16, weight: .medium))
@@ -139,11 +150,11 @@ struct HomeView: View {
           .accessibilityIdentifier("home.quote.attribution")
         HStack(spacing: 10) {
           Link(destination: quote.sourceURL) {
-            Label(L10n.text("home.quote.source"), systemImage: "arrow.up.right.square")
+            Label(strings.text("home.quote.source"), systemImage: "arrow.up.right.square")
           }
           .accessibilityIdentifier("home.quote.source")
           if localized.isTranslation {
-            Text(verbatim: L10n.text("home.quote.translation"))
+            Text(verbatim: strings.text("home.quote.translation"))
               .foregroundStyle(.secondary)
           }
         }
@@ -162,17 +173,19 @@ struct HomeView: View {
   private var recentHeading: some View {
     HStack(alignment: .center, spacing: 20) {
       VStack(alignment: .leading, spacing: 5) {
-        Text(verbatim: L10n.text("home.recent"))
+        Text(verbatim: strings.text("home.recent"))
           .font(.system(size: 19, weight: .semibold))
           .accessibilityAddTraits(.isHeader)
-        Text(verbatim: L10n.text("home.recent.detail"))
+        Text(verbatim: strings.text("home.recent.detail"))
           .font(.system(size: 12)).foregroundStyle(.secondary)
+          .fixedSize(horizontal: false, vertical: true)
       }
       Spacer(minLength: 8)
       if !recentPhotos.folders.isEmpty {
-        Button(L10n.text("home.clear")) { store.clearRecentPhotos() }
+        Button(strings.text("home.clear")) { store.clearRecentPhotos() }
           .buttonStyle(ViewerToolButtonStyle())
-          .help(L10n.text("home.clear.help"))
+          .fixedSize(horizontal: true, vertical: false)
+          .help(strings.text("home.clear.help"))
           .accessibilityIdentifier("home.clear")
       }
     }
@@ -185,9 +198,9 @@ struct HomeView: View {
         .foregroundStyle(.secondary)
         .padding(.bottom, 4)
         .accessibilityHidden(true)
-      Text(verbatim: L10n.text("home.empty"))
+      Text(verbatim: strings.text("home.empty"))
         .font(.system(size: 14, weight: .medium))
-      Text(verbatim: L10n.text("home.empty.detail"))
+      Text(verbatim: strings.text("home.empty.detail"))
         .font(.system(size: 12)).foregroundStyle(.secondary)
     }
     .multilineTextAlignment(.center)
@@ -203,6 +216,7 @@ struct HomeView: View {
 
 private struct RecentFolderCard: View {
   let folder: RecentFolder
+  let strings: HomeStrings
   let isBusy: Bool
   let open: () -> Void
   let remove: () -> Void
@@ -234,22 +248,23 @@ private struct RecentFolderCard: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         VStack(alignment: .trailing, spacing: 5) {
-          Text(verbatim: L10n.format("home.folder.count", folder.photos.count))
+          Text(verbatim: strings.format("home.folder.count", folder.photos.count))
             .font(.system(size: 11, weight: .medium))
           Text(folder.lastOpened, format: .dateTime.month(.abbreviated).day())
             .font(.system(size: 11))
             .foregroundStyle(.secondary)
         }
         Button(action: open) {
-          Label(L10n.text(folder.isArchive ? "home.archive.open" : "home.folder.open"),
+          Label(strings.text(folder.isArchive ? "home.archive.open" : "home.folder.open"),
             systemImage: "arrow.up.forward")
+            .fixedSize(horizontal: true, vertical: false)
         }
         .buttonStyle(ViewerToolButtonStyle())
         .disabled(isBusy)
-        .accessibilityLabel(L10n.format("home.folder.open.label", folder.name))
+        .accessibilityLabel(strings.format("home.folder.open.label", folder.name))
         .accessibilityIdentifier("home.folder.open.\(folder.id)")
         Menu {
-          Button(L10n.text("home.folder.remove"), action: remove)
+          Button(strings.text("home.folder.remove"), action: remove)
         } label: {
           Image(systemName: "ellipsis").font(.system(size: 16, weight: .semibold))
             .frame(width: 22, height: 24)
@@ -257,11 +272,11 @@ private struct RecentFolderCard: View {
         .menuStyle(.borderlessButton)
         .menuIndicator(.hidden)
         .fixedSize()
-        .accessibilityLabel(L10n.format("home.folder.remove.label", folder.name))
+        .accessibilityLabel(strings.format("home.folder.remove.label", folder.name))
         .accessibilityIdentifier("home.folder.menu.\(folder.id)")
       }
       if folder.photos.isEmpty {
-        Label(L10n.text("home.folder.empty"), systemImage: "photo.on.rectangle")
+        Label(strings.text("home.folder.empty"), systemImage: "photo.on.rectangle")
           .font(.system(size: 12))
           .foregroundStyle(.secondary)
           .frame(maxWidth: .infinity, minHeight: 90)
@@ -269,7 +284,7 @@ private struct RecentFolderCard: View {
       } else {
         LazyVGrid(columns: columns, alignment: .leading, spacing: 12) {
           ForEach(folder.photos) { photo in
-            RecentPhotoCard(photo: photo, isBusy: isBusy,
+            RecentPhotoCard(photo: photo, strings: strings, isBusy: isBusy,
               open: { openPhoto(photo) }, remove: { removePhoto(photo) })
           }
         }
@@ -288,14 +303,16 @@ private struct RecentFolderCard: View {
 
 private struct RecentPhotoCard: View {
   let photo: RecentPhoto
+  let strings: HomeStrings
   let isBusy: Bool
   let open: () -> Void
   let remove: () -> Void
   private let preview: NSImage?
   @State private var hovered = false
 
-  init(photo: RecentPhoto, isBusy: Bool, open: @escaping () -> Void, remove: @escaping () -> Void) {
+  init(photo: RecentPhoto, strings: HomeStrings, isBusy: Bool, open: @escaping () -> Void, remove: @escaping () -> Void) {
     self.photo = photo
+    self.strings = strings
     self.isBusy = isBusy
     self.open = open
     self.remove = remove
@@ -320,7 +337,7 @@ private struct RecentPhotoCard: View {
       }
       .buttonStyle(.plain)
       .disabled(isBusy)
-      .accessibilityLabel(L10n.format("home.open.label", photo.filename))
+      .accessibilityLabel(strings.format("home.open.label", photo.filename))
       .accessibilityIdentifier("home.recent.open.\(photo.id)")
 
       // This is a sibling of the open button, so removing never opens the photo.
@@ -335,8 +352,8 @@ private struct RecentPhotoCard: View {
       }
       .buttonStyle(.plain)
       .padding(6)
-      .help(L10n.format("home.remove.label", photo.filename))
-      .accessibilityLabel(L10n.format("home.remove.label", photo.filename))
+      .help(strings.format("home.remove.label", photo.filename))
+      .accessibilityLabel(strings.format("home.remove.label", photo.filename))
       .accessibilityIdentifier("home.recent.remove.\(photo.id)")
     }
     .background(ViewerTheme.panelGradient)
@@ -349,7 +366,7 @@ private struct RecentPhotoCard: View {
     }
     .onHover { hovered = $0 }
     .contextMenu {
-      Button(L10n.text("home.remove"), action: remove)
+      Button(strings.text("home.remove"), action: remove)
     }
   }
 
@@ -368,7 +385,7 @@ private struct RecentPhotoCard: View {
           VStack(spacing: 8) {
             Image(systemName: "photo")
               .font(.system(size: 25, weight: .light))
-            Text(verbatim: L10n.text("home.preview.unavailable"))
+            Text(verbatim: strings.text("home.preview.unavailable"))
               .font(.system(size: 11))
               .lineLimit(2)
               .multilineTextAlignment(.center)
@@ -378,5 +395,20 @@ private struct RecentPhotoCard: View {
         }
       }
       .clipped()
+  }
+}
+
+/// Pass the same resolved app language through recent cards and previews. This
+/// also lets layout checks render real translations without changing macOS.
+private struct HomeStrings {
+  let languageIdentifier: String
+  let locale: Locale
+
+  func text(_ key: String) -> String {
+    L10n.text(key, localeIdentifier: languageIdentifier)
+  }
+
+  func format(_ key: String, _ arguments: CVarArg...) -> String {
+    String(format: text(key), locale: locale, arguments: arguments)
   }
 }

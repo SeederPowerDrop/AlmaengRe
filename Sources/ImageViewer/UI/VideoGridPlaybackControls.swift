@@ -21,6 +21,14 @@ struct VideoGridPlaybackControls: View {
           playSelectedButton
           pauseButton
         }
+        .fixedSize(horizontal: true, vertical: false)
+      }
+      // Long translated labels must keep their full-size targets even when the
+      // folder sidebar leaves too little room for the two-button second row.
+      VStack(spacing: 10) {
+        playAllButton
+        playSelectedButton
+        pauseButton
       }
     }
     .frame(maxWidth: .infinity)

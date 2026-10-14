@@ -1,0 +1,5 @@
+"title" = "App-Sprache";
+"current" = "Aktuelle Sprache";
+"open" = "macOS-Spracheinstellungen öffnen";
+"instructions" = "Unter Systemeinstellungen → Allgemein → Sprache & Region → Apps AlmaengRe hinzufügen oder auswählen und die Sprache ändern.";
+"restart" = "Die App beenden und erneut öffnen, um die Sprache auf alle Menüs und Fenster anzuwenden. Nicht unterstützte Sprachen verwenden Koreanisch.";

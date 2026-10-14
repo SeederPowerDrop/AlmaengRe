@@ -26,6 +26,8 @@ struct BottomControlBar: View {
             .help(pageNavigationHelp(direction: -1))
           Text(store.positionDescription)
             .font(.system(size: 11, weight: .medium).monospacedDigit())
+            .lineLimit(1)
+            .fixedSize(horizontal: true, vertical: false)
             .frame(minWidth: 58)
           Button { store.navigatePage(1) } label: { Image(systemName: "chevron.right") }
             .help(pageNavigationHelp(direction: 1))
@@ -70,7 +72,10 @@ struct BottomControlBar: View {
     HStack(spacing: 2) {
       Button { store.setFitToWindow() } label: {
         if compact { Image(systemName: "arrow.down.right.and.arrow.up.left") }
-        else { Text(verbatim: L10n.text(store.isMultiImageViewer ? "프레임 맞춤" : "화면 맞춤")) }
+        else {
+          Text(verbatim: L10n.text(store.isMultiImageViewer ? "프레임 맞춤" : "화면 맞춤"))
+            .fixedSize(horizontal: true, vertical: false)
+        }
       }
       .help(L10n.text(store.isMultiImageViewer
         ? "각 이미지를 주어진 프레임 안에 맞춥니다." : "이미지 전체를 화면 안에 맞춥니다."))

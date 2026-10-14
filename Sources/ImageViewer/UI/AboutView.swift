@@ -4,6 +4,15 @@ import SwiftUI
 /// 앱 언어를 따르는 소개와 후원을 제공하는, 초기 Windows 스타일의 정보 창입니다.
 struct AboutView: View {
   static let windowID = "about-almaeng-re"
+  private let localeIdentifier: String?
+  private let preferredWidth: CGFloat?
+
+  init(localeIdentifier: String? = nil, width: CGFloat? = nil) {
+    self.localeIdentifier = localeIdentifier
+    preferredWidth = width
+  }
+
+  private var languageIdentifier: String { localeIdentifier ?? AboutContent.languageIdentifier }
 
   // Fit the introduction to its contents, including restored windows that used
   // to be small enough to hide the support cards below a scroll view.
@@ -23,11 +32,11 @@ struct AboutView: View {
   private static let bitcoinQR = AboutSupport.makeBitcoinQRCode()
 
   private var layoutDirection: LayoutDirection {
-    AboutContent.languageIdentifier == "ar" ? .rightToLeft : .leftToRight
+    languageIdentifier == "ar" ? .rightToLeft : .leftToRight
   }
 
   private func text(_ key: String) -> String {
-    AboutContent.text(key)
+    AboutContent.text(key, localeIdentifier: languageIdentifier)
   }
 
   private static func resource(_ name: String, extension ext: String, subdirectory: String? = nil) -> URL? {
@@ -53,7 +62,8 @@ struct AboutView: View {
     .overlay { Rectangle().strokeBorder(Color(red: 0.10, green: 0.28, blue: 0.65), lineWidth: 1) }
     .background(AboutWindowChrome(title: showsLicenses ? text("licenses") : text("windowTitle")))
     .environment(\.layoutDirection, layoutDirection)
-    .frame(width: Self.windowWidth)
+    .environment(\.locale, localeIdentifier.map(Locale.init(identifier:)) ?? .current)
+    .frame(width: preferredWidth ?? Self.windowWidth)
     .fixedSize(horizontal: false, vertical: true)
     .ignoresSafeArea()
   }
@@ -220,7 +230,7 @@ struct AboutView: View {
         .accessibilityHidden(true)
       VStack(alignment: .leading, spacing: 3) {
         Text(verbatim: title).font(.system(size: 15, weight: .bold))
-          .fixedSize(horizontal: false, vertical: true)
+          .fixedSize(horizontal: true, vertical: false)
         if let subtitle {
           Text(verbatim: subtitle).font(.system(size: 12)).foregroundStyle(RetroAboutTheme.secondaryText)
         }
@@ -265,17 +275,10 @@ struct AboutView: View {
           .environment(\.layoutDirection, .leftToRight)
           .accessibilityLabel(text("bitcoinAddress"))
           .accessibilityValue(AboutSupport.bitcoinAddress)
-        HStack(spacing: 10) {
-          Button(text("copyAddress")) {
-            NSPasteboard.general.clearContents()
-            NSPasteboard.general.setString(AboutSupport.bitcoinAddress, forType: .string)
-            supportStatus = text("addressCopied")
-          }
-          Button(text("openWallet")) {
-            if !NSWorkspace.shared.open(AboutSupport.bitcoinURL) {
-              supportStatus = text("walletUnavailable")
-            }
-          }
+        ViewThatFits(in: .horizontal) {
+          HStack(spacing: 10) { bitcoinActions }
+            .fixedSize(horizontal: true, vertical: false)
+          VStack(alignment: .leading, spacing: 10) { bitcoinActions }
         }
         .buttonStyle(RetroAboutButtonStyle())
         if let supportStatus {
@@ -288,6 +291,19 @@ struct AboutView: View {
     .padding(16)
     .background(RetroAboutTheme.details)
     .overlay { RetroBevel(inset: true) }
+  }
+
+  @ViewBuilder private var bitcoinActions: some View {
+    Button(text("copyAddress")) {
+      NSPasteboard.general.clearContents()
+      NSPasteboard.general.setString(AboutSupport.bitcoinAddress, forType: .string)
+      supportStatus = text("addressCopied")
+    }
+    Button(text("openWallet")) {
+      if !NSWorkspace.shared.open(AboutSupport.bitcoinURL) {
+        supportStatus = text("walletUnavailable")
+      }
+    }
   }
 
   private var footer: some View {
@@ -388,6 +404,7 @@ private enum RetroAboutTheme {
 private struct RetroAboutButtonStyle: ButtonStyle {
   func makeBody(configuration: Configuration) -> some View {
     configuration.label
+      .fixedSize(horizontal: true, vertical: false)
       .foregroundStyle(RetroAboutTheme.text)
       .padding(.horizontal, 12)
       .padding(.vertical, 8)
