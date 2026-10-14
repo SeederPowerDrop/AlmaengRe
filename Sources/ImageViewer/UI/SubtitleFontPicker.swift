@@ -70,6 +70,7 @@ struct SubtitleFontPicker: NSViewRepresentable {
       guard let button else { return }
       let name = selection.wrappedValue
       if let item = button.itemArray.first(where: { $0.representedObject as? String == name }) {
+        if name.isEmpty { item.title = MotionMediaL10n.text("study.systemFont") }
         button.select(item)
       } else {
         let title = name.isEmpty ? MotionMediaL10n.text("study.systemFont") : name

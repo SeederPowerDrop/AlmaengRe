@@ -5,16 +5,31 @@ struct AppCommands: Commands {
   @ObservedObject var store: AppStore
   @ObservedObject var shortcuts: ShortcutStore
   @ObservedObject var appearance: AppearanceStore
+  @ObservedObject var language: LanguageStore
   @ObservedObject private var comparison: FolderComparisonStore
 
-  init(store: AppStore, shortcuts: ShortcutStore, appearance: AppearanceStore) {
+  init(store: AppStore, shortcuts: ShortcutStore, appearance: AppearanceStore, language: LanguageStore) {
     self.store = store
     self.shortcuts = shortcuts
     self.appearance = appearance
+    self.language = language
     self.comparison = store.folderComparison
   }
 
   var body: some Commands {
+    CommandMenu(LanguageSettings.text("menu")) {
+      Picker(LanguageSettings.text("menu"), selection: $language.selection) {
+        Text(verbatim: LanguageSettings.text("system")).tag("system")
+        Divider()
+        ForEach(L10n.supportedLocalizations, id: \.self) { identifier in
+          Text(verbatim: LanguageSettings.languageName(for: identifier)).tag(identifier)
+        }
+      }
+      .pickerStyle(.inline)
+      .labelsHidden()
+      .accessibilityIdentifier("app.language")
+    }
+
     CommandGroup(after: .toolbar) {
       Divider()
       Picker(L10n.text("appearance.title"), selection: $appearance.mode) {
@@ -25,30 +40,30 @@ struct AppCommands: Commands {
     }
 
     CommandGroup(replacing: .appInfo) {
-      Button("알맹Re 정보") {
+      Button(L10n.text("알맹Re 정보")) {
         store.pauseSlideshow()
         openWindow(id: AboutView.windowID)
       }
     }
 
     CommandGroup(replacing: .help) {
-      Button("기본 사용법") {
+      Button(L10n.text("기본 사용법")) {
         store.pauseSlideshow()
         openWindow(id: BasicUsageView.windowID)
       }
-      Button("상세 사용설명서 (GitHub)") {
+      Button(L10n.text("상세 사용설명서 (GitHub)")) {
         store.pauseSlideshow()
         UserGuide.openDetailedGuide()
       }
       Divider()
-      Button("앱 소개") {
+      Button(L10n.text("앱 소개")) {
         store.pauseSlideshow()
         openWindow(id: AboutView.windowID)
       }
     }
 
     CommandGroup(replacing: .newItem) {
-      Button("열기…") { store.chooseItems() }
+      Button(L10n.text("열기…")) { store.chooseItems() }
         .keyboardShortcut(shortcuts.binding(for: .openFolder).menuShortcut)
         .disabled(!store.canOpenFolderFromTree)
       Button(L10n.text("home.show")) { store.showHome() }
@@ -57,7 +72,7 @@ struct AppCommands: Commands {
         .disabled(!store.showsHome || !store.canResumeWorkspace || !store.canShowHome)
     }
 
-    CommandMenu("탐색") {
+    CommandMenu(L10n.text("탐색")) {
       Group {
         Button(
           L10n.format(
@@ -87,18 +102,18 @@ struct AppCommands: Commands {
         ) {
           store.toggleFocusMode()
         }
-        Button("전체 화면") {
+        Button(L10n.text("전체 화면")) {
           store.toggleFullScreen()
         }
         .keyboardShortcut("f", modifiers: [.command, .control])
-        Menu("전자 앨범") {
+        Menu(L10n.text("전자 앨범")) {
           SlideshowMenuItems(store: store, shortcuts: shortcuts)
         }
         Divider()
-        Toggle("폴더 트리 표시", isOn: $store.showsFolderTree)
+        Toggle(L10n.text("폴더 트리 표시"), isOn: $store.showsFolderTree)
         Toggle(MotionMediaL10n.text("showVideos"), isOn: $store.showsVideos)
           .disabled(!store.canOpenFolderFromTree)
-        Menu("썸네일 패널 위치") {
+        Menu(L10n.text("썸네일 패널 위치")) {
           ForEach(ThumbnailPanelPlacement.quickSelectionOrder) { placement in
             Button {
               store.thumbnailPanelPlacement = placement
@@ -111,16 +126,16 @@ struct AppCommands: Commands {
             }
           }
         }
-        Menu("파일 이름 표시") {
-          Picker("크기", selection: $store.filenameDisplaySize) {
+        Menu(L10n.text("파일 이름 표시")) {
+          Picker(L10n.text("크기"), selection: $store.filenameDisplaySize) {
             ForEach(FilenameDisplaySize.allCases) { size in
               Text(size.title).tag(size)
             }
           }
         }
-        Toggle("몽땅보기 번호 표시", isOn: $store.showsOverviewNumbers)
-        Button("이미지 정보 패널") { store.toggleInspector(.information) }
-        Button("이미지 편집 패널") { store.toggleInspector(.editing) }
+        Toggle(L10n.text("몽땅보기 번호 표시"), isOn: $store.showsOverviewNumbers)
+        Button(L10n.text("이미지 정보 패널")) { store.toggleInspector(.information) }
+        Button(L10n.text("이미지 편집 패널")) { store.toggleInspector(.editing) }
       }.disabled(store.isVideoFullScreenPresented || store.showsHome || comparison.isEditingNames)
     }
 
@@ -154,10 +169,10 @@ struct AppCommands: Commands {
       }.disabled(store.showsHome || comparison.isEditingNames)
     }
 
-    CommandMenu("이미지 비교") {
+    CommandMenu(L10n.text("이미지 비교")) {
       Group {
         if store.presentationMode != .folderComparison {
-          Button("비교할 폴더 선택…") {
+          Button(L10n.text("비교할 폴더 선택…")) {
             store.presentationMode = .folderComparison
             store.folderComparison.choosePair()
           }
@@ -172,9 +187,9 @@ struct AppCommands: Commands {
       }.disabled(store.isVideoFullScreenPresented || store.showsHome || comparison.isEditingNames)
     }
 
-    CommandMenu("이미지") {
+    CommandMenu(L10n.text("이미지")) {
       Group {
-      Button("AI 확대…") {
+      Button(L10n.text("AI 확대…")) {
         store.pauseSlideshow()
         store.showsAIUpscaling = true
       }
@@ -186,9 +201,9 @@ struct AppCommands: Commands {
       }
       .disabled(!store.canSetWallpaper)
       Divider()
-      Button("모두 선택") { store.selectAllAssets() }
+      Button(L10n.text("모두 선택")) { store.selectAllAssets() }
         .disabled(store.assets.isEmpty || store.batchSheet != nil || store.isBatchBusy)
-      Button("선택 해제") { store.clearSelection() }
+      Button(L10n.text("선택 해제")) { store.clearSelection() }
         .disabled(store.selectedURLs.isEmpty || store.batchSheet != nil || store.isBatchBusy)
       Divider()
       Button(FileOperationsL10n.text("copy.menu")) { store.presentFileOperation(.copy) }
@@ -201,7 +216,7 @@ struct AppCommands: Commands {
       .keyboardShortcut(.delete, modifiers: .command)
       .disabled(!store.canPerformFileOperation(.trash))
       Divider()
-      Button("이름 일괄 변경…") { store.presentBatchRename() }
+      Button(L10n.text("이름 일괄 변경…")) { store.presentBatchRename() }
         .disabled(!store.canStartBatchOperation || store.selectedAssets.contains(where: \.isReadOnly))
       Button(BatchActionsL10n.text("export.menu")) { store.presentBatchExport() }
         .disabled(!store.canExportBatchImages() || ExportFormat.available.isEmpty)
@@ -213,13 +228,13 @@ struct AppCommands: Commands {
       Button(BatchActionsL10n.text("share.menu")) { store.shareSelectedFiles() }
         .disabled(!store.canStartBatchOperation)
       Divider()
-      Button("왼쪽으로 회전") { store.rotateCounterclockwise() }
-      Button("오른쪽으로 회전") { store.rotateClockwise() }
-      Button("좌우 반전하기") { store.flipHorizontally() }
+      Button(L10n.text("왼쪽으로 회전")) { store.rotateCounterclockwise() }
+      Button(L10n.text("오른쪽으로 회전")) { store.rotateClockwise() }
+      Button(L10n.text("좌우 반전하기")) { store.flipHorizontally() }
         .disabled(store.currentAsset == nil)
-      Button("상하 반전하기") { store.flipVertically() }
+      Button(L10n.text("상하 반전하기")) { store.flipVertically() }
         .disabled(store.currentAsset == nil)
-      Button("조정 초기화") { store.resetAdjustments() }
+      Button(L10n.text("조정 초기화")) { store.resetAdjustments() }
       Divider()
       Button(
         L10n.format(
@@ -232,12 +247,12 @@ struct AppCommands: Commands {
       }.disabled(store.isVideoFullScreenPresented || store.showsHome || store.presentationMode == .folderComparison)
     }
 
-    CommandMenu("확대/축소") {
+    CommandMenu(L10n.text("확대/축소")) {
       Group {
-        Menu("확대 이미지 이동") {
+        Menu(L10n.text("확대 이미지 이동")) {
           PanModeMenuItems(store: store, shortcuts: shortcuts)
         }
-        Menu("고화질 확대 및 비교") {
+        Menu(L10n.text("고화질 확대 및 비교")) {
           MagnificationMenuItems(store: store, shortcuts: shortcuts)
         }
         Divider()

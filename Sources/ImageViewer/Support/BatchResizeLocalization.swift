@@ -2,7 +2,7 @@ import Foundation
 
 enum BatchResizeL10n {
   static func text(_ key: String) -> String {
-    activeBundle.localizedString(forKey: key, value: key, table: "BatchResize")
+    L10n.text(key, localeIdentifier: L10n.languageIdentifier, table: "BatchResize")
   }
 
   static func text(_ key: String, localeIdentifier: String) -> String {

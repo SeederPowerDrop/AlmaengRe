@@ -13,12 +13,9 @@ enum UserGuide {
   }
 
   static var currentLanguage: String {
-    // Honor the language assigned to this app in macOS. SwiftPM keeps its
-    // localizations in a separate bundle, while the packaged app uses main.
-    let bundle: Bundle = Bundle.main.url(forResource: "Localizable", withExtension: "strings") != nil
-      ? .main : .module
-    return language(for: bundle.preferredLocalizations.first
-      ?? Locale.preferredLanguages.first ?? "en")
+    // Select the existing guide for the live app language. Languages without a
+    // detailed guide retain the existing English fallback.
+    language(for: L10n.languageIdentifier)
   }
 
   static func detailedURL(for localeIdentifier: String) -> URL {

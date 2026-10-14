@@ -12,6 +12,10 @@ final class ApplicationDelegate: NSObject, NSApplicationDelegate, ObservableObje
     appearance.apply(to: NSApplication.shared)
   }
 
+  func applicationDidFinishLaunching(_ notification: Notification) {
+    NativeMenuLocalization.startObserving()
+  }
+
   func application(_ application: NSApplication, open urls: [URL]) {
     guard !urls.isEmpty else { return }
     if let openHandler { openHandler(urls) }

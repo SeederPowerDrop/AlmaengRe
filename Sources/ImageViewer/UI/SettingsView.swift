@@ -5,6 +5,7 @@ struct SettingsView: View {
   @ObservedObject var store: AppStore
   @ObservedObject var shortcuts: ShortcutStore
   @ObservedObject var appearance: AppearanceStore
+  @ObservedObject var language: LanguageStore
   @StateObject private var associations = DefaultAppAssociationStore()
   @State private var associationError: String?
   @State private var selectedTab = SettingsTab.general
@@ -34,7 +35,7 @@ struct SettingsView: View {
     .background(ViewerTheme.chromeGradient)
     .tint(ViewerTheme.accent)
     .environment(\.layoutDirection,
-      L10n.languageIdentifier == "ar" ? .rightToLeft : .leftToRight)
+      language.languageIdentifier == "ar" ? .rightToLeft : .leftToRight)
     .alert(
       "기본 앱을 변경할 수 없음",
       isPresented: Binding(
@@ -52,25 +53,19 @@ struct SettingsView: View {
     Form {
       Section(LanguageSettings.text("title")) {
         VStack(alignment: .leading, spacing: 10) {
-          HStack(spacing: 8) {
-            Text(LanguageSettings.text("current"))
-              .foregroundStyle(.secondary)
-            Text(LanguageSettings.languageName())
-              .fontWeight(.medium)
-          }
-          .accessibilityIdentifier("settings.currentLanguage")
-
-          Button(action: LanguageSettings.openSystemSettings) {
-            Label(LanguageSettings.text("open"), systemImage: "globe")
-              .fixedSize(horizontal: true, vertical: false)
+          Picker(LanguageSettings.text("current"), selection: $language.selection) {
+            Text(LanguageSettings.text("system")).tag("system")
+            ForEach(L10n.supportedLocalizations, id: \.self) { identifier in
+              Text(verbatim: LanguageSettings.languageName(for: identifier)).tag(identifier)
+            }
           }
           .accessibilityIdentifier("settings.language")
 
-          Text(LanguageSettings.text("instructions"))
+          Text(LanguageSettings.text("help"))
             .font(.caption)
             .foregroundStyle(.secondary)
             .fixedSize(horizontal: false, vertical: true)
-          Text(LanguageSettings.text("restart"))
+          Text(LanguageSettings.text("fallback"))
             .font(.caption)
             .foregroundStyle(.secondary)
             .fixedSize(horizontal: false, vertical: true)
@@ -204,6 +199,9 @@ struct SettingsView: View {
       }
     }
     .formStyle(.grouped)
+    // Recreate only the native settings controls when their writing direction
+    // changes; AppKit otherwise retains the old popup-arrow placement.
+    .id(language.languageIdentifier == "ar")
   }
 
   private var shortcutSettings: some View {

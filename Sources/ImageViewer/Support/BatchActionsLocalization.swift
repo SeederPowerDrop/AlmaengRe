@@ -2,8 +2,6 @@ import Foundation
 
 enum BatchActionsL10n {
   static func text(_ key: String) -> String {
-    let bundle: Bundle = Bundle.main.url(forResource: "BatchActions", withExtension: "strings") != nil
-      ? .main : .module
-    return bundle.localizedString(forKey: key, value: key, table: "BatchActions")
+    L10n.text(key, localeIdentifier: L10n.languageIdentifier, table: "BatchActions")
   }
 }

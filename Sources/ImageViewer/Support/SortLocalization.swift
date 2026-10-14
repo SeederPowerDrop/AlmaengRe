@@ -2,7 +2,7 @@ import Foundation
 
 enum SortL10n {
   static func text(_ key: String) -> String {
-    activeBundle.localizedString(forKey: key, value: key, table: "Sort")
+    L10n.text(key, localeIdentifier: L10n.languageIdentifier, table: "Sort")
   }
 
   static func format(_ key: String, _ arguments: CVarArg...) -> String {

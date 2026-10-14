@@ -2,7 +2,7 @@ import Foundation
 
 enum BatchRenameL10n {
   static func text(_ key: String) -> String {
-    activeBundle.localizedString(forKey: key, value: key, table: "BatchRename")
+    L10n.text(key, localeIdentifier: L10n.languageIdentifier, table: "BatchRename")
   }
 
   static func format(_ key: String, _ arguments: CVarArg...) -> String {

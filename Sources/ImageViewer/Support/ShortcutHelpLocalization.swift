@@ -2,7 +2,7 @@ import Foundation
 
 enum ShortcutHelpL10n {
   static func text(_ key: String) -> String {
-    activeBundle.localizedString(forKey: key, value: key, table: "Shortcuts")
+    L10n.text(key, localeIdentifier: L10n.languageIdentifier, table: "Shortcuts")
   }
 
   static func format(_ key: String, _ arguments: CVarArg...) -> String {

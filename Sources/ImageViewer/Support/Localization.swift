@@ -1,17 +1,53 @@
 import Foundation
+import Observation
+
+/// Dynamic labels participate in SwiftUI observation even when they call L10n
+/// through a model/helper. Reads also remain safe in background image services.
+final class AppLanguagePreference: Observable, @unchecked Sendable {
+  static let shared = AppLanguagePreference(
+    selection: UserDefaults.standard.string(forKey: L10n.languageDefaultsKey))
+  private let registrar = ObservationRegistrar()
+  private let lock = NSLock()
+  private var storedSelection: String?
+
+  init(selection: String? = nil) { storedSelection = selection }
+
+  var selection: String? {
+    get {
+      registrar.access(self, keyPath: \.selection)
+      return lock.withLock { storedSelection }
+    }
+    set {
+      registrar.withMutation(of: self, keyPath: \.selection) {
+        lock.withLock { storedSelection = newValue }
+      }
+    }
+  }
+}
 
 /// 앱의 동적 문자열과 오류 문구를 SwiftPM 및 .app 번들 모두에서 현지화합니다.
 enum L10n {
   static let supportedLocalizations = ["ko", "en", "ja", "zh-Hans", "vi", "es", "fr", "de", "ru", "ar"]
+  static let languageDefaultsKey = "ImageViewer.Language.v1"
 
   /// Match the app's selected language, rather than the user's region format.
   static var languageIdentifier: String {
+    resolvedLanguage(selection: AppLanguagePreference.shared.selection,
+      systemLanguage: systemLanguageIdentifier)
+  }
+
+  static var systemLanguageIdentifier: String {
     Bundle.preferredLocalizations(from: supportedLocalizations,
       forPreferences: activeBundle.preferredLocalizations).first ?? "ko"
   }
 
+  static func resolvedLanguage(selection: String?, systemLanguage: String) -> String {
+    if let selection, supportedLocalizations.contains(selection) { return selection }
+    return supportedLocalizations.contains(systemLanguage) ? systemLanguage : "ko"
+  }
+
   static func text(_ key: String) -> String {
-    activeBundle.localizedString(forKey: key, value: key, table: nil)
+    text(key, localeIdentifier: languageIdentifier)
   }
 
   static func format(_ key: String, _ arguments: CVarArg...) -> String {

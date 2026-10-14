@@ -2,12 +2,16 @@ import SwiftUI
 
 struct HomeView: View {
   @Environment(\.openWindow) private var openWindow
+  @Environment(\.locale) private var appLocale
   @ObservedObject var store: AppStore
   @ObservedObject private var recentPhotos: RecentPhotoStore
   private let localeIdentifier: String?
   private var formattingLocale: Locale { localeIdentifier.map(Locale.init(identifier:)) ?? .current }
   private var strings: HomeStrings {
-    HomeStrings(languageIdentifier: localeIdentifier ?? L10n.languageIdentifier, locale: formattingLocale)
+    // Observe the language environment without replacing the user's regional
+    // date and number formats. The explicit locale is only for layout previews.
+    _ = appLocale
+    return HomeStrings(languageIdentifier: localeIdentifier ?? L10n.languageIdentifier, locale: formattingLocale)
   }
 
   init(store: AppStore, localeIdentifier: String? = nil) {

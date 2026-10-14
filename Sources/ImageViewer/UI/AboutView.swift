@@ -12,7 +12,11 @@ struct AboutView: View {
     preferredWidth = width
   }
 
-  private var languageIdentifier: String { localeIdentifier ?? AboutContent.languageIdentifier }
+  private var languageIdentifier: String {
+    // Reading the parent locale refreshes this open window after a live change.
+    _ = appLocale
+    return localeIdentifier ?? AboutContent.languageIdentifier
+  }
 
   // Fit the introduction to its contents, including restored windows that used
   // to be small enough to hide the support cards below a scroll view.
@@ -22,6 +26,7 @@ struct AboutView: View {
 
   @Environment(\.dismiss) private var dismiss
   @Environment(\.openWindow) private var openWindow
+  @Environment(\.locale) private var appLocale
   @State private var showsBitcoin = false
   @State private var supportStatus: String?
   @State private var showsLicenses = false

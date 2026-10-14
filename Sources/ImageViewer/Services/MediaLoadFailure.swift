@@ -12,9 +12,7 @@ enum MediaLoadFailure: String, CaseIterable, Sendable {
   var message: String { Self.text(rawValue) }
 
   static func text(_ key: String) -> String {
-    let bundle: Bundle = Bundle.main.url(forResource: "MediaLoadFailure", withExtension: "strings") != nil
-      ? .main : .module
-    return bundle.localizedString(forKey: key, value: key, table: "MediaLoadFailure")
+    L10n.text(key, localeIdentifier: L10n.languageIdentifier, table: "MediaLoadFailure")
   }
 
   /// File checks happen only after a load failure and never block the UI actor.

@@ -2,7 +2,7 @@ import Foundation
 
 enum PhotoMarkReportL10n {
   static func text(_ key: String) -> String {
-    activeBundle.localizedString(forKey: key, value: key, table: "PhotoMarkReports")
+    L10n.text(key, localeIdentifier: L10n.languageIdentifier, table: "PhotoMarkReports")
   }
 
   static func format(_ key: String, _ arguments: CVarArg...) -> String {
