@@ -24,8 +24,8 @@ struct GridRowNavigationTests {
     }
   }
 
-  @Test("여러 장 뷰어는 페이지 시작을 기준으로 행을 이동하고 창 열 수 변경을 따른다", arguments: [false, true])
-  func viewerUsesVisiblePageAndResponsiveColumns(marking: Bool) async throws {
+  @Test("여러 장 뷰어는 페이지 시작을 기준으로 행을 이동하고 프레임 열 수 변경을 따른다", arguments: [false, true])
+  func viewerUsesVisiblePageAndConfiguredColumns(marking: Bool) async throws {
     let fixture = try Fixture(count: 23)
     let store = fixture.makeStore()
     defer { fixture.cleanup(store) }
@@ -34,7 +34,7 @@ struct GridRowNavigationTests {
     store.setImagesPerPage(7)
     store.navigatePage(1)
     try #require(store.pageStartIndex == 7)
-    store.viewerColumnCount = 3
+    store.frameLayout.setColumns(3, count: 7)
     store.isPhotoMarking = marking
     store.select(index: 8) // Visible slot 1, despite global index 8.
 
@@ -47,10 +47,12 @@ struct GridRowNavigationTests {
     #expect(store.handleViewerKeyDown(try key(125), shortcuts: shortcuts))
     #expect(store.currentIndex == 13 && store.pageStartIndex == 7)
     #expect(store.handleViewerKeyDown(try key(126), shortcuts: shortcuts))
-    #expect(store.currentIndex == 10 && store.pageStartIndex == 7)
+    // The last row's sole frame spans the whole width. Moving up selects
+    // the center frame immediately above it, rather than the source ordinal.
+    #expect(store.currentIndex == 11 && store.pageStartIndex == 7)
 
     store.select(index: 8)
-    store.viewerColumnCount = 4
+    store.frameLayout.setColumns(4, count: 7)
     #expect(store.handleViewerKeyDown(try key(125), shortcuts: shortcuts))
     #expect(store.currentIndex == 12 && store.pageStartIndex == 7)
     #expect(store.handleViewerKeyDown(try key(126), shortcuts: shortcuts))
@@ -67,7 +69,7 @@ struct GridRowNavigationTests {
     try await open(store, fixture: fixture)
     let shortcuts = ShortcutStore(defaults: fixture.defaults)
     store.setImagesPerPage(7)
-    store.viewerColumnCount = 3
+    store.frameLayout.setColumns(3, count: 7)
     store.isPhotoMarking = marking
     store.select(index: 1)
     store.zoom = 2
@@ -118,7 +120,7 @@ struct GridRowNavigationTests {
     try await open(store, fixture: fixture)
     let shortcuts = ShortcutStore(defaults: fixture.defaults)
     store.setImagesPerPage(7)
-    store.viewerColumnCount = 3
+    store.frameLayout.setColumns(3, count: 7)
     shortcuts.setBinding(KeyBinding(key: "down"), for: .zoomIn)
     #expect(store.handleViewerKeyDown(try key(125), shortcuts: shortcuts))
     #expect(store.currentIndex == 0 && store.zoom > 1)
@@ -140,7 +142,7 @@ struct GridRowNavigationTests {
     try await open(store, fixture: fixture)
     let shortcuts = ShortcutStore(defaults: fixture.defaults)
     store.isPhotoMarking = true
-    store.viewerColumnCount = 4 // A stale multi-image column count must not affect single mode.
+    store.frameLayout.setColumns(4, count: 7) // A saved multi-image layout must not affect single mode.
     #expect(store.handleViewerKeyDown(try key(125), shortcuts: shortcuts))
     #expect(store.currentIndex == 1 && store.pageStartIndex == 1)
     #expect(store.handleViewerKeyDown(try key(126), shortcuts: shortcuts))

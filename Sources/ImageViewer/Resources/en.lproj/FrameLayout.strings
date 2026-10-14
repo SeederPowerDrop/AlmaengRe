@@ -1,0 +1,17 @@
+"title" = "Frame layout";
+"preset.balanced" = "Balanced grid";
+"preset.horizontal" = "Single row";
+"preset.vertical" = "Single column";
+"columns" = "Column count";
+"columns.count" = "Columns: %d";
+"edit" = "Edit layout";
+"reset" = "Reset layout";
+"editing.help" = "Drag a frame’s move handle to rearrange it. Drag a divider to resize the frames.";
+"done" = "Done";
+"move.help" = "Drag this handle onto another frame to swap their positions.";
+"move.accessibility" = "Move frame %d";
+"swap.with" = "Swap with frame %d";
+"resize.columns" = "Resize side-by-side frames";
+"resize.rows" = "Resize stacked frames";
+"equalize" = "Equal sizes";
+"video.more" = "More video controls";

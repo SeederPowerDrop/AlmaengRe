@@ -21,8 +21,11 @@ extension AppStore {
     guard !showsHome, !isLoading, !isFiltering, !isExporting, !isSavingMetadata,
       motionMediaAsset == nil, batchSheet == nil, !isBatchBusy,
       overviewSelectionSession == nil, count > 0 else { return true }
-    let target = start + GridRowNavigation.target(
-      from: currentIndex - start, direction: direction, count: count, columns: columns)
+    let targetSlot = presentationMode == .viewer
+      ? frameLayout.rowTarget(from: currentIndex - start, direction: direction, count: count, in: viewerViewportSize)
+      : GridRowNavigation.target(from: currentIndex - start, direction: direction,
+          count: count, columns: columns)
+    let target = start + targetSlot
     if target != currentIndex { select(index: target) }
     return true
   }

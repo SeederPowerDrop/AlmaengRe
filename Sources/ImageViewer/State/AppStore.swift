@@ -19,6 +19,7 @@ enum BatchSheet: String, Identifiable {
 final class AppStore: ObservableObject {
   @Published private(set) var showsHome = true
   let videoGridPlayback = VideoGridPlaybackState()
+  let frameLayout: ViewerFrameLayoutStore
   let recentPhotos: RecentPhotoStore
   private var recentPreviewTasks: [String: Task<Void, Never>] = [:]
   private var recentPreviewGenerations: [String: UUID] = [:]
@@ -40,6 +41,7 @@ final class AppStore: ObservableObject {
   private(set) var photoMapViewport = PhotoMapViewportState()
   var overviewColumnCount = 1
   var viewerColumnCount = 1
+  var viewerViewportSize: CGSize?
   @Published private(set) var isIndexingLocations = false
   @Published private(set) var locationScanCount = 0
   private var locationScanGeneration = UUID()
@@ -132,6 +134,7 @@ final class AppStore: ObservableObject {
       }
       if oldValue == .folderComparison { folderComparison.cancelLoads() }
       if presentationMode != .viewer {
+        frameLayout.isEditing = false
         pauseSlideshow()
         slideshowPresentedAsset = nil
         isFocusMode = false
@@ -145,7 +148,10 @@ final class AppStore: ObservableObject {
     didSet { if oldValue != baseScaleMode { viewerPan.clearGeometry() } }
   }
   @Published var imagesPerPage = 1 {
-    didSet { normalizeMultiImageScale() }
+    didSet {
+      if oldValue != imagesPerPage { frameLayout.isEditing = false }
+      normalizeMultiImageScale()
+    }
   }
   @Published var thumbnailSize: CGFloat {
     didSet {
@@ -308,6 +314,7 @@ final class AppStore: ObservableObject {
     photoMarkDatabaseURL: URL? = nil, batchFileOperator: BatchFileOperator = BatchFileOperator()) {
     self.batchFileOperator = batchFileOperator
     preferences = defaults
+    frameLayout = ViewerFrameLayoutStore(defaults: defaults)
     recentPhotos = RecentPhotoStore(defaults: defaults)
     showsVideos = defaults.object(forKey: Self.showsVideosDefaultsKey) as? Bool ?? true
     photoMarks = PhotoMarkStore(databaseURL: photoMarkDatabaseURL,
@@ -861,10 +868,12 @@ final class AppStore: ObservableObject {
   }
 
   var canPan: Bool {
-    currentAsset?.isVideo != true && (zoom > 1 || baseScaleMode.canOverflowAtBaseScale)
+    !isEditingViewerFrames && currentAsset?.isVideo != true
+      && (zoom > 1 || baseScaleMode.canOverflowAtBaseScale)
   }
 
   var isMultiImageViewer: Bool { presentationMode == .viewer && imagesPerPage > 1 }
+  var isEditingViewerFrames: Bool { isMultiImageViewer && frameLayout.isEditing }
 
   var positionDescription: String {
     guard !assets.isEmpty else { return "0 / 0" }
@@ -1297,6 +1306,10 @@ final class AppStore: ObservableObject {
       !showsPhotoMarkTrackingReport,
       !folderComparison.isEditingNames, folderComparison.editingPhotoMarkSide == nil,
       alert == nil else { return false }
+    if isEditingViewerFrames {
+      if event.keyCode == 53 { return handleEscapeKey() }
+      return false
+    }
     if handlePhotoMarkKeyDown(event) { return true }
     if event.keyCode == 51,
       event.modifierFlags.intersection([.command, .option, .control, .shift]) == .command,
@@ -1357,7 +1370,7 @@ final class AppStore: ObservableObject {
   }
 
   var canToggleImageFocus: Bool {
-    motionMediaAsset == nil && presentationMode == .viewer && currentAsset != nil && !isLoading && !isFiltering
+    !isEditingViewerFrames && motionMediaAsset == nil && presentationMode == .viewer && currentAsset != nil && !isLoading && !isFiltering
       && batchSheet == nil && !isBatchBusy && !isExporting && !isSavingMetadata
       && wallpaperRequest == nil && !isSettingWallpaper && !showsAIUpscaling
       && !showsPhotoMarkEditor && alert == nil
@@ -1530,6 +1543,10 @@ final class AppStore: ObservableObject {
   /// Esc는 확대 비교, 집중 모드, 일반 뷰어 순서로 한 단계씩 이전 보기로 이동합니다.
   @discardableResult
   func handleEscapeKey() -> Bool {
+    if isEditingViewerFrames {
+      frameLayout.isEditing = false
+      return true
+    }
     if isPhotoMarking {
       isPhotoMarking = false
       return true

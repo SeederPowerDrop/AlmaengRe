@@ -10,7 +10,7 @@ struct LocalizationCoverageTests {
     "About", "BatchActions", "BatchRename", "BatchResize", "ComparisonNames", "InfoPlist",
     "Localizable", "MapSelection", "MotionMedia", "PhotoMarkReports", "PhotoMarks",
     "Shortcuts", "Sort", "Watermark", "LibrarySearch", "MediaFormats", "MediaPlayback",
-    "FileOperations", "MediaLoadFailure", "LanguageSettings",
+    "FileOperations", "MediaLoadFailure", "LanguageSettings", "FrameLayout",
   ]
 
   private var projectDirectory: URL {

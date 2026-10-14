@@ -1,0 +1,17 @@
+"title" = "Disposition des cadres";
+"preset.balanced" = "Grille équilibrée";
+"preset.horizontal" = "Une seule rangée";
+"preset.vertical" = "Une seule colonne";
+"columns" = "Nombre de colonnes";
+"columns.count" = "Colonnes : %d";
+"edit" = "Modifier la disposition";
+"reset" = "Réinitialiser la disposition";
+"editing.help" = "Faites glisser la poignée d’un cadre pour le déplacer. Faites glisser un séparateur pour redimensionner les cadres.";
+"done" = "Terminé";
+"move.help" = "Faites glisser cette poignée sur un autre cadre pour échanger leurs positions.";
+"move.accessibility" = "Déplacer le cadre %d";
+"swap.with" = "Échanger avec le cadre %d";
+"resize.columns" = "Redimensionner les cadres côte à côte";
+"resize.rows" = "Redimensionner les cadres superposés";
+"equalize" = "Égaliser les tailles";
+"video.more" = "Autres commandes vidéo";

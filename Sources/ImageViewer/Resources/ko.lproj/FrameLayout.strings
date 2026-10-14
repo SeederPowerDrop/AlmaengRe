@@ -1,0 +1,17 @@
+"title" = "프레임 배치";
+"preset.balanced" = "균형 배치";
+"preset.horizontal" = "가로 한 줄";
+"preset.vertical" = "세로 한 줄";
+"columns" = "열 수";
+"columns.count" = "%d열";
+"edit" = "배치 편집";
+"reset" = "배치 초기화";
+"editing.help" = "프레임의 이동 손잡이를 드래그하고 경계선을 끌어 크기를 조절하세요.";
+"done" = "완료";
+"move.help" = "손잡이를 다른 프레임 위로 끌어 위치를 바꿉니다.";
+"move.accessibility" = "%d번 프레임 이동";
+"swap.with" = "%d번 프레임과 위치 바꾸기";
+"resize.columns" = "좌우 프레임 크기 조절";
+"resize.rows" = "위아래 프레임 크기 조절";
+"equalize" = "같은 크기로 맞춤";
+"video.more" = "영상 더보기";

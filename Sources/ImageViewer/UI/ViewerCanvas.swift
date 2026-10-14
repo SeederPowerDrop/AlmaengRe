@@ -10,6 +10,7 @@ struct ViewerCanvas: View {
   @ObservedObject var store: AppStore
   @ObservedObject var shortcuts: ShortcutStore
   @ObservedObject private var panState: ViewerPanState
+  @ObservedObject private var frameLayout: ViewerFrameLayoutStore
 
   @Environment(\.displayScale) private var displayScale
   @GestureState private var liveMagnification: CGFloat = 1
@@ -23,10 +24,14 @@ struct ViewerCanvas: View {
     self.store = store
     self.shortcuts = shortcuts
     panState = store.viewerPan
+    frameLayout = store.frameLayout
   }
 
   var body: some View {
     VStack(spacing: 0) {
+      if frameLayout.isEditing && store.visibleAssets.count > 1 {
+        ViewerFrameEditingBar(layout: frameLayout, count: store.visibleAssets.count)
+      }
       imageArea
         .environment(\.colorScheme, .dark)
       if !store.isFocusMode {
@@ -41,6 +46,9 @@ struct ViewerCanvas: View {
     .onChange(of: store.isFocusMode) { _, _ in
       controlsDismissed = false
       controlsVisible = true
+    }
+    .onChange(of: frameLayout.isEditing) { _, editing in
+      if editing { store.pauseSlideshow() }
     }
     .onAppear {
       store.beginTrackingViewerPresentation()
@@ -82,28 +90,12 @@ struct ViewerCanvas: View {
   private var imageArea: some View {
     GeometryReader { geometry in
       let visible = store.visibleAssets
-      let columnCount = ViewerGridLayout.columnCount(
-        itemCount: visible.count,
-        containerSize: geometry.size
-      )
-      let columns = Array(
-        repeating: GridItem(.flexible(minimum: 1), spacing: 3),
-        count: columnCount
-      )
-      let rowCount = max(1, Int(ceil(Double(visible.count) / Double(max(columnCount, 1)))))
-      let rowSpacing = CGFloat(max(0, rowCount - 1)) * 3
-      let tileHeight = max(1, (geometry.size.height - rowSpacing - 6) / CGFloat(rowCount))
-      let tileWidth = max(
-        1, (geometry.size.width - 6 - CGFloat(max(0, columnCount - 1)) * 3)
-          / CGFloat(max(1, columnCount)))
-      let renderPixels = ImageLoadingPolicy.requestedPixels(
-        tileSize: store.comparisonLayout.paneSize(in: CGSize(width: tileWidth, height: tileHeight)),
-        displayScale: displayScale,
-        zoom: store.zoom,
-        actualPixels: store.baseScaleMode == .actualPixels,
-        itemCount: visible.count,
-        physicalMemory: ProcessInfo.processInfo.physicalMemory
-      )
+      let configuration = frameLayout.configuration(for: visible.count)
+      let frames = configuration.geometry(in: geometry.size)
+      let columnCount = configuration.rows.map { $0.slots.count }.max() ?? 1
+      let renderPixels = frames.frames.map {
+        requestedRenderPixels(tileSize: $0.rect.size, itemCount: visible.count)
+      }.max() ?? 768
       let prefetchRequest = ViewerPrefetchRequest(
         assets: visible, previewPixels: ImageLoadingPolicy.previewPixels(for: renderPixels))
       let canPan = store.canPan
@@ -113,9 +105,9 @@ struct ViewerCanvas: View {
       ZStack {
         ViewerTheme.canvas
 
-        LazyVGrid(columns: columns, spacing: 3) {
-          // Slot identity survives key repeat, preserving the last completed sample.
-          ForEach(Array(visible.enumerated()), id: \.offset) { slot, asset in
+        ViewerFrameWorkspace(layout: frameLayout, count: visible.count) { slot, tileSize in
+            let asset = visible[slot]
+            let renderPixels = requestedRenderPixels(tileSize: tileSize, itemCount: visible.count)
             Group {
             if asset.isVideo {
               VideoViewerTile(asset: asset, itemCount: visible.count,
@@ -180,9 +172,7 @@ struct ViewerCanvas: View {
             )
             }
             }
-            // GeometryReader는 LazyVGrid 안에서 고유 높이가 없으므로 행 수로
-            // 높이를 명시해야 이미지가 캔버스 전체를 채웁니다.
-            .frame(height: tileHeight)
+            .frame(width: tileSize.width, height: tileSize.height)
             .contentShape(Rectangle())
             .gesture(TapGesture(count: 2).onEnded {
               focusImageCanvas()
@@ -191,10 +181,8 @@ struct ViewerCanvas: View {
             .gesture(TapGesture().onEnded {
               selectAsset(asset, modifiers: NSEvent.modifierFlags)
             }, including: asset.isVideo ? .subviews : .all)
-          }
         }
         .id(store.libraryRevision)
-        .padding(3)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
 
         VStack {
@@ -231,6 +219,9 @@ struct ViewerCanvas: View {
       .onChange(of: columnCount, initial: true) { _, count in
         store.viewerColumnCount = count
       }
+      .onChange(of: geometry.size, initial: true) { _, size in
+        store.viewerViewportSize = size
+      }
       .task(id: prefetchRequest) {
         store.updateViewerPrefetchSize(prefetchRequest.previewPixels)
       }
@@ -250,12 +241,23 @@ struct ViewerCanvas: View {
     }
   }
 
+  private func requestedRenderPixels(tileSize: CGSize, itemCount: Int) -> Int {
+    let pixels = ImageLoadingPolicy.requestedPixels(
+      tileSize: store.comparisonLayout.paneSize(in: tileSize), displayScale: displayScale,
+      zoom: store.zoom, actualPixels: store.baseScaleMode == .actualPixels,
+      itemCount: itemCount, physicalMemory: ProcessInfo.processInfo.physicalMemory)
+    // Divider movement should not issue a new video-poster request for every pixel.
+    return max(128, Int(ceil(Double(pixels) / 128)) * 128)
+  }
+
   private var magnificationGesture: some Gesture {
     MagnificationGesture()
       .updating($liveMagnification) { value, state, _ in
+        guard !frameLayout.isEditing else { return }
         state = value
       }
       .onEnded { value in
+        guard !frameLayout.isEditing else { return }
         store.updateZoom(with: value)
       }
   }
@@ -264,6 +266,7 @@ struct ViewerCanvas: View {
     DragGesture(minimumDistance: 2)
       .updating($isDragging) { _, state, _ in state = true }
       .onChanged { value in
+        guard !frameLayout.isEditing else { return }
         let delta = CGSize(width: value.translation.width - lastDragTranslation.width,
           height: value.translation.height - lastDragTranslation.height)
         lastDragTranslation = value.translation
@@ -272,6 +275,11 @@ struct ViewerCanvas: View {
         if canPan, usesPrimaryDrag { store.updatePan(by: delta) }
       }
       .onEnded { value in
+        guard !frameLayout.isEditing else {
+          lastDragTranslation = .zero
+          hasDragTranslation = false
+          return
+        }
         if canPan, usesPrimaryDrag, hasDragTranslation {
           store.updatePan(by: CGSize(width: value.translation.width - lastDragTranslation.width,
             height: value.translation.height - lastDragTranslation.height))

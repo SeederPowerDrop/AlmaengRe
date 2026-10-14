@@ -354,6 +354,9 @@ struct RootView: View {
         .labelsHidden()
         .frame(width: 66)
         .help("한 화면에 표시할 이미지 수")
+        if store.visibleAssets.count > 1 {
+          ViewerFrameLayoutMenu(layout: store.frameLayout, count: store.visibleAssets.count)
+        }
       }
       BatchActionsMenu(store: store, compact: true)
       if store.presentationMode != .map {
@@ -417,7 +420,7 @@ struct RootView: View {
           store.handlePanInput(input, delta: delta)
         },
         onHorizontalSwipe: { delta in
-          guard store.presentationMode == .viewer else { return }
+          guard store.presentationMode == .viewer, !store.isEditingViewerFrames else { return }
           store.navigatePage(delta < 0 ? 1 : -1)
         },
         canHandleSpaceTap: { store.canToggleImageFocus && !shortcuts.hasPlainSpaceBinding },

@@ -1,0 +1,17 @@
+"title" = "フレーム配置";
+"preset.balanced" = "バランス配置";
+"preset.horizontal" = "横一列";
+"preset.vertical" = "縦一列";
+"columns" = "列数";
+"columns.count" = "%d列";
+"edit" = "配置を編集";
+"reset" = "配置をリセット";
+"editing.help" = "フレームの移動ハンドルをドラッグして配置を変え、境界線をドラッグしてサイズを調整します。";
+"done" = "完了";
+"move.help" = "このハンドルを別のフレームにドラッグすると、位置を入れ替えられます。";
+"move.accessibility" = "フレーム%dを移動";
+"swap.with" = "フレーム%dと位置を入れ替え";
+"resize.columns" = "左右のフレームのサイズを調整";
+"resize.rows" = "上下のフレームのサイズを調整";
+"equalize" = "同じサイズにする";
+"video.more" = "動画のその他の操作";

@@ -1,0 +1,17 @@
+"title" = "Bố cục khung";
+"preset.balanced" = "Lưới cân đối";
+"preset.horizontal" = "Một hàng ngang";
+"preset.vertical" = "Một cột dọc";
+"columns" = "Số cột";
+"columns.count" = "%d cột";
+"edit" = "Sửa bố cục";
+"reset" = "Đặt lại bố cục";
+"editing.help" = "Kéo tay nắm của khung để đổi vị trí. Kéo đường phân cách để đổi kích thước các khung.";
+"done" = "Xong";
+"move.help" = "Kéo tay nắm này sang khung khác để đổi chỗ hai khung.";
+"move.accessibility" = "Di chuyển khung %d";
+"swap.with" = "Đổi chỗ với khung %d";
+"resize.columns" = "Đổi kích thước các khung cạnh nhau";
+"resize.rows" = "Đổi kích thước các khung trên dưới";
+"equalize" = "Chia đều kích thước";
+"video.more" = "Thêm điều khiển video";

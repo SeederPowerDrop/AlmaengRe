@@ -1,0 +1,17 @@
+"title" = "Distribución de marcos";
+"preset.balanced" = "Cuadrícula equilibrada";
+"preset.horizontal" = "Una fila";
+"preset.vertical" = "Una columna";
+"columns" = "Número de columnas";
+"columns.count" = "Columnas: %d";
+"edit" = "Editar distribución";
+"reset" = "Restablecer distribución";
+"editing.help" = "Arrastra el asa de un marco para cambiar su posición. Arrastra un separador para ajustar el tamaño de los marcos.";
+"done" = "Listo";
+"move.help" = "Arrastra esta asa sobre otro marco para intercambiar sus posiciones.";
+"move.accessibility" = "Mover el marco %d";
+"swap.with" = "Intercambiar con el marco %d";
+"resize.columns" = "Ajustar los marcos contiguos";
+"resize.rows" = "Ajustar los marcos apilados";
+"equalize" = "Igualar tamaños";
+"video.more" = "Más controles de vídeo";

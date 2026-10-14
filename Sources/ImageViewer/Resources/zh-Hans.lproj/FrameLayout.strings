@@ -1,0 +1,17 @@
+"title" = "画面布局";
+"preset.balanced" = "均衡布局";
+"preset.horizontal" = "横向一行";
+"preset.vertical" = "纵向一列";
+"columns" = "列数";
+"columns.count" = "%d列";
+"edit" = "编辑布局";
+"reset" = "重置布局";
+"editing.help" = "拖动画面的移动手柄以调整位置，拖动分隔线以调整大小。";
+"done" = "完成";
+"move.help" = "将此手柄拖到其他画面上，即可交换位置。";
+"move.accessibility" = "移动第%d个画面";
+"swap.with" = "与第%d个画面交换位置";
+"resize.columns" = "调整左右画面大小";
+"resize.rows" = "调整上下画面大小";
+"equalize" = "设为相同大小";
+"video.more" = "更多视频操作";

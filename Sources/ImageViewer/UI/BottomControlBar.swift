@@ -33,6 +33,9 @@ struct BottomControlBar: View {
             .help(pageNavigationHelp(direction: 1))
         }
         .modifier(ViewerControlGroup())
+        if store.isFocusMode && store.visibleAssets.count > 1 {
+          ViewerFrameLayoutMenu(layout: store.frameLayout, count: store.visibleAssets.count)
+        }
         Spacer(minLength: 12)
         HStack(spacing: 2) {
           Button { store.zoomOut() } label: { Image(systemName: "minus") }.help("축소")

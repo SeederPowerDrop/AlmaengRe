@@ -1,0 +1,17 @@
+"title" = "Rahmenanordnung";
+"preset.balanced" = "Ausgewogenes Raster";
+"preset.horizontal" = "Eine Zeile";
+"preset.vertical" = "Eine Spalte";
+"columns" = "Spaltenanzahl";
+"columns.count" = "Spalten: %d";
+"edit" = "Anordnung bearbeiten";
+"reset" = "Anordnung zurücksetzen";
+"editing.help" = "Ziehe am Griff eines Rahmens, um ihn zu verschieben. Ziehe an einer Trennlinie, um die Rahmengröße anzupassen.";
+"done" = "Fertig";
+"move.help" = "Ziehe diesen Griff auf einen anderen Rahmen, um die Positionen zu tauschen.";
+"move.accessibility" = "Rahmen %d verschieben";
+"swap.with" = "Mit Rahmen %d tauschen";
+"resize.columns" = "Nebeneinanderliegende Rahmen skalieren";
+"resize.rows" = "Übereinanderliegende Rahmen skalieren";
+"equalize" = "Gleiche Größe";
+"video.more" = "Weitere Videosteuerungen";

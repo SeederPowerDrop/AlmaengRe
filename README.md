@@ -2,13 +2,13 @@
 
 빠르고 단정한 macOS용 무료 오픈 소스 이미지 뷰어입니다. 반디뷰의 이미지 중심 흐름에서 영감을 받되, SwiftUI·트랙패드·Apple 컬러 파이프라인에 맞게 새로 설계합니다.
 
-현재 공개 버전은 **1.0.4 (빌드 54)** 입니다. **macOS 14 이상**, **Apple Silicon·Intel 공용(Universal 2)** 앱입니다.
+현재 공개 버전은 **1.0.5 (빌드 55)** 입니다. **macOS 14 이상**, **Apple Silicon·Intel 공용(Universal 2)** 앱입니다.
 
-**[알맹Re 1.0.4 DMG 다운로드](https://github.com/SeederPowerDrop/AlmaengRe/releases/download/v1.0.4/AlmaengRe-1.0.4-macos-universal.dmg)** · [릴리스와 변경 내역](https://github.com/SeederPowerDrop/AlmaengRe/releases/tag/v1.0.4) · [SHA-256 체크섬](https://github.com/SeederPowerDrop/AlmaengRe/releases/download/v1.0.4/SHA256SUMS.txt)
+**[알맹Re 1.0.5 DMG 다운로드](https://github.com/SeederPowerDrop/AlmaengRe/releases/download/v1.0.5/AlmaengRe-1.0.5-macos-universal.dmg)** · [릴리스와 변경 내역](https://github.com/SeederPowerDrop/AlmaengRe/releases/tag/v1.0.5) · [SHA-256 체크섬](https://github.com/SeederPowerDrop/AlmaengRe/releases/download/v1.0.5/SHA256SUMS.txt)
 
 DMG 안의 **알맹Re.app**을 **Applications**로 옮겨 설치합니다. 현재 배포본은 ad-hoc 서명이며 **Apple Developer ID 서명·공증은 적용되지 않았습니다**. 인터넷에서 받은 앱은 macOS 보안 정책에 따라 첫 실행이 제한될 수 있습니다. Intel용 실행 파일은 포함되어 있지만 실제 Intel Mac에서의 실행은 아직 검증하지 못했습니다.
 
-1.0.4에서는 상단 **언어** 메뉴에서 지원하는 10개 언어와 **시스템 설정 따르기**를 바로 선택할 수 있습니다. 선택은 열린 화면과 메뉴에 즉시 적용되고 다음 실행에도 유지됩니다. 사진 선택과 확대 상태, macOS 지역 설정은 보존합니다. 긴 번역의 버튼·설정·이미지 비교 조작부 배치를 개선하고, 홈·정보창·뷰어 조작부를 라이트·다크 모드와 아랍어 RTL로 검증했습니다.
+1.0.5에서는 다중보기의 **프레임 배치**를 직접 바꿀 수 있습니다. 네 장은 기본으로 **2×2**에 배치하며, 가로 한 줄·세로 한 줄·원하는 열 수도 선택할 수 있습니다. **배치 편집**에서 프레임을 끌어 위치를 바꾸고 구분선을 끌어 크기를 조절합니다. 배치는 사진 개수별로 기억하며, 파일 정렬·선택한 사진·확대 상태는 유지합니다. 새 조작부는 지원하는 10개 언어와 라이트·다크 모드에 맞췄으며, 아랍어에서도 사진의 실제 좌우 위치를 유지합니다.
 
 이번 버전에는 Finder에서 간단히 이미지 열기와 기본 이미지 앱 연결, 이미지·영상·폴더 드래그 앤 드롭, 최근 3개 폴더와 폴더별 최근 4개 파일, 다중 영상 재생·음소거 개선, 형식·메타데이터·날짜 검색, 분류 이력 CSV 내보내기가 포함됩니다. 설명서 갱신은 일시 중단되어 아래 기존 설명서는 0.13.1 기준으로 보존하고 있습니다.
 
@@ -45,7 +45,7 @@ The **0.13.1 development app** provides its interface and in-app Basic Usage in 
 - 빈 공간이나 사진 위에서 드래그해 사각형 영역 선택. Shift는 추가, ⌘는 선택 반전, Esc는 시작 전 선택으로 복원
 - ⌘/⇧ 다중 선택, 앞·뒤 문구와 일련번호를 조합하는 이름 일괄 변경 및 미리보기
 - 선택한 이미지의 형식 일괄 변환, 저장 폴더 지정, 진행률·중지·개별 결과 표시
-- 한 창에 1~10장 동시 보기와 창 비율 기반 자동 그리드
+- 한 창에 1~10장 동시 보기, 균형·가로·세로·열 수 배치 선택과 프레임 위치·크기 조절
 - 두 폴더를 좌우/상하로 비교하고 함께 또는 A/B만 이동, 번호로 이동, 확대·팬 연동 선택
 - 트랙패드 핀치 확대/축소, 안티앨리어싱 기반 부드러운 확대와 가로 스와이프 탐색
 - 고화질 확대 켜기/끄기와 같은 이미지의 원본 픽셀·부드러운 확대 좌우/상하 동기화 비교
@@ -93,7 +93,7 @@ macOS 14 이상, Swift 6 / Xcode 16 이상, Rust 툴체인이 필요합니다. U
 ```bash
 rustup target add aarch64-apple-darwin x86_64-apple-darwin
 IMAGEVIEWER_DEFER_GUIDE_CHECK=1 ./scripts/build-app.sh release universal
-./scripts/build-dmg.sh "$PWD/dist/알맹Re.app" "$PWD/dist/AlmaengRe-1.0.4-macos-universal.dmg"
+./scripts/build-dmg.sh "$PWD/dist/알맹Re.app" "$PWD/dist/AlmaengRe-1.0.5-macos-universal.dmg"
 ```
 
 `IMAGEVIEWER_DEFER_GUIDE_CHECK=1`은 설명서 작업 중단 지시에 따라 기존 설명서와 검토 지문을 유지합니다. 앱 빌드와 코드 테스트는 계속 실행합니다. 빠른 로컬 앱 빌드는 `IMAGEVIEWER_DEFER_GUIDE_CHECK=1 ./scripts/build-app.sh debug native`로 만듭니다.

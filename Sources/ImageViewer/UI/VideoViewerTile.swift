@@ -37,6 +37,7 @@ struct VideoViewerTile: View {
   @State private var isHovered = false
   @State private var appIsActive = NSApp.isActive
   @State private var study: VideoStudySession?
+  @State private var showsSubtitles = false
 
   private var isMultiTile: Bool { itemCount > 1 }
   private var retainedPlaybackFailureReason: String? {
@@ -50,50 +51,17 @@ struct VideoViewerTile: View {
 
   var body: some View {
     VStack(spacing: 0) {
-      HStack(spacing: 10) {
-        if isMultiTile {
-          if let photoMarkStore, photoMarkStore.isPhotoMarking, let onToggleSelection {
-            PhotoMarkSelectionToggle(asset: asset,
-              isSelected: photoMarkStore.selectedURLs.contains(asset.url),
-              action: onToggleSelection)
-          }
-          Button { gridPlayback.toggleSelection(asset.id) } label: {
-            Image(systemName: playbackSelectionSymbol)
-          }
-          .help(MediaPlaybackL10n.text("grid.select"))
-          .accessibilityLabel(MediaPlaybackL10n.text("grid.select") + " " + asset.filename)
-          .accessibilityIdentifier("video.select.\(asset.id.absoluteString)")
-          .foregroundStyle(gridPlayback.selectedIDs.contains(asset.id) ? Color.accentColor : .white)
-          Button { gridPlayback.togglePlayback(asset.id) } label: {
-            Image(systemName: gridPlayback.playingIDs.contains(asset.id) ? "pause.fill" : "play.fill")
-          }
-          .disabled(!allowsPlayback)
-          .help(MediaPlaybackL10n.text(gridPlayback.playingIDs.contains(asset.id) ? "grid.pause" : "grid.play"))
-          .accessibilityLabel(MediaPlaybackL10n.text(gridPlayback.playingIDs.contains(asset.id) ? "grid.pause" : "grid.play") + " " + asset.filename)
-          .accessibilityIdentifier("video.play.\(asset.id.absoluteString)")
-        }
-        Label(asset.filename, systemImage: "film")
-          .lineLimit(1).truncationMode(.middle)
-          .frame(maxWidth: .infinity, alignment: .leading)
-        if let photoMarkStore, photoMarkStore.isPhotoMarking {
-          PhotoMarkCardMenu(store: photoMarkStore, asset: asset)
-        }
-        if let study {
-          VideoStudyControls(session: study).disabled(!allowsPlayback)
-        }
-        Button(action: openFullScreen) {
-          Image(systemName: "arrow.up.left.and.arrow.down.right")
-        }
-        .help(MotionMediaL10n.text("video.fullscreen"))
-        .accessibilityLabel(MotionMediaL10n.text("video.fullscreen"))
-        .disabled(!allowsPlayback)
-        Button(action: onOpenTools) { Image(systemName: "film.stack") }
-          .help(MotionMediaL10n.text("editor.open"))
-          .accessibilityLabel(MotionMediaL10n.text("editor.open"))
-          .disabled(!allowsPlayback)
+      ViewThatFits(in: .horizontal) {
+        fullHeader
+        compactHeader
       }
       .buttonStyle(.borderless)
-      .font(.caption).foregroundStyle(.white).padding(10).background(.black)
+      .font(.caption).foregroundStyle(.white).background(.black)
+      // The presentation belongs to the tile, so changing header variants while
+      // resizing does not discard an open subtitle settings panel.
+      .popover(isPresented: $showsSubtitles) {
+        if let study { VideoSubtitleSettings(session: study) }
+      }
 
       ZStack {
         posterSurface
@@ -212,6 +180,109 @@ struct VideoViewerTile: View {
     }
   }
 
+  private var fullHeader: some View {
+    HStack(spacing: 10) {
+      if isMultiTile {
+        if let photoMarkStore, photoMarkStore.isPhotoMarking, let onToggleSelection {
+          PhotoMarkSelectionToggle(asset: asset,
+            isSelected: photoMarkStore.selectedURLs.contains(asset.url),
+            action: onToggleSelection)
+        }
+        Button { gridPlayback.toggleSelection(asset.id) } label: {
+          Image(systemName: playbackSelectionSymbol)
+        }
+        .help(MediaPlaybackL10n.text("grid.select"))
+        .accessibilityLabel(MediaPlaybackL10n.text("grid.select") + " " + asset.filename)
+        .accessibilityIdentifier("video.select.\(asset.id.absoluteString)")
+        .foregroundStyle(gridPlayback.selectedIDs.contains(asset.id) ? Color.accentColor : .white)
+        playButton
+      }
+      Label(asset.filename, systemImage: "film")
+        .lineLimit(1).truncationMode(.middle)
+        .frame(minWidth: 60, idealWidth: 160, maxWidth: .infinity, alignment: .leading)
+        .help(asset.filename)
+      if let photoMarkStore, photoMarkStore.isPhotoMarking {
+        PhotoMarkCardMenu(store: photoMarkStore, asset: asset)
+      }
+      if let study {
+        VideoTileStudyActions(session: study, showsSubtitles: $showsSubtitles)
+          .disabled(!allowsPlayback)
+      }
+      Button(action: openFullScreen) {
+        Image(systemName: "arrow.up.left.and.arrow.down.right")
+      }
+      .help(MotionMediaL10n.text("video.fullscreen"))
+      .accessibilityLabel(MotionMediaL10n.text("video.fullscreen"))
+      .disabled(!allowsPlayback)
+      Button(action: onOpenTools) { Image(systemName: "film.stack") }
+        .help(MotionMediaL10n.text("editor.open"))
+        .accessibilityLabel(MotionMediaL10n.text("editor.open"))
+        .disabled(!allowsPlayback)
+    }
+    .padding(10)
+    .accessibilityIdentifier("video.header.full")
+  }
+
+  private var compactHeader: some View {
+    HStack(spacing: 6) {
+      if isMultiTile { playButton }
+      Text(asset.filename)
+        .lineLimit(1).truncationMode(.middle)
+        .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
+        .help(asset.filename)
+      Menu {
+        if isMultiTile {
+          Toggle(MediaPlaybackL10n.text("grid.select"), isOn: Binding(
+            get: { gridPlayback.selectedIDs.contains(asset.id) },
+            set: { _ in gridPlayback.toggleSelection(asset.id) }))
+          if let photoMarkStore, photoMarkStore.isPhotoMarking, let onToggleSelection {
+            Toggle(PhotoMarkL10n.format("selection.accessibilityFormat", asset.filename), isOn: Binding(
+              get: { photoMarkStore.selectedURLs.contains(asset.url) },
+              set: { _ in onToggleSelection() }))
+          }
+          Divider()
+        }
+        if let photoMarkStore, photoMarkStore.isPhotoMarking {
+          PhotoMarkCardMenu(store: photoMarkStore, asset: asset)
+        }
+        if let study {
+          VideoTileStudyActions(session: study, showsSubtitles: $showsSubtitles, inMenu: true)
+            .disabled(!allowsPlayback)
+          Divider()
+        }
+        Button(action: openFullScreen) {
+          Label(MotionMediaL10n.text("video.fullscreen"),
+            systemImage: "arrow.up.left.and.arrow.down.right")
+        }
+        .disabled(!allowsPlayback)
+        Button(action: onOpenTools) {
+          Label(MotionMediaL10n.text("editor.open"), systemImage: "film.stack")
+        }
+        .disabled(!allowsPlayback)
+      } label: {
+        Image(systemName: "ellipsis.circle").frame(width: 18, height: 28)
+      }
+      .menuStyle(.borderlessButton).menuIndicator(.hidden).fixedSize()
+      .help(FrameLayoutL10n.text("video.more"))
+      .accessibilityLabel(FrameLayoutL10n.text("video.more"))
+      .accessibilityIdentifier("video.header.more")
+    }
+    .padding(.horizontal, 6).padding(.vertical, 4)
+    .accessibilityIdentifier("video.header.compact")
+  }
+
+  private var playButton: some View {
+    Button { gridPlayback.togglePlayback(asset.id) } label: {
+      Image(systemName: gridPlayback.playingIDs.contains(asset.id) ? "pause.fill" : "play.fill")
+        .frame(width: 16, height: 28)
+    }
+    .disabled(!allowsPlayback)
+    .help(MediaPlaybackL10n.text(gridPlayback.playingIDs.contains(asset.id) ? "grid.pause" : "grid.play"))
+    .accessibilityLabel(MediaPlaybackL10n.text(gridPlayback.playingIDs.contains(asset.id) ? "grid.pause" : "grid.play") + " " + asset.filename)
+    .accessibilityIdentifier("video.play.\(asset.id.absoluteString)")
+    .fixedSize()
+  }
+
   private var posterSurface: some View {
     Color.black.overlay {
       if let poster {
@@ -254,6 +325,60 @@ struct VideoViewerTile: View {
     guard allowsPlayback else { return }
     let position = controller.pauseForFullScreen()
     onOpenFullScreen(position.seconds, position.isMuted)
+  }
+}
+
+private struct VideoTileStudyActions: View {
+  @ObservedObject var session: VideoStudySession
+  @Binding var showsSubtitles: Bool
+  var inMenu = false
+
+  var body: some View {
+    Group {
+      if inMenu {
+        speedMenu
+        subtitlesButton
+      } else {
+        HStack(spacing: 8) {
+          speedMenu
+          subtitlesButton
+        }
+        .fixedSize()
+      }
+    }
+    .font(.system(size: 13, weight: .medium))
+    .task { SubtitleFontCatalog.shared.prepare() }
+  }
+
+  private var speedMenu: some View {
+    Menu {
+      Picker(MotionMediaL10n.text("study.speed"), selection: $session.playbackRate) {
+        ForEach([0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.5, 3, 4], id: \.self) { rate in
+          Text(rate.formatted(.number.precision(.fractionLength(0...2))) + "×").tag(rate)
+        }
+      }
+    } label: {
+      if inMenu {
+        Text(MotionMediaL10n.text("study.speed"))
+      } else {
+        Text(session.playbackRate.formatted(.number.precision(.fractionLength(0...2))) + "×")
+          .monospacedDigit().frame(minWidth: 36, minHeight: 28)
+      }
+    }
+    .menuStyle(.borderlessButton).fixedSize()
+    .help(MotionMediaL10n.text("study.speed"))
+    .accessibilityLabel(MotionMediaL10n.text("study.speed"))
+    .accessibilityValue(String(session.playbackRate))
+    .accessibilityIdentifier("video.study.speed")
+  }
+
+  private var subtitlesButton: some View {
+    Button { showsSubtitles.toggle() } label: {
+      Label(MotionMediaL10n.text("study.subtitles"), systemImage: "captions.bubble")
+        .lineLimit(1).frame(minHeight: inMenu ? nil : 28)
+    }
+    .buttonStyle(.borderless)
+    .accessibilityIdentifier("video.study.subtitles")
   }
 }
 
