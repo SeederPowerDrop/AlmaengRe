@@ -22,12 +22,13 @@
 "save" = "Save";
 "cancel" = "Cancel";
 "done" = "Done";
-"filter.title" = "Tags";
-"filter.activeFormat" = "Tags %d";
+"filter.title" = "Tag filter";
+"filter.activeFormat" = "Tag filter · %d";
 "filter.any" = "Any selected tag";
 "filter.all" = "All selected tags";
 "filter.allPhotos" = "All Photos";
 "filter.unmarked" = "Untagged Photos";
+"filter.unmarkedTitle" = "Tag filter · Untagged";
 "filter.reset" = "Clear Tag Filter";
 "filter.help" = "Gather photos by tag";
 "filter.empty" = "Try changing the tag or search filters.";

@@ -11,7 +11,8 @@ struct PhotoMarkLocalizationTests {
     let essentialKeys: Set<String> = [
       "panel.title", "panel.hint", "panel.multipleHint", "panel.close",
       "labels.title", "labels.hint", "labels.safety", "labels.keyFormat",
-      "filter.any", "filter.all", "filter.unmarked", "filter.reset", "filter.empty",
+      "filter.title", "filter.activeFormat", "filter.any", "filter.all", "filter.unmarked",
+      "filter.unmarkedTitle", "filter.reset", "filter.empty",
       "mode.help", "storage.error", "error.title",
       "settings.title", "settings.hint", "labels.settingsLink", "labels.editHelp",
       "labels.keyHelpFormat", "labels.previewFormat", "labels.revertHelp", "mode.detailHelp",

@@ -22,12 +22,13 @@
 "save" = "Lưu";
 "cancel" = "Hủy";
 "done" = "Xong";
-"filter.title" = "Nhãn";
-"filter.activeFormat" = "Nhãn %d";
+"filter.title" = "Bộ lọc nhãn";
+"filter.activeFormat" = "Bộ lọc nhãn · %d";
 "filter.any" = "Có bất kỳ nhãn đã chọn nào";
 "filter.all" = "Có tất cả nhãn đã chọn";
 "filter.allPhotos" = "Tất cả ảnh";
 "filter.unmarked" = "Ảnh chưa gắn nhãn";
+"filter.unmarkedTitle" = "Bộ lọc · Chưa gắn nhãn";
 "filter.reset" = "Bỏ bộ lọc nhãn";
 "filter.help" = "Xem ảnh theo nhãn";
 "filter.empty" = "Hãy thử thay đổi bộ lọc nhãn hoặc điều kiện tìm kiếm.";

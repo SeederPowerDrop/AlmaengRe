@@ -22,12 +22,13 @@
 "save" = "Sichern";
 "cancel" = "Abbrechen";
 "done" = "Fertig";
-"filter.title" = "Markierungen";
-"filter.activeFormat" = "Markierungen %d";
+"filter.title" = "Markierungsfilter";
+"filter.activeFormat" = "Markierungsfilter · %d";
 "filter.any" = "Mindestens eine gewählte Markierung";
 "filter.all" = "Alle gewählten Markierungen";
 "filter.allPhotos" = "Alle Fotos";
 "filter.unmarked" = "Nicht markierte Fotos";
+"filter.unmarkedTitle" = "Filter · Ohne Markierung";
 "filter.reset" = "Markierungsfilter aufheben";
 "filter.help" = "Fotos nach Markierung zusammenstellen";
 "filter.empty" = "Ändere die Markierungs- oder Suchfilter.";

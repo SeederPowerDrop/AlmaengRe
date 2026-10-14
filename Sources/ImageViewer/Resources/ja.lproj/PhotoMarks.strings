@@ -22,12 +22,13 @@
 "save" = "保存";
 "cancel" = "キャンセル";
 "done" = "完了";
-"filter.title" = "分類";
-"filter.activeFormat" = "分類 %d";
+"filter.title" = "分類フィルタ";
+"filter.activeFormat" = "分類フィルタ · %d件";
 "filter.any" = "選んだ分類のいずれか";
 "filter.all" = "選んだ分類のすべて";
 "filter.allPhotos" = "すべての写真";
 "filter.unmarked" = "未分類の写真";
+"filter.unmarkedTitle" = "分類フィルタ · 未分類";
 "filter.reset" = "分類フィルタを解除";
 "filter.help" = "分類した写真をまとめて表示";
 "filter.empty" = "分類や検索条件を変更してください。";

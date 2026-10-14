@@ -22,12 +22,13 @@
 "save" = "저장";
 "cancel" = "취소";
 "done" = "완료";
-"filter.title" = "분류";
-"filter.activeFormat" = "분류 %d";
+"filter.title" = "분류 필터";
+"filter.activeFormat" = "분류 필터 · %d개";
 "filter.any" = "선택한 분류 중 하나라도";
 "filter.all" = "선택한 분류 모두";
 "filter.allPhotos" = "모든 사진";
 "filter.unmarked" = "분류하지 않은 사진";
+"filter.unmarkedTitle" = "분류 필터 · 미분류";
 "filter.reset" = "분류 필터 해제";
 "filter.help" = "분류한 사진 모아 보기";
 "filter.empty" = "분류·검색 조건을 바꿔 보세요.";

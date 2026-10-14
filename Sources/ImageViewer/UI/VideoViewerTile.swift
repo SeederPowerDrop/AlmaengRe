@@ -243,7 +243,7 @@ struct VideoViewerTile: View {
           Divider()
         }
         if let photoMarkStore, photoMarkStore.isPhotoMarking {
-          PhotoMarkCardMenu(store: photoMarkStore, asset: asset)
+          PhotoMarkCardMenu(store: photoMarkStore, asset: asset, inMenu: true)
         }
         if let study {
           VideoTileStudyActions(session: study, showsSubtitles: $showsSubtitles, inMenu: true)

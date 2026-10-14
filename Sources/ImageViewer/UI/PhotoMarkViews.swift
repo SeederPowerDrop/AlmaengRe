@@ -479,6 +479,7 @@ struct PhotoMarkFilterMenu: View {
         .disabled(!store.canEditPhotoMarkLabels)
     } label: {
       Label(menuTitle, systemImage: store.photoMarkFilter.isActive ? "tag.fill" : "tag")
+        .lineLimit(1)
         .foregroundStyle(store.photoMarkFilter.isActive ? ViewerTheme.accent : Color.primary)
     }
     .fixedSize()
@@ -487,7 +488,7 @@ struct PhotoMarkFilterMenu: View {
   }
 
   private var menuTitle: String {
-    if store.photoMarkFilter.unmarkedOnly { return PhotoMarkL10n.text("filter.unmarked") }
+    if store.photoMarkFilter.unmarkedOnly { return PhotoMarkL10n.text("filter.unmarkedTitle") }
     if !store.photoMarkFilter.slots.isEmpty {
       return PhotoMarkL10n.format("filter.activeFormat", store.photoMarkFilter.slots.count)
     }

@@ -22,12 +22,13 @@
 "save" = "حفظ";
 "cancel" = "إلغاء";
 "done" = "تم";
-"filter.title" = "التصنيفات";
-"filter.activeFormat" = "التصنيفات %d";
+"filter.title" = "تصفية التصنيفات";
+"filter.activeFormat" = "تصفية التصنيفات · %d";
 "filter.any" = "أي تصنيف محدد";
 "filter.all" = "كل التصنيفات المحددة";
 "filter.allPhotos" = "كل الصور";
 "filter.unmarked" = "الصور غير المصنفة";
+"filter.unmarkedTitle" = "تصفية · غير مصنفة";
 "filter.reset" = "إزالة فلتر التصنيف";
 "filter.help" = "عرض الصور حسب التصنيف";
 "filter.empty" = "جرّب تغيير شروط التصنيف أو البحث.";

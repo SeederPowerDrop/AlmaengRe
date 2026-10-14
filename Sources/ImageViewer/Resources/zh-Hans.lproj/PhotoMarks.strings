@@ -22,12 +22,13 @@
 "save" = "保存";
 "cancel" = "取消";
 "done" = "完成";
-"filter.title" = "分类";
-"filter.activeFormat" = "分类 %d";
+"filter.title" = "分类筛选";
+"filter.activeFormat" = "分类筛选 · %d项";
 "filter.any" = "任一所选分类";
 "filter.all" = "全部所选分类";
 "filter.allPhotos" = "所有照片";
 "filter.unmarked" = "未分类照片";
+"filter.unmarkedTitle" = "分类筛选 · 未分类";
 "filter.reset" = "清除分类筛选";
 "filter.help" = "按分类查看照片";
 "filter.empty" = "请尝试调整分类或搜索条件。";

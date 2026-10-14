@@ -72,7 +72,7 @@ def main():
                 result = subprocess.run([
                     str(runner), "--test-bundle-path", str(test_bundle),
                     "--testing-library", "swift-testing", "--filter",
-                    "LocalizedControlsLayoutTests|ViewerFrameLayoutRenderTests|LanguageSettingsTests.currentLanguageMatchesUI",
+                    "LocalizedControlsLayoutTests|ViewerFrameLayoutRenderTests|PhotoMarkLabelLayoutTests|LanguageSettingsTests.currentLanguageMatchesUI",
                     "-AppleLanguages", f"({language})",
                 ], cwd=root, env=env, stdout=stream, stderr=subprocess.STDOUT)
             results.append({"language": language, "passed": result.returncode == 0,

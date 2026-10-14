@@ -22,12 +22,13 @@
 "save" = "Сохранить";
 "cancel" = "Отмена";
 "done" = "Готово";
-"filter.title" = "Метки";
-"filter.activeFormat" = "Метки: %d";
+"filter.title" = "Фильтр меток";
+"filter.activeFormat" = "Фильтр меток · %d";
 "filter.any" = "Любая выбранная метка";
 "filter.all" = "Все выбранные метки";
 "filter.allPhotos" = "Все фотографии";
 "filter.unmarked" = "Фото без меток";
+"filter.unmarkedTitle" = "Фильтр · Без меток";
 "filter.reset" = "Сбросить фильтр меток";
 "filter.help" = "Собрать фото по меткам";
 "filter.empty" = "Попробуйте изменить фильтры меток или поиска.";

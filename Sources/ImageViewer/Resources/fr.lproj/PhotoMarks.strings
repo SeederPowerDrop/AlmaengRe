@@ -22,12 +22,13 @@
 "save" = "Enregistrer";
 "cancel" = "Annuler";
 "done" = "Terminé";
-"filter.title" = "Étiquettes";
-"filter.activeFormat" = "Étiquettes %d";
+"filter.title" = "Filtre d’étiquettes";
+"filter.activeFormat" = "Filtre d’étiquettes · %d";
 "filter.any" = "Au moins une étiquette choisie";
 "filter.all" = "Toutes les étiquettes choisies";
 "filter.allPhotos" = "Toutes les photos";
 "filter.unmarked" = "Photos sans étiquette";
+"filter.unmarkedTitle" = "Filtre · Sans étiquette";
 "filter.reset" = "Effacer le filtre par étiquette";
 "filter.help" = "Regrouper les photos par étiquette";
 "filter.empty" = "Essayez de modifier les filtres ou la recherche.";
