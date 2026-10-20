@@ -191,20 +191,20 @@ private struct FullScreenVideoContent: View {
       // Keep controls outside the native player's hit region. Its double-click
       // monitor cannot distinguish SwiftUI controls painted over that region.
       HStack {
-        Text(asset.filename).font(.callout).lineLimit(1).truncationMode(.middle)
+        Text(asset.filename).font(ViewerUIMetrics.font(.callout)).lineLimit(1).truncationMode(.middle)
         Spacer(minLength: 16)
         if let study = playback.study { VideoStudyControls(session: study) }
         if let store {
           FullScreenPhotoMarkControls(store: store, asset: asset)
         }
         Button(action: onClose) {
-          Image(systemName: "xmark").font(.body.weight(.semibold)).frame(width: 30, height: 30)
+          Image(systemName: "xmark").font(ViewerUIMetrics.font(.body).weight(.semibold)).viewerFrame(width: 30, height: 30)
         }
         .buttonStyle(.plain)
         .help(MotionMediaL10n.text("video.fullscreen.close") + " (Esc)")
         .accessibilityLabel(MotionMediaL10n.text("video.fullscreen.close"))
       }
-      .foregroundStyle(.white).padding(12)
+      .foregroundStyle(.white).viewerPadding(12)
       .background(.black.opacity(0.55))
 
       Group {

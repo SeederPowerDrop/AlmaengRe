@@ -11,6 +11,11 @@ private struct VideoTilePlaybackRequest: Equatable {
   let slideshowPlaybackID: UUID?
 }
 
+private struct VideoTilePosterInput: Equatable {
+  let asset: ImageAsset
+  let pixels: Int
+}
+
 struct VideoViewerTile: View {
   let asset: ImageAsset
   let itemCount: Int
@@ -30,9 +35,7 @@ struct VideoViewerTile: View {
   var onSlideshowFailed: (ImageAsset, UUID) -> Void = { _, _ in }
 
   @StateObject private var controller = VideoTilePlaybackController()
-  @State private var poster: CGImage?
-  @State private var posterFailureReason: String?
-  @State private var posterRequestID = UUID()
+  @StateObject private var posterLoader = VideoPosterLoader()
   @State private var playbackFailure: (asset: ImageAsset, reason: String)?
   @State private var isHovered = false
   @State private var appIsActive = NSApp.isActive
@@ -40,8 +43,18 @@ struct VideoViewerTile: View {
   @State private var showsSubtitles = false
 
   private var isMultiTile: Bool { itemCount > 1 }
+  private var posterRequest: VideoTilePosterRequest { VideoTilePosterRequest(asset: asset, maxPixelSize: posterPixelSize) }
+  private var poster: CGImage? {
+    guard let presentation = posterLoader.presentation,
+      presentation.request.hasSameSource(as: posterRequest) else { return nil }
+    return presentation.image
+  }
+  private var posterFailureReason: String? { posterLoader.errorMessage }
   private var retainedPlaybackFailureReason: String? {
-    playbackFailure?.asset == asset ? playbackFailure?.reason : nil
+    guard let playbackFailure,
+      VideoTilePosterRequest(asset: playbackFailure.asset, maxPixelSize: posterPixelSize)
+        .hasSameSource(as: posterRequest) else { return nil }
+    return playbackFailure.reason
   }
   private var request: VideoTilePlaybackRequest {
     VideoTilePlaybackRequest(asset: asset, isMultiTile: isMultiTile,
@@ -56,7 +69,7 @@ struct VideoViewerTile: View {
         compactHeader
       }
       .buttonStyle(.borderless)
-      .font(.caption).foregroundStyle(.white).background(.black)
+      .font(ViewerUIMetrics.font(.caption)).foregroundStyle(.white).background(.black)
       // The presentation belongs to the tile, so changing header variants while
       // resizing does not discard an open subtitle settings panel.
       .popover(isPresented: $showsSubtitles) {
@@ -70,6 +83,7 @@ struct VideoViewerTile: View {
           .onTapGesture(perform: onSelect)
         if let playback = controller.playback {
           VideoTilePlayerSurface(playback: playback, isMultiTile: isMultiTile,
+            isAudio: asset.isAudio,
             isInteractive: allowsPlayback && appIsActive,
             isSoundEnabled: controller.isSoundEnabled,
             onToggleSound: {
@@ -78,6 +92,26 @@ struct VideoViewerTile: View {
             },
             onOpenFullScreen: openFullScreen,
             onSelect: onSelect,
+            onAudioToggle: {
+              if slideshowPlaybackID != nil { playback.togglePlayback() }
+              else { gridPlayback.togglePlayback(asset.id) }
+            },
+            onAudioPlaybackChange: { playing, soundEnabled in
+              // A child onChange may still carry its previous interaction or
+              // album values. Consult the controller's current lifetime and
+              // reject a rate event superseded by a later native action.
+              guard controller.acceptsNativeAudioPlaybackChanges,
+                let current = controller.playback, current === playback,
+                playing == (current.player.rate != 0) else { return }
+              gridPlayback.nativeAudioPlaybackChanged(asset.id,
+                isPlaying: playing, isSoundEnabled: soundEnabled)
+            },
+            onAudioSoundChange: { enabled in
+              guard controller.acceptsNativeAudioSoundChanges,
+                let current = controller.playback, current === playback,
+                enabled == !current.player.isMuted else { return }
+              gridPlayback.nativeAudioSoundChanged(asset.id, isEnabled: enabled)
+            },
             onEnded: { completedSlideshowID in
               gridPlayback.didFinish(asset.id)
               if let completedSlideshowID { onSlideshowFinished(asset, completedSlideshowID) }
@@ -88,28 +122,28 @@ struct VideoViewerTile: View {
               if let slideshowPlaybackID { onSlideshowFailed(asset, slideshowPlaybackID) }
             },
             onReady: {
-              if playbackFailure?.asset == asset { playbackFailure = nil }
+              if retainedPlaybackFailureReason != nil { playbackFailure = nil }
               onReady(asset)
               onDisplayedAssetChange?(asset)
             })
         } else if let reason = retainedPlaybackFailureReason {
           // Hover releases its player when the pointer leaves. Keep the reason
           // on this asset even when a successfully cached poster is still shown.
-          failureNotice(title: MotionMediaL10n.text("video.unavailable"), reason: reason)
+          failureNotice(title: MotionMediaL10n.text(asset.isAudio ? "audio.unavailable" : "video.unavailable"), reason: reason)
             .background(.black.opacity(0.85), in: RoundedRectangle(cornerRadius: 10))
-            .padding(16)
+            .viewerPadding(16)
             .allowsHitTesting(false)
             .accessibilityIdentifier("video.failure.retained")
         }
-        if isMultiTile && controller.playback == nil && posterFailureReason == nil
+        if isMultiTile && !asset.isAudio && controller.playback == nil && posterFailureReason == nil
           && retainedPlaybackFailureReason == nil && !gridPlayback.usesExplicitPlayback {
           VStack {
             Spacer()
             Label(MotionMediaL10n.text("video.preview.hover"), systemImage: "play.fill")
-              .font(.caption).lineLimit(1)
-              .padding(.horizontal, 9).padding(.vertical, 6)
+              .font(ViewerUIMetrics.font(.caption)).lineLimit(1)
+              .viewerPadding(.horizontal, 9).viewerPadding(.vertical, 6)
               .background(.black.opacity(0.65), in: Capsule())
-              .padding(10)
+              .viewerPadding(10)
           }
           .foregroundStyle(.white)
           .allowsHitTesting(false)
@@ -130,54 +164,69 @@ struct VideoViewerTile: View {
       }
     }
     .onHover { isHovered = $0 }
-    .onChange(of: request, initial: true) { _, request in
+    .onChange(of: request, initial: true) { old, request in
+      if request.asset.isAudio, request.slideshowPlaybackID != nil,
+        request.allowsPlayback, request.appIsActive,
+        old.slideshowPlaybackID != request.slideshowPlaybackID || controller.playback == nil {
+        gridPlayback.nativeAudioSoundChanged(asset.id, isEnabled: true)
+      }
       controller.update(asset: request.asset, isMultiTile: request.isMultiTile,
         isHovered: request.isHovered, allowsPlayback: request.allowsPlayback,
         appIsActive: request.appIsActive, command: request.command,
         slideshowPlaybackID: request.slideshowPlaybackID)
     }
-    .task(id: asset) {
-      study = VideoStudySession.session(for: asset.url)
-      onDisplayedAssetChange?(nil)
-      let requestID = UUID()
-      posterRequestID = requestID
-      poster = nil
-      posterFailureReason = nil
-      playbackFailure = nil
-      do {
-        let image = try await thumbnailPipeline.browsingThumbnail(for: asset,
-          maxPixelSize: min(1_024, max(256, posterPixelSize)))
-        try Task.checkCancellation()
-        guard posterRequestID == requestID else { return }
-        poster = image
-        onReady(asset)
-        onDisplayedAssetChange?(asset)
-      } catch is CancellationError {
-      } catch {
-        guard !Task.isCancelled, posterRequestID == requestID else { return }
-        let reason = await MediaLoadFailure.message(for: error, url: asset.url)
-        guard !Task.isCancelled, posterRequestID == requestID else { return }
-        posterFailureReason = reason
+    .onChange(of: VideoTilePosterInput(asset: asset, pixels: posterRequest.maxPixelSize), initial: true) { old, _ in
+      let previous = VideoTilePosterRequest(asset: old.asset, maxPixelSize: old.pixels)
+      if !previous.hasSameSource(as: posterRequest) {
+        playbackFailure = nil
+        study = asset.isAudio ? nil : VideoStudySession.session(for: asset.url)
+      } else if study == nil, !asset.isAudio {
+        study = VideoStudySession.session(for: asset.url)
       }
+      loadPoster()
     }
     .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
-      appIsActive = true
+      updateApplicationActivity(true)
     }
     .onReceive(NotificationCenter.default.publisher(for: NSApplication.didResignActiveNotification)) { _ in
-      appIsActive = false
+      updateApplicationActivity(false)
     }
     .onReceive(NSWorkspace.shared.notificationCenter.publisher(for: NSWorkspace.willSleepNotification)) { _ in
-      appIsActive = false
+      updateApplicationActivity(false)
     }
     .onReceive(NSWorkspace.shared.notificationCenter.publisher(for: NSWorkspace.didWakeNotification)) { _ in
-      appIsActive = NSApp.isActive
+      updateApplicationActivity(NSApp.isActive)
     }
-    .onAppear { appIsActive = NSApp.isActive }
+    .onAppear {
+      appIsActive = NSApp.isActive
+      loadPoster()
+    }
     .onDisappear {
       controller.stop()
+      posterLoader.stop()
       isHovered = false
       onDisplayedAssetChange?(nil)
     }
+  }
+
+  private func loadPoster() {
+    posterLoader.load(posterRequest, preview: { [thumbnailPipeline] request in
+      try await thumbnailPipeline.browsingThumbnail(for: request.asset, maxPixelSize: request.maxPixelSize)
+    }, render: { [thumbnailPipeline] request in
+      try await thumbnailPipeline.thumbnail(for: request.asset, maxPixelSize: request.maxPixelSize,
+        waitsForStableVisibility: true)
+    }, onReady: onReady, onDisplayedAssetChange: onDisplayedAssetChange)
+  }
+
+  private func updateApplicationActivity(_ active: Bool) {
+    // Update the playback lifetime in the notification callback itself. Waiting
+    // for SwiftUI's next layout can misclassify an automatic pause as a native
+    // control action and discard the user's intended playback state.
+    appIsActive = active
+    controller.update(asset: asset, isMultiTile: isMultiTile,
+      isHovered: isHovered, allowsPlayback: allowsPlayback,
+      appIsActive: active, command: gridPlayback.command(for: asset.id),
+      slideshowPlaybackID: slideshowPlaybackID)
   }
 
   private var fullHeader: some View {
@@ -195,86 +244,99 @@ struct VideoViewerTile: View {
         .accessibilityLabel(MediaPlaybackL10n.text("grid.select") + " " + asset.filename)
         .accessibilityIdentifier("video.select.\(asset.id.absoluteString)")
         .foregroundStyle(gridPlayback.selectedIDs.contains(asset.id) ? Color.accentColor : .white)
-        playButton
+        if !asset.isAudio { playButton }
       }
-      Label(asset.filename, systemImage: "film")
-        .lineLimit(1).truncationMode(.middle)
-        .frame(minWidth: 60, idealWidth: 160, maxWidth: .infinity, alignment: .leading)
-        .help(asset.filename)
+      HStack(spacing: 6) {
+        Image(systemName: asset.isAudio ? "waveform" : "film").fixedSize()
+          .accessibilityHidden(true)
+        Text(asset.filename).lineLimit(1).truncationMode(.middle)
+      }
+      .foregroundStyle(.white)
+      .viewerFrame(minWidth: 60, idealWidth: 160, maxWidth: .infinity, alignment: .leading)
+      .help(asset.filename)
+      .accessibilityElement(children: .ignore)
+      .accessibilityLabel(asset.filename)
       if let photoMarkStore, photoMarkStore.isPhotoMarking {
         PhotoMarkCardMenu(store: photoMarkStore, asset: asset)
       }
-      if let study {
+      if let study, !asset.isAudio {
         VideoTileStudyActions(session: study, showsSubtitles: $showsSubtitles)
           .disabled(!allowsPlayback)
       }
-      Button(action: openFullScreen) {
-        Image(systemName: "arrow.up.left.and.arrow.down.right")
-      }
-      .help(MotionMediaL10n.text("video.fullscreen"))
-      .accessibilityLabel(MotionMediaL10n.text("video.fullscreen"))
-      .disabled(!allowsPlayback)
-      Button(action: onOpenTools) { Image(systemName: "film.stack") }
-        .help(MotionMediaL10n.text("editor.open"))
-        .accessibilityLabel(MotionMediaL10n.text("editor.open"))
+      if !asset.isAudio {
+        Button(action: openFullScreen) {
+          Image(systemName: "arrow.up.left.and.arrow.down.right")
+        }
+        .help(MotionMediaL10n.text("video.fullscreen"))
+        .accessibilityLabel(MotionMediaL10n.text("video.fullscreen"))
         .disabled(!allowsPlayback)
+        Button(action: onOpenTools) { Image(systemName: "film.stack") }
+          .help(MotionMediaL10n.text("editor.open"))
+          .accessibilityLabel(MotionMediaL10n.text("editor.open"))
+          .disabled(!allowsPlayback)
+      }
     }
-    .padding(10)
+    .viewerPadding(10)
     .accessibilityIdentifier("video.header.full")
   }
 
   private var compactHeader: some View {
     HStack(spacing: 6) {
-      if isMultiTile { playButton }
+      if isMultiTile && !asset.isAudio { playButton }
       Text(asset.filename)
+        .foregroundStyle(.white)
         .lineLimit(1).truncationMode(.middle)
         .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
         .help(asset.filename)
-      Menu {
-        if isMultiTile {
-          Toggle(MediaPlaybackL10n.text("grid.select"), isOn: Binding(
-            get: { gridPlayback.selectedIDs.contains(asset.id) },
-            set: { _ in gridPlayback.toggleSelection(asset.id) }))
-          if let photoMarkStore, photoMarkStore.isPhotoMarking, let onToggleSelection {
-            Toggle(PhotoMarkL10n.format("selection.accessibilityFormat", asset.filename), isOn: Binding(
-              get: { photoMarkStore.selectedURLs.contains(asset.url) },
-              set: { _ in onToggleSelection() }))
+      if !asset.isAudio || isMultiTile || photoMarkStore?.isPhotoMarking == true {
+        Menu {
+          if isMultiTile {
+            Toggle(MediaPlaybackL10n.text("grid.select"), isOn: Binding(
+              get: { gridPlayback.selectedIDs.contains(asset.id) },
+              set: { _ in gridPlayback.toggleSelection(asset.id) }))
+            if let photoMarkStore, photoMarkStore.isPhotoMarking, let onToggleSelection {
+              Toggle(PhotoMarkL10n.format("selection.accessibilityFormat", asset.filename), isOn: Binding(
+                get: { photoMarkStore.selectedURLs.contains(asset.url) },
+                set: { _ in onToggleSelection() }))
+            }
+            Divider()
           }
-          Divider()
-        }
-        if let photoMarkStore, photoMarkStore.isPhotoMarking {
-          PhotoMarkCardMenu(store: photoMarkStore, asset: asset, inMenu: true)
-        }
-        if let study {
-          VideoTileStudyActions(session: study, showsSubtitles: $showsSubtitles, inMenu: true)
+          if let photoMarkStore, photoMarkStore.isPhotoMarking {
+            PhotoMarkCardMenu(store: photoMarkStore, asset: asset, inMenu: true)
+          }
+          if let study, !asset.isAudio {
+            VideoTileStudyActions(session: study, showsSubtitles: $showsSubtitles, inMenu: true)
+              .disabled(!allowsPlayback)
+            Divider()
+          }
+          if !asset.isAudio {
+            Button(action: openFullScreen) {
+              Label(MotionMediaL10n.text("video.fullscreen"),
+                systemImage: "arrow.up.left.and.arrow.down.right")
+            }
             .disabled(!allowsPlayback)
-          Divider()
+            Button(action: onOpenTools) {
+              Label(MotionMediaL10n.text("editor.open"), systemImage: "film.stack")
+            }
+            .disabled(!allowsPlayback)
+          }
+        } label: {
+          Image(systemName: "ellipsis.circle").viewerFrame(width: 18, height: 28)
         }
-        Button(action: openFullScreen) {
-          Label(MotionMediaL10n.text("video.fullscreen"),
-            systemImage: "arrow.up.left.and.arrow.down.right")
-        }
-        .disabled(!allowsPlayback)
-        Button(action: onOpenTools) {
-          Label(MotionMediaL10n.text("editor.open"), systemImage: "film.stack")
-        }
-        .disabled(!allowsPlayback)
-      } label: {
-        Image(systemName: "ellipsis.circle").frame(width: 18, height: 28)
+        .menuStyle(.borderlessButton).menuIndicator(.hidden).fixedSize()
+        .help(FrameLayoutL10n.text("video.more"))
+        .accessibilityLabel(FrameLayoutL10n.text("video.more"))
+        .accessibilityIdentifier("video.header.more")
       }
-      .menuStyle(.borderlessButton).menuIndicator(.hidden).fixedSize()
-      .help(FrameLayoutL10n.text("video.more"))
-      .accessibilityLabel(FrameLayoutL10n.text("video.more"))
-      .accessibilityIdentifier("video.header.more")
     }
-    .padding(.horizontal, 6).padding(.vertical, 4)
+    .viewerPadding(.horizontal, 6).viewerPadding(.vertical, 4)
     .accessibilityIdentifier("video.header.compact")
   }
 
   private var playButton: some View {
     Button { gridPlayback.togglePlayback(asset.id) } label: {
       Image(systemName: gridPlayback.playingIDs.contains(asset.id) ? "pause.fill" : "play.fill")
-        .frame(width: 16, height: 28)
+        .viewerFrame(width: 16, height: 28)
     }
     .disabled(!allowsPlayback)
     .help(MediaPlaybackL10n.text(gridPlayback.playingIDs.contains(asset.id) ? "grid.pause" : "grid.play"))
@@ -285,7 +347,24 @@ struct VideoViewerTile: View {
 
   private var posterSurface: some View {
     Color.black.overlay {
-      if let poster {
+      if asset.isAudio && retainedPlaybackFailureReason == nil && controller.playback?.errorMessage == nil {
+        GeometryReader { geometry in
+          VStack(spacing: 16) {
+            if geometry.size.height >= ViewerUIMetrics.scale(140) {
+              Image(systemName: "waveform").font(ViewerUIMetrics.font(size: 42))
+                .foregroundStyle(.white.opacity(0.65))
+            }
+            audioPlayButton
+            if geometry.size.height >= ViewerUIMetrics.scale(190) {
+              Text(MotionMediaL10n.text("audio.ready"))
+                .font(ViewerUIMetrics.font(.caption)).foregroundStyle(.white.opacity(0.65))
+                .multilineTextAlignment(.center)
+            }
+          }
+          .viewerPadding(16)
+          .frame(width: geometry.size.width, height: geometry.size.height)
+        }
+      } else if let poster {
         Image(decorative: poster, scale: 1).resizable().scaledToFit()
       } else if let posterFailureReason {
         // A missing first-frame preview does not mean playback will fail.
@@ -299,16 +378,21 @@ struct VideoViewerTile: View {
     }
   }
 
+  private var audioPlayButton: some View {
+    AudioPlaybackButton(isPlaying: gridPlayback.playingIDs.contains(asset.id),
+      isEnabled: allowsPlayback) { gridPlayback.togglePlayback(asset.id) }
+  }
+
   private func failureNotice(title: String, reason: String) -> some View {
     VStack(spacing: 8) {
-      Image(systemName: "film").font(.title2)
-      Text(title).font(.callout.weight(.semibold)).lineLimit(2)
-      Text(reason).font(.caption).lineLimit(3)
+      Image(systemName: asset.isAudio ? "waveform" : "film").font(ViewerUIMetrics.font(.title2))
+      Text(title).font(ViewerUIMetrics.font(.callout).weight(.semibold)).lineLimit(2)
+      Text(reason).font(ViewerUIMetrics.font(.caption)).lineLimit(3)
     }
     .multilineTextAlignment(.center)
     .foregroundStyle(.white.opacity(0.75))
-    .frame(maxWidth: 360)
-    .padding(16)
+    .viewerFrame(maxWidth: 360)
+    .viewerPadding(16)
     .help(reason)
     .accessibilityElement(children: .combine)
   }
@@ -322,9 +406,41 @@ struct VideoViewerTile: View {
   }
 
   private func openFullScreen() {
-    guard allowsPlayback else { return }
+    guard allowsPlayback, !asset.isAudio else { return }
     let position = controller.pauseForFullScreen()
     onOpenFullScreen(position.seconds, position.isMuted)
+  }
+}
+
+/// A compact fallback keeps long translations and narrow multi-view frames
+/// usable without removing the explicit audio play/pause action.
+private struct AudioPlaybackButton: View {
+  let isPlaying: Bool
+  let isEnabled: Bool
+  let action: () -> Void
+  private var title: String { MotionMediaL10n.text(isPlaying ? "audio.pause" : "audio.play") }
+  private var symbol: String { isPlaying ? "pause.fill" : "play.fill" }
+
+  var body: some View {
+    ViewThatFits(in: .horizontal) {
+      Button(action: action) {
+        Label(title, systemImage: symbol)
+          .font(ViewerUIMetrics.font(.callout).weight(.semibold))
+          .fixedSize(horizontal: true, vertical: false)
+          .viewerPadding(.horizontal, 12).viewerPadding(.vertical, 8)
+      }
+      .fixedSize()
+      Button(action: action) {
+        Image(systemName: symbol)
+          .font(ViewerUIMetrics.font(.callout).weight(.semibold))
+          .viewerFrame(width: 32, height: 32)
+      }
+    }
+    .buttonStyle(.borderedProminent)
+    .disabled(!isEnabled)
+    .help(title)
+    .accessibilityLabel(title)
+    .accessibilityIdentifier("audio.play")
   }
 }
 
@@ -346,7 +462,7 @@ private struct VideoTileStudyActions: View {
         .fixedSize()
       }
     }
-    .font(.system(size: 13, weight: .medium))
+    .font(ViewerUIMetrics.font(size: 13, weight: .medium))
     .task { SubtitleFontCatalog.shared.prepare() }
   }
 
@@ -362,7 +478,7 @@ private struct VideoTileStudyActions: View {
         Text(MotionMediaL10n.text("study.speed"))
       } else {
         Text(session.playbackRate.formatted(.number.precision(.fractionLength(0...2))) + "×")
-          .monospacedDigit().frame(minWidth: 36, minHeight: 28)
+          .monospacedDigit().viewerFrame(minWidth: 36, minHeight: 28)
       }
     }
     .menuStyle(.borderlessButton).fixedSize()
@@ -375,7 +491,7 @@ private struct VideoTileStudyActions: View {
   private var subtitlesButton: some View {
     Button { showsSubtitles.toggle() } label: {
       Label(MotionMediaL10n.text("study.subtitles"), systemImage: "captions.bubble")
-        .lineLimit(1).frame(minHeight: inMenu ? nil : 28)
+        .lineLimit(1).viewerFrame(minHeight: inMenu ? nil : 28)
     }
     .buttonStyle(.borderless)
     .accessibilityIdentifier("video.study.subtitles")
@@ -385,11 +501,15 @@ private struct VideoTileStudyActions: View {
 private struct VideoTilePlayerSurface: View {
   @ObservedObject var playback: VideoPlaybackState
   let isMultiTile: Bool
+  let isAudio: Bool
   let isInteractive: Bool
   let isSoundEnabled: Bool
   let onToggleSound: () -> Void
   let onOpenFullScreen: () -> Void
   let onSelect: () -> Void
+  let onAudioToggle: () -> Void
+  let onAudioPlaybackChange: (Bool, Bool) -> Void
+  let onAudioSoundChange: (Bool) -> Void
   let onEnded: (UUID?) -> Void
   let onFailed: (String) -> Void
   let onReady: () -> Void
@@ -397,14 +517,34 @@ private struct VideoTilePlayerSurface: View {
   var body: some View {
     ZStack(alignment: .bottomTrailing) {
       if let error = playback.errorMessage {
-        ContentUnavailableView(MotionMediaL10n.text("video.unavailable"),
-          systemImage: "film", description: Text(error))
+        ContentUnavailableView(MotionMediaL10n.text(isAudio ? "audio.unavailable" : "video.unavailable"),
+          systemImage: isAudio ? "waveform" : "film", description: Text(error))
           .environment(\.colorScheme, .dark)
           .frame(maxWidth: .infinity, maxHeight: .infinity)
           .background(.black)
           .accessibilityIdentifier("video.failure.current")
       } else if playback.document != nil {
-        if isMultiTile {
+        if isAudio {
+          GeometryReader { geometry in
+            VStack(spacing: 8) {
+              VStack(spacing: 12) {
+                if geometry.size.height >= ViewerUIMetrics.scale(210) {
+                  Image(systemName: "waveform").font(ViewerUIMetrics.font(size: 42))
+                    .foregroundStyle(.white.opacity(0.65))
+                }
+                audioPlayButton
+              }
+              .frame(maxWidth: .infinity, maxHeight: .infinity)
+              NativeVideoPlayerView(player: playback.player, isInteractive: isInteractive,
+                showsFullScreenToggleButton: false, keepsControlsVisibleWhenInactive: true)
+                .viewerFrame(height: 64)
+                .accessibilityIdentifier("audio.nativePlayer")
+            }
+            .viewerPadding(12)
+            .frame(width: geometry.size.width, height: geometry.size.height)
+          }
+          .background(.black)
+        } else if isMultiTile {
           // The SwiftUI surface owns grid gestures. A native event monitor
           // would also catch double-clicks on the overlaid sound button.
           StudyVideoPlayerView(playback: playback, isInteractive: false)
@@ -417,11 +557,11 @@ private struct VideoTilePlayerSurface: View {
             onDoubleClick: onOpenFullScreen)
         }
       }
-      if isMultiTile {
+      if isMultiTile && !isAudio {
         Button(action: onToggleSound) {
           Image(systemName: isSoundEnabled ? "speaker.wave.2.fill" : "speaker.slash.fill")
-            .font(.system(size: 14, weight: .semibold))
-            .frame(width: 32, height: 32)
+            .font(ViewerUIMetrics.font(size: 14, weight: .semibold))
+            .viewerFrame(width: 32, height: 32)
             .foregroundStyle(.white)
             .background(.black.opacity(0.7), in: Circle())
         }
@@ -430,7 +570,7 @@ private struct VideoTilePlayerSurface: View {
         .accessibilityLabel(MotionMediaL10n.text(isSoundEnabled ? "video.preview.mute" : "video.preview.unmute"))
         .accessibilityIdentifier("video.preview.sound")
         .disabled(!isInteractive || playback.document?.hasAudio != true)
-        .padding(10)
+        .viewerPadding(10)
       }
     }
     .onChange(of: playback.completedPlaybackCount) { old, new in
@@ -442,5 +582,17 @@ private struct VideoTilePlayerSurface: View {
     .onChange(of: playback.document, initial: true) { _, document in
       if document != nil { onReady() }
     }
+    .onChange(of: playback.isPlaying) { _, playing in
+      if isAudio && isInteractive {
+        onAudioPlaybackChange(playing, !playback.player.isMuted)
+      }
+    }
+    .onChange(of: playback.isSoundEnabled) { _, enabled in
+      if isAudio && isInteractive { onAudioSoundChange(enabled) }
+    }
+  }
+
+  private var audioPlayButton: some View {
+    AudioPlaybackButton(isPlaying: playback.isPlaying, isEnabled: isInteractive, action: onAudioToggle)
   }
 }

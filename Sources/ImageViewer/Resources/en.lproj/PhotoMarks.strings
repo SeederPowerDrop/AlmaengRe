@@ -3,13 +3,13 @@
 "mode.help" = "With Tagging ON, use 1–4, QWER, and ASDF to toggle tags.";
 "mode.toggle" = "Toggle Tagging Mode";
 "mode.active" = "Tagging Mode";
-"mode.unavailable" = "Open a photo or video to tag it.";
+"mode.unavailable" = "Open a file to tag it.";
 "menu.title" = "Photo Tags";
 "menu.edit" = "Edit Tag Names & Colors…";
 "panel.title" = "Photo Tags";
 "panel.hint" = "← → Browse items · 1–4, QWER, ASDF tag";
-"panel.multipleHint" = "A photo or video can have multiple tags.";
-"panel.noPhoto" = "Open a photo or video to tag.";
+"panel.multipleHint" = "A file can have multiple tags.";
+"panel.noPhoto" = "Open a file to tag.";
 "panel.loading" = "Loading photo tags…";
 "panel.close" = "Exit Tagging Mode";
 "labels.edit" = "Edit Tag Names & Colors";
@@ -61,7 +61,7 @@
 "labels.previewFormat" = "%@ → %@";
 "mark.addHelpFormat" = "%@ → %@: with Tagging ON, press the key or click to add; repeat to remove. Multiple tags can coexist and original files stay unchanged.";
 "mark.removeHelpFormat" = "%@ → %@: this tag is applied. With Tagging ON, press the key or click to remove it. Other tags and original files stay unchanged.";
-"mode.detailHelp" = "⌘⇧M turns Tagging on or off. With it ON, use 1–4, QWER, ASDF or the tag panel to tag all selected photos and videos. Use checkboxes or ⌘-click to select multiple items and ⇧-click for a range. Each card’s Tags menu affects only that item. With Tagging OFF, ordinary viewing shortcuts apply. In Image Comparison, choose A Only, B Only, or Both under Apply Tags.";
+"mode.detailHelp" = "⌘⇧M turns Tagging on or off. With it ON, use 1–4, QWER, ASDF or the tag panel to tag all selected files. Use checkboxes or ⌘-click to select multiple items and ⇧-click for a range. Each card’s Tags menu affects only that item. With Tagging OFF, ordinary viewing shortcuts apply. In Image Comparison, choose A Only, B Only, or Both under Apply Tags.";
 "labels.settingsLink" = "Edit Tag Names & Colors…";
 "labels.revert" = "Revert Changes";
 "labels.revertHelp" = "Restore saved tag names and colors without closing Settings. Unsaved changes are discarded.";
@@ -98,7 +98,7 @@
 
 "card.title" = "Tags";
 
-"card.help" = "Choose tags for this photo or video.";
+"card.help" = "Choose tags for this file.";
 
 "card.accessibilityFormat" = "Tags for %@";
 
@@ -122,7 +122,7 @@
 
 "panel.selectionHint" = "Checkboxes or ⌘-click add items; ⇧-click selects a range. Tag keys and the panel affect all selected items; each card’s Tags menu affects only that item.";
 
-"selection.help" = "Add or remove this item from the selection. Tag keys and panel buttons apply to all selected photos and videos.";
+"selection.help" = "Add or remove this item from the selection. Tag keys and panel buttons apply to all selected files.";
 
 "selection.accessibilityFormat" = "Select %@";
 
@@ -136,4 +136,18 @@
 "inheritance.originals" = "Moving an original or restoring it from Trash preserves its tags regardless of these options.";
 
 "panel.viewerSelectionHint" = "%@ Select a photo";
-"panel.viewerSelectionHelp" = "Use %@ to select one photo or video at a time on the current page. Selection wraps from either end of the page to the other. Turn on tagging mode, then use 1–4, QWER, or ASDF to tag the selected item.";
+"panel.viewerSelectionHelp" = "Use %@ to select a frame by position: left/right in the same row, up/down in the closest column. Selection wraps at row or column ends. Turn on tagging mode, then use 1–4, QWER or ASDF to tag the selected item.";
+
+/* Include/exclude conditions stay within the currently opened collection. */
+"filter.scope" = "Search only within the folders and files currently open.";
+"filter.conditions" = "Tag conditions";
+"filter.includeCountFormat" = "Include · %d";
+"filter.excludeCountFormat" = "Exclude · %d";
+"filter.includeHelp" = "Choose tags to include. Below, choose whether any or all included tags must match.";
+"filter.excludeHelp" = "Exclude files with any of these tags. Example: include S and exclude E.";
+"filter.included" = "Included";
+"filter.excluded" = "Excluded";
+"filter.ignored" = "No condition";
+"filter.includeRule" = "Match included tags";
+"filter.includeSummaryFormat" = "Include: %@";
+"filter.excludeSummaryFormat" = "Exclude: %@";

@@ -3,7 +3,7 @@
 "wildcard.hint" = "Use * or % for unknown characters: img* · *.png · *trip* · * (all). Plain text matches part of a filename.";
 "metadata.title" = "Capture information · Metadata";
 "metadata.placeholder" = "Camera, lens, ISO, description, keywords…";
-"metadata.hint" = "Search EXIF/IPTC information and video tags stored in the file.";
+"metadata.hint" = "Search EXIF/IPTC information and video or audio tags stored in the file.";
 "location.title" = "Location";
 "location.placeholder" = "Stored city/country name or GPS coordinates…";
 "location.hint" = "Search recorded place names and coordinates. GPS coordinates are not converted to place names.";

@@ -25,7 +25,10 @@ struct InspectorView: View {
           case .information:
             informationPanel
           case .editing:
-            if store.currentAsset?.isVideo == true {
+            if store.currentAsset?.isAudio == true {
+              Text(MotionMediaL10n.text("audio.manageHint"))
+                .fixedSize(horizontal: false, vertical: true)
+            } else if store.currentAsset?.isVideo == true {
               Text(MotionMediaL10n.text("video.editHint"))
               Button(MotionMediaL10n.text("editor.open")) { store.presentMotionMedia() }
                 .disabled(!store.canOpenMotionMedia)
@@ -34,7 +37,7 @@ struct InspectorView: View {
             }
           }
         }
-        .padding(18)
+        .viewerPadding(18)
         .frame(maxWidth: .infinity, alignment: .leading)
       }
     }
@@ -58,18 +61,18 @@ struct InspectorView: View {
   private var panelHeader: some View {
     HStack(spacing: 8) {
       Image(systemName: panel == .information ? "info.circle" : "slider.horizontal.3")
-        .font(.system(size: 12, weight: .medium))
+        .font(ViewerUIMetrics.font(size: 12, weight: .medium))
         .foregroundStyle(ViewerTheme.accent)
-        .frame(width: 25, height: 25)
+        .viewerFrame(width: 25, height: 25)
         .background(ViewerTheme.selection, in: RoundedRectangle(cornerRadius: 7))
         .accessibilityHidden(true)
       Text(panel.title)
-        .font(.system(size: 12, weight: .semibold))
+        .font(ViewerUIMetrics.font(size: 12, weight: .semibold))
       Spacer(minLength: 8)
       Button { store.toggleInspector(panel) } label: {
         Image(systemName: "xmark")
-          .font(.system(size: 10, weight: .semibold))
-          .frame(width: 22, height: 22)
+          .font(ViewerUIMetrics.font(size: 10, weight: .semibold))
+          .viewerFrame(width: 22, height: 22)
           .background(ViewerTheme.controlFill, in: RoundedRectangle(cornerRadius: 6))
           .contentShape(Rectangle())
       }
@@ -78,18 +81,19 @@ struct InspectorView: View {
       .help("패널 닫기")
       .accessibilityLabel("패널 닫기")
     }
-    .padding(.leading, 18)
-    .padding(.trailing, 10)
-    .padding(.vertical, 10)
+    .viewerPadding(.leading, 18)
+    .viewerPadding(.trailing, 10)
+    .viewerPadding(.vertical, 10)
     .background(ViewerTheme.chromeGradient)
   }
 
   private var selectedImageHeader: some View {
     HStack(alignment: .top, spacing: 10) {
-      Image(systemName: "photo")
-        .font(.system(size: 15, weight: .regular))
+      Image(systemName: store.currentAsset?.isAudio == true ? "waveform"
+        : store.currentAsset?.isVideo == true ? "film" : "photo")
+        .font(ViewerUIMetrics.font(size: 15, weight: .regular))
         .foregroundStyle(.secondary)
-        .frame(width: 32, height: 32)
+        .viewerFrame(width: 32, height: 32)
         .background(ViewerTheme.controlFill, in: RoundedRectangle(cornerRadius: 8))
         .overlay {
           RoundedRectangle(cornerRadius: 8)
@@ -97,7 +101,7 @@ struct InspectorView: View {
         }
         .accessibilityHidden(true)
       Text(store.currentAsset?.filename ?? "—")
-        .font(.system(size: 12, weight: .medium))
+        .font(ViewerUIMetrics.font(size: 12, weight: .medium))
         .lineLimit(3)
         .truncationMode(.middle)
         .textSelection(.enabled)
@@ -110,7 +114,7 @@ struct InspectorView: View {
           Image(systemName: "square.and.pencil")
         }
         .buttonStyle(.borderless)
-        .disabled(store.currentAsset == nil || store.currentAsset?.isVideo == true || store.currentMetadata == nil)
+        .disabled(store.currentAsset == nil || store.currentAsset?.isPlaybackMedia == true || store.currentMetadata == nil)
         .help("파일 및 내장 메타데이터 수정")
         .accessibilityLabel("수정")
       }
@@ -119,7 +123,7 @@ struct InspectorView: View {
 
   private var informationPanel: some View {
     VStack(alignment: .leading, spacing: 20) {
-      if store.currentAsset?.isVideo != true { histogram }
+      if store.currentAsset?.isPlaybackMedia != true { histogram }
       if let location = store.currentMetadata?.location {
         Divider()
         locationInformation(location)
@@ -133,18 +137,22 @@ struct InspectorView: View {
       }
 
     }
-    .font(.caption)
+    .font(ViewerUIMetrics.font(.caption))
   }
 
   private var basicInformation: some View {
     VStack(alignment: .leading, spacing: 10) {
-      sectionHeading("파일 및 이미지", systemImage: "doc.text.image")
-        .padding(.bottom, 2)
+      sectionHeading(store.currentAsset?.isAudio == true ? MotionMediaL10n.text("audio.title") : L10n.text("파일 및 이미지"), systemImage: store.currentAsset?.isAudio == true ? "waveform" : "doc.text.image")
+        .viewerPadding(.bottom, 2)
 
-      informationRow("크기", store.currentMetadata?.dimensionsDescription ?? "확인 중")
+      if store.currentAsset?.isAudio != true {
+        informationRow("크기", store.currentMetadata?.dimensionsDescription ?? "확인 중")
+      }
       informationRow("파일 용량", store.currentAsset?.formattedFileSize ?? "—")
       informationRow("포맷", formatDescription)
-      informationRow("프레임", "\(store.currentMetadata?.frameCount ?? 1)")
+      if store.currentAsset?.isAudio != true {
+        informationRow("프레임", "\(store.currentMetadata?.frameCount ?? 1)")
+      }
 
       if let modified = store.currentAsset?.modificationDate {
         informationRow(
@@ -182,12 +190,12 @@ struct InspectorView: View {
 
       if let path = store.currentAsset?.url.path {
         Text(path)
-          .font(.caption2.monospaced())
+          .font(ViewerUIMetrics.font(.caption2).monospaced())
           .foregroundStyle(.secondary)
           .textSelection(.enabled)
           .lineLimit(4)
           .truncationMode(.middle)
-          .padding(8)
+          .viewerPadding(8)
           .frame(maxWidth: .infinity, alignment: .leading)
           .background(ViewerTheme.controlFill, in: RoundedRectangle(cornerRadius: 6))
       }
@@ -197,7 +205,7 @@ struct InspectorView: View {
   private var cameraInformation: some View {
     VStack(alignment: .leading, spacing: 10) {
       sectionHeading("카메라 / EXIF", systemImage: "camera")
-        .padding(.bottom, 2)
+        .viewerPadding(.bottom, 2)
 
       if let make = store.currentMetadata?.cameraMake {
         informationRow("제조사", make)
@@ -291,12 +299,12 @@ struct InspectorView: View {
         sectionHeading("비파괴 조정", systemImage: "slider.horizontal.3")
         Spacer()
         Button("초기화") { store.resetAdjustments() }
-          .font(.caption)
+          .font(ViewerUIMetrics.font(.caption))
           .buttonStyle(.borderless)
       }
 
-      Text("빛").font(.caption.weight(.semibold)).foregroundStyle(.secondary)
-        .padding(.top, 3)
+      Text("빛").font(ViewerUIMetrics.font(.caption).weight(.semibold)).foregroundStyle(.secondary)
+        .viewerPadding(.top, 3)
       adjustmentSlider(title: "노출", value: adjustmentBinding(\.exposure), range: -4...4, suffix: " EV")
       adjustmentSlider(title: "휘도", value: adjustmentBinding(\.brightness), range: -1...1)
       adjustmentSlider(title: "대비", value: adjustmentBinding(\.contrast), range: 0.25...2)
@@ -307,7 +315,7 @@ struct InspectorView: View {
       )
 
       Divider()
-      Text("색상").font(.caption.weight(.semibold)).foregroundStyle(.secondary)
+      Text("색상").font(ViewerUIMetrics.font(.caption).weight(.semibold)).foregroundStyle(.secondary)
       adjustmentSlider(title: "색조", value: adjustmentBinding(\.hue), range: -180...180, suffix: "°")
       adjustmentSlider(title: "색온도", value: adjustmentBinding(\.temperature), range: -100...100)
       HStack {
@@ -315,7 +323,7 @@ struct InspectorView: View {
         Spacer()
         Text("따뜻하게")
       }
-      .font(.caption2)
+      .font(ViewerUIMetrics.font(.caption2))
       .foregroundStyle(.secondary)
       adjustmentSlider(title: "색선명도", value: adjustmentBinding(\.vibrance), range: -1...1)
       adjustmentSlider(title: "채도", value: adjustmentBinding(\.saturation), range: 0...2)
@@ -323,11 +331,11 @@ struct InspectorView: View {
         .toggleStyle(.switch)
 
       Divider()
-      Text("디테일").font(.caption.weight(.semibold)).foregroundStyle(.secondary)
+      Text("디테일").font(ViewerUIMetrics.font(.caption).weight(.semibold)).foregroundStyle(.secondary)
       adjustmentSlider(title: "선명도", value: adjustmentBinding(\.sharpness), range: 0...2)
       adjustmentSlider(title: "노이즈 감소", value: adjustmentBinding(\.noiseReduction), range: 0...1)
     }
-    .font(.system(size: 11))
+    .font(ViewerUIMetrics.font(size: 11))
     .disabled(store.currentAsset == nil)
   }
 
@@ -413,7 +421,7 @@ struct InspectorView: View {
       .frame(maxWidth: .infinity, alignment: .trailing)
 
       Text("원본은 수정하지 않으며 현재 조정값을 새 파일에 적용합니다.")
-        .font(.caption)
+        .font(ViewerUIMetrics.font(.caption))
         .foregroundStyle(.secondary)
       Button {
         if let url = store.currentAsset?.url { store.presentWatermark(urls: [url]) }
@@ -446,12 +454,12 @@ struct InspectorView: View {
   private func sectionHeading(_ title: String, systemImage: String) -> some View {
     HStack(spacing: 7) {
       Image(systemName: systemImage)
-        .font(.system(size: 12, weight: .medium))
+        .font(ViewerUIMetrics.font(size: 12, weight: .medium))
         .foregroundStyle(ViewerTheme.accent)
-        .frame(width: 16)
+        .viewerFrame(width: 16)
         .accessibilityHidden(true)
       Text(L10n.text(title))
-        .font(.system(size: 12, weight: .semibold))
+        .font(ViewerUIMetrics.font(size: 12, weight: .semibold))
     }
   }
 
@@ -459,13 +467,13 @@ struct InspectorView: View {
     HStack(alignment: .top, spacing: 10) {
       Text(L10n.text(title))
         .foregroundStyle(.secondary)
-        .frame(width: 80, alignment: .leading)
+        .viewerFrame(width: 80, alignment: .leading)
       Text(value)
         .multilineTextAlignment(.leading)
         .textSelection(.enabled)
         .frame(maxWidth: .infinity, alignment: .leading)
     }
-    .font(.system(size: 11))
+    .font(ViewerUIMetrics.font(size: 11))
     .fixedSize(horizontal: false, vertical: true)
   }
 
@@ -480,7 +488,7 @@ struct InspectorView: View {
         Text(L10n.text(title))
         Spacer()
         Text(value.wrappedValue.formatted(.number.precision(.fractionLength(2))) + suffix)
-          .font(.caption.monospacedDigit())
+          .font(ViewerUIMetrics.font(.caption).monospacedDigit())
           .foregroundStyle(.secondary)
       }
       Slider(value: value, in: range)

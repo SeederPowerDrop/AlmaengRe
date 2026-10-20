@@ -18,7 +18,7 @@ struct VideoStudyControls: View {
         }
       } label: {
         Text(session.playbackRate.formatted(.number.precision(.fractionLength(0...2))) + "×")
-          .monospacedDigit().frame(minWidth: 36, minHeight: 28)
+          .monospacedDigit().viewerFrame(minWidth: 36, minHeight: 28)
       }
       .menuStyle(.borderlessButton).fixedSize()
       .help(MotionMediaL10n.text("study.speed"))
@@ -27,7 +27,7 @@ struct VideoStudyControls: View {
       .accessibilityIdentifier("video.study.speed")
       Button { showsSubtitles.toggle() } label: {
         Label(MotionMediaL10n.text("study.subtitles"), systemImage: "captions.bubble")
-          .frame(minHeight: 28)
+          .viewerFrame(minHeight: 28)
       }
       .buttonStyle(.borderless)
       .accessibilityIdentifier("video.study.subtitles")
@@ -35,7 +35,7 @@ struct VideoStudyControls: View {
         VideoSubtitleSettings(session: session)
       }
     }
-    .font(.system(size: 13, weight: .medium))
+    .font(ViewerUIMetrics.font(size: 13, weight: .medium))
     .task { SubtitleFontCatalog.shared.prepare() }
   }
 }
@@ -53,29 +53,29 @@ struct VideoSubtitleSettings: View {
   var body: some View {
     ScrollView {
       VStack(alignment: .leading, spacing: 12) {
-        Text(MotionMediaL10n.text("study.dual")).font(.system(size: 17, weight: .semibold))
+        Text(MotionMediaL10n.text("study.dual")).font(ViewerUIMetrics.font(size: 17, weight: .semibold))
         Text(MotionMediaL10n.text("study.formats"))
-          .font(.caption).foregroundStyle(.secondary)
+          .font(ViewerUIMetrics.font(.caption)).foregroundStyle(.secondary)
         Text(MotionMediaL10n.text("study.automaticHint"))
-          .font(.system(size: 12)).foregroundStyle(.secondary)
+          .font(ViewerUIMetrics.font(size: 12)).foregroundStyle(.secondary)
         HStack(alignment: .top, spacing: 14) {
           VideoSubtitleSlotSettings(slot: session.primary, sidecars: session.sidecarURLs,
             title: MotionMediaL10n.text("study.primary"))
-            .padding(12).background(card, in: RoundedRectangle(cornerRadius: 10))
+            .viewerPadding(12).background(card, in: RoundedRectangle(cornerRadius: 10))
           VideoSubtitleSlotSettings(slot: session.secondary, sidecars: session.sidecarURLs,
             title: MotionMediaL10n.text("study.secondary"))
-            .padding(12).background(card, in: RoundedRectangle(cornerRadius: 10))
+            .viewerPadding(12).background(card, in: RoundedRectangle(cornerRadius: 10))
         }
         if session.isDiscovering { ProgressView().controlSize(.small) }
         if let error = session.sidecarErrorMessage {
-          Text(error).font(.caption).foregroundStyle(.secondary)
+          Text(error).font(ViewerUIMetrics.font(.caption)).foregroundStyle(.secondary)
         }
         Text(MotionMediaL10n.text("study.sessionHint"))
-          .font(.caption).foregroundStyle(.secondary)
+          .font(ViewerUIMetrics.font(.caption)).foregroundStyle(.secondary)
       }
-      .padding(20)
+      .viewerPadding(20)
     }
-    .frame(width: 660, height: 580)
+    .viewerFrame(width: 660, height: 580)
     .foregroundStyle(foreground)
     .background(background)
     .buttonStyle(.bordered)
@@ -91,7 +91,7 @@ private struct VideoSubtitleSlotSettings: View {
 
   var body: some View {
     VStack(alignment: .leading, spacing: 10) {
-      Toggle(title, isOn: $slot.isEnabled).font(.headline)
+      Toggle(title, isOn: $slot.isEnabled).font(ViewerUIMetrics.font(.headline))
         .accessibilityIdentifier("video.subtitle.\(slot.id).enabled")
       HStack {
         Menu {
@@ -112,11 +112,11 @@ private struct VideoSubtitleSlotSettings: View {
           .disabled(slot.sourceURL == nil && !slot.isLoading)
       }
       Text(slot.sourceURL?.lastPathComponent ?? MotionMediaL10n.text("study.none"))
-        .font(.caption).lineLimit(2).truncationMode(.middle)
+        .font(ViewerUIMetrics.font(.caption)).lineLimit(2).truncationMode(.middle)
         .frame(maxWidth: .infinity, alignment: .leading)
       if slot.isLoading { ProgressView().controlSize(.small) }
       if let error = slot.errorMessage {
-        Text(error).font(.caption).foregroundStyle(.red)
+        Text(error).font(ViewerUIMetrics.font(.caption)).foregroundStyle(.red)
           .fixedSize(horizontal: false, vertical: true)
       }
       if let document = slot.document, document.tracks.count > 1 {
@@ -127,13 +127,13 @@ private struct VideoSubtitleSlotSettings: View {
         }
       }
       Divider()
-      Text(MotionMediaL10n.text("study.sync")).font(.subheadline.weight(.medium))
+      Text(MotionMediaL10n.text("study.sync")).font(ViewerUIMetrics.font(.subheadline).weight(.medium))
       HStack(spacing: 5) {
         Button { slot.offsetSeconds -= 0.1 } label: { Image(systemName: "minus") }
           .accessibilityLabel(MotionMediaL10n.text("study.earlier"))
         TextField("", value: $slot.offsetSeconds,
           format: .number.precision(.fractionLength(1...3)))
-          .textFieldStyle(.roundedBorder).frame(minWidth: 54)
+          .textFieldStyle(.roundedBorder).viewerFrame(minWidth: 54)
           .accessibilityLabel(title + " " + MotionMediaL10n.text("study.sync"))
         Text("s").foregroundStyle(.secondary)
         Button { slot.offsetSeconds += 0.1 } label: { Image(systemName: "plus") }
@@ -142,18 +142,18 @@ private struct VideoSubtitleSlotSettings: View {
           .help(MotionMediaL10n.text("study.reset"))
           .accessibilityLabel(MotionMediaL10n.text("study.reset"))
       }
-      Text(MotionMediaL10n.text("study.syncHint")).font(.caption).foregroundStyle(.secondary)
+      Text(MotionMediaL10n.text("study.syncHint")).font(ViewerUIMetrics.font(.caption)).foregroundStyle(.secondary)
       HStack(spacing: 8) {
         Text(MotionMediaL10n.text("study.font"))
         SubtitleFontPicker(selection: $slot.fontName,
           accessibilityID: "video.subtitle.\(slot.id).font")
-          .frame(height: 26)
+          .viewerFrame(height: 26)
       }
       HStack {
         Text(MotionMediaL10n.text("study.size"))
         Slider(value: $slot.fontSize, in: 12...96, step: 1)
           .accessibilityLabel(title + " " + MotionMediaL10n.text("study.size"))
-        Text(Int(slot.fontSize).formatted()).monospacedDigit().frame(width: 26)
+        Text(Int(slot.fontSize).formatted()).monospacedDigit().viewerFrame(width: 26)
       }
       VStack(alignment: .leading, spacing: 3) {
         Text(MotionMediaL10n.text("study.horizontal"))
@@ -170,7 +170,7 @@ private struct VideoSubtitleSlotSettings: View {
         slot.verticalPosition = slot.id == .primary ? 0.84 : 0.72
       }
     }
-    .font(.system(size: 13))
+    .font(ViewerUIMetrics.font(size: 13))
     .frame(maxWidth: .infinity, alignment: .topLeading)
   }
 

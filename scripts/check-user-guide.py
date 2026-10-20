@@ -20,8 +20,8 @@ from user_guide_markdown import render_figure, render_index, render_markdown
 
 
 LANGUAGES = ("ko", "en", "ja", "zh-Hans", "fr", "es", "vi")
-FIGURES = ("viewer", "overview", "compare", "tags", "tag-editor", "map",
-           "editing", "settings", "shortcuts", "batch", "watermark", "video", "animation")
+FIGURES = ("home", "viewer", "overview", "compare", "tags", "tag-editor", "map",
+           "editing", "settings", "shortcuts", "batch", "watermark", "video", "animation", "ai-upscaling")
 META_KEYS = {"title", "subtitle", "intro", "uiLanguageNote"}
 CHAPTER_KEYS = {"id", "title", "summary", "steps", "details", "tips", "figure"}
 SOURCE_PATTERNS = (

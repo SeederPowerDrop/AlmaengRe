@@ -42,11 +42,18 @@ final class VideoTilePlaybackController: ObservableObject {
   private var desiredPlaying = false
   private var lastCommand = VideoTilePlaybackCommand()
   private var slideshowPlaybackID: UUID?
+  private var audioCommandSuppressedAfterSlideshow: VideoTilePlaybackCommand?
   private var monitor: Task<Void, Never>?
   private var documentSubscription: AnyCancellable?
   private var generation = UUID()
 
   init(coordinator: VideoHoverPlaybackCoordinator = .shared) { self.coordinator = coordinator }
+
+  var acceptsNativeAudioSoundChanges: Bool { asset?.isAudio == true && permitsPlayback }
+
+  var acceptsNativeAudioPlaybackChanges: Bool {
+    acceptsNativeAudioSoundChanges && slideshowPlaybackID == nil
+  }
 
   func update(asset: ImageAsset, isMultiTile: Bool, isHovered: Bool,
     allowsPlayback: Bool, appIsActive: Bool,
@@ -64,6 +71,7 @@ final class VideoTilePlaybackController: ObservableObject {
     let slideshowChanged = self.slideshowPlaybackID != slideshowPlaybackID
     let slideshowStopped = self.slideshowPlaybackID != nil && slideshowPlaybackID == nil
     let commandChanged = lastCommand != command
+    let playIntentChanged = lastCommand.mode != command.mode || lastCommand.generation != command.generation
     self.slideshowPlaybackID = slideshowPlaybackID
     lastCommand = command
     if playback?.errorMessage != nil,
@@ -80,6 +88,38 @@ final class VideoTilePlaybackController: ObservableObject {
         desiredPlaying = false
         playback?.pause()
       } else { stop() }
+      return
+    }
+
+    if asset.isAudio {
+      coordinator.releaseHover(self)
+      // Album playback has its own lifetime. A manual pause from a previous
+      // page must not prevent a new album token from starting this audio file.
+      if slideshowStopped {
+        audioCommandSuppressedAfterSlideshow = command
+        desiredPlaying = false
+        playback?.pause()
+        return
+      }
+      if slideshowPlaybackID != nil
+        || audioCommandSuppressedAfterSlideshow?.generation != command.generation {
+        audioCommandSuppressedAfterSlideshow = nil
+      }
+      desiredPlaying = slideshowPlaybackID != nil
+        || (command.mode == .playing && audioCommandSuppressedAfterSlideshow == nil)
+      guard desiredPlaying else {
+        if command.mode == .hover { stop() }
+        else {
+          playback?.pause()
+          setSoundEnabled(!command.isMuted)
+        }
+        return
+      }
+      if playback == nil { start(asset, autoplays: true) }
+      setSoundEnabled(slideshowChanged && slideshowPlaybackID != nil ? true : !command.isMuted)
+      if playIntentChanged || slideshowChanged || regainingPlayback {
+        playback?.resume(completionID: slideshowPlaybackID)
+      }
       return
     }
 
@@ -101,13 +141,24 @@ final class VideoTilePlaybackController: ObservableObject {
       if command.mode == .playing { setSoundEnabled(!command.isMuted) }
       if commandChanged || slideshowChanged || regainingPlayback { playback?.resume(completionID: slideshowPlaybackID) }
     } else {
-      if playback == nil { start(asset, autoplays: slideshowPlaybackID != nil) }
+      let startsNewPlayback = playback == nil
+      if startsNewPlayback { start(asset, autoplays: slideshowPlaybackID != nil) }
       if slideshowStopped {
         desiredPlaying = false
         playback?.pause()
       } else if slideshowPlaybackID != nil {
         desiredPlaying = true
         if slideshowChanged || regainingPlayback { playback?.resume(completionID: slideshowPlaybackID) }
+      } else if command.mode != .hover {
+        // A partial final grid page can contain just one video. Honor its
+        // explicit page command while leaving ordinary single-view controls alone.
+        desiredPlaying = command.mode == .playing
+        if commandChanged || regainingPlayback || startsNewPlayback {
+          setSoundEnabled(desiredPlaying && !command.isMuted)
+          if desiredPlaying {
+            if playIntentChanged || regainingPlayback || startsNewPlayback { playback?.resume() }
+          } else { playback?.pause() }
+        }
       }
     }
   }
@@ -128,8 +179,8 @@ final class VideoTilePlaybackController: ObservableObject {
   func setSoundEnabled(_ enabled: Bool) {
     if enabled { coordinator.claimAudio(self) }
     if isSoundEnabled != enabled { isSoundEnabled = enabled }
-    playback?.player.isMuted = !enabled
-    if enabled { playback?.player.volume = 1 }
+    if playback?.player.isMuted != !enabled { playback?.player.isMuted = !enabled }
+    if enabled, asset?.isAudio != true, (playback?.player.volume ?? 0) == 0 { playback?.player.volume = 1 }
   }
 
   /// Ordinary fullscreen playback is audible by default. The automatic mute of
@@ -155,6 +206,7 @@ final class VideoTilePlaybackController: ObservableObject {
     isPinned = false
     explicitSoundChoice = nil
     desiredPlaying = false
+    audioCommandSuppressedAfterSlideshow = nil
     if isSoundEnabled { isSoundEnabled = false }
     coordinator.release(self)
   }

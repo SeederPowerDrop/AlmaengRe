@@ -7,6 +7,7 @@ import Testing
 struct VideoLibraryTests {
   @Test("이미지 전용 스캔과 영상 포함 스캔을 명시적으로 구분한다")
   func folderOptIn() async throws {
+    #expect(MediaFormatRegistry.isVideo(URL(fileURLWithPath: "/fixture/movie.MKV")))
     let fixture = try Fixture()
     defer { fixture.remove() }
     for ext in MediaFormatRegistry.videoExtensions {

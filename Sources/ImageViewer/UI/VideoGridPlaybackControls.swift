@@ -5,7 +5,7 @@ struct VideoGridPlaybackControls: View {
   @ObservedObject var state: VideoGridPlaybackState
   let visibleAssets: [ImageAsset]
 
-  private var videos: [ImageAsset] { visibleAssets.filter(\.isVideo) }
+  private var videos: [ImageAsset] { visibleAssets.filter(\.isPlaybackMedia) }
 
   var body: some View {
     ViewThatFits(in: .horizontal) {
@@ -31,28 +31,36 @@ struct VideoGridPlaybackControls: View {
         pauseButton
       }
     }
-    .frame(maxWidth: .infinity)
-    .padding(.horizontal, 16)
-    .padding(.vertical, 10)
+    .viewerFrame(maxWidth: .infinity)
+    .viewerPadding(.horizontal, 16)
+    .viewerPadding(.vertical, 10)
     .background(ViewerTheme.chromeGradient)
-    .disabled(videos.isEmpty)
     .accessibilityElement(children: .contain)
     .onChange(of: visibleAssets, initial: true) { _, assets in state.updateVisibleAssets(assets) }
   }
 
   private var playAllButton: some View {
     Button { state.playAll() } label: {
-      actionLabel("grid.playAll", systemImage: "play.rectangle.on.rectangle.fill")
+      actionLabel(playAllKey, systemImage: state.followsPages
+        ? "checkmark.circle.fill" : "play.rectangle.on.rectangle.fill")
     }
     .buttonStyle(ViewerActionButtonStyle(prominent: true))
+    .disabled(videos.isEmpty && !state.followsPages)
+    .help(MediaPlaybackL10n.text(playAllKey + ".help"))
+    .accessibilityAddTraits(state.followsPages ? .isSelected : [])
     .accessibilityIdentifier("video.grid.playAll")
+  }
+
+  private var playAllKey: String {
+    state.followsPages ? "grid.pageAutoplayOn"
+      : state.canEnablePageAutoplay ? "grid.playNextPages" : "grid.playAll"
   }
 
   private var playSelectedButton: some View {
     Button { state.playSelected() } label: {
       Label(MediaPlaybackL10n.format("grid.playSelected", state.selectedIDs.count), systemImage: "checkmark.rectangle.stack")
-        .font(.system(size: 14, weight: .semibold))
-        .frame(minHeight: 42)
+        .font(ViewerUIMetrics.font(size: 14, weight: .semibold))
+        .viewerFrame(minHeight: 42)
         .fixedSize()
     }
     .buttonStyle(ViewerActionButtonStyle())
@@ -65,13 +73,14 @@ struct VideoGridPlaybackControls: View {
       actionLabel("grid.pauseAll", systemImage: "pause.fill")
     }
     .buttonStyle(ViewerActionButtonStyle())
+    .disabled(videos.isEmpty && !state.followsPages)
     .accessibilityIdentifier("video.grid.pauseAll")
   }
 
   private func actionLabel(_ key: String, systemImage: String) -> some View {
     Label(MediaPlaybackL10n.text(key), systemImage: systemImage)
-      .font(.system(size: 14, weight: .semibold))
-      .frame(minHeight: 42)
+      .font(ViewerUIMetrics.font(size: 14, weight: .semibold))
+      .viewerFrame(minHeight: 42)
       .fixedSize()
   }
 }

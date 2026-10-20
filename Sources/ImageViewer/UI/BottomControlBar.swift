@@ -11,8 +11,8 @@ struct BottomControlBar: View {
       controls(compact: false)
       controls(compact: true)
     }
-    .padding(.horizontal, 12)
-    .padding(.vertical, 8)
+    .viewerPadding(.horizontal, 12)
+    .viewerPadding(.vertical, 8)
     .background(ViewerTheme.chromeGradient)
   }
 
@@ -25,10 +25,10 @@ struct BottomControlBar: View {
           Button { store.navigatePage(-1) } label: { Image(systemName: "chevron.left") }
             .help(pageNavigationHelp(direction: -1))
           Text(store.positionDescription)
-            .font(.system(size: 11, weight: .medium).monospacedDigit())
+            .font(ViewerUIMetrics.font(size: 11, weight: .medium).monospacedDigit())
             .lineLimit(1)
             .fixedSize(horizontal: true, vertical: false)
-            .frame(minWidth: 58)
+            .frame(minWidth: ViewerUIMetrics.scale(58))
           Button { store.navigatePage(1) } label: { Image(systemName: "chevron.right") }
             .help(pageNavigationHelp(direction: 1))
         }
@@ -41,12 +41,12 @@ struct BottomControlBar: View {
           Button { store.zoomOut() } label: { Image(systemName: "minus") }.help("축소")
           if !compact {
             Slider(value: $store.zoom, in: 0.1...8)
-              .frame(width: 96)
+              .frame(width: ViewerUIMetrics.scale(96))
               .accessibilityLabel("확대/축소")
           }
           Text("\(Int(store.zoom * 100))%")
-            .font(.system(size: 11).monospacedDigit())
-            .frame(minWidth: 42)
+            .font(ViewerUIMetrics.font(size: 11).monospacedDigit())
+            .frame(minWidth: ViewerUIMetrics.scale(42))
           Button { store.zoomIn() } label: { Image(systemName: "plus") }.help("확대")
         }
         .modifier(ViewerControlGroup())
@@ -65,7 +65,7 @@ struct BottomControlBar: View {
       if store.isFocusMode {
         Divider()
         SlideshowPlaybackControls(store: store)
-          .padding(.top, 4)
+          .viewerPadding(.top, 4)
       }
     }
     .buttonStyle(ViewerToolButtonStyle())
@@ -73,40 +73,9 @@ struct BottomControlBar: View {
 
   private func fitControls(compact: Bool) -> some View {
     HStack(spacing: 2) {
-      Button { store.setFitToWindow() } label: {
-        if compact { Image(systemName: "arrow.down.right.and.arrow.up.left") }
-        else {
-          Text(verbatim: L10n.text(store.isMultiImageViewer ? "프레임 맞춤" : "화면 맞춤"))
-            .fixedSize(horizontal: true, vertical: false)
-        }
-      }
-      .help(L10n.text(store.isMultiImageViewer
-        ? "각 이미지를 주어진 프레임 안에 맞춥니다." : "이미지 전체를 화면 안에 맞춥니다."))
-      .accessibilityLabel(L10n.text(store.isMultiImageViewer ? "프레임 맞춤" : "화면 맞춤"))
-      .accessibilityIdentifier("viewer.fit")
-      Menu {
-        Button(L10n.text(store.isMultiImageViewer ? "프레임 맞춤" : "화면 맞춤")) {
-          store.setFitToWindow()
-        }
-        if !store.isMultiImageViewer {
-          Button(L10n.text("가로 맞춤")) { store.setScaleMode(.fitWidth) }
-            .help(L10n.text("이미지 너비를 화면에 맞춥니다."))
-          Button(L10n.text("세로 맞춤")) { store.setScaleMode(.fitHeight) }
-            .help(L10n.text("이미지 높이를 화면에 맞춥니다."))
-          Divider()
-        }
-        Button(L10n.text("가운데 정렬")) { store.centerImage() }
-          .help(L10n.text("확대 배율을 유지하고 이미지를 가운데로 옮깁니다."))
-      } label: {
-        Image(systemName: "chevron.down").font(.system(size: 10, weight: .semibold))
-          .frame(width: 18, height: 24)
-      }
-      .menuStyle(.borderlessButton)
-      .menuIndicator(.hidden)
-      .fixedSize()
-      .help(L10n.text("맞춤 옵션"))
-      .accessibilityLabel(L10n.text("맞춤 옵션"))
-      .accessibilityIdentifier("viewer.fitOptions")
+      ImageFitMenu(mode: store.baseScaleMode, zoom: store.zoom,
+        isFrameLimited: store.isMultiImageViewer, identifier: "viewer.fitOptions",
+        setMode: store.setScaleMode, center: store.centerImage)
       if !store.isMultiImageViewer {
         Button { store.setActualPixels() } label: { Text(verbatim: "1:1") }
           .help("실제 픽셀 크기")
@@ -157,11 +126,11 @@ struct BottomControlBar: View {
         Text(asset.formattedFileSize)
       }
     }
-    .font(.system(size: 10)).foregroundStyle(.secondary)
+    .font(ViewerUIMetrics.font(size: 10)).foregroundStyle(.secondary)
     .lineLimit(1)
   }
 
-  private var separator: some View { Divider().frame(height: 18).padding(.horizontal, 3) }
+  private var separator: some View { Divider().frame(height: ViewerUIMetrics.scale(18)).viewerPadding(.horizontal, 3) }
 
   @ViewBuilder private var detailControls: some View {
     Menu {
@@ -180,7 +149,7 @@ struct BottomControlBar: View {
         Image(systemName: store.isAntialiasingEnabled ? "checkmark" : "circle")
         Text("고화질 확대")
       }
-      .font(.system(size: 11, weight: .medium))
+      .font(ViewerUIMetrics.font(size: 11, weight: .medium))
       .foregroundStyle(store.isAntialiasingEnabled ? ViewerTheme.accent : Color.secondary)
     }
     .menuStyle(.borderlessButton)

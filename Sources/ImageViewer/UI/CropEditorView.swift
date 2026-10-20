@@ -29,12 +29,12 @@ struct CropEditorView: View {
   var body: some View {
     VStack(alignment: .leading, spacing: 12) {
       HStack {
-        Label("잘라내기", systemImage: "crop").font(.headline)
+        Label("잘라내기", systemImage: "crop").font(ViewerUIMetrics.font(.headline))
         Spacer()
         Text(asset.filename).foregroundStyle(.secondary).lineLimit(1).truncationMode(.middle)
       }
       Text("드래그해서 영역을 선택하고 모서리로 크기를 조절하세요.")
-        .font(.caption).foregroundStyle(.secondary)
+        .font(ViewerUIMetrics.font(.caption)).foregroundStyle(.secondary)
 
       GeometryReader { geometry in
         ZStack {
@@ -61,7 +61,7 @@ struct CropEditorView: View {
             Text($0).tag($0)
           }
         }
-        .frame(width: 205)
+        .viewerFrame(width: 205)
         .onChange(of: aspect) { _, _ in
           if let ratio = normalizedRatio { selection = CropSelectionGeometry.fit(selection, ratio: ratio) }
         }
@@ -73,7 +73,7 @@ struct CropEditorView: View {
         if let frame {
           let pixels = selection.pixelRect(in: frame.sourcePixelSize ?? frame.image.size)
           Text("\(Int(pixels.width)) × \(Int(pixels.height)) px")
-            .font(.caption.monospacedDigit()).foregroundStyle(.secondary)
+            .font(ViewerUIMetrics.font(.caption).monospacedDigit()).foregroundStyle(.secondary)
         }
       }
       .disabled(frame == nil)
@@ -85,9 +85,9 @@ struct CropEditorView: View {
           numericControl("너비", keyPath: \.width, upper: 1 - selection.x)
           numericControl("높이", keyPath: \.height, upper: 1 - selection.y)
         }
-        .padding(.top, 6)
+        .viewerPadding(.top, 6)
       }
-      .font(.caption)
+      .font(ViewerUIMetrics.font(.caption))
       .disabled(frame == nil)
 
       Divider()
@@ -103,7 +103,7 @@ struct CropEditorView: View {
         .disabled(frame == nil)
       }
     }
-    .padding(18)
+    .viewerPadding(18)
     .frame(width: 780, height: 620)
     .task {
       var preview = adjustments
@@ -189,7 +189,7 @@ struct CropEditorView: View {
         Circle().fill(.white)
           .overlay { Circle().stroke(.black.opacity(0.6), lineWidth: 1) }
           .frame(width: 12, height: 12)
-          .padding(7)
+          .viewerPadding(7)
           .contentShape(Rectangle())
           .gesture(DragGesture(minimumDistance: 0, coordinateSpace: .named("cropCanvas")).onChanged { value in
             if dragStart == nil { dragStart = selection }

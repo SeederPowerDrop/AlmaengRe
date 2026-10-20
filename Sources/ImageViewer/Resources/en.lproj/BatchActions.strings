@@ -12,3 +12,9 @@
 "quick.export" = "Format & Size";
 "quick.watermark" = "Watermark";
 "quick.share" = "Share";
+
+"classify.menu" = "Classify Selected Files…";
+"quick.classify" = "Classify";
+
+"selection.focused" = "Keyboard navigation position";
+"selection.overviewHelp" = "⌘-click: toggle selection\n⌘-arrow: move and toggle the destination item\n⇧-click / ⇧-arrow: select a range\n⌘⇧-click / ⌘⇧-arrow: add a range to the existing selection";

@@ -1,0 +1,16 @@
+/* Image fitting menu and contextual help. */
+"menu.image" = "Căn ảnh";
+"menu.frame" = "Căn khung";
+"menu.help" = "Chọn xem toàn bộ ảnh, khớp chiều rộng hoặc chiều cao, căn giữa hay kích thước thật.";
+"menu.frameHelp" = "Chọn xem toàn bộ ảnh hoặc căn giữa trong từng khung.";
+"whole.title" = "Xem toàn bộ ảnh";
+"whole.help" = "Giữ nguyên tỉ lệ và điều chỉnh để hiển thị toàn bộ ảnh.";
+"frame.wholeHelp" = "Giữ nguyên tỉ lệ và hiển thị toàn bộ mỗi ảnh trong khung tương ứng.";
+"width.title" = "Lấp khoảng trống hai bên";
+"width.help" = "Khớp chiều rộng và giữ nguyên tỉ lệ. Phần trên hoặc dưới ảnh có thể bị khuất.";
+"height.title" = "Lấp khoảng trống trên/dưới";
+"height.help" = "Khớp chiều cao và giữ nguyên tỉ lệ. Phần bên trái hoặc phải ảnh có thể bị khuất.";
+"center.title" = "Đưa vào giữa";
+"center.help" = "Đưa ảnh vào giữa mà không đổi mức thu phóng.";
+"actual.title" = "Kích thước thật (1:1)";
+"actual.help" = "Hiển thị một điểm ảnh của ảnh bằng một điểm ảnh trên màn hình.";

@@ -1,6 +1,11 @@
-"grid.playAll" = "Lire les vidéos affichées";
+"grid.playAll" = "Tout lire";
+"grid.playNextPages" = "Lire les pages suivantes";
+"grid.pageAutoplayOn" = "Lecture automatique active";
+"grid.playAll.help" = "Lit toutes les vidéos et tous les fichiers audio de la page actuelle. Appuyez à nouveau pour les lire automatiquement au changement de page. Les photos restent affichées.";
+"grid.playNextPages.help" = "Lit automatiquement les vidéos et les fichiers audio de chaque nouvelle page lorsque vous naviguez. Les éléments qui quittent l’écran s’arrêtent et les photos restent affichées.";
+"grid.pageAutoplayOn.help" = "Les vidéos et les fichiers audio sont lus automatiquement au changement de page. Appuyez à nouveau pour lire uniquement la page actuelle. Tout mettre en pause désactive également la lecture automatique.";
 "grid.playSelected" = "Lire la sélection (%d)";
-"grid.pauseAll" = "Mettre toutes les vidéos en pause";
-"grid.select" = "Sélectionner la vidéo à lire";
-"grid.play" = "Lire la vidéo";
-"grid.pause" = "Mettre la vidéo en pause";
+"grid.pauseAll" = "Tout mettre en pause";
+"grid.select" = "Sélectionner pour lire";
+"grid.play" = "Lire";
+"grid.pause" = "Pause";

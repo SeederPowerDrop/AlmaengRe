@@ -42,7 +42,7 @@ struct UserGuideTests {
     }
   }
 
-  @Test("안내는 변경된 단축키를 따르고 비활성 페이지 키는 표시하지 않는다")
+  @Test("안내는 실제 페이지 단축키를 따르고 사진 선택 별칭과 구분한다")
   @MainActor
   func followsCurrentShortcuts() throws {
     let suite = "UserGuideTests.\(UUID().uuidString)"
@@ -54,11 +54,25 @@ struct UserGuideTests {
     shortcuts.setBinding(KeyBinding(key: "v", modifiers: [.command, .option]), for: .exportImage)
     #expect(BasicUsageTopic.edit.body(shortcuts: shortcuts).contains("⌥⌘V"))
 
-    #expect(BasicUsageTopic.browse.body(shortcuts: shortcuts).contains("⌥←"))
+    let defaultPageGuidance = L10n.format("basicUsage.browse.pages", "← / →")
+    #expect(BasicUsageTopic.browse.body(shortcuts: shortcuts).contains(defaultPageGuidance))
+    shortcuts.setBinding(KeyBinding(key: "j", modifiers: [.control, .shift]), for: .previousPage)
+    #expect(BasicUsageTopic.browse.body(shortcuts: shortcuts).contains(
+      L10n.format("basicUsage.browse.pages", "⌃⇧J / →")))
+    shortcuts.setBinding(KeyBinding(key: "k", modifiers: [.command, .shift]), for: .nextPage)
+    let customPageGuidance = L10n.format("basicUsage.browse.pages", "⌃⇧J / ⇧⌘K")
+    let customBody = BasicUsageTopic.browse.body(shortcuts: shortcuts)
+    #expect(customBody.contains(customPageGuidance))
+    #expect(!customBody.contains(defaultPageGuidance))
+
+    // Option arrows select photos within a page. Occupying those aliases does
+    // not disable either independently configured page-navigation shortcut.
     shortcuts.setBinding(KeyBinding(key: "left", modifiers: [.option]), for: .toggleFocus)
-    #expect(!BasicUsageTopic.browse.body(shortcuts: shortcuts).contains("⌥←"))
-    #expect(BasicUsageTopic.browse.body(shortcuts: shortcuts).contains("⌥→"))
+    #expect(shortcuts.viewerSelectionBinding(direction: .left) == nil)
+    #expect(shortcuts.viewerSelectionBinding(direction: .right) != nil)
+    #expect(BasicUsageTopic.browse.body(shortcuts: shortcuts) == customBody)
     shortcuts.setBinding(KeyBinding(key: "right", modifiers: [.option]), for: .toggleOverview)
-    #expect(!BasicUsageTopic.browse.body(shortcuts: shortcuts).contains("⌥→"))
+    #expect(shortcuts.viewerSelectionBinding(direction: .right) == nil)
+    #expect(BasicUsageTopic.browse.body(shortcuts: shortcuts) == customBody)
   }
 }

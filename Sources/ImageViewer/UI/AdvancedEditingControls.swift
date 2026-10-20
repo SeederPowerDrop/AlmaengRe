@@ -14,29 +14,29 @@ struct AdvancedEditingControls: View {
     VStack(alignment: .leading, spacing: 18) {
       VStack(alignment: .leading, spacing: 12) {
         Label("톤 조정", systemImage: "sun.min")
-          .font(.system(size: 12, weight: .semibold))
+          .font(ViewerUIMetrics.font(size: 12, weight: .semibold))
         slider("그림자", value: binding(\.shadows), range: -1...1)
         slider("블랙 포인트", value: binding(\.blackPoint), range: -1...1)
         slider("흰색", value: binding(\.whites), range: -1...1)
       }
       Divider()
       DisclosureGroup(isExpanded: $curvesExpanded) {
-        curveControls.padding(.top, 10)
+        curveControls.viewerPadding(.top, 10)
       } label: { sectionLabel("톤 커브", icon: "point.3.connected.trianglepath.dotted") }
       Divider()
       DisclosureGroup(isExpanded: $mixerExpanded) {
-        mixerControls.padding(.top, 10)
+        mixerControls.viewerPadding(.top, 10)
       } label: { sectionLabel("컬러 믹서", icon: "paintpalette") }
       Divider()
       DisclosureGroup(isExpanded: $presenceExpanded) {
-        presenceControls.padding(.top, 10)
+        presenceControls.viewerPadding(.top, 10)
       } label: { sectionLabel("프레즌스", icon: "circle.lefthalf.filled") }
       Divider()
       DisclosureGroup(isExpanded: $filmExpanded) {
-        filmControls.padding(.top, 10)
+        filmControls.viewerPadding(.top, 10)
       } label: { sectionLabel("필름 룩", icon: "camera.filters") }
     }
-    .font(.system(size: 11))
+    .font(ViewerUIMetrics.font(size: 11))
     .disabled(store.currentAsset == nil)
   }
 
@@ -47,9 +47,9 @@ struct AdvancedEditingControls: View {
       }
       .pickerStyle(.segmented)
       ToneCurveGraph(curve: curveBinding, channel: curveChannel, selectedPoint: $selectedPoint)
-        .frame(height: 180)
+        .viewerFrame(height: 180)
       Text("다섯 제어점을 위아래로 드래그하세요.")
-        .font(.caption2).foregroundStyle(.secondary)
+        .font(ViewerUIMetrics.font(.caption2)).foregroundStyle(.secondary)
       HStack(spacing: 6) {
         curvePreset("선형", .identity)
         curvePreset("중간 대비", .mediumContrast)
@@ -95,7 +95,7 @@ struct AdvancedEditingControls: View {
       slider("명료도", value: binding(\.clarity), range: 0...1, percent: true)
       slider("안개 제거", value: binding(\.dehaze), range: -1...1, percent: true)
       Text("텍스처는 작은 디테일을, 명료도는 넓은 윤곽을 강조합니다. 안개 제거는 어두운 톤과 대비를 조절합니다.")
-        .font(.caption2).foregroundStyle(.secondary)
+        .font(ViewerUIMetrics.font(.caption2)).foregroundStyle(.secondary)
         .fixedSize(horizontal: false, vertical: true)
       Button("프레즌스 초기화") {
         store.updateAdjustments { $0.texture = 0; $0.clarity = 0; $0.dehaze = 0 }
@@ -113,14 +113,14 @@ struct AdvancedEditingControls: View {
           HStack(spacing: 10) {
             RoundedRectangle(cornerRadius: 5)
               .fill(LinearGradient(colors: swatchColors(look), startPoint: .leading, endPoint: .trailing))
-              .frame(width: 38, height: 27)
+              .viewerFrame(width: 38, height: 27)
             Text(L10n.text(look.title)).foregroundStyle(.primary)
             Spacer(minLength: 0)
             if store.currentAdjustments.filmLook == look {
               Image(systemName: "checkmark.circle.fill").foregroundStyle(ViewerTheme.accent)
             }
           }
-          .padding(8)
+          .viewerPadding(8)
           .background(store.currentAdjustments.filmLook == look
             ? ViewerTheme.accent.opacity(0.13) : Color.primary.opacity(0.035))
           .clipShape(RoundedRectangle(cornerRadius: 7))
@@ -144,7 +144,7 @@ struct AdvancedEditingControls: View {
   }
 
   private func sectionLabel(_ title: String, icon: String) -> some View {
-    Label(L10n.text(title), systemImage: icon).font(.system(size: 12, weight: .semibold))
+    Label(L10n.text(title), systemImage: icon).font(ViewerUIMetrics.font(size: 12, weight: .semibold))
   }
 
   private func curvePreset(_ title: String, _ curve: ImageToneCurve) -> some View {
@@ -245,8 +245,8 @@ private struct ToneCurveGraph: View {
     return Circle()
       .fill(fill)
       .overlay(Circle().stroke(curveColor, lineWidth: 2))
-      .frame(width: 11, height: 11)
-      .frame(width: 24, height: 24)
+      .viewerFrame(width: 11, height: 11)
+      .viewerFrame(width: 24, height: 24)
       .contentShape(Circle())
       .position(point(index, values: values, plot: plot))
       .gesture(DragGesture(minimumDistance: 0, coordinateSpace: .named("imageToneCurve"))

@@ -58,7 +58,7 @@ final class RecentPhotoStore: ObservableObject {
   }
 
   func record(_ asset: ImageAsset, at date: Date = Date()) {
-    guard !asset.isVideo, !MediaFormatRegistry.isVideo(URL(fileURLWithPath: asset.filename)),
+    guard !asset.isPlaybackMedia, !MediaFormatRegistry.isPlaybackMedia(URL(fileURLWithPath: asset.filename)),
       (asset.archiveOrigin?.archiveURL ?? asset.url).isFileURL else { return }
     let previous = items.first { $0.id == asset.sessionID }
     let thumbnail = previous.flatMap { $0.hasSameVersion(as: asset) ? $0.thumbnailData : nil }
@@ -171,7 +171,7 @@ final class RecentPhotoStore: ObservableObject {
 
   private static func isValidPhoto(_ photo: RecentPhoto) -> Bool {
     photo.location.url.isFileURL && !photo.id.isEmpty && !photo.filename.isEmpty
-      && !MediaFormatRegistry.isVideo(URL(fileURLWithPath: photo.filename))
+      && !MediaFormatRegistry.isPlaybackMedia(URL(fileURLWithPath: photo.filename))
   }
 
   private static func acceptsThumbnail(_ data: Data) -> Bool {

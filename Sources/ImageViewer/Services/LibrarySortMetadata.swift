@@ -77,6 +77,7 @@ actor LibrarySortMetadataCache {
     if let governor {
       result = try await governor.value(
         for: ImageResourceWorkKey(namespace: namespace, key: version), url: version.url,
+        workload: LibrarySortMetadataReader.workload(for: version.url, isVideo: isVideo),
         operation: operation)
     } else {
       result = try await scheduler.value(for: version, operation: operation)
@@ -90,9 +91,15 @@ actor LibrarySortMetadataCache {
 }
 
 enum LibrarySortMetadataReader {
+  static func workload(for url: URL, isVideo: Bool) -> ImageResourceWorkload {
+    isVideo || MediaFormatRegistry.isAudio(url) ? .source : .metadataHeader
+  }
+
   static func read(_ url: URL, isVideo: Bool) async throws -> LibrarySortMetadata {
     try Task.checkCancellation()
-    if isVideo { return try await SortVideoMetadataRequest(url: url).value() }
+    if workload(for: url, isVideo: isVideo) == .source {
+      return try await SortPlaybackMetadataRequest(url: url).value()
+    }
     let result = autoreleasepool {
       if let source = CGImageSourceCreateWithURL(url as CFURL,
           [kCGImageSourceShouldCache: false] as CFDictionary),
@@ -252,7 +259,7 @@ enum LibrarySortMetadataReader {
   }
 }
 
-private final class SortVideoMetadataRequest: @unchecked Sendable {
+private final class SortPlaybackMetadataRequest: @unchecked Sendable {
   private let asset: AVURLAsset
   init(url: URL) { asset = AVURLAsset(url: url) }
 
@@ -286,7 +293,7 @@ private final class SortVideoMetadataRequest: @unchecked Sendable {
         result.capturedDay = LibraryCalendarDay(metadataString: try? await item.load(.stringValue))
       }
       // Native container make/model tags may exist, but photo-only EXIF values
-      // (shutter and aperture) are deliberately left unknown for videos.
+      // (shutter and aperture) are deliberately left unknown for video and audio.
       if let items = try? await asset.load(.metadata) {
         for (identifier, isMake) in [(AVMetadataIdentifier.quickTimeMetadataMake, true),
           (AVMetadataIdentifier.quickTimeMetadataModel, false)] {

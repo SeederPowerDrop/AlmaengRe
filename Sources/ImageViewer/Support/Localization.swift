@@ -25,6 +25,25 @@ final class AppLanguagePreference: Observable, @unchecked Sendable {
   }
 }
 
+/// App resources are immutable for the lifetime of a running build. Resolve the
+/// small set of language bundles once; labels need only an in-memory lookup.
+struct LocalizationBundleCatalog: Sendable {
+  private let bundles: [String: Bundle]
+
+  init(languages: [String], resolve: (String) -> Bundle?) {
+    var values: [String: Bundle] = [:]
+    for language in languages {
+      let normalized = language.lowercased()
+      // SwiftPM can normalize zh-Hans.lproj to zh-hans.lproj.
+      let bundle = resolve(language) ?? (normalized != language ? resolve(normalized) : nil)
+      if let bundle { values[normalized] = bundle }
+    }
+    bundles = values
+  }
+
+  func bundle(for identifier: String) -> Bundle? { bundles[identifier.lowercased()] }
+}
+
 /// 앱의 동적 문자열과 오류 문구를 SwiftPM 및 .app 번들 모두에서 현지화합니다.
 enum L10n {
   static let supportedLocalizations = ["ko", "en", "ja", "zh-Hans", "vi", "es", "fr", "de", "ru", "ar"]
@@ -41,9 +60,12 @@ enum L10n {
       forPreferences: activeBundle.preferredLocalizations).first ?? "ko"
   }
 
-  static func resolvedLanguage(selection: String?, systemLanguage: String) -> String {
+  static func resolvedLanguage(selection: String?, systemLanguage: @autoclosure () -> String) -> String {
     if let selection, supportedLocalizations.contains(selection) { return selection }
-    return supportedLocalizations.contains(systemLanguage) ? systemLanguage : "ko"
+    // A manually selected UI language does not need to resolve the system's
+    // preferred bundle on every label. The preference itself is still read live.
+    let fallback = systemLanguage()
+    return supportedLocalizations.contains(fallback) ? fallback : "ko"
   }
 
   static func text(_ key: String) -> String {
@@ -82,27 +104,21 @@ enum L10n {
     return Set(values.keys)
   }
 
-  private static var activeBundle: Bundle {
+  private static let activeBundle: Bundle = {
     // 배포 앱은 주 번들의 Contents/Resources를, swift run·테스트·Xcode가
     // 별도 리소스 번들을 만들면 SwiftPM 번들을 사용합니다.
     if Bundle.main.url(forResource: "Localizable", withExtension: "strings") != nil {
       return .main
     }
-    return moduleBundle
-  }
+    return .module
+  }()
 
-  private static var moduleBundle: Bundle {
-    .module
+  private static let languageBundles = LocalizationBundleCatalog(languages: supportedLocalizations) { candidate in
+    guard let path = activeBundle.path(forResource: candidate, ofType: "lproj") else { return nil }
+    return Bundle(path: path)
   }
 
   private static func languageBundle(for localeIdentifier: String) -> Bundle? {
-    // SwiftPM은 zh-Hans 같은 식별자의 리소스 폴더를 zh-hans.lproj로
-    // 정규화할 수 있으므로 원본과 소문자 이름을 모두 확인합니다.
-    for candidate in [localeIdentifier, localeIdentifier.lowercased()] {
-      if let path = activeBundle.path(forResource: candidate, ofType: "lproj") {
-        return Bundle(path: path)
-      }
-    }
-    return nil
+    languageBundles.bundle(for: localeIdentifier)
   }
 }

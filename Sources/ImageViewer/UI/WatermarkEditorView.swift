@@ -53,10 +53,10 @@ struct WatermarkEditorView: View {
     VStack(spacing: 0) {
       HStack {
         Label(WatermarkL10n.text("title"), systemImage: "signature")
-          .font(.title2.bold())
+          .font(ViewerUIMetrics.font(.title2).bold())
         Spacer()
         Toggle(WatermarkL10n.text("enabled"), isOn: $options.isEnabled)
-      }.padding(16)
+      }.viewerPadding(16)
       Divider()
       HStack(alignment: .top, spacing: 20) {
         ScrollView {
@@ -64,7 +64,7 @@ struct WatermarkEditorView: View {
             WatermarkSection(WatermarkL10n.text("text.title")) {
               VStack(alignment: .leading, spacing: 8) {
                 TextEditor(text: $options.text)
-                  .font(.body)
+                  .font(ViewerUIMetrics.font(.body))
                   .frame(height: 44)
                   .accessibilityLabel(WatermarkL10n.text("text.placeholder"))
                   .overlay(RoundedRectangle(cornerRadius: 4).stroke(.quaternary))
@@ -91,7 +91,7 @@ struct WatermarkEditorView: View {
                     }
                   }
                 }
-              }.padding(2)
+              }.viewerPadding(2)
             }
             WatermarkSection(WatermarkL10n.text("metadata.title")) {
               VStack(alignment: .leading, spacing: 8) {
@@ -105,8 +105,8 @@ struct WatermarkEditorView: View {
                   }
                 }
                 Text(WatermarkL10n.text("metadata.help"))
-                  .font(.caption).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
-              }.padding(2)
+                  .font(ViewerUIMetrics.font(.caption)).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
+              }.viewerPadding(2)
             }
             WatermarkSection(WatermarkL10n.text("logo.title")) {
               VStack(alignment: .leading, spacing: 8) {
@@ -117,8 +117,8 @@ struct WatermarkEditorView: View {
                   }
                 }
                 Text(options.logoURL?.lastPathComponent ?? WatermarkL10n.text("logo.help"))
-                  .font(.caption).foregroundStyle(.secondary).lineLimit(2)
-              }.frame(maxWidth: .infinity, alignment: .leading).padding(2)
+                  .font(ViewerUIMetrics.font(.caption)).foregroundStyle(.secondary).lineLimit(2)
+              }.frame(maxWidth: .infinity, alignment: .leading).viewerPadding(2)
             }
             WatermarkSection(WatermarkL10n.text("layout.title")) {
               VStack(alignment: .leading, spacing: 8) {
@@ -144,15 +144,15 @@ struct WatermarkEditorView: View {
                   .help(WatermarkL10n.text("margin.anchorHelp"))
                 percentageSlider("opacity", value: $options.opacity, range: 0...1)
                 Text(WatermarkL10n.text("layout.help"))
-                  .font(.caption).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
-              }.padding(2)
+                  .font(ViewerUIMetrics.font(.caption)).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
+              }.viewerPadding(2)
             }
-          }.disabled(!options.isEnabled).padding(.bottom, 4)
+          }.disabled(!options.isEnabled).viewerPadding(.bottom, 4)
         }.frame(width: 395)
 
         VStack(alignment: .leading, spacing: 10) {
           HStack {
-            Text(WatermarkL10n.text("preview.title")).font(.headline)
+            Text(WatermarkL10n.text("preview.title")).font(ViewerUIMetrics.font(.headline))
             Spacer()
             if options.expandsCanvas {
               Button(WatermarkL10n.text("canvas.original")) { requestOriginalCanvas() }
@@ -161,7 +161,7 @@ struct WatermarkEditorView: View {
             }
           }
           Text(WatermarkL10n.text("drag.help"))
-            .font(.caption).foregroundStyle(.secondary)
+            .font(ViewerUIMetrics.font(.caption)).foregroundStyle(.secondary)
             .fixedSize(horizontal: false, vertical: true)
           ZStack {
             RoundedRectangle(cornerRadius: 10).fill(Color.black.opacity(0.92))
@@ -183,22 +183,22 @@ struct WatermarkEditorView: View {
               && !showsCanvasConfirmation && errorMessage == nil)
           if options.expandsCanvas {
             Text(WatermarkL10n.text("canvas.help"))
-              .font(.caption).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
+              .font(ViewerUIMetrics.font(.caption)).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
           }
-          Text(asset?.filename ?? "").font(.caption).lineLimit(1).truncationMode(.middle)
+          Text(asset?.filename ?? "").font(ViewerUIMetrics.font(.caption)).lineLimit(1).truncationMode(.middle)
           Text(WatermarkL10n.text("preview.help"))
-            .font(.caption).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
+            .font(ViewerUIMetrics.font(.caption)).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
           if let errorMessage {
-            Text(errorMessage).font(.caption).foregroundStyle(.red).textSelection(.enabled)
+            Text(errorMessage).font(ViewerUIMetrics.font(.caption)).foregroundStyle(.red).textSelection(.enabled)
           } else if options.isEnabled && !hasContent {
             Text(WatermarkL10n.text("empty"))
-              .font(.caption).foregroundStyle(.secondary)
+              .font(ViewerUIMetrics.font(.caption)).foregroundStyle(.secondary)
           }
         }.frame(maxWidth: .infinity, maxHeight: .infinity)
-      }.padding(16)
+      }.viewerPadding(16)
       Divider()
       HStack {
-        Text(WatermarkL10n.text("copy.help")).font(.caption).foregroundStyle(.secondary)
+        Text(WatermarkL10n.text("copy.help")).font(ViewerUIMetrics.font(.caption)).foregroundStyle(.secondary)
         Spacer()
         Button(WatermarkL10n.text("cancel")) { close() }.keyboardShortcut(.cancelAction)
         Button(WatermarkL10n.text("apply")) {
@@ -207,7 +207,7 @@ struct WatermarkEditorView: View {
         }.keyboardShortcut(.defaultAction)
           .disabled(!isValid || isRendering || !sourceReady
             || (options.isEnabled && (errorMessage != nil || previewedOptions != options)))
-      }.padding(16)
+      }.viewerPadding(16)
     }
     .frame(width: 940, height: 730)
     .task { await loadSource() }
@@ -360,10 +360,10 @@ private struct WatermarkSection<Content: View>: View {
 
   var body: some View {
     VStack(alignment: .leading, spacing: 6) {
-      Text(title).font(.headline)
+      Text(title).font(ViewerUIMetrics.font(.headline))
       content
     }
-    .padding(8)
+    .viewerPadding(8)
     .frame(maxWidth: .infinity, alignment: .leading)
     .background(.quaternary.opacity(0.2), in: RoundedRectangle(cornerRadius: 8))
     .accessibilityElement(children: .contain)

@@ -24,7 +24,7 @@ struct ViewerFrameWorkspace<Content: View>: View {
   }
 
   private var editing: Bool { layout.isEditing && count > 1 }
-  private var headerHeight: CGFloat { editing ? 28 : 0 }
+  private var headerHeight: CGFloat { editing ? ViewerUIMetrics.scale(28) : 0 }
 
   var body: some View {
     GeometryReader { proxy in
@@ -60,8 +60,8 @@ struct ViewerFrameWorkspace<Content: View>: View {
         }
         if let movingSlot, let moveLocation {
           Label("\(movingSlot + 1)", systemImage: "arrow.up.and.down.and.arrow.left.and.right")
-            .font(.system(size: 13, weight: .semibold))
-            .padding(10)
+            .font(ViewerUIMetrics.font(size: 13, weight: .semibold))
+            .viewerPadding(10)
             .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 8))
             .position(x: min(max(moveLocation.x, 30), max(30, proxy.size.width - 30)),
               y: min(max(moveLocation.y, 20), max(20, proxy.size.height - 20)))
@@ -112,9 +112,9 @@ struct ViewerFrameWorkspace<Content: View>: View {
       .accessibilityLabel(FrameLayoutL10n.format("move.accessibility", slot + 1))
       .accessibilityIdentifier("viewer.frame.moveMenu.\(slot)")
     }
-    .font(.system(size: 11, weight: .semibold))
+    .font(ViewerUIMetrics.font(size: 11, weight: .semibold))
     .foregroundStyle(.white)
-    .padding(.horizontal, 9)
+    .viewerPadding(.horizontal, 9)
     .frame(height: headerHeight)
     .background(Color.accentColor.opacity(0.28))
     .onHover { inside in
@@ -193,7 +193,7 @@ struct ViewerFrameEditingBar: View {
       Image(systemName: "rectangle.3.group")
         .foregroundStyle(Color.accentColor)
       Text(FrameLayoutL10n.text("editing.help"))
-        .font(.caption)
+        .font(ViewerUIMetrics.font(.caption))
         .fixedSize(horizontal: false, vertical: true)
         .frame(maxWidth: .infinity, alignment: .leading)
       Button(FrameLayoutL10n.text("done")) { layout.isEditing = false }
@@ -201,7 +201,7 @@ struct ViewerFrameEditingBar: View {
         .fixedSize()
         .accessibilityIdentifier("viewer.frame.done")
     }
-    .padding(.horizontal, 14).padding(.vertical, 8)
+    .viewerPadding(.horizontal, 14).viewerPadding(.vertical, 8)
     .background(ViewerTheme.chromeGradient)
     .accessibilityIdentifier("viewer.frame.editingBar")
   }

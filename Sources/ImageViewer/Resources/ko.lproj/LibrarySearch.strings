@@ -3,7 +3,7 @@
 "wildcard.hint" = "문자 일부는 * 또는 %로 대신할 수 있습니다. img* · *.png · *여행* · * (전체). 일반 문자는 이름의 일부를 검색합니다.";
 "metadata.title" = "촬영 정보 · 메타데이터";
 "metadata.placeholder" = "카메라, 렌즈, ISO, 설명, 키워드…";
-"metadata.hint" = "파일에 저장된 EXIF·IPTC 정보와 영상 태그를 검색합니다.";
+"metadata.hint" = "파일에 저장된 EXIF·IPTC 정보와 영상·음성 태그를 검색합니다.";
 "location.title" = "위치";
 "location.placeholder" = "저장된 도시·국가명 또는 GPS 좌표…";
 "location.hint" = "파일에 기록된 지명과 좌표를 검색합니다. GPS 좌표에서 지명을 자동으로 찾지는 않습니다.";

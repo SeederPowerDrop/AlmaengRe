@@ -16,8 +16,8 @@ struct PhotoMarkPanel: View {
       if store.presentationMode == .folderComparison { targetPicker }
       ViewThatFits(in: .horizontal) {
         HStack(alignment: .center, spacing: 18) {
-          summary.frame(width: 190, alignment: .leading)
-          keyboard.frame(minWidth: 330, maxWidth: 660)
+          summary.viewerFrame(width: 190, alignment: .leading)
+          keyboard.viewerFrame(minWidth: 330, maxWidth: 660)
           closeButton
         }
         VStack(alignment: .leading, spacing: 10) {
@@ -32,7 +32,7 @@ struct PhotoMarkPanel: View {
       if store.presentationMode == .overview
         || (store.presentationMode == .viewer && store.imagesPerPage > 1) {
         Label(PhotoMarkL10n.text("panel.selectionHint"), systemImage: "checkmark.square")
-          .font(.caption2)
+          .font(ViewerUIMetrics.font(.caption2))
           .foregroundStyle(.secondary)
           .fixedSize(horizontal: false, vertical: true)
       }
@@ -40,29 +40,29 @@ struct PhotoMarkPanel: View {
         ? (store.folderComparison.first.photoMarkFilter.isActive || store.folderComparison.second.photoMarkFilter.isActive)
         : store.photoMarkFilter.isActive {
         Text(PhotoMarkL10n.text("panel.filterStable"))
-          .font(.caption2)
+          .font(ViewerUIMetrics.font(.caption2))
           .foregroundStyle(.secondary)
           .fixedSize(horizontal: false, vertical: true)
       }
       if let error = marks.errorMessage {
         Text(error)
-          .font(.caption)
+          .font(ViewerUIMetrics.font(.caption))
           .foregroundStyle(.red)
           .fixedSize(horizontal: false, vertical: true)
           .textSelection(.enabled)
       }
     }
-    .padding(.horizontal, 16)
-    .padding(.vertical, 12)
-    .frame(maxWidth: .infinity, alignment: .leading)
+    .viewerPadding(.horizontal, 16)
+    .viewerPadding(.vertical, 12)
+    .viewerFrame(maxWidth: .infinity, alignment: .leading)
     .background(ViewerTheme.panelGradient)
-    .overlay(alignment: .top) { Rectangle().fill(ViewerTheme.separator).frame(height: 1) }
+    .overlay(alignment: .top) { Rectangle().fill(ViewerTheme.separator).viewerFrame(height: 1) }
   }
 
   private var targetPicker: some View {
     HStack(spacing: 10) {
       Text(PhotoMarkL10n.text("target.title"))
-        .font(.caption.weight(.medium))
+        .font(ViewerUIMetrics.font(.caption).weight(.medium))
       Picker(PhotoMarkL10n.text("target.title"), selection: Binding(
         get: { store.folderComparison.photoMarkTarget },
         set: {
@@ -76,7 +76,7 @@ struct PhotoMarkPanel: View {
       }
       .labelsHidden()
       .pickerStyle(.segmented)
-      .frame(width: 270)
+      .viewerFrame(width: 270)
       .disabled(!store.canTogglePhotoMarking)
       .help(PhotoMarkL10n.text("target.help"))
       .accessibilityIdentifier("comparison.photoMarkTarget")
@@ -87,9 +87,9 @@ struct PhotoMarkPanel: View {
     VStack(alignment: .leading, spacing: 5) {
       HStack(spacing: 6) {
         Image(systemName: "tag")
-          .font(.system(size: 12, weight: .medium))
+          .font(ViewerUIMetrics.font(size: 12, weight: .medium))
           .foregroundStyle(ViewerTheme.accent)
-          .frame(width: 25, height: 25)
+          .viewerFrame(width: 25, height: 25)
           .background(ViewerTheme.selection, in: RoundedRectangle(cornerRadius: 7))
           .accessibilityHidden(true)
         Text(PhotoMarkL10n.text("panel.title")).fontWeight(.semibold)
@@ -99,7 +99,7 @@ struct PhotoMarkPanel: View {
         }
       }
       Text(targetDescription)
-        .font(.caption)
+        .font(ViewerUIMetrics.font(.caption))
         .fontWeight(hasBatchSelection ? .semibold : .regular)
         .foregroundStyle(hasBatchSelection ? ViewerTheme.accent : Color.secondary)
         .lineLimit(store.presentationMode == .folderComparison
@@ -110,7 +110,7 @@ struct PhotoMarkPanel: View {
       Text(store.presentationMode == .viewer && store.imagesPerPage > 1
         ? ViewerNavigationHintText.markingPanelHint(shortcuts: shortcuts)
         : PhotoMarkL10n.text(store.presentationMode == .overview ? "panel.gridHint" : "panel.hint"))
-        .font(.caption2)
+        .font(ViewerUIMetrics.font(.caption2))
         .foregroundStyle(.secondary)
         .fixedSize(horizontal: false, vertical: true)
       Button {
@@ -125,7 +125,7 @@ struct PhotoMarkPanel: View {
         .controlSize(.small)
         .disabled(!store.canEditPhotoMarkLabels)
     }
-    .font(.system(size: 12))
+    .font(ViewerUIMetrics.font(size: 12))
   }
 
   private var keyboard: some View {
@@ -138,18 +138,18 @@ struct PhotoMarkPanel: View {
           HStack(spacing: 6) {
             PhotoMarkKeycap(key: slot.keyLabel, isSelected: selected, color: color)
             Text(displayName(for: slot, marks: marks))
-              .font(.system(size: 11, weight: selected ? .semibold : .regular))
+              .font(ViewerUIMetrics.font(size: 11, weight: selected ? .semibold : .regular))
               .lineLimit(1)
               .truncationMode(.tail)
-              .frame(maxWidth: .infinity, alignment: .leading)
+              .viewerFrame(maxWidth: .infinity, alignment: .leading)
             Image(systemName: state == .mixed ? "minus" : "checkmark")
-              .font(.system(size: 9, weight: .bold))
+              .font(ViewerUIMetrics.font(size: 9, weight: .bold))
               .foregroundStyle(color.tint)
-              .frame(width: 10)
+              .viewerFrame(width: 10)
               .opacity(selected ? 1 : 0)
           }
-          .padding(.horizontal, 7)
-          .frame(height: 31)
+          .viewerPadding(.horizontal, 7)
+          .viewerFrame(height: 31)
           .foregroundStyle(Color.primary)
           .background {
             RoundedRectangle(cornerRadius: 6).fill(ViewerTheme.controlFill)
@@ -200,8 +200,8 @@ struct PhotoMarkPanel: View {
   private var closeButton: some View {
     Button { store.togglePhotoMarking() } label: {
       Image(systemName: "xmark")
-        .font(.system(size: 10, weight: .semibold))
-        .frame(width: 22, height: 22)
+        .font(ViewerUIMetrics.font(size: 10, weight: .semibold))
+        .viewerFrame(width: 22, height: 22)
         .background(ViewerTheme.controlFill, in: RoundedRectangle(cornerRadius: 6))
     }
     .buttonStyle(.plain)
@@ -221,9 +221,9 @@ struct PhotoMarkSelectionToggle: View {
   var body: some View {
     Button(action: action) {
       Image(systemName: isSelected ? "checkmark.square.fill" : "square")
-        .font(.system(size: 15, weight: .medium))
+        .font(ViewerUIMetrics.font(size: 15, weight: .medium))
         .foregroundStyle(isSelected ? Color.accentColor : Color.primary)
-        .frame(width: 24, height: 24)
+        .viewerFrame(width: 24, height: 24)
         .contentShape(Rectangle())
     }
     .buttonStyle(.plain)
@@ -255,13 +255,13 @@ struct PhotoMarkEditor: View {
     VStack(alignment: .leading, spacing: 16) {
       HStack(spacing: 9) {
         Image(systemName: "tag")
-          .font(.system(size: 15, weight: .medium))
+          .font(ViewerUIMetrics.font(size: 15, weight: .medium))
           .foregroundStyle(ViewerTheme.accent)
-          .frame(width: 30, height: 30)
+          .viewerFrame(width: 30, height: 30)
           .background(ViewerTheme.selection, in: RoundedRectangle(cornerRadius: 8))
           .accessibilityHidden(true)
         Text(PhotoMarkL10n.text("labels.title"))
-          .font(.title3.weight(.semibold))
+          .font(ViewerUIMetrics.font(.title3).weight(.semibold))
       }
       Text(PhotoMarkL10n.text("labels.hint"))
         .foregroundStyle(.secondary)
@@ -286,7 +286,7 @@ struct PhotoMarkEditor: View {
               .labelsHidden()
               .pickerStyle(.menu)
               .controlSize(.small)
-              .frame(maxWidth: 100)
+              .viewerFrame(maxWidth: 100)
               .help(PhotoMarkL10n.text("colors.help"))
             }
             TextField(PhotoMarkL10n.text("labels.placeholder"), text: Binding(
@@ -301,7 +301,7 @@ struct PhotoMarkEditor: View {
       }
       VStack(alignment: .leading, spacing: 5) {
         Text(PhotoMarkL10n.text("labels.previewTitle"))
-          .font(.caption.weight(.semibold))
+          .font(ViewerUIMetrics.font(.caption).weight(.semibold))
         LazyVGrid(columns: Array(repeating: GridItem(.flexible(), alignment: .leading), count: 4),
           alignment: .leading, spacing: 5) {
           ForEach(PhotoMarkSlot.allCases, id: \.self) { slot in
@@ -310,10 +310,10 @@ struct PhotoMarkEditor: View {
               name.isEmpty ? PhotoMarkL10n.text("labels.unnamed") : name)
             HStack(spacing: 5) {
               Circle().fill((draft.colors[slot] ?? slot.defaultColor).tint)
-                .frame(width: 7, height: 7)
+                .viewerFrame(width: 7, height: 7)
                 .accessibilityHidden(true)
               Text(preview)
-                .font(.caption)
+                .font(ViewerUIMetrics.font(.caption))
                 .lineLimit(1)
                 .truncationMode(.tail)
             }
@@ -321,15 +321,15 @@ struct PhotoMarkEditor: View {
           }
         }
       }
-      .padding(10)
-      .frame(maxWidth: .infinity, alignment: .leading)
+      .viewerPadding(10)
+      .viewerFrame(maxWidth: .infinity, alignment: .leading)
       .background(ViewerTheme.controlFill, in: RoundedRectangle(cornerRadius: 8))
       .overlay {
         RoundedRectangle(cornerRadius: 8)
           .strokeBorder(ViewerTheme.controlBorder, lineWidth: 1)
       }
       Text(PhotoMarkL10n.text("labels.safety"))
-        .font(.caption)
+        .font(ViewerUIMetrics.font(.caption))
         .foregroundStyle(.secondary)
         .fixedSize(horizontal: false, vertical: true)
 
@@ -352,8 +352,8 @@ struct PhotoMarkEditor: View {
         .disabled(!marks.isReady || !draft.hasChanges)
       }
     }
-    .padding(isEmbedded ? 16 : 24)
-    .frame(width: isEmbedded ? nil : 620)
+    .viewerPadding(isEmbedded ? 16 : 24)
+    .viewerFrame(width: isEmbedded ? nil : 620)
     .onChange(of: marks.labels) { _, _ in
       draft.refresh(with: currentLabels, colors: currentColors)
     }
@@ -385,114 +385,207 @@ struct PhotoMarkSettingsView: View {
     ScrollView {
       VStack(alignment: .leading, spacing: 0) {
         inheritanceSettings
-        Divider().padding(.horizontal, 16)
+        Divider().viewerPadding(.horizontal, 16)
         Text(PhotoMarkL10n.text("settings.hint"))
-          .font(.caption)
+          .font(ViewerUIMetrics.font(.caption))
           .foregroundStyle(.secondary)
           .fixedSize(horizontal: false, vertical: true)
-          .padding(.horizontal, 16)
-          .padding(.top, 12)
+          .viewerPadding(.horizontal, 16)
+          .viewerPadding(.top, 12)
         if let error = marks.errorMessage {
           Text(error)
             .foregroundStyle(.red)
             .textSelection(.enabled)
-            .padding(16)
+            .viewerPadding(16)
         } else if marks.isReady {
           PhotoMarkEditor(marks: marks, isEmbedded: true)
         } else {
           ProgressView(PhotoMarkL10n.text("panel.loading"))
-            .padding(16)
+            .viewerPadding(16)
         }
       }
-      .frame(maxWidth: .infinity, alignment: .leading)
+      .viewerFrame(maxWidth: .infinity, alignment: .leading)
     }
   }
 
   private var inheritanceSettings: some View {
     VStack(alignment: .leading, spacing: 10) {
       Label(PhotoMarkL10n.text("inheritance.title"), systemImage: "doc.on.doc")
-        .font(.headline)
+        .font(ViewerUIMetrics.font(.headline))
       Toggle(PhotoMarkL10n.text("inheritance.copy"), isOn: $preferences.inheritOnCopy)
         .accessibilityIdentifier("settings.photoMarks.inheritOnCopy")
       Toggle(PhotoMarkL10n.text("inheritance.export"), isOn: $preferences.inheritOnExport)
         .accessibilityIdentifier("settings.photoMarks.inheritOnExport")
       Text(PhotoMarkL10n.text("inheritance.defaults"))
-        .font(.caption)
+        .font(ViewerUIMetrics.font(.caption))
         .foregroundStyle(.secondary)
         .fixedSize(horizontal: false, vertical: true)
       Text(PhotoMarkL10n.text("inheritance.originals"))
-        .font(.caption)
+        .font(ViewerUIMetrics.font(.caption))
         .foregroundStyle(.secondary)
         .fixedSize(horizontal: false, vertical: true)
     }
-    .padding(16)
+    .viewerPadding(16)
   }
 }
 
 struct PhotoMarkFilterMenu: View {
   @ObservedObject var store: AppStore
   @ObservedObject var marks: PhotoMarkStore
+  @State private var showsFilter = false
 
   var body: some View {
-    Menu {
-      ForEach(PhotoMarkSlot.allCases, id: \.self) { slot in
-        Toggle(isOn: Binding(
-          get: { store.photoMarkFilter.slots.contains(slot) },
-          set: { enabled in
-            var filter = store.photoMarkFilter
-            if enabled {
-              filter.slots.insert(slot)
-              filter.unmarkedOnly = false
-            } else {
-              filter.slots.remove(slot)
-            }
-            store.photoMarkFilter = filter
-          }
-        )) {
-          PhotoMarkMenuLabel(name: "\(slot.keyLabel) · \(displayName(for: slot, marks: marks))",
-            color: marks.color(for: slot))
-        }
+    Button { showsFilter.toggle() } label: {
+      HStack(spacing: 5) {
+        Label(menuTitle, systemImage: store.photoMarkFilter.isActive ? "tag.fill" : "tag")
+        Image(systemName: "chevron.down").font(ViewerUIMetrics.font(size: 9, weight: .semibold))
       }
-      Divider()
-      Picker(PhotoMarkL10n.text("filter.title"), selection: Binding(
-        get: { store.photoMarkFilter.matchesAll },
-        set: { store.photoMarkFilter.matchesAll = $0 }
-      )) {
-        Text(PhotoMarkL10n.text("filter.any")).tag(false)
-        Text(PhotoMarkL10n.text("filter.all")).tag(true)
-      }
-      .pickerStyle(.inline)
-      .disabled(store.photoMarkFilter.unmarkedOnly)
-      Toggle(PhotoMarkL10n.text("filter.unmarked"), isOn: Binding(
-        get: { store.photoMarkFilter.unmarkedOnly },
-        set: { enabled in
-          var filter = store.photoMarkFilter
-          filter.unmarkedOnly = enabled
-          if enabled { filter.slots = [] }
-          store.photoMarkFilter = filter
-        }
-      ))
-      Divider()
-      Button(PhotoMarkL10n.text("filter.reset")) { store.photoMarkFilter = PhotoMarkFilter() }
-        .disabled(!store.photoMarkFilter.isActive)
-      Button(PhotoMarkL10n.text("labels.edit")) { store.presentPhotoMarkEditor() }
-        .disabled(!store.canEditPhotoMarkLabels)
-    } label: {
-      Label(menuTitle, systemImage: store.photoMarkFilter.isActive ? "tag.fill" : "tag")
-        .lineLimit(1)
-        .foregroundStyle(store.photoMarkFilter.isActive ? ViewerTheme.accent : Color.primary)
+      .lineLimit(1)
+      .foregroundStyle(store.photoMarkFilter.isActive ? ViewerTheme.accent : Color.primary)
     }
     .fixedSize()
     .help(PhotoMarkL10n.text("filter.help"))
+    .accessibilityIdentifier("photoMark.filter")
+    .accessibilityValue(menuTitle)
+    .popover(isPresented: $showsFilter, arrowEdge: .bottom) {
+      PhotoMarkFilterEditor(filter: $store.photoMarkFilter, marks: marks,
+        title: PhotoMarkL10n.text("filter.title"), editLabels: {
+          showsFilter = false
+          store.presentPhotoMarkEditor()
+        }, canEditLabels: store.canEditPhotoMarkLabels)
+    }
     .disabled(!marks.isReady || store.isBatchBusy || store.batchSheet != nil || store.isSavingMetadata || store.isExporting)
   }
 
   private var menuTitle: String {
     if store.photoMarkFilter.unmarkedOnly { return PhotoMarkL10n.text("filter.unmarkedTitle") }
-    if !store.photoMarkFilter.slots.isEmpty {
-      return PhotoMarkL10n.format("filter.activeFormat", store.photoMarkFilter.slots.count)
+    if store.photoMarkFilter.isActive {
+      return PhotoMarkL10n.format("filter.activeFormat", store.photoMarkFilter.conditionCount)
     }
     return PhotoMarkL10n.text("filter.title")
+  }
+}
+
+/// Both the library and comparison panes use the same include/exclude rules.
+/// Changing tabs edits a condition; it never clears the other tab's selection.
+struct PhotoMarkFilterEditor: View {
+  @Binding var filter: PhotoMarkFilter
+  @ObservedObject var marks: PhotoMarkStore
+  let title: String
+  var editLabels: (() -> Void)? = nil
+  var canEditLabels = true
+  @State private var editsExclusions: Bool
+
+  init(filter: Binding<PhotoMarkFilter>, marks: PhotoMarkStore, title: String,
+    editLabels: (() -> Void)? = nil, canEditLabels: Bool = true,
+    editsExclusions: Bool = false) {
+    _filter = filter
+    self.marks = marks
+    self.title = title
+    self.editLabels = editLabels
+    self.canEditLabels = canEditLabels
+    _editsExclusions = State(initialValue: editsExclusions)
+  }
+
+  var body: some View {
+    VStack(alignment: .leading, spacing: 12) {
+      Text(title).font(ViewerUIMetrics.font(.headline))
+      Text(PhotoMarkL10n.text("filter.scope"))
+        .font(ViewerUIMetrics.font(.caption)).foregroundStyle(.secondary)
+        .fixedSize(horizontal: false, vertical: true)
+      Picker(PhotoMarkL10n.text("filter.conditions"), selection: $editsExclusions) {
+        Text(PhotoMarkL10n.format("filter.includeCountFormat", filter.slots.count)).tag(false)
+        Text(PhotoMarkL10n.format("filter.excludeCountFormat", filter.excludedSlots.count)).tag(true)
+      }
+      .pickerStyle(.segmented)
+      .accessibilityIdentifier("photoMark.filter.conditionMode")
+      Text(PhotoMarkL10n.text(editsExclusions ? "filter.excludeHelp" : "filter.includeHelp"))
+        .font(ViewerUIMetrics.font(.caption)).foregroundStyle(.secondary)
+        .fixedSize(horizontal: false, vertical: true)
+      LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())],
+        alignment: .leading, spacing: 10) {
+        ForEach(PhotoMarkSlot.allCases, id: \.self) { slot in
+          Toggle(isOn: Binding(get: {
+            (editsExclusions ? filter.excludedSlots : filter.slots).contains(slot)
+          }, set: { selected in
+            if editsExclusions { filter.setExcluded(slot, enabled: selected) }
+            else { filter.setIncluded(slot, enabled: selected) }
+          })) {
+            HStack(spacing: 6) {
+              PhotoMarkKeycap(key: slot.keyLabel,
+                isSelected: filter.slots.contains(slot) || filter.excludedSlots.contains(slot),
+                color: marks.color(for: slot), width: 23, height: 22)
+              Text(displayName(for: slot, marks: marks)).lineLimit(1).truncationMode(.tail)
+              Spacer(minLength: 0)
+              if (editsExclusions ? filter.slots : filter.excludedSlots).contains(slot) {
+                Image(systemName: editsExclusions ? "plus.circle" : "minus.circle")
+                  .foregroundStyle(editsExclusions ? ViewerTheme.accent : Color.secondary)
+                  .accessibilityHidden(true)
+              }
+            }
+          }
+          .toggleStyle(.checkbox)
+          .help("\(slot.keyLabel) · \(displayName(for: slot, marks: marks))")
+          .accessibilityLabel("\(slot.keyLabel) · \(displayName(for: slot, marks: marks))")
+          .accessibilityValue(PhotoMarkL10n.text(filter.excludedSlots.contains(slot)
+            ? "filter.excluded" : filter.slots.contains(slot) ? "filter.included" : "filter.ignored"))
+          .accessibilityIdentifier("photoMark.filter.slot.\(slot.rawValue)")
+        }
+      }
+      Divider()
+      VStack(alignment: .leading, spacing: 6) {
+        Text(PhotoMarkL10n.text("filter.includeRule"))
+          .font(ViewerUIMetrics.font(.caption)).foregroundStyle(.secondary)
+          .fixedSize(horizontal: false, vertical: true)
+        Picker(PhotoMarkL10n.text("filter.includeRule"), selection: $filter.matchesAll) {
+          Text(PhotoMarkL10n.text("filter.any"))
+            .fixedSize(horizontal: true, vertical: false).tag(false)
+          Text(PhotoMarkL10n.text("filter.all"))
+            .fixedSize(horizontal: true, vertical: false).tag(true)
+        }
+        .pickerStyle(.radioGroup)
+        .labelsHidden()
+        .disabled(filter.unmarkedOnly || filter.slots.isEmpty)
+      }
+      Toggle(PhotoMarkL10n.text("filter.unmarked"), isOn: Binding(
+        get: { filter.unmarkedOnly }, set: { filter.setUnmarkedOnly($0) }))
+        .toggleStyle(.checkbox)
+      if filter.isActive && !filter.unmarkedOnly {
+        VStack(alignment: .leading, spacing: 4) {
+          conditionSummary(filter.slots, key: "filter.includeSummaryFormat")
+          conditionSummary(filter.excludedSlots, key: "filter.excludeSummaryFormat")
+        }
+        .font(ViewerUIMetrics.font(.caption)).foregroundStyle(.secondary)
+      }
+      ViewThatFits(in: .horizontal) {
+        HStack(spacing: 12) { actions }
+        VStack(alignment: .leading, spacing: 10) { actions }
+      }
+    }
+    .viewerPadding(18)
+    .viewerFrame(width: 430)
+  }
+
+  @ViewBuilder private var actions: some View {
+    Button(PhotoMarkL10n.text("filter.reset")) { filter = PhotoMarkFilter() }
+      .fixedSize(horizontal: true, vertical: false)
+      .disabled(!filter.isActive)
+    if let editLabels {
+      Button(PhotoMarkL10n.text("labels.edit"), action: editLabels)
+        .fixedSize(horizontal: true, vertical: false)
+        .disabled(!canEditLabels)
+    }
+  }
+
+  @ViewBuilder private func conditionSummary(_ slots: Set<PhotoMarkSlot>, key: String) -> some View {
+    if !slots.isEmpty {
+      let names = PhotoMarkSlot.allCases.filter { slots.contains($0) }.map {
+        "\($0.keyLabel) · \(displayName(for: $0, marks: marks))"
+      }.joined(separator: ", ")
+      let summary = PhotoMarkL10n.format(key, names)
+      Text(summary).lineLimit(2).help(summary).accessibilityLabel(summary)
+        .fixedSize(horizontal: false, vertical: true)
+    }
   }
 }
 
@@ -501,25 +594,27 @@ struct PhotoMarkThumbnailBadges: View {
   let asset: ImageAsset
 
   private var assigned: [PhotoMarkSlot] {
-    PhotoMarkSlot.allCases.filter { marks.marks(for: asset).contains($0) }
+    let selected = marks.marks(for: asset)
+    return PhotoMarkSlot.allCases.filter { selected.contains($0) }
   }
 
   var body: some View {
+    let assigned = self.assigned
     if !assigned.isEmpty {
       HStack(spacing: 3) {
         ForEach(Array(assigned.prefix(4)), id: \.self) { slot in
           Text(slot.keyLabel)
             .foregroundStyle(marks.color(for: slot).tint)
-            .frame(minWidth: 14)
-            .padding(.horizontal, 2)
-            .padding(.vertical, 2)
+            .viewerFrame(minWidth: 14)
+            .viewerPadding(.horizontal, 2)
+            .viewerPadding(.vertical, 2)
             .background(marks.color(for: slot).tint.opacity(0.16), in: RoundedRectangle(cornerRadius: 3))
         }
         if assigned.count > 4 {
           Text(PhotoMarkL10n.format("badge.moreFormat", assigned.count - 4))
         }
       }
-      .font(.system(size: 9, weight: .semibold, design: .monospaced))
+      .font(ViewerUIMetrics.font(size: 9, weight: .semibold, design: .monospaced))
       .foregroundStyle(.secondary)
       .help(assigned.map { displayName(for: $0, marks: marks) }.joined(separator: ", "))
       .accessibilityHidden(true)
@@ -537,9 +632,9 @@ private struct PhotoMarkKeycap: View {
 
   var body: some View {
     Text(key)
-      .font(.system(size: 12, weight: .semibold, design: .monospaced))
+      .font(ViewerUIMetrics.font(size: 12, weight: .semibold, design: .monospaced))
       .foregroundStyle(color.tint)
-      .frame(width: width, height: height)
+      .viewerFrame(width: width, height: height)
       .background {
         RoundedRectangle(cornerRadius: 4).fill(ViewerTheme.panelGradient)
           .overlay {

@@ -75,8 +75,9 @@ final class ViewerFrameLayoutStore: ObservableObject {
     configuration(for: count).rowTarget(from: sourceSlot, direction: direction, in: size)
   }
 
-  func selectionTarget(from sourceSlot: Int, direction: Int, count: Int) -> Int {
-    configuration(for: count).selectionTarget(from: sourceSlot, direction: direction)
+  func selectionTarget(from sourceSlot: Int, direction: ViewerSelectionDirection, count: Int,
+    in size: CGSize? = nil) -> Int {
+    configuration(for: count).selectionTarget(from: sourceSlot, direction: direction, in: size)
   }
 
   private func keepingVisualOrder(_ slots: [Int], in configuration: ViewerFrameLayoutConfiguration)

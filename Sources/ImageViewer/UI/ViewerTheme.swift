@@ -51,9 +51,9 @@ struct ViewerToolButtonStyle: ButtonStyle {
     var body: some View {
       let highlighted = isEnabled && (hovered || configuration.isPressed)
       configuration.label
-        .font(.system(size: 12, weight: .medium))
-        .padding(.horizontal, 9)
-        .frame(minWidth: 30, minHeight: 28)
+        .font(ViewerUIMetrics.font(size: 12, weight: .medium))
+        .viewerPadding(.horizontal, 9)
+        .viewerFrame(minWidth: 30, minHeight: 28)
         .foregroundStyle(isSelected ? ViewerTheme.accent : Color.primary)
         .background {
           RoundedRectangle(cornerRadius: 7, style: .continuous)
@@ -94,9 +94,9 @@ struct ViewerActionButtonStyle: ButtonStyle {
 
     var body: some View {
       configuration.label
-        .font(.system(size: 13, weight: .semibold))
-        .padding(.horizontal, 16)
-        .frame(minHeight: 38)
+        .font(ViewerUIMetrics.font(size: 13, weight: .semibold))
+        .viewerPadding(.horizontal, 16)
+        .viewerFrame(minHeight: 38)
         .foregroundStyle(prominent ? Color.white : Color.primary)
         .background {
           RoundedRectangle(cornerRadius: 9, style: .continuous)
@@ -128,7 +128,7 @@ struct ViewerActionButtonStyle: ButtonStyle {
 struct ViewerControlGroup: ViewModifier {
   func body(content: Content) -> some View {
     content
-      .padding(3)
+      .viewerPadding(3)
       .background(ViewerTheme.panelGradient, in: RoundedRectangle(cornerRadius: 9))
       .overlay {
         RoundedRectangle(cornerRadius: 9).strokeBorder(ViewerTheme.separator, lineWidth: 0.75)

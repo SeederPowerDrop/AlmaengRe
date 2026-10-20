@@ -115,11 +115,14 @@ final class PhotoMarkStore: ObservableObject {
     var tracked: [ImageAsset] = []
     var changed = false
     for asset in assets {
-      let key = asset.photoMarkID
-      if key != asset.sessionID, !referenceIDs.contains(asset.sessionID),
-        let legacy = marksByAssetID.removeValue(forKey: asset.sessionID) {
+      // One immutable identity serves migration and registration. Computing it
+      // repeatedly otherwise normalizes the same file URL on every lookup.
+      let sessionID = asset.sessionID
+      let key = asset.photoMarkIdentity ?? sessionID
+      if key != sessionID, !referenceIDs.contains(sessionID),
+        let legacy = marksByAssetID.removeValue(forKey: sessionID) {
         marksByAssetID[key, default: []].formUnion(legacy)
-        migration[asset.sessionID] = key
+        migration[sessionID] = key
         changed = true
       }
       guard marksByAssetID[key] != nil else { continue }
@@ -130,8 +133,8 @@ final class PhotoMarkStore: ObservableObject {
       if !retryUnavailable, unavailableAssetIDs.contains(key) { continue }
       // Filtering can pass cached assets whose files no longer exist. Only the
       // background capture below can validate a returned disk or restored file.
-      if registeredLocations[key] != asset.sessionID || unavailableAssetIDs.contains(key) {
-        registeredLocations[key] = asset.sessionID
+      if registeredLocations[key] != sessionID || unavailableAssetIDs.contains(key) {
+        registeredLocations[key] = sessionID
         tracked.append(asset)
         referenceIDs.insert(key)
       }

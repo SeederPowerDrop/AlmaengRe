@@ -1,0 +1,16 @@
+/* Image fitting menu and contextual help. */
+"menu.image" = "Adapter l’image";
+"menu.frame" = "Adapter au cadre";
+"menu.help" = "Choisissez l’image entière, la largeur, la hauteur, le centrage ou la taille réelle.";
+"menu.frameHelp" = "Choisissez l’image entière ou le centrage dans chaque cadre.";
+"whole.title" = "Voir l’image entière";
+"whole.help" = "Adapte l’image pour la voir en entier sans modifier ses proportions.";
+"frame.wholeHelp" = "Adapte chaque image entière à son cadre sans modifier ses proportions.";
+"width.title" = "Remplir les marges gauche/droite";
+"width.help" = "Ajuste la largeur sans modifier les proportions. Le haut ou le bas de l’image peut sortir du cadre.";
+"height.title" = "Remplir les marges haut/bas";
+"height.help" = "Ajuste la hauteur sans modifier les proportions. La gauche ou la droite de l’image peut sortir du cadre.";
+"center.title" = "Déplacer au centre";
+"center.help" = "Centre l’image sans modifier le niveau de zoom.";
+"actual.title" = "Taille réelle (1:1)";
+"actual.help" = "Affiche un pixel de l’image pour un pixel de l’écran.";

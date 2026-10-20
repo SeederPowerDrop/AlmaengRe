@@ -3,13 +3,13 @@
 "mode.help" = "分类 ON 时，用 1–4、QWER 和 ASDF 切换分类标记。";
 "mode.toggle" = "切换分类模式";
 "mode.active" = "分类模式";
-"mode.unavailable" = "打开照片或视频即可分类。";
+"mode.unavailable" = "打开文件即可分类。";
 "menu.title" = "照片分类";
 "menu.edit" = "编辑分类名称与颜色…";
 "panel.title" = "照片分类";
 "panel.hint" = "← → 浏览项目 · 1–4、QWER、ASDF 分类";
-"panel.multipleHint" = "一张照片或一个视频可添加多个分类。";
-"panel.noPhoto" = "请打开要分类的照片或视频。";
+"panel.multipleHint" = "一个文件可添加多个分类。";
+"panel.noPhoto" = "请打开要分类的文件。";
 "panel.loading" = "正在载入分类…";
 "panel.close" = "退出分类模式";
 "labels.edit" = "编辑分类名称与颜色";
@@ -61,7 +61,7 @@
 "labels.previewFormat" = "%@ → %@";
 "mark.addHelpFormat" = "%@ → %@：分类 ON 时，按键或点击可添加，再次操作可移除。可添加多个分类，原始文件保持不变。";
 "mark.removeHelpFormat" = "%@ → %@：已添加此分类。分类 ON 时，按键或点击可移除，其他分类和原始文件保持不变。";
-"mode.detailHelp" = "⌘⇧M 开启或关闭分类。开启后，使用 1–4、QWER、ASDF 或分类面板为全部所选照片和视频分类。使用复选框或 ⌘ 单击选择多个项目，⇧ 单击选择范围。各卡片的分类菜单仅作用于该项目。关闭后使用普通查看快捷键。在图像比较中，可选择仅 A、仅 B 或两者作为分类目标。";
+"mode.detailHelp" = "⌘⇧M 开启或关闭分类。开启后，使用 1–4、QWER、ASDF 或分类面板为全部所选文件分类。使用复选框或 ⌘ 单击选择多个项目，⇧ 单击选择范围。各卡片的分类菜单仅作用于该项目。关闭后使用普通查看快捷键。在图像比较中，可选择仅 A、仅 B 或两者作为分类目标。";
 "labels.settingsLink" = "编辑分类名称与颜色…";
 "labels.revert" = "撤销更改";
 "labels.revertHelp" = "恢复已保存的分类名称与颜色，不关闭设置窗口。尚未保存的更改将被撤销。";
@@ -98,7 +98,7 @@
 
 "card.title" = "分类";
 
-"card.help" = "选择此照片或视频的分类。";
+"card.help" = "选择此文件的分类。";
 
 "card.accessibilityFormat" = "%@ 的分类";
 
@@ -122,7 +122,7 @@
 
 "panel.selectionHint" = "使用复选框或 ⌘ 单击追加选择，⇧ 单击选择范围。分类按键和面板作用于全部所选项目；卡片的分类菜单只作用于该项目。";
 
-"selection.help" = "将此项目加入或移出选择。分类按键和面板按钮作用于全部所选照片和视频。";
+"selection.help" = "将此项目加入或移出选择。分类按键和面板按钮作用于全部所选文件。";
 
 "selection.accessibilityFormat" = "选择 %@";
 
@@ -136,4 +136,18 @@
 "inheritance.originals" = "移动原文件或从废纸篓恢复原文件时，其分类会保留，不受这些选项影响。";
 
 "panel.viewerSelectionHint" = "%@ 选择照片";
-"panel.viewerSelectionHelp" = "使用 %@ 在当前页内逐个选择照片或视频。到达一端时，会循环到同一页的另一端。先开启分类模式，再按 1–4、QWER、ASDF 键为选中项目分类。";
+"panel.viewerSelectionHelp" = "使用 %@ 按画面位置移动选择：左右在同一行，上下选择最近列的项目。到达行或列的末端时，会循环到另一端。开启分类模式后，按 1–4、QWER、ASDF 键为选中项目分类。";
+
+/* Include/exclude conditions stay within the currently opened collection. */
+"filter.scope" = "仅在当前打开的文件夹和文件范围内查找。";
+"filter.conditions" = "分类条件";
+"filter.includeCountFormat" = "包含 · %d";
+"filter.excludeCountFormat" = "排除 · %d";
+"filter.includeHelp" = "选择要包含的分类，然后在下方选择匹配其中任意一个或全部分类。";
+"filter.excludeHelp" = "排除带有任意所选分类的文件。例如：包含 S，同时排除 E。";
+"filter.included" = "包含";
+"filter.excluded" = "排除";
+"filter.ignored" = "无条件";
+"filter.includeRule" = "包含分类的匹配规则";
+"filter.includeSummaryFormat" = "包含：%@";
+"filter.excludeSummaryFormat" = "排除：%@";

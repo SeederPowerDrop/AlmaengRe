@@ -19,11 +19,26 @@ struct LibraryControlsView: View {
 
   private var queryControls: some View {
     LibraryQueryControls(query: $store.libraryQuery, isWorking: store.isFiltering,
-      availableExtensions: store.allAssets.map(\.fileExtension))
+      availableExtensions: store.availableFileExtensions)
       .disabled(store.isBatchBusy || store.batchSheet != nil || store.isSavingMetadata || store.isExporting)
   }
 
   private var collectionControls: some View {
+    ViewThatFits(in: .horizontal) {
+      HStack(spacing: 12) {
+        classificationControls
+        mediaToggle
+        Spacer(minLength: 0)
+        collectionCount
+      }
+      VStack(alignment: .leading, spacing: 8) {
+        HStack { classificationControls; Spacer(minLength: 0) }
+        HStack(spacing: 12) { mediaToggle; Spacer(minLength: 0); collectionCount }
+      }
+    }
+  }
+
+  private var classificationControls: some View {
     HStack(spacing: 12) {
       if store.presentationMode == .map && store.libraryQuery.geographicSelection != nil {
         Button { store.libraryQuery.geographicSelection = nil } label: {
@@ -32,29 +47,36 @@ struct LibraryControlsView: View {
         .fixedSize(horizontal: true, vertical: false)
         .buttonStyle(ViewerActionButtonStyle())
         .help("위치 필터를 해제하고 폴더의 사진을 다시 표시합니다.")
-        .disabled(store.isBatchBusy || store.isSavingMetadata || store.isExporting)
+        .disabled(store.isBatchBusy || store.batchSheet != nil || store.isSavingMetadata || store.isExporting)
       }
       PhotoMarkFilterMenu(store: store, marks: store.photoMarks)
         .disabled(!store.photoMarks.isReady || store.isBatchBusy || store.isLoading)
-      Toggle(isOn: $store.showsVideos) {
-        Label(MotionMediaL10n.text("showVideos"), systemImage: "film")
-      }
-      .toggleStyle(.button)
-      .fixedSize()
-      .help(MotionMediaL10n.text("showVideos.help"))
-      .disabled(!store.canOpenFolderFromTree)
-      Spacer(minLength: 0)
-      if !store.allAssets.isEmpty {
-        Text(L10n.format("%d / %d개", store.assets.count, store.allAssets.count))
-          .font(.system(size: 11).monospacedDigit())
-          .foregroundStyle(.secondary)
-          .padding(.horizontal, 8).padding(.vertical, 4)
-          .background(ViewerTheme.controlFill.opacity(0.65), in: Capsule())
-          .fixedSize()
-          .accessibilityLabel("검색 결과 수")
-      }
+    }
+    .fixedSize(horizontal: true, vertical: false)
+  }
+
+  private var mediaToggle: some View {
+    Toggle(isOn: $store.showsVideos) {
+      Label(MotionMediaL10n.text("showVideos"), systemImage: "play.rectangle")
+    }
+    .toggleStyle(.button)
+    .fixedSize()
+    .help(MotionMediaL10n.text("showVideos.help"))
+    .disabled(!store.canOpenFolderFromTree)
+  }
+
+  @ViewBuilder private var collectionCount: some View {
+    if !store.allAssets.isEmpty {
+      Text(L10n.format("%d / %d개", store.assets.count, store.allAssets.count))
+        .font(ViewerUIMetrics.font(size: 11).monospacedDigit())
+        .foregroundStyle(.secondary)
+        .viewerPadding(.horizontal, 8).viewerPadding(.vertical, 4)
+        .background(ViewerTheme.controlFill.opacity(0.65), in: Capsule())
+        .fixedSize()
+        .accessibilityLabel("검색 결과 수")
     }
   }
+
 }
 
 /// Keep the geographic scope visible even with hidden chrome or an empty result.
@@ -72,13 +94,13 @@ struct MapSelectionScopeView: View {
         summary
         actions
       }
-      .frame(maxWidth: .infinity, alignment: .leading)
+      .viewerFrame(maxWidth: .infinity, alignment: .leading)
     }
-    .padding(.horizontal, 16)
-    .padding(.vertical, 10)
+    .viewerPadding(.horizontal, 16)
+    .viewerPadding(.vertical, 10)
     .background(ViewerTheme.accent.opacity(0.14))
     .overlay(alignment: .leading) {
-      Rectangle().fill(ViewerTheme.accent).frame(width: 3)
+      Rectangle().fill(ViewerTheme.accent).viewerFrame(width: 3)
         .allowsHitTesting(false)
     }
   }
@@ -86,12 +108,12 @@ struct MapSelectionScopeView: View {
   private var summary: some View {
     HStack(spacing: 10) {
       Image(systemName: "map.fill")
-        .font(.system(size: 21, weight: .medium))
+        .font(ViewerUIMetrics.font(size: 21, weight: .medium))
         .foregroundStyle(ViewerTheme.accent)
         .accessibilityHidden(true)
       VStack(alignment: .leading, spacing: 3) {
         Text(MapSelectionL10n.text("지도에서 선택한 사진만 보는 중"))
-          .font(.system(size: 12, weight: .semibold))
+          .font(ViewerUIMetrics.font(size: 12, weight: .semibold))
         HStack(spacing: 6) {
           Text(MapSelectionL10n.format("영역 %lld개 · 표시 %lld장",
             Int64(store.libraryQuery.geographicSelection?.areas.count ?? 0),
@@ -99,7 +121,7 @@ struct MapSelectionScopeView: View {
             .monospacedDigit()
           if store.isFiltering { ProgressView().controlSize(.mini) }
         }
-        .font(.system(size: 11))
+        .font(ViewerUIMetrics.font(size: 11))
         .foregroundStyle(.secondary)
       }
       .fixedSize(horizontal: false, vertical: true)
@@ -161,20 +183,20 @@ struct LibraryQueryControls: View {
       }
     }
     .controlSize(.small)
-    .frame(maxWidth: .infinity, alignment: .leading)
+    .viewerFrame(maxWidth: .infinity, alignment: .leading)
   }
 
   private var filenameSearch: some View {
       HStack(spacing: 5) {
         Image(systemName: "magnifyingglass")
           .foregroundStyle(isSearchFocused ? ViewerTheme.accent : Color.secondary)
-          .font(.system(size: 11, weight: .medium))
+          .font(ViewerUIMetrics.font(size: 11, weight: .medium))
         TextField("파일 이름 검색", text: $query.searchText)
           .textFieldStyle(.plain)
           .focused($isSearchFocused)
           .help(LibrarySearchL10n.text("wildcard.hint"))
           .accessibilityIdentifier("librarySearch.filename")
-          .frame(minWidth: 100, idealWidth: 160, maxWidth: 240)
+          .viewerFrame(minWidth: 100, idealWidth: 160, maxWidth: 240)
         if !query.searchText.isEmpty {
           Button { query.searchText = "" } label: {
             Image(systemName: "xmark.circle.fill").foregroundStyle(.secondary)
@@ -184,7 +206,7 @@ struct LibraryQueryControls: View {
           .accessibilityLabel("검색 지우기")
         }
       }
-      .padding(.horizontal, 10).padding(.vertical, 7)
+      .viewerPadding(.horizontal, 10).viewerPadding(.vertical, 7)
       .background(ViewerTheme.panel, in: RoundedRectangle(cornerRadius: 8))
       .overlay {
         RoundedRectangle(cornerRadius: 8)

@@ -327,7 +327,8 @@ struct RealRAWStressTests {
     func request(_ step: Int, _ slot: Int) -> ViewerFrameRequest {
       let position = step <= 100 ? step : 200 - step
       return ViewerFrameRequest(asset: assets[(position + slot * 17) % assets.count], maxPixelSize: 1_280,
-        adjustments: .identity, prefersHDR: true)
+        adjustments: .identity, prefersHDR: true,
+        loadingPolicy: .forVisibleItemCount(slots))
     }
     // First establish a visible frame in each tile, so continuity checks cannot pass
     // vacuously when a slow RAW preview completes only after input stops.

@@ -7,6 +7,11 @@ struct BatchActionsMenu: View {
 
   var body: some View {
     Menu {
+      Button { store.presentSelectionClassification() } label: {
+        Label(BatchActionsL10n.text("classify.menu"), systemImage: "tag")
+      }
+      .disabled(!store.canStartBatchOperation || !store.canTogglePhotoMarking)
+      Divider()
       FileOperationMenuItems(store: store)
       Divider()
 
@@ -56,7 +61,9 @@ struct BatchActionsMenu: View {
     .fixedSize()
     .accessibilityLabel(L10n.text("선택한 사진 작업"))
     .accessibilityValue(L10n.format("%d개 선택", store.selectedURLs.count))
-    .help(L10n.text("⌘ 클릭으로 추가 선택, ⇧ 클릭으로 범위 선택"))
+    .help(store.presentationMode == .overview
+      ? BatchActionsL10n.text("selection.overviewHelp")
+      : L10n.text("⌘ 클릭으로 추가 선택, ⇧ 클릭으로 범위 선택"))
   }
 }
 
@@ -68,10 +75,11 @@ struct BatchQuickActionsView: View {
   var layout: Layout = .labels
 
   private enum Action: String, CaseIterable {
-    case rename, export, watermark, share
+    case classify, rename, export, watermark, share
 
     var symbol: String {
       switch self {
+      case .classify: "tag"
       case .rename: "pencil.line"
       case .export: "photo.on.rectangle.angled"
       case .watermark: "signature"
@@ -86,9 +94,9 @@ struct BatchQuickActionsView: View {
     Group {
       if layout == .twoRows {
         Grid(horizontalSpacing: 6, verticalSpacing: 6) {
-          GridRow { actionButton(.rename); actionButton(.export) }
-          GridRow { actionButton(.watermark); actionButton(.share) }
-          GridRow { fileManagementMenu.gridCellColumns(2) }
+          GridRow { actionButton(.classify); actionButton(.rename) }
+          GridRow { actionButton(.export); actionButton(.watermark) }
+          GridRow { actionButton(.share); fileManagementMenu }
         }
       } else {
         HStack(spacing: 6) {
@@ -109,11 +117,11 @@ struct BatchQuickActionsView: View {
         if layout == .labels {
           Label(FileOperationsL10n.text("menu.title"), systemImage: "folder.badge.gearshape")
         } else {
-          Image(systemName: "folder.badge.gearshape").frame(width: 16)
+          Image(systemName: "folder.badge.gearshape").viewerFrame(width: 16)
         }
       }
       .lineLimit(1)
-      .frame(height: 38)
+      .viewerFrame(height: 38)
     }
     .menuStyle(.borderlessButton)
     .fixedSize()
@@ -126,6 +134,7 @@ struct BatchQuickActionsView: View {
   private func actionButton(_ action: Action) -> some View {
     Button {
       switch action {
+      case .classify: store.presentSelectionClassification()
       case .rename: store.presentBatchRename()
       case .export: store.presentBatchExport()
       case .watermark: store.presentWatermark()
@@ -137,11 +146,11 @@ struct BatchQuickActionsView: View {
           Label(action.title, systemImage: action.symbol)
         } else {
           Image(systemName: action.symbol)
-            .frame(width: 16)
+            .viewerFrame(width: 16)
         }
       }
       .lineLimit(1)
-      .frame(height: 38)
+      .viewerFrame(height: 38)
     }
     .disabled(isDisabled(action))
     .help(action.title)
@@ -151,6 +160,8 @@ struct BatchQuickActionsView: View {
 
   private func isDisabled(_ action: Action) -> Bool {
     switch action {
+    case .classify:
+      !store.canStartBatchOperation || !store.canTogglePhotoMarking
     case .rename:
       !store.canStartBatchOperation || store.selectedAssets.contains(where: \.isReadOnly)
     case .export, .watermark:
@@ -167,6 +178,14 @@ struct BatchAssetContextMenu: View {
   let url: URL
 
   var body: some View {
+    Button {
+      guard store.prepareBatchContextSelection(url: url) else { return }
+      store.presentSelectionClassification()
+    } label: {
+      Label(BatchActionsL10n.text("classify.menu"), systemImage: "tag")
+    }
+    .disabled(!store.canStartBatchOperation(urls: [url]) || !store.canTogglePhotoMarking)
+    Divider()
     FileOperationMenuItems(store: store, contextURL: url)
     Divider()
 
@@ -207,7 +226,7 @@ struct BatchAssetContextMenu: View {
   }
 
   private var isReadOnlySelection: Bool {
-    guard let asset = store.assets.first(where: { $0.url == url }) else { return true }
+    guard let asset = store.visibleAsset(at: url) else { return true }
     return asset.isReadOnly || (store.selectedURLs.contains(asset.url)
       && store.selectedAssets.contains(where: \.isReadOnly))
   }

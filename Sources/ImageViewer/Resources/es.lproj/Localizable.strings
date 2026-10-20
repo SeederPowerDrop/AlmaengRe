@@ -440,7 +440,7 @@
 "전자 앨범 반복 재생" = "Repetir el álbum";
 "%d초 간격" = "Cada %d segundos";
 "전자 앨범 재생 완료" = "Reproducción del álbum finalizada";
-"1~300초. 사진은 표시된 뒤 시간을 세고, 영상은 끝까지 재생한 뒤 넘어갑니다. 집중 보기를 나가거나 다른 앱으로 전환하면 일시정지합니다." = "De 1 a 300 segundos desde que aparece cada foto. Los vídeos se reproducen hasta el final antes de avanzar. Salir de la vista de enfoque o cambiar de app pausa la reproducción.";
+"1~300초. 사진은 표시된 뒤 시간을 세고, 영상은 끝까지 재생한 뒤 넘어갑니다. 집중 보기를 나가거나 다른 앱으로 전환하면 일시정지합니다." = "1–300 segundos. El tiempo de las fotos empieza cuando se muestran; el vídeo y el audio se reproducen hasta el final antes de avanzar. Salir de la vista de enfoque o cambiar de aplicación pausa la reproducción.";
 "탐색 → 전자 앨범 또는 집중 보기 하단의 재생 버튼으로 시작합니다. 사진 두 장 이상 또는 영상이 있으면 재생할 수 있습니다." = "Inicia desde Navegar → Álbum de fotos o el botón de reproducción en la vista de enfoque. Se necesitan al menos dos fotos o un vídeo.";
 "현재 이미지를 바탕화면으로 설정" = "Usar la imagen actual como fondo de pantalla";
 "사진 전체 맞춤" = "Mostrar la foto completa";
@@ -817,7 +817,7 @@
 "aiPreview.basicUsage" = "En Ampliación con IA, ajusta el zoom y arrastra la división para comparar el original y el resultado; después guarda una copia PNG.";
 
 /* Branded home and recent-photo history */
-"home.subtitle" = "Explora los momentos de tus fotos y vídeos y organízalos a tu manera.";
+"home.subtitle" = "Explora fotos, vídeos y audio, y organízalos a tu manera.";
 "home.recent" = "Carpetas abiertas recientemente";
 "home.recent.detail" = "Hasta 3 carpetas, de la más reciente a la más antigua, con hasta 4 imágenes que hayas visto o utilizado por última vez en cada una.";
 "home.empty" = "Aún no hay carpetas recientes";
@@ -853,10 +853,23 @@
 "appearance.dark" = "Oscuro";
 "appearance.help" = "El modo Sistema sigue automáticamente la apariencia de macOS.";
 
-"%@ 영상을 재생할 수 없어 전자 앨범을 일시정지했습니다." = "El álbum de fotos se ha pausado porque no se pudo reproducir el vídeo %@.";
+"%@ 영상을 재생할 수 없어 전자 앨범을 일시정지했습니다." = "El álbum se pausó porque no se pudo reproducir el archivo %@.";
 "‘%@’은 비어 있는 파일입니다(0바이트). 원본이나 백업에서 다시 복사해 주세요." = "«%@» es un archivo vacío (0 bytes). Vuelve a copiarlo desde el original o una copia de seguridad.";
 
 "지원 이미지 모두 연결" = "Asociar todos los formatos de imagen compatibles";
-"Finder에서 이미지를 열면 한 장 보기로 시작합니다. 이미지·영상·폴더를 창에 끌어 놓아도 열 수 있습니다." = "Las imágenes que abras desde el Finder se mostrarán de una en una. También puedes abrir imágenes, vídeos y carpetas arrastrándolos a la ventana.";
+"Finder에서 이미지를 열면 한 장 보기로 시작합니다. 이미지·영상·폴더를 창에 끌어 놓아도 열 수 있습니다." = "Las imágenes abiertas desde Finder se muestran de una en una. También puedes arrastrar imágenes, vídeos, audio y carpetas a la ventana para abrirlos.";
 "연결 확인이 필요한 형식: %@" = "Formatos cuya asociación debe comprobarse: %@";
-"이미지·영상·폴더를 여기에 놓으세요." = "Suelta aquí imágenes, vídeos o carpetas.";
+"이미지·영상·폴더를 여기에 놓으세요." = "Arrastra imágenes, vídeos, audio o carpetas aquí.";
+
+/* Image cache management */
+"cache.title" = "Caché de imágenes";
+"cache.memoryUsage" = "RAM de imágenes reutilizables: %@";
+"cache.diskUsage" = "Miniaturas en disco: %@";
+"cache.usageUnknown" = "No disponible";
+"cache.diskUsageUnavailableHelp" = "Comprueba el acceso a la carpeta de caché y actualiza el tamaño.";
+"cache.calculating" = "Calculando tamaño…";
+"cache.refresh" = "Actualizar tamaño";
+"cache.clearing" = "Vaciando caché…";
+"cache.usageHelp" = "La RAM estima el espacio de los mapas de bits reutilizables, no la memoria total de la app. El tamaño en disco suma los archivos de miniaturas guardados.";
+"cache.clearHelp" = "Se conservan los originales, los ajustes y la vista actual. Las vistas previas se vuelven a crear cuando se necesitan.";
+"cache.clearFailed" = "No se pudieron borrar algunos archivos de caché del disco. Comprueba el tamaño restante y vuelve a intentarlo.";

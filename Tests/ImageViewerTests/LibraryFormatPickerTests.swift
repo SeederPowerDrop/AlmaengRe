@@ -20,9 +20,10 @@ struct LibraryFormatPickerTests {
 
   @Test("검색 결과에도 선택한 이미지 또는 영상 종류를 적용한다")
   func limitsSearchToMediaKind() {
-    let values = ["jpg", "png", "mp4", "mov", "qt", "cr3"]
+    let values = ["jpg", "png", "mp4", "mov", "qt", "cr3", "wav", "mp3"]
     #expect(LibraryFormatPicker.extensions(values, kind: .images) == ["jpg", "png", "cr3"])
     #expect(LibraryFormatPicker.extensions(values, kind: .videos) == ["mp4", "mov", "qt"])
     #expect(LibraryFormatPicker.extensions(values, kind: .images, search: "mp4").isEmpty)
+    #expect(LibraryFormatPicker.extensions(values, kind: .audio) == ["mp3", "wav"])
   }
 }

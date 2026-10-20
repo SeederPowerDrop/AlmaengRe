@@ -56,6 +56,7 @@ private struct FrameCacheKey: Hashable, Sendable {
   let pixelSize: Int?
   let adjustments: ImageAdjustments
   let prefersHDR: Bool
+  let usesSpatialPreview: Bool
   let generation: UInt64
 
   var needsSerialDecoder: Bool {
@@ -67,11 +68,19 @@ private struct FrameCacheKey: Hashable, Sendable {
   }
 }
 
+private extension ImageAdjustments {
+  var usesSpatialFiltering: Bool {
+    noiseReduction > 0 || sharpness > 0 || texture > 0 || clarity > 0
+  }
+}
+
 /// A small worker pool keeps multi-image pages moving without spawning a decoder
 /// per file. The scheduler prioritizes visible work and shares identical requests.
 actor ImagePipeline {
-  private let workers = (0..<4).map { _ in ImageDecoder() }
-  private let largeImageDecoder = ImageDecoder()
+  private let workers: [ImageDecoder]
+  private let largeImageDecoder: ImageDecoder
+  private let decodedInputs: DecodedImageInputCache
+  private let reusesDecodedInputs: Bool
   private let metadataDecoder = ImageDecoder()
   private let governor: ImageResourceGovernor
   private let renderNamespace = UUID()
@@ -82,7 +91,14 @@ actor ImagePipeline {
   private var resourceRevision: UInt64 = 0
   private var registeredCacheClient = false
 
-  init(maxConcurrentDecodes: Int? = nil, governor: ImageResourceGovernor? = nil) {
+  init(maxConcurrentDecodes: Int? = nil, governor: ImageResourceGovernor? = nil,
+    reusesDecodedInputs: Bool = true)
+  {
+    let decodedInputs = DecodedImageInputCache()
+    self.decodedInputs = decodedInputs
+    self.reusesDecodedInputs = reusesDecodedInputs
+    workers = (0..<4).map { _ in ImageDecoder(decodedInputs: reusesDecodedInputs ? decodedInputs : nil) }
+    largeImageDecoder = ImageDecoder(decodedInputs: reusesDecodedInputs ? decodedInputs : nil)
     self.governor = governor ?? ImageResourceGovernor(
       mode: maxConcurrentDecodes == nil ? .comfortable : .priority,
       maximumConcurrentLoadsOverride: maxConcurrentDecodes)
@@ -97,6 +113,7 @@ actor ImagePipeline {
       for: ImageResourceWorkKey(namespace: metadataNamespace, key: file),
       url: url
     ) { _ in
+      if MediaFormatRegistry.isAudio(url) { return AudioMediaPreview.metadata(for: url) }
       if MediaFormatRegistry.isVideo(url) {
         return try await VideoMediaReader.metadata(for: url)
       }
@@ -113,35 +130,60 @@ actor ImagePipeline {
     priority: ImageWorkPriority = .visible
   ) async throws -> RenderedFrame {
     try Task.checkCancellation()
-    if MediaFormatRegistry.isVideo(url), maxPixelSize == nil || !adjustments.isIdentity {
-      // A movie poster is for display only. Image export and image adjustments
-      // must not silently turn the selected video into a single still image.
+    if MediaFormatRegistry.isPlaybackMedia(url), maxPixelSize == nil || !adjustments.isIdentity {
+      // Playback-media previews are for display only. Image export and image
+      // adjustments must not silently turn video/audio into a still image.
       throw ImagePipelineError.unsupported(url)
+    }
+    if MediaFormatRegistry.isAudio(url), let maxPixelSize {
+      return try AudioMediaPreview.frame(for: url, maxPixelSize: maxPixelSize)
     }
     await registerCacheClientIfNeeded()
     let key = FrameCacheKey(
       file: ImageFileVersion(url: url), frameIndex: max(0, frameIndex),
       pixelSize: maxPixelSize.map(ImageLoadingPolicy.pixelBucket),
-      adjustments: adjustments, prefersHDR: prefersHDR, generation: generation)
+      adjustments: adjustments, prefersHDR: prefersHDR,
+      usesSpatialPreview: priority == .interactivePreview && adjustments.usesSpatialFiltering,
+      generation: generation)
     // Use fresh file information, so restoring an empty file needs no cache reset.
     guard key.file.byteCount != 0 else { throw ImagePipelineError.emptyFile(url) }
     if let frame = cache.value(for: key) { return frame }
+    let inputGeneration = decodedInputs.generationToken()
 
     let workers = workers
     let largeImageDecoder = largeImageDecoder
     let frame = try await governor.value(
       for: ImageResourceWorkKey(namespace: renderNamespace, key: key), url: url, priority: priority
     ) { slot in
+      // Storage admission can suspend a caller after its first cache miss. A
+      // second caller may finish before this job reaches the scheduler at all.
+      if let cached = await self.cachedFrame(for: key) { return cached }
       if MediaFormatRegistry.isVideo(key.file.url) {
-        return try await VideoMediaReader.posterFrame(for: key.file.url,
+        let frame = try await VideoMediaReader.posterFrame(for: key.file.url,
           maxPixelSize: key.pixelSize ?? 512)
+        return try await self.remember(frame, for: key)
       }
       let decoder = key.needsSerialDecoder ? largeImageDecoder : workers[slot]
-      return try await decoder.renderFrame(
-        url: key.file.url, frameIndex: key.frameIndex, maxPixelSize: key.pixelSize,
+      let frame = try await decoder.renderFrame(
+        file: key.file, inputGeneration: inputGeneration,
+        frameIndex: key.frameIndex, maxPixelSize: key.pixelSize,
         adjustments: key.adjustments, prefersHDR: key.prefersHDR,
+        usesSpatialPreview: key.usesSpatialPreview,
         hdrFallback: key.needsSerialDecoder ? nil : largeImageDecoder)
+      // Publish before completing the shared job, so later admitted work can
+      // find these exact pixels even before the original waiter resumes.
+      return try await self.remember(frame, for: key)
     }
+    try Task.checkCancellation()
+    return frame
+  }
+
+  private func cachedFrame(for key: FrameCacheKey) -> RenderedFrame? {
+    guard key.generation == generation else { return nil }
+    return cache.value(for: key)
+  }
+
+  private func remember(_ frame: RenderedFrame, for key: FrameCacheKey) throws -> RenderedFrame {
     try Task.checkCancellation()
     if key.pixelSize != nil, key.generation == generation {
       cache.insert(frame, for: key, cost: frame.image.bytesPerRow * frame.image.height)
@@ -163,12 +205,18 @@ actor ImagePipeline {
   func purgeCaches() async {
     generation &+= 1
     cache.removeAll()
+    decodedInputs.removeAll()
     await clearDecoderCaches()
   }
 
   func cacheSnapshot() -> ImageCacheSnapshot {
-    ImageCacheSnapshot(entryCount: cache.count, byteCount: cache.totalCost,
-      byteLimit: cache.costLimit)
+    let inputs = decodedInputs.snapshot().cache
+    return ImageCacheSnapshot(entryCount: cache.count + inputs.entryCount,
+      byteCount: cache.totalCost + inputs.byteCount, byteLimit: cache.costLimit + inputs.byteLimit)
+  }
+
+  func decodeReuseSnapshot() -> ImageDecodeReuseSnapshot {
+    decodedInputs.snapshot()
   }
 
   private func registerCacheClientIfNeeded() async {
@@ -182,11 +230,17 @@ actor ImagePipeline {
   private func applyResourceLimits(_ update: ImageResourceUpdate) async {
     guard update.revision >= resourceRevision else { return }
     resourceRevision = update.revision
-    let smaller = update.limits.renderCacheBytes < cache.costLimit
-    cache.costLimit = update.limits.renderCacheBytes
+    let budget = max(0, update.limits.renderCacheBytes)
+    let smaller = budget < cacheSnapshot().byteLimit
+    // Two small RAW working inputs (preview and fitted detail) avoid developing
+    // the sensor again for each slider value. Repartition the existing allowance.
+    let inputBudget = reusesDecodedInputs ? min(64 * ImageLoadingPolicy.mebibyte, budget / 2) : 0
+    decodedInputs.setCostLimit(inputBudget)
+    cache.costLimit = budget - inputBudget
     if smaller {
       generation &+= 1
       cache.removeAll()
+      decodedInputs.removeAll()
       await clearDecoderCaches()
     }
   }
@@ -201,6 +255,7 @@ actor ImagePipeline {
 /// Each scheduler slot owns a decoder. Synchronous codec calls never run on the UI actor.
 private actor ImageDecoder {
   private let sourceCache = NSCache<NSString, ImageSourceBox>()
+  private let decodedInputs: DecodedImageInputCache?
   private var existingContext: CIContext?
   private var context: CIContext {
     if let existingContext { return existingContext }
@@ -225,7 +280,8 @@ private actor ImageDecoder {
     return context
   }
 
-  init() {
+  init(decodedInputs: DecodedImageInputCache? = nil) {
+    self.decodedInputs = decodedInputs
     sourceCache.countLimit = 2
   }
 
@@ -288,37 +344,45 @@ private actor ImageDecoder {
   }
 
   func renderFrame(
-    url: URL,
+    file: ImageFileVersion,
+    inputGeneration: UInt64,
     frameIndex: Int,
     maxPixelSize: Int?,
     adjustments: ImageAdjustments,
     prefersHDR: Bool,
+    usesSpatialPreview: Bool,
     hdrFallback: ImageDecoder? = nil
   ) async throws -> RenderedFrame {
     try Task.checkCancellation()
     // Gain-map JPEG and high-bit HEIC/AVIF can require a full HDR workspace too.
     // Inspect before decoding and route them through the single large-image actor.
-    if let hdrFallback, let source = imageSource(for: url),
-      shouldPreserveHDR(source: source, url: url)
+    if let hdrFallback, let source = imageSource(for: file),
+      shouldPreserveHDR(source: source, url: file.url)
     {
-      return try await hdrFallback.renderFrame(url: url, frameIndex: frameIndex,
-        maxPixelSize: maxPixelSize, adjustments: adjustments, prefersHDR: prefersHDR)
+      return try await hdrFallback.renderFrame(file: file, inputGeneration: inputGeneration,
+        frameIndex: frameIndex,
+        maxPixelSize: maxPixelSize, adjustments: adjustments, prefersHDR: prefersHDR,
+        usesSpatialPreview: usesSpatialPreview)
     }
     return try autoreleasepool {
-      try decodeFrame(url: url, frameIndex: frameIndex, maxPixelSize: maxPixelSize,
-        adjustments: adjustments, prefersHDR: prefersHDR)
+      try decodeFrame(file: file, inputGeneration: inputGeneration,
+        frameIndex: frameIndex, maxPixelSize: maxPixelSize,
+        adjustments: adjustments, prefersHDR: prefersHDR, usesSpatialPreview: usesSpatialPreview)
     }
   }
 
   private func decodeFrame(
-    url: URL,
+    file: ImageFileVersion,
+    inputGeneration: UInt64,
     frameIndex requestedFrameIndex: Int,
     maxPixelSize: Int?,
     adjustments: ImageAdjustments,
-    prefersHDR: Bool
+    prefersHDR: Bool,
+    usesSpatialPreview: Bool
   ) throws -> RenderedFrame {
     try Task.checkCancellation()
-    let source = imageSource(for: url)
+    let url = file.url
+    let source = imageSource(for: file)
     let frameCount = max(1, source.map(CGImageSourceGetCount) ?? 1)
     let frameIndex = min(max(0, requestedFrameIndex), frameCount - 1)
     let pixelBucket = maxPixelSize ?? 0
@@ -338,6 +402,7 @@ private actor ImageDecoder {
       requestedPixels: maxPixelSize, sourceSize: sourcePixelSize, adjustments: adjustments)
 
     let input: CIImage
+    var isDirectRAW = false
     var directlyDecodedBitmap: CGImage?
     var shouldDecodeWithImageIO = frameCount > 1
     if !shouldDecodeWithImageIO, pixelBucket > 0, source != nil {
@@ -345,8 +410,10 @@ private actor ImageDecoder {
     }
     if let source,
       shouldDecodeWithImageIO,
-      let frameImage = makeImageIOFrame(
+      let frameImage = reusableImageIOFrame(
         source: source,
+        file: file,
+        inputGeneration: inputGeneration,
         frameIndex: frameIndex,
         maxPixelSize: decodePixels
       )
@@ -366,6 +433,7 @@ private actor ImageDecoder {
       )
     {
       input = directImage
+      isDirectRAW = ImageFormatRegistry.cameraRAWExtensions.contains(url.pathExtension.lowercased())
     } else {
       let bitmap = try decodeCustomOrAppKit(url: url)
       directlyDecodedBitmap = bitmap
@@ -402,6 +470,17 @@ private actor ImageDecoder {
     // 원본 좌표에서 회전·자르기를 먼저 적용해야 작은 선택 영역도 화면 크기를 채웁니다.
     var image = applyingGeometry(adjustments, to: input)
     image = downsample(image, maxPixelSize: maxPixelSize)
+    // A raster boundary can slightly change Core Image's edge-aware filter
+    // fusion. Keep settled noise/sharpness/texture/clarity on the original graph;
+    // only interactive samples may reuse that working plane. Their cache keys
+    // are distinct, so a sample can never stand in for precise output.
+    if isDirectRAW, let maxPixelSize,
+      !adjustments.usesSpatialFiltering || usesSpatialPreview
+    {
+      image = reusableRAWWorkingImage(image, file: file, frameIndex: frameIndex,
+        maxPixelSize: maxPixelSize, adjustments: adjustments, prefersHDR: prefersHDR,
+        inputGeneration: inputGeneration)
+    }
     image = applying(adjustments, to: image)
 
     let extent = image.extent.integral
@@ -462,14 +541,18 @@ private actor ImageDecoder {
   }
 
   private func imageSource(for url: URL) -> CGImageSource? {
-    let key = ImageFileVersion(url: url).encoded
+    imageSource(for: ImageFileVersion(url: url))
+  }
+
+  private func imageSource(for file: ImageFileVersion) -> CGImageSource? {
+    let key = file.encoded
     if let cached = sourceCache.object(forKey: key) {
       return cached.source
     }
 
     guard
       let source = CGImageSourceCreateWithURL(
-        url as CFURL,
+        file.url as CFURL,
         [
           kCGImageSourceShouldCache: false
         ] as CFDictionary)
@@ -505,6 +588,65 @@ private actor ImageDecoder {
         sourceMaximumDimension > 0 ? min(maxPixelSize, sourceMaximumDimension) : maxPixelSize
     }
     return CGImageSourceCreateThumbnailAtIndex(source, frameIndex, options as CFDictionary)
+  }
+
+  private func reusableImageIOFrame(
+    source: CGImageSource, file: ImageFileVersion, inputGeneration: UInt64,
+    frameIndex: Int, maxPixelSize: Int?
+  ) -> CGImage? {
+    // Exports/original-size reads and HDR/gain-map CIImage paths remain untouched.
+    // Keep ImageIO's exact decoded precision and ICC profile, without rendering
+    // through an intermediate SDR color space or retaining full RAW sensor data.
+    let ext = file.url.pathExtension.lowercased()
+    guard let decodedInputs, let maxPixelSize,
+      ImageFormatRegistry.cameraRAWExtensions.contains(ext) || ["tif", "tiff"].contains(ext)
+    else {
+      return makeImageIOFrame(source: source, frameIndex: frameIndex, maxPixelSize: maxPixelSize)
+    }
+    let key = DecodedImageInputKey(file: file, frameIndex: frameIndex,
+      pixelSize: maxPixelSize)
+    if let image = decodedInputs.lookup(key, generation: inputGeneration) { return image }
+    guard let image = makeImageIOFrame(source: source, frameIndex: frameIndex,
+      maxPixelSize: maxPixelSize) else { return nil }
+    decodedInputs.insert(image, for: key, generation: inputGeneration)
+    return image
+  }
+
+  private func reusableRAWWorkingImage(
+    _ image: CIImage, file: ImageFileVersion, frameIndex: Int, maxPixelSize: Int,
+    adjustments: ImageAdjustments, prefersHDR: Bool, inputGeneration: UInt64
+  ) -> CIImage {
+    guard let decodedInputs else { return image }
+    let originalExtent = image.extent
+    let extent = originalExtent.integral
+    let storageBytes = extent.width * extent.height * 16
+    guard !extent.isEmpty, extent.minX.isFinite, extent.minY.isFinite,
+      extent.width.isFinite, extent.height.isFinite, storageBytes.isFinite,
+      storageBytes > 0, storageBytes < CGFloat(Int.max),
+      decodedInputs.canRetain(cost: Int(storageBytes),
+        generation: inputGeneration)
+    else { return image }
+    let key = DecodedImageInputKey(file: file, frameIndex: frameIndex,
+      pixelSize: maxPixelSize, geometry: DecodedImageGeometry(adjustments), prefersHDR: prefersHDR)
+    let bitmap: CGImage
+    if let reused = decodedInputs.lookup(key, generation: inputGeneration) {
+      bitmap = reused
+    } else {
+      // ProRAW/gain-map DNGs use a lazy CIImage rather than ImageIO thumbnails.
+      // Materialize only the fitted, unadjusted working plane. Float32 extended
+      // linear RGB retains highlights, negative/wide-gamut values and precision;
+      // an SDR or half-float intermediate would change the editing source.
+      guard let rendered = context.createCGImage(image, from: extent, format: .RGBAf,
+        colorSpace: CGColorSpace(name: CGColorSpace.extendedLinearSRGB)!)
+      else { return image }
+      bitmap = rendered
+      decodedInputs.insert(rendered, for: key, generation: inputGeneration)
+    }
+    return CIImage(cgImage: bitmap).transformed(
+      by: CGAffineTransform(translationX: extent.minX, y: extent.minY))
+      // Restore fractional bounds too: edge-aware filters must clamp to exactly
+      // the same crop/downsample extent as the uncached pipeline.
+      .cropped(to: originalExtent)
   }
 
   private func shouldPreserveHDR(source: CGImageSource, url: URL) -> Bool {

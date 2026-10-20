@@ -33,8 +33,8 @@ struct ComparisonFilmstrip: View {
               .id(entry.asset.id)
           }
         }
-        .padding(.horizontal, 10)
-        .padding(.vertical, compact ? 3 : 4)
+        .viewerPadding(.horizontal, 10)
+        .viewerPadding(.vertical, compact ? 3 : 4)
       }
       .onChange(of: pane.currentAsset?.id, initial: true) { _, _ in
         scrollToCurrent(with: proxy)
@@ -72,10 +72,10 @@ struct ComparisonFilmstrip: View {
               .truncationMode(.middle)
           }
         }
-        .font(.system(size: 9, weight: isCurrent ? .medium : .regular))
+        .font(ViewerUIMetrics.font(size: 9, weight: isCurrent ? .medium : .regular))
         .frame(width: thumbnailWidth)
       }
-      .padding(4)
+      .viewerPadding(4)
       .background(isCurrent ? ViewerTheme.selection : Color.clear,
         in: RoundedRectangle(cornerRadius: 6, style: .continuous))
       .overlay {

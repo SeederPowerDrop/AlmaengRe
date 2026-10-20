@@ -61,7 +61,7 @@ struct GridRowNavigationTests {
     #expect(store.photoMarks.marksByAssetID.isEmpty)
   }
 
-  @Test("행 끝에서는 확대와 이동을 유지하고 Option 좌우는 현재 화면 안에서 사진 선택을 순환한다", arguments: [false, true])
+  @Test("행 끝과 한 장뿐인 행의 좌우는 확대를 유지하고 Option 위아래는 화면 안에서 행을 순환한다", arguments: [false, true])
   func blockedRowPreservesViewportAndOptionSelectionCycles(marking: Bool) async throws {
     let fixture = try Fixture(count: 23)
     let store = fixture.makeStore()
@@ -86,11 +86,20 @@ struct GridRowNavigationTests {
     #expect(store.currentIndex == 6 && store.pageStartIndex == 0)
     #expect(store.zoom == 2 && store.panOffset == CGSize(width: -14, height: 12))
     #expect(store.handleViewerKeyDown(try key(124, modifiers: .option), shortcuts: shortcuts))
-    #expect(store.currentIndex == 0 && store.pageStartIndex == 0)
-    #expect(store.selectedURLs == [store.assets[0].url])
+    #expect(store.currentIndex == 6 && store.pageStartIndex == 0)
+    #expect(store.zoom == 2 && store.panOffset == CGSize(width: -14, height: 12))
     #expect(store.handleViewerKeyDown(try key(123, modifiers: .option), shortcuts: shortcuts))
     #expect(store.currentIndex == 6 && store.pageStartIndex == 0)
     #expect(store.selectedURLs == [store.assets[6].url])
+    #expect(store.zoom == 2 && store.panOffset == CGSize(width: -14, height: 12))
+    #expect(store.handleViewerKeyDown(try key(126, modifiers: .option), shortcuts: shortcuts))
+    #expect(store.currentIndex == 4 && store.pageStartIndex == 0)
+    #expect(store.handleViewerKeyDown(try key(125, modifiers: .option), shortcuts: shortcuts))
+    #expect(store.currentIndex == 6 && store.pageStartIndex == 0)
+    #expect(store.handleViewerKeyDown(try key(125, modifiers: .option), shortcuts: shortcuts))
+    #expect(store.currentIndex == 1 && store.pageStartIndex == 0)
+    #expect(store.handleViewerKeyDown(try key(126, modifiers: .option), shortcuts: shortcuts))
+    #expect(store.currentIndex == 6 && store.pageStartIndex == 0)
   }
 
   @Test("사진과 영상이 섞인 몽땅보기에서도 분류 중 위아래는 같은 열의 항목을 고른다")
@@ -129,11 +138,13 @@ struct GridRowNavigationTests {
     store.isPhotoMarking = true
     #expect(store.handleViewerKeyDown(try key(125), shortcuts: shortcuts))
     #expect(store.currentIndex == 3 && store.pageStartIndex == 0)
-    let modifiers: [NSEvent.ModifierFlags] = [.option, .shift, .command, .control]
+    let modifiers: [NSEvent.ModifierFlags] = [.shift, .command, .control, [.option, .shift]]
     for modifier in modifiers {
       _ = store.handleViewerKeyDown(try key(125, modifiers: modifier), shortcuts: shortcuts)
       #expect(store.currentIndex == 3 && store.pageStartIndex == 0)
     }
+    #expect(store.handleViewerKeyDown(try key(125, modifiers: .option), shortcuts: shortcuts))
+    #expect(store.currentIndex == 6 && store.pageStartIndex == 0)
   }
 
   @Test("분류 중 한 장 뷰어의 위아래는 이전과 다음 항목 이동을 유지한다")

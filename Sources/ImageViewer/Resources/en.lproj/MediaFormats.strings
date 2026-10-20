@@ -1,5 +1,5 @@
 "kind.title" = "Media Type";
-"kind.all" = "Photos and Videos";
+"kind.all" = "Photos, Video & Audio";
 "kind.images" = "Images Only";
 "kind.videos" = "Videos Only";
 "extensions.folder" = "Extensions in This Folder";
@@ -12,11 +12,17 @@
 "picker.kind.all" = "All";
 "picker.kind.images" = "Images";
 "picker.kind.videos" = "Videos";
-"picker.search" = "Find extensions (e.g. jpg, mp4)";
+"picker.search" = "Find extensions: jpg, mp4, mp3";
 "picker.clearSearch" = "Clear search";
 "picker.source" = "Extension source";
 "picker.folder" = "This Folder";
-"picker.supported" = "All Supported";
+"picker.supported" = "All Extensions";
 "picker.empty" = "No matching extensions.";
 "picker.hint" = "You can select multiple formats.";
 "picker.done" = "Done";
+
+"kind.audio" = "Audio Only";
+
+"picker.kind.audio" = "Audio";
+
+"extensions.audio" = "Audio Extensions";

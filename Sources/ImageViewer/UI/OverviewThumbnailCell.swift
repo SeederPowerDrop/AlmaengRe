@@ -9,11 +9,17 @@ struct OverviewThumbnailCell: View {
   let asset: ImageAsset
   let size: CGFloat
   var isAdjustingSize = false
+  var defersLoadingForOcclusion = false
+  var defersRefinement = false
+  var overviewRefinementGate: OverviewRefinementGate? = nil
+  var onBitmapStateApplied: (@MainActor (ThumbnailBitmapStateEvent) -> Void)? = nil
+  var currentIndexForAsset: (@MainActor (URL) -> Int?)? = nil
   @Environment(\.displayScale) private var displayScale
   @State private var imagePixelSize: CGSize?
   @State private var isHovered = false
 
   private var isSelected: Bool { store.selectedURLs.contains(asset.url) }
+  private var isCurrent: Bool { store.currentAsset?.url == asset.url }
 
   var body: some View {
     VStack(alignment: .leading, spacing: 7) {
@@ -24,26 +30,33 @@ struct OverviewThumbnailCell: View {
           asset: asset, thumbnailPipeline: store.thumbnailPipeline, pipeline: store.pipeline,
           maxPixelSize: OverviewThumbnailSizing.requestedPixelSize(for: size, displayScale: displayScale),
           adjustments: store.adjustments(for: asset), prefersPreciseImage: true,
-          defersLoading: isAdjustingSize,
-          onDisplayedImageSizeChange: { imagePixelSize = $0 }
+          defersLoading: isAdjustingSize || defersLoadingForOcclusion, prefersCompactPreview: true,
+          defersRefinement: defersRefinement,
+          overviewRefinementGate: overviewRefinementGate,
+          onDisplayedImageSizeChange: store.showsOverviewNumbers ? { size in
+            if imagePixelSize != size { imagePixelSize = size }
+          } : nil,
+          onBitmapStateApplied: onBitmapStateApplied
         )
         .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
         .overlay(alignment: .bottomTrailing) {
-          if asset.isVideo {
-            Image(systemName: "play.fill")
-              .font(.caption.weight(.semibold)).foregroundStyle(.white)
-              .padding(8).background(.black.opacity(0.7), in: Circle()).padding(6)
+          if asset.isPlaybackMedia {
+            Image(systemName: asset.isAudio ? "waveform" : "play.fill")
+              .font(ViewerUIMetrics.font(.caption).weight(.semibold)).foregroundStyle(.white)
+              .viewerPadding(8).background(.black.opacity(0.7), in: Circle()).viewerPadding(6)
               .allowsHitTesting(false)
           }
         }
 
-        Text("\(index + 1)")
-          .font(.system(size: 11, weight: .medium, design: .monospaced))
+        // This URL-backed cell can survive an order change without recreation.
+        // Read the current ordinal from the same lookup as viewport membership.
+        Text("\((currentIndexForAsset?(asset.id) ?? index) + 1)")
+          .font(ViewerUIMetrics.font(size: 11, weight: .medium, design: .monospaced))
           .foregroundStyle(.white)
           .lineLimit(1)
           .minimumScaleFactor(0.5)
-          .padding(.horizontal, 6)
-          .padding(.vertical, 3)
+          .viewerPadding(.horizontal, 6)
+          .viewerPadding(.vertical, 3)
           .background(.black.opacity(0.85), in: Capsule())
           .opacity(store.showsOverviewNumbers ? 1 : 0)
           .accessibilityHidden(true)
@@ -52,12 +65,12 @@ struct OverviewThumbnailCell: View {
       HStack(spacing: 3) {
         if store.isPhotoMarking {
           PhotoMarkSelectionToggle(asset: asset, isSelected: isSelected) {
-            focusCard()
-            store.selectForBatch(index: index, modifiers: .command)
+            selectCard(modifiers: .command)
           }
+          .highPriorityGesture(modifiedSelectionGesture)
         }
         Text(asset.filename)
-          .font(.system(size: 11, weight: isSelected ? .semibold : .medium))
+          .font(ViewerUIMetrics.font(size: 11, weight: isSelected ? .semibold : .medium))
           .foregroundStyle(Color.primary.opacity(isSelected ? 1 : 0.85))
           .lineLimit(1)
           .truncationMode(.middle)
@@ -65,14 +78,14 @@ struct OverviewThumbnailCell: View {
           // 선택 표식도 작은 사진을 가리지 않도록 파일 이름 옆에 둡니다.
           Image(systemName: "checkmark.circle.fill")
             .foregroundStyle(ViewerTheme.accent)
-            .font(.caption2)
+            .font(ViewerUIMetrics.font(.caption2))
             .accessibilityHidden(true)
         }
       }
       PhotoMarkThumbnailBadges(marks: store.photoMarks, asset: asset)
       if store.isPhotoMarking {
         PhotoMarkCardMenu(store: store, asset: asset)
-          .font(.caption)
+          .font(ViewerUIMetrics.font(.caption))
       }
     }
     .padding(7)
@@ -87,37 +100,65 @@ struct OverviewThumbnailCell: View {
     .overlay {
       RoundedRectangle(cornerRadius: 10, style: .continuous)
         .strokeBorder(
-          isSelected ? ViewerTheme.selectionBorder
-            : ViewerTheme.controlBorder.opacity(isHovered ? 1 : 0.65), lineWidth: 1)
+          isCurrent || isSelected ? ViewerTheme.selectionBorder
+            : ViewerTheme.controlBorder.opacity(isHovered ? 1 : 0.65),
+          style: StrokeStyle(lineWidth: isCurrent ? 2 : 1,
+            dash: isCurrent && !isSelected ? [4, 3] : []))
         .allowsHitTesting(false)
     }
     .contentShape(Rectangle())
     .onHover { isHovered = $0 }
-    .onTapGesture(count: 2) {
-      guard store.overviewSelectionSession == nil else { return }
-      focusCard()
-      store.select(index: index)
-      if asset.isVideo { store.openVideoFullScreen(asset) }
-      else { store.presentationMode = .viewer }
-    }
-    .onTapGesture {
-      focusCard()
-      store.selectForBatch(index: index, modifiers: NSEvent.modifierFlags)
-    }
+    .gesture(cardTapGesture)
     .contextMenu { BatchAssetContextMenu(store: store, url: asset.url) }
     .accessibilityElement(children: store.isPhotoMarking ? .contain : .ignore)
     .accessibilityLabel(asset.filename)
+    .accessibilityIdentifier("overview.asset.\(asset.sessionID)")
     .accessibilityValue(accessibilityValue)
     .accessibilityActions {
-      if asset.isVideo {
+      if asset.isAudio {
+        Button(MotionMediaL10n.text("audio.play")) {
+          store.openAudioForPlayback(asset)
+        }
+      } else if asset.isVideo {
         Button(MotionMediaL10n.text("video.fullscreen")) { store.openVideoFullScreen(asset) }
       }
     }
     .accessibilityAddTraits(isSelected ? [.isButton, .isSelected] : .isButton)
     .accessibilityAction {
-      focusCard()
-      store.selectForBatch(index: index, modifiers: [])
+      selectCard(modifiers: [])
     }
+  }
+
+  /// Register modifier combinations explicitly. A plain SwiftUI tap does not
+  /// reliably receive Command-click, and reading global flags after the
+  /// double-click delay loses a modifier released immediately after mouse-up.
+  private var modifiedSelectionGesture: some Gesture {
+    TapGesture().modifiers([.command, .shift])
+      .onEnded { selectCard(modifiers: [.command, .shift]) }
+      .exclusively(before: TapGesture().modifiers(.shift)
+        .onEnded { selectCard(modifiers: .shift) })
+      .exclusively(before: TapGesture().modifiers(.command)
+        .onEnded { selectCard(modifiers: .command) })
+  }
+
+  private var cardTapGesture: some Gesture {
+    modifiedSelectionGesture.exclusively(before:
+      TapGesture(count: 2).onEnded { openCard() }
+        .exclusively(before: TapGesture().onEnded { selectCard(modifiers: []) }))
+  }
+
+  private func selectCard(modifiers: NSEvent.ModifierFlags) {
+    focusCard()
+    store.selectOverviewCard(url: asset.url, modifiers: modifiers)
+  }
+
+  private func openCard() {
+    guard store.overviewSelectionSession == nil,
+      store.selectOverviewCard(url: asset.url, modifiers: []) else { return }
+    focusCard()
+    if asset.isAudio { store.openAudioForPlayback(asset) }
+    else if asset.isVideo { store.openVideoFullScreen(asset) }
+    else { store.presentationMode = .viewer }
   }
 
   private func focusCard() {
@@ -127,6 +168,7 @@ struct OverviewThumbnailCell: View {
 
   private var accessibilityValue: String {
     let selection = L10n.text(isSelected ? "선택됨" : "선택 안 됨")
+      + (isCurrent ? ", " + BatchActionsL10n.text("selection.focused") : "")
     let assigned = store.photoMarks.marks(for: asset)
     let names = PhotoMarkSlot.allCases.filter { assigned.contains($0) }.map { slot in
       let name = store.photoMarks.label(for: slot)
@@ -145,6 +187,9 @@ private struct OverviewNumberedImageLayout: Layout {
   let showsNumber: Bool
 
   private func metrics(width: CGFloat, subviews: Subviews) -> (badge: CGSize, image: CGSize?, top: CGFloat) {
+    // Hidden numbers do not affect card geometry; avoid measuring an invisible
+    // text subview for every intermediate grid width while the slider moves.
+    guard showsNumber else { return (.zero, nil, 0) }
     let badge = subviews[1].sizeThatFits(ProposedViewSize(width: width, height: nil))
     let image = OverviewNumberPlacement.fittedImageSize(
       pixels: imagePixels, in: CGSize(width: width, height: imageHeight))

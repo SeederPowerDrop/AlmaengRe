@@ -66,23 +66,29 @@ enum RustImageEngine {
   private struct ZIPRequest: Encodable { let op = "zip"; let path: String; let destination: String; let extensions: [String] }
 
   static func query(_ assets: [ImageAsset], options: LibraryQuery) throws -> [ImageAsset] {
+    let totalStarted = QueryPerformanceTrace.start()
+    defer { QueryPerformanceTrace.record("engine.query_total", since: totalStarted, count: assets.count, synchronous: true) }
+    let predicateStarted = QueryPerformanceTrace.start()
     let nameMatcher = LibraryTextMatcher(pattern: options.searchText)
+    let searchPredicate = LibrarySearchPredicate(filters: options.searchFilters)
     var filtered: [ImageAsset] = []
     filtered.reserveCapacity(assets.count)
     for asset in assets {
       try Task.checkCancellation()
       if nameMatcher.matches(asset.filename), LibraryMediaFilter.matches(asset, query: options),
-        options.searchFilters.matches(asset) {
+        searchPredicate.matches(asset) {
         filtered.append(asset)
       }
     }
+    QueryPerformanceTrace.record("engine.swift_predicates", since: predicateStarted, count: assets.count, synchronous: true)
     // The native engine still owns ordering, format families and map geometry.
     // Names were matched above, including glob syntax the engine does not parse.
     var nativeOptions = options
     nativeOptions.searchText = ""
-    let indices: [Int] = try call(QueryRequest(assets: filtered.map(Record.init), options: nativeOptions))
+    let records = QueryPerformanceTrace.measure("engine.make_records", count: filtered.count) { filtered.map(Record.init) }
+    let indices: [Int] = try call(QueryRequest(assets: records, options: nativeOptions), profile: "query")
     guard indices.allSatisfy({ filtered.indices.contains($0) }) else { throw RustImageEngineError(detail: "Invalid image index") }
-    return indices.map { filtered[$0] }
+    return QueryPerformanceTrace.measure("engine.map_results", count: indices.count) { indices.map { filtered[$0] } }
   }
 
   static func match(first: [ImageAsset], second: [ImageAsset], sort: LibrarySort = .nameAscending) throws -> [ImageMatchPair] {
@@ -127,12 +133,17 @@ enum RustImageEngine {
     return image
   }
 
-  private static func call<Request: Encodable, Response: Decodable>(_ request: Request) throws -> Response {
-    let input = try JSONEncoder().encode(request)
-    let buffer = input.withUnsafeBytes { bytes in am_engine_json(bytes.bindMemory(to: UInt8.self).baseAddress, bytes.count) }
+  private static func call<Request: Encodable, Response: Decodable>(_ request: Request,
+    profile: String = "other") throws -> Response {
+    let input = try QueryPerformanceTrace.measure("ffi.\(profile).json_encode") { try JSONEncoder().encode(request) }
+    let buffer = QueryPerformanceTrace.measure("ffi.\(profile).rust_call", count: input.count) {
+      input.withUnsafeBytes { bytes in am_engine_json(bytes.bindMemory(to: UInt8.self).baseAddress, bytes.count) }
+    }
     defer { am_buffer_free(buffer) }
     guard let pointer = buffer.ptr else { throw RustImageEngineError(detail: "Empty engine response") }
-    let reply = try JSONDecoder().decode(Reply<Response>.self, from: Data(bytes: pointer, count: buffer.len))
+    let reply = try QueryPerformanceTrace.measure("ffi.\(profile).json_decode", count: buffer.len) {
+      try JSONDecoder().decode(Reply<Response>.self, from: Data(bytes: pointer, count: buffer.len))
+    }
     guard reply.ok, let data = reply.data else { throw RustImageEngineError(detail: reply.error ?? "Unknown engine error") }
     return data
   }

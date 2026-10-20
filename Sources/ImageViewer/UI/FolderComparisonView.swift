@@ -78,8 +78,8 @@ struct FolderComparisonView: View {
         .disabled(comparison.first.isLocked || comparison.second.isLocked)
     }
     .controlSize(.small)
-    .padding(.horizontal, 16)
-    .padding(.vertical, 11)
+    .viewerPadding(.horizontal, 16)
+    .viewerPadding(.vertical, 11)
     .frame(maxWidth: .infinity, alignment: .leading)
     .background(ViewerTheme.chromeGradient)
   }
@@ -99,7 +99,7 @@ struct FolderComparisonView: View {
       }
       if hasLockedPane {
         Label("잠금에 따라 자동 선택", systemImage: "lock.fill")
-          .font(.caption).foregroundStyle(.secondary)
+          .font(ViewerUIMetrics.font(.caption)).foregroundStyle(.secondary)
           .fixedSize(horizontal: false, vertical: true)
       }
       if comparison.navigationTarget == .both {
@@ -115,7 +115,7 @@ struct FolderComparisonView: View {
 
   private var navigationLabel: some View {
     Label("이미지 넘기기", systemImage: "arrow.left.arrow.right")
-      .font(.system(size: 12, weight: .medium))
+      .font(ViewerUIMetrics.font(size: 12, weight: .medium))
       .fixedSize(horizontal: true, vertical: false)
   }
 
@@ -151,7 +151,7 @@ struct FolderComparisonView: View {
   private var loopDescription: some View {
     Text(comparison.alignment == .filename
             ? ComparisonAlignment.filename.title : comparison.endBehavior.title)
-      .font(.caption).foregroundStyle(.secondary)
+      .font(ViewerUIMetrics.font(.caption)).foregroundStyle(.secondary)
       .fixedSize(horizontal: false, vertical: true)
   }
 
@@ -164,7 +164,7 @@ struct FolderComparisonView: View {
       VStack(alignment: .leading, spacing: 8) { matchingControls; thumbnailControl }
     }
     .controlSize(.regular)
-    .font(.system(size: 13, weight: .medium))
+    .font(ViewerUIMetrics.font(size: 13, weight: .medium))
   }
 
   private var thumbnailControl: some View {
@@ -185,7 +185,7 @@ struct FolderComparisonView: View {
         : "양쪽 폴더를 목록 순서대로 비교합니다. 각 칸의 사진을 따로 고를 수 있습니다."))
       if comparison.alignment == .filename {
         Text(L10n.format("비교 %1$@", comparison.matchedPosition))
-          .font(.caption.monospacedDigit()).foregroundStyle(.secondary)
+          .font(ViewerUIMetrics.font(.caption).monospacedDigit()).foregroundStyle(.secondary)
       }
     }
   }
@@ -252,7 +252,7 @@ struct FolderComparisonView: View {
       }
     }
     .controlSize(.regular)
-    .font(.system(size: 13, weight: .medium))
+    .font(ViewerUIMetrics.font(size: 13, weight: .medium))
   }
 
   private var linkedViewportControl: some View {
@@ -266,39 +266,25 @@ struct FolderComparisonView: View {
       HStack(spacing: 8) {
         Button { comparison.updateZoom(1 / 1.25) } label: {
           Image(systemName: "minus.magnifyingglass")
-            .font(.system(size: 18, weight: .medium))
-            .frame(width: 22, height: 22)
+            .font(ViewerUIMetrics.font(size: 18, weight: .medium))
+            .frame(width: ViewerUIMetrics.scale(22), height: ViewerUIMetrics.scale(22))
         }
         .help("축소")
         .accessibilityLabel("축소")
         .accessibilityIdentifier("comparison.zoomOut")
         Button { comparison.updateZoom(1.25) } label: {
           Image(systemName: "plus.magnifyingglass")
-            .font(.system(size: 18, weight: .medium))
-            .frame(width: 22, height: 22)
+            .font(ViewerUIMetrics.font(size: 18, weight: .medium))
+            .frame(width: ViewerUIMetrics.scale(22), height: ViewerUIMetrics.scale(22))
         }
         .help("확대")
         .accessibilityLabel("확대")
         .accessibilityIdentifier("comparison.zoomIn")
-        Button("화면 맞춤") { comparison.setScale(.fit) }
-          .fixedSize(horizontal: true, vertical: false)
-          .accessibilityIdentifier("comparison.fit")
-        Menu {
-          Button("화면 맞춤") { comparison.setScale(.fit) }
-          Button(L10n.text("가로 맞춤")) { comparison.setScale(.fitWidth) }
-          Button(L10n.text("세로 맞춤")) { comparison.setScale(.fitHeight) }
-          Divider()
-          Button(L10n.text("가운데 정렬")) { comparison.centerImage() }
-        } label: {
-          Image(systemName: "chevron.down").font(.system(size: 10, weight: .semibold))
-            .frame(width: 18, height: 24)
-        }
-        .menuStyle(.borderlessButton)
-        .menuIndicator(.hidden)
-        .fixedSize()
-        .help(L10n.text("맞춤 옵션"))
-        .accessibilityLabel(L10n.text("맞춤 옵션"))
-        .accessibilityIdentifier("comparison.fitOptions")
+        ImageFitMenu(mode: comparison.pane(comparison.activeSide).scaleMode,
+          zoom: comparison.pane(comparison.activeSide).zoom,
+          fontSize: 13, minimumHeight: 38,
+          identifier: "comparison.fitOptions", setMode: comparison.setScale,
+          center: comparison.centerImage)
         Button("1:1") { comparison.setScale(.actualPixels) }
           .help("실제 픽셀 크기")
           .accessibilityIdentifier("comparison.actualPixels")
@@ -312,7 +298,7 @@ struct FolderComparisonView: View {
     HStack(spacing: 12) {
       Text(L10n.text(comparison.first.folderURL == nil && comparison.second.folderURL == nil
         ? "A와 B에 이미지나 폴더를 열어 비교하세요." : "두 손가락으로 이동 · 핀치로 확대 · 한쪽을 잠그면 다른 쪽만 조작"))
-        .font(.caption)
+        .font(ViewerUIMetrics.font(.caption))
         .foregroundStyle(.secondary)
         .lineLimit(1)
         .truncationMode(.tail)
@@ -321,7 +307,7 @@ struct FolderComparisonView: View {
         Text(L10n.format("이동 대상: %@", comparison.navigationTitle(for: comparison.navigationTarget)))
           .lineLimit(1).truncationMode(.middle).frame(maxWidth: 220)
           .help(comparison.navigationTitle(for: comparison.navigationTarget))
-          .font(.caption.weight(.medium)).foregroundStyle(ViewerTheme.accent)
+          .font(ViewerUIMetrics.font(.caption).weight(.medium)).foregroundStyle(ViewerTheme.accent)
         Button { comparison.navigateSelection(-1) } label: {
           Image(systemName: "backward.end")
         }
@@ -329,7 +315,7 @@ struct FolderComparisonView: View {
         .help("이전 비교 이미지")
         Text(L10n.format("이미지 이동: %@ / %@", shortcuts.binding(for: .previousPage).displayText,
           shortcuts.binding(for: .nextPage).displayText))
-          .font(.caption).foregroundStyle(.secondary)
+          .font(ViewerUIMetrics.font(.caption)).foregroundStyle(.secondary)
           .lineLimit(1)
         Button { comparison.navigateSelection(1) } label: {
           Image(systemName: "forward.end")
@@ -340,8 +326,8 @@ struct FolderComparisonView: View {
       .help(L10n.text("잠금에 맞춰 이동 대상이 바뀝니다. 잠금을 모두 풀면 양쪽으로 돌아갑니다."))
     }
     .controlSize(.small)
-    .padding(.horizontal, 16)
-    .padding(.vertical, 8)
+    .viewerPadding(.horizontal, 16)
+    .viewerPadding(.vertical, 8)
     .background(ViewerTheme.chromeGradient)
   }
 
@@ -427,7 +413,7 @@ private struct FolderComparisonPaneView: View {
     }
     .controlSize(.small)
     .padding(.horizontal, 14)
-    .padding(.vertical, 11)
+    .viewerPadding(.vertical, 11)
     .background(ViewerTheme.panelGradient)
   }
 
@@ -462,9 +448,9 @@ private struct FolderComparisonPaneView: View {
   private var sourceIdentity: some View {
     HStack(spacing: 9) {
         Text(side == .first ? "A" : "B")
-          .font(.system(size: 11, weight: .semibold, design: .rounded))
+          .font(ViewerUIMetrics.font(size: 11, weight: .semibold, design: .rounded))
           .foregroundStyle(comparison.activeSide == side ? ViewerTheme.accent : .secondary)
-          .frame(width: 23, height: 23)
+          .frame(width: ViewerUIMetrics.scale(23), height: ViewerUIMetrics.scale(23))
           .background(comparison.activeSide == side ? ViewerTheme.selection : Color.primary.opacity(0.055),
             in: RoundedRectangle(cornerRadius: 6))
           .overlay {
@@ -477,7 +463,7 @@ private struct FolderComparisonPaneView: View {
         Text(comparison.customName(for: side).isEmpty
           ? (sourceLabelURL?.lastPathComponent ?? L10n.text(pane.assets.isEmpty ? "이미지 또는 폴더를 선택하세요." : "선택한 이미지"))
           : comparison.displayName(for: side))
-          .font(.system(size: 12, weight: .semibold))
+          .font(ViewerUIMetrics.font(size: 12, weight: .semibold))
           .lineLimit(1).truncationMode(.middle)
           .help([comparison.displayName(for: side), sourceLabelURL?.path].compactMap { $0 }.joined(separator: "\n"))
     }
@@ -501,14 +487,14 @@ private struct FolderComparisonPaneView: View {
           .disabled(!comparison.canNavigate(side, direction: -1))
           .help(L10n.format("%@  %@", previousAction.title, shortcuts.binding(for: previousAction).displayText))
         Text(pane.position)
-          .font(.caption.monospacedDigit())
+          .font(ViewerUIMetrics.font(.caption).monospacedDigit())
           .foregroundStyle(.secondary)
         Button { comparison.navigate(side, direction: 1) } label: { Image(systemName: "chevron.right") }
           .disabled(!comparison.canNavigate(side, direction: 1))
           .help(L10n.format("%@  %@", nextAction.title, shortcuts.binding(for: nextAction).displayText))
         Spacer(minLength: 4)
         TextField("이미지 번호", value: $jumpNumber, format: .number.grouping(.never))
-          .textFieldStyle(.roundedBorder).frame(width: 54)
+          .textFieldStyle(.roundedBorder).frame(width: ViewerUIMetrics.scale(54))
           .onSubmit { comparison.jump(side, number: jumpNumber); jumpNumber = pane.index + 1 }
           .disabled(pane.isLocked || pane.assets.isEmpty || pane.isLoading)
         Button("이동") { comparison.jump(side, number: jumpNumber); jumpNumber = pane.index + 1 }
@@ -626,24 +612,24 @@ private struct ComparisonImageCanvas: View {
     ViewThatFits(in: .vertical) {
       VStack(spacing: 14) {
         Image(systemName: canRecoverMissingMatch ? "photo.badge.exclamationmark" : "folder")
-          .font(.system(size: 38, weight: .ultraLight))
+          .font(ViewerUIMetrics.font(size: 38, weight: .ultraLight))
           .foregroundStyle(.white.opacity(0.35))
         VStack(spacing: 7) {
           Text(sideTitle)
-            .font(.system(size: 13, weight: .semibold))
+            .font(ViewerUIMetrics.font(size: 13, weight: .semibold))
             .foregroundStyle(.white.opacity(0.9))
           Text(emptyPaneMessage)
-            .font(.callout)
+            .font(ViewerUIMetrics.font(.callout))
             .foregroundStyle(.white.opacity(0.55))
             .multilineTextAlignment(.center)
           if canRecoverMissingMatch {
             Text("폴더는 그대로 열려 있습니다. 파일명과 관계없이 보려면 목록 순서로 전환하세요.")
-              .font(.caption)
+              .font(ViewerUIMetrics.font(.caption))
               .foregroundStyle(.white.opacity(0.55))
               .multilineTextAlignment(.center)
           } else if !pane.sourceURLs.isEmpty && pane.errorMessage == nil {
             Text(PhotoMarkL10n.text("comparison.emptyHelp"))
-              .font(.caption).foregroundStyle(.white.opacity(0.55))
+              .font(ViewerUIMetrics.font(.caption)).foregroundStyle(.white.opacity(0.55))
               .multilineTextAlignment(.center)
           }
         }
@@ -653,7 +639,7 @@ private struct ComparisonImageCanvas: View {
       .fixedSize(horizontal: false, vertical: true)
       VStack(spacing: 8) {
         Text(emptyPaneMessage)
-          .font(.caption)
+          .font(ViewerUIMetrics.font(.caption))
           .foregroundStyle(.white.opacity(0.55))
           .multilineTextAlignment(.center)
         emptyPaneAction
@@ -687,7 +673,7 @@ private struct ComparisonZoomReadout: View {
 
   var body: some View {
     Text("\(Int(viewport.zoom * 100))%")
-      .font(.caption.monospacedDigit()).foregroundStyle(.secondary)
+      .font(ViewerUIMetrics.font(.caption).monospacedDigit()).foregroundStyle(.secondary)
   }
 }
 

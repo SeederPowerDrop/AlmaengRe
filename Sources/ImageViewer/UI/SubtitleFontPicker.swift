@@ -38,7 +38,7 @@ struct SubtitleFontPicker: NSViewRepresentable {
   func makeNSView(context: Context) -> NSPopUpButton {
     let button = NSPopUpButton(frame: .zero, pullsDown: false)
     button.controlSize = .regular
-    button.font = .systemFont(ofSize: 13)
+    button.font = .systemFont(ofSize: ViewerUIMetrics.scale(13))
     button.setContentHuggingPriority(.defaultLow, for: .horizontal)
     button.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
     button.target = context.coordinator

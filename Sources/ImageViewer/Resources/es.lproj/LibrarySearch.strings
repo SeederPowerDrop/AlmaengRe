@@ -3,7 +3,7 @@
 "wildcard.hint" = "Usa * o % para caracteres desconocidos: img* · *.png · *viaje* · * (todo). El texto normal coincide con parte del nombre.";
 "metadata.title" = "Datos de captura · Metadatos";
 "metadata.placeholder" = "Cámara, objetivo, ISO, descripción, palabras clave…";
-"metadata.hint" = "Busca datos EXIF/IPTC y etiquetas de vídeo guardados en el archivo.";
+"metadata.hint" = "Busca información EXIF/IPTC y etiquetas de vídeo o audio del archivo.";
 "location.title" = "Ubicación";
 "location.placeholder" = "Ciudad, país o coordenadas GPS guardados…";
 "location.hint" = "Busca nombres de lugares y coordenadas registrados. No convierte coordenadas GPS en nombres de lugares.";

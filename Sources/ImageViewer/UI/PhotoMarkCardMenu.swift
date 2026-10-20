@@ -22,7 +22,7 @@ struct PhotoMarkCardMenu: View {
       // A native Menu flattens the label into one string, hiding the second
       // name and the extra-marks indicator. A plain button preserves each name.
       Button { showsMarks.toggle() } label: {
-        PhotoMarkCardLabel(summary: summary).padding(.vertical, 3)
+        PhotoMarkCardLabel(summary: summary).viewerPadding(.vertical, 3)
           .contentShape(Rectangle())
       }
       .buttonStyle(.plain)
@@ -36,25 +36,25 @@ struct PhotoMarkCardMenu: View {
       .accessibilityIdentifier("photoMark.card.\(asset.sessionID)")
       .popover(isPresented: $showsMarks) {
         VStack(alignment: .leading, spacing: 10) {
-          Text(asset.filename).font(.headline).lineLimit(2).truncationMode(.middle)
+          Text(asset.filename).font(ViewerUIMetrics.font(.headline)).lineLimit(2).truncationMode(.middle)
           Divider()
           ScrollView {
             VStack(alignment: .leading, spacing: 10) {
               ForEach(PhotoMarkSlot.allCases, id: \.self) { slot in
                 Toggle(isOn: binding(for: slot)) {
                   HStack(spacing: 8) {
-                    Circle().fill(store.photoMarks.color(for: slot).tint).frame(width: 8, height: 8)
-                    Text(slot.keyLabel).font(.caption.monospaced()).frame(width: 14)
+                    Circle().fill(store.photoMarks.color(for: slot).tint).viewerFrame(width: 8, height: 8)
+                    Text(slot.keyLabel).font(ViewerUIMetrics.font(.caption).monospaced()).viewerFrame(width: 14)
                     Text(displayName(for: slot)).lineLimit(2).fixedSize(horizontal: false, vertical: true)
                   }
                 }
                 .toggleStyle(.checkbox)
                 .help(displayName(for: slot))
               }
-            }.padding(2)
-          }.frame(maxHeight: 380)
+            }.viewerPadding(2)
+          }.viewerFrame(maxHeight: 380)
         }
-        .padding(14).frame(width: 320)
+        .viewerPadding(14).viewerFrame(width: 320)
       }
       .onChange(of: store.canMarkPhoto(asset)) { _, allowed in
         if !allowed { showsMarks = false }
@@ -118,7 +118,7 @@ struct PhotoMarkCardLabel: View {
           // Keep the additional-marks indicator separate, so long names cannot hide it.
           if summary.hasMore { Text("…").fixedSize() }
         }
-        Image(systemName: "chevron.down").font(.system(size: 8, weight: .semibold)).fixedSize()
+        Image(systemName: "chevron.down").font(ViewerUIMetrics.font(size: 8, weight: .semibold)).fixedSize()
       }
     }
   }

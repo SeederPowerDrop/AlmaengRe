@@ -1,6 +1,11 @@
-"grid.playAll" = "播放当前画面的所有视频";
-"grid.playSelected" = "播放所选视频（%d）";
-"grid.pauseAll" = "暂停所有视频";
-"grid.select" = "选择要播放的视频";
-"grid.play" = "播放视频";
-"grid.pause" = "暂停视频";
+"grid.playAll" = "全部播放";
+"grid.playNextPages" = "后续页面也播放";
+"grid.pageAutoplayOn" = "页面自动播放已开启";
+"grid.playAll.help" = "播放当前页面的所有视频和音频。再次点击，翻页后也会自动播放。照片保持显示。";
+"grid.playNextPages.help" = "翻页时自动播放新页面的视频和音频。离开屏幕的项目会停止播放，照片保持显示。";
+"grid.pageAutoplayOn.help" = "每次翻页时都会自动播放视频和音频。再次点击可恢复为仅播放当前页面。点击“全部暂停”也会关闭自动播放。";
+"grid.playSelected" = "播放所选（%d）";
+"grid.pauseAll" = "全部暂停";
+"grid.select" = "选择播放项";
+"grid.play" = "播放";
+"grid.pause" = "暂停";

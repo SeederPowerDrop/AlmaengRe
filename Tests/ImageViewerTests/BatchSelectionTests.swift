@@ -7,6 +7,34 @@ import Testing
 @Suite("다중 선택과 이름 변경 연결")
 @MainActor
 struct BatchSelectionTests {
+  @Test("조회한 선택 캐시는 정렬·필터·선택 변경 후 최신 목록을 따른다")
+  func cachedSelectionTracksCollectionChanges() async throws {
+    let folder = try makeLibrary()
+    defer { try? FileManager.default.removeItem(at: folder) }
+    let store = AppStore(defaults: UserDefaults(suiteName: "BatchSelectionTests-\(UUID())")!,
+      monitorsSystemResources: false)
+    store.open(urls: [folder])
+    try await waitForLoad(store)
+    store.selectAllAssets()
+    let initial = store.selectedAssets
+    #expect(initial.count == 4)
+    #expect(store.batchTargets(urls: Set(initial.map(\.url))) == store.mapAssets)
+    #expect(store.visibleAsset(at: initial[0].url) == initial[0])
+
+    store.libraryQuery.sort = .nameDescending
+    try await waitForQuery(store)
+    #expect(store.selectedAssets.map(\.url) == initial.reversed().map(\.url))
+    #expect(store.batchTargets(urls: Set(initial.map(\.url))) == store.mapAssets)
+    store.libraryQuery.searchText = "photo4"
+    try await waitForQuery(store)
+    #expect(store.selectedAssets.map(\.filename) == ["photo4.qoi"])
+    #expect(store.visibleAsset(at: initial[0].url) == nil)
+    #expect(!store.canPerformFileOperation(.copy, urls: [initial[0].url]))
+    store.clearSelection()
+    #expect(store.selectedAssets.isEmpty)
+    #expect(!store.canStartBatchOperation)
+  }
+
   @Test("우클릭 후 목록이 바뀌어도 원래 파일을 선택하고 사라진 대상은 중단한다")
   func contextMenuKeepsFileIdentity() async throws {
     let folder = try makeLibrary()

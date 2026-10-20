@@ -3,13 +3,13 @@
 "mode.help" = "Con Etiquetado ON, usa 1–4, QWER y ASDF para cambiar las etiquetas.";
 "mode.toggle" = "Activar/desactivar el etiquetado";
 "mode.active" = "Modo de etiquetado";
-"mode.unavailable" = "Abre una foto o vídeo para etiquetarlo.";
+"mode.unavailable" = "Abre un archivo para etiquetarlo.";
 "menu.title" = "Etiquetas de fotos";
 "menu.edit" = "Editar nombres y colores…";
 "panel.title" = "Etiquetas de fotos";
 "panel.hint" = "← → Recorrer · 1–4, QWER, ASDF: etiquetas";
-"panel.multipleHint" = "Una foto o vídeo puede tener varias etiquetas.";
-"panel.noPhoto" = "Abre una foto o vídeo para etiquetarlo.";
+"panel.multipleHint" = "Un archivo puede tener varias etiquetas.";
+"panel.noPhoto" = "Abre un archivo para etiquetarlo.";
 "panel.loading" = "Cargando etiquetas…";
 "panel.close" = "Salir del modo de etiquetado";
 "labels.edit" = "Editar nombres y colores";
@@ -61,7 +61,7 @@
 "labels.previewFormat" = "%@ → %@";
 "mark.addHelpFormat" = "%@ → %@: con Etiquetado ON, pulsa la tecla o haz clic para añadir; repite para quitar. Pueden coexistir varias etiquetas y los originales no cambian.";
 "mark.removeHelpFormat" = "%@ → %@: etiqueta aplicada. Con Etiquetado ON, pulsa la tecla o haz clic para quitarla. Las demás etiquetas y los originales no cambian.";
-"mode.detailHelp" = "⌘⇧M activa o desactiva el etiquetado. Al activarlo, usa 1–4, QWER, ASDF o el panel para etiquetar todas las fotos y vídeos seleccionados. Usa las casillas o ⌘-clic para elegir varios elementos y ⇧-clic para un intervalo. El menú de cada tarjeta afecta solo a ese elemento. Al desactivarlo se usan los atajos de visualización habituales. En Comparación de imágenes, elige Solo A, Solo B o Ambos.";
+"mode.detailHelp" = "⌘⇧M activa o desactiva el etiquetado. Al activarlo, usa 1–4, QWER, ASDF o el panel para etiquetar todos los archivos seleccionados. Usa las casillas o ⌘-clic para elegir varios elementos y ⇧-clic para un intervalo. El menú de cada tarjeta afecta solo a ese elemento. Al desactivarlo se usan los atajos de visualización habituales. En Comparación de imágenes, elige Solo A, Solo B o Ambos.";
 "labels.settingsLink" = "Editar nombres y colores…";
 "labels.revert" = "Revertir cambios";
 "labels.revertHelp" = "Restaurar los nombres y colores guardados sin cerrar Ajustes. Se descartan los cambios sin guardar.";
@@ -98,7 +98,7 @@
 
 "card.title" = "Etiquetas";
 
-"card.help" = "Elige las etiquetas de esta foto o vídeo.";
+"card.help" = "Elige las etiquetas de este archivo.";
 
 "card.accessibilityFormat" = "Etiquetas de %@";
 
@@ -122,7 +122,7 @@
 
 "panel.selectionHint" = "Casillas o ⌘-clic: añadir a la selección; ⇧-clic: seleccionar un intervalo. Las teclas y el panel afectan a toda la selección; el menú de cada tarjeta solo a ese elemento.";
 
-"selection.help" = "Añadir o quitar este elemento de la selección. Las teclas y los botones del panel se aplican a todas las fotos y vídeos seleccionados.";
+"selection.help" = "Añadir o quitar este elemento de la selección. Las teclas y los botones del panel se aplican a todos los archivos seleccionados.";
 
 "selection.accessibilityFormat" = "Seleccionar %@";
 
@@ -136,4 +136,18 @@
 "inheritance.originals" = "Mover un original o restaurarlo desde la Papelera conserva sus etiquetas, independientemente de estas opciones.";
 
 "panel.viewerSelectionHint" = "%@ Seleccionar foto";
-"panel.viewerSelectionHelp" = "Usa %@ para seleccionar fotos o vídeos de uno en uno en la página actual. Al llegar a un extremo, la selección continúa desde el otro extremo de la misma página. Activa el modo de etiquetado y usa 1–4, QWER o ASDF para etiquetar el elemento seleccionado.";
+"panel.viewerSelectionHelp" = "Usa %@ para seleccionar por posición: izquierda/derecha en la misma fila y arriba/abajo en la columna más cercana. Al llegar al extremo de una fila o columna, la selección continúa desde el otro extremo. Activa el modo de etiquetado y usa 1–4, QWER o ASDF para etiquetar el elemento seleccionado.";
+
+/* Include/exclude conditions stay within the currently opened collection. */
+"filter.scope" = "Buscar solo en las carpetas y los archivos abiertos.";
+"filter.conditions" = "Condiciones de etiquetas";
+"filter.includeCountFormat" = "Incluir · %d";
+"filter.excludeCountFormat" = "Excluir · %d";
+"filter.includeHelp" = "Elige las etiquetas que incluir. Debajo, indica si debe coincidir cualquiera de ellas o todas.";
+"filter.excludeHelp" = "Excluir archivos con cualquiera de estas etiquetas. Ejemplo: incluir S y excluir E.";
+"filter.included" = "Incluida";
+"filter.excluded" = "Excluida";
+"filter.ignored" = "Sin condición";
+"filter.includeRule" = "Coincidencia de etiquetas incluidas";
+"filter.includeSummaryFormat" = "Incluir: %@";
+"filter.excludeSummaryFormat" = "Excluir: %@";

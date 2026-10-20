@@ -3,7 +3,7 @@
 "wildcard.hint" = "Utilisez * ou % pour les caractères inconnus : img* · *.png · *voyage* · * (tout). Le texte simple correspond à une partie du nom.";
 "metadata.title" = "Prise de vue · Métadonnées";
 "metadata.placeholder" = "Appareil, objectif, ISO, description, mots-clés…";
-"metadata.hint" = "Recherche les données EXIF/IPTC et les balises vidéo enregistrées dans le fichier.";
+"metadata.hint" = "Recherchez les informations EXIF/IPTC et les balises vidéo ou audio du fichier.";
 "location.title" = "Lieu";
 "location.placeholder" = "Ville, pays ou coordonnées GPS enregistrés…";
 "location.hint" = "Recherche les lieux et coordonnées enregistrés. Les coordonnées GPS ne sont pas converties en noms de lieux.";

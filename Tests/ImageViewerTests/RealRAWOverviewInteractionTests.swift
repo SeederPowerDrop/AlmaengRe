@@ -1,4 +1,5 @@
 import AppKit
+import Darwin
 import SwiftUI
 import Testing
 
@@ -50,18 +51,23 @@ struct RealRAWOverviewInteractionTests {
     let listedAt = ProcessInfo.processInfo.systemUptime
 
     _ = NSApplication.shared
-    let host = NSHostingView(rootView: OverviewView(store: store))
+    let preloader = OverviewThumbnailPreloader()
+    let host = NSHostingView(rootView: OverviewView(store: store, thumbnailPreloader: preloader))
     let window = makeWindow(host: host)
     defer { close(window) }
     try await wait("overview controls") {
       host.layoutSubtreeIfNeeded()
       return sliders(in: host).count == 1 && firstScrollView(in: host) != nil
+        && !preloader.visibleIndices.isEmpty
     }
     try await wait("first observed thumbnail cache entry") {
       host.layoutSubtreeIfNeeded()
       return await store.thumbnailPipeline.cacheSnapshot().entryCount > 0
     }
     let firstBitmapAt = ProcessInfo.processInfo.systemUptime
+    let initiallyVisible = preloader.visibleIndices
+    #expect(initiallyVisible.count < min(100, store.assets.count))
+    #expect((initiallyVisible.min() ?? 999) < 10)
     // Initial geometry publishes the available footer width on the next turn.
     // Do not mistake that first layout for a value-induced track resize.
     for _ in 0..<4 {
@@ -77,6 +83,7 @@ struct RealRAWOverviewInteractionTests {
       String(cachePreparation.osFilePagesVerifiedZero)))
 
     heartbeat.reset()
+    let processBeforeInteraction = processUsage()
     var maximumQueued = 0
     var forcedLayoutSeconds: [Double] = []
     func layoutForObservation() {
@@ -109,13 +116,19 @@ struct RealRAWOverviewInteractionTests {
       return work.runningCount == 0 && work.queuedCount == 0
     }
     #expect(abs(store.thumbnailSize - 240) < 0.01)
+    #expect((preloader.visibleIndices.min() ?? 0) > store.assets.count / 2)
+    #expect(preloader.visibleIndices.isDisjoint(with: initiallyVisible))
+    print("RAW_OVERVIEW_VIEWPORT initialVisible=\(initiallyVisible.count) finalVisible=\(preloader.visibleIndices.count) total=\(store.assets.count) actualViewportTracked=true")
     #expect(abs(defaults.double(forKey: "ImageViewer.OverviewThumbnailSize.v1") - 240) < 0.01)
     #expect(sliders(in: host).first === slider)
+    let processAfterInteraction = processUsage()
     heartbeat.report(phase: "actual_overview_scroll_and_resize", count: rawCount,
       extra: String(format:
-        "nativeScrollSteps=30 nativeSliderChanges=30 maximumQueued=%d finalSize=240 forcedLayoutCalls=%d forcedLayoutTotalSeconds=%.6f forcedLayoutMaxSeconds=%.6f",
+        "nativeScrollSteps=30 nativeSliderChanges=30 maximumQueued=%d finalSize=240 forcedLayoutCalls=%d forcedLayoutTotalSeconds=%.6f forcedLayoutMaxSeconds=%.6f processCPUSeconds=%.6f processPeakResidentBytes=%lld",
         maximumQueued, forcedLayoutSeconds.count, forcedLayoutSeconds.reduce(0, +),
-        forcedLayoutSeconds.max() ?? 0))
+        forcedLayoutSeconds.max() ?? 0,
+        processAfterInteraction.cpuSeconds - processBeforeInteraction.cpuSeconds,
+        processAfterInteraction.peakResidentBytes))
     window.contentView = nil
     await store.thumbnailPipeline.purgeCache()
     await store.pipeline.purgeCaches()
@@ -229,6 +242,16 @@ struct RealRAWOverviewInteractionTests {
 
   private func rawDirectory() throws -> URL {
     URL(fileURLWithPath: try #require(ProcessInfo.processInfo.environment["IMAGEVIEWER_RAW_DIRECTORY"]))
+  }
+
+  /// CPU belongs to this test process. The RSS high-water mark includes earlier
+  /// phases/tests in the same process; neither number describes the whole Mac.
+  private func processUsage() -> (cpuSeconds: Double, peakResidentBytes: Int64) {
+    var usage = rusage()
+    guard getrusage(RUSAGE_SELF, &usage) == 0 else { return (0, 0) }
+    let user = Double(usage.ru_utime.tv_sec) + Double(usage.ru_utime.tv_usec) / 1_000_000
+    let system = Double(usage.ru_stime.tv_sec) + Double(usage.ru_stime.tv_usec) / 1_000_000
+    return (user + system, Int64(usage.ru_maxrss))
   }
 
   private func rawAssets(in directory: URL, limit: Int) throws -> [ImageAsset] {

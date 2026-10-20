@@ -7,6 +7,7 @@ struct AppCommands: Commands {
   @ObservedObject var appearance: AppearanceStore
   @ObservedObject var language: LanguageStore
   @ObservedObject private var comparison: FolderComparisonStore
+  @ObservedObject private var mapPreview: PhotoMapPreviewState
 
   init(store: AppStore, shortcuts: ShortcutStore, appearance: AppearanceStore, language: LanguageStore) {
     self.store = store
@@ -14,6 +15,7 @@ struct AppCommands: Commands {
     self.appearance = appearance
     self.language = language
     self.comparison = store.folderComparison
+    self.mapPreview = store.photoMapPreview
   }
 
   var body: some Commands {
@@ -136,7 +138,9 @@ struct AppCommands: Commands {
         Toggle(L10n.text("몽땅보기 번호 표시"), isOn: $store.showsOverviewNumbers)
         Button(L10n.text("이미지 정보 패널")) { store.toggleInspector(.information) }
         Button(L10n.text("이미지 편집 패널")) { store.toggleInspector(.editing) }
-      }.disabled(store.isVideoFullScreenPresented || store.showsHome || comparison.isEditingNames)
+      }.disabled(store.isVideoFullScreenPresented || store.showsHome || comparison.isEditingNames
+        || store.presentationMode == .overview
+        || (store.presentationMode == .map && !mapPreview.hasSelection))
     }
 
     CommandMenu(PhotoMarkL10n.text("menu.title")) {
@@ -184,7 +188,9 @@ struct AppCommands: Commands {
         if store.presentationMode == .folderComparison {
           FolderComparisonMenuItems(comparison: store.folderComparison, shortcuts: shortcuts)
         }
-      }.disabled(store.isVideoFullScreenPresented || store.showsHome || comparison.isEditingNames)
+      }.disabled(store.isVideoFullScreenPresented || store.showsHome || comparison.isEditingNames
+        || store.presentationMode == .overview
+        || (store.presentationMode == .map && !mapPreview.hasSelection))
     }
 
     CommandMenu(L10n.text("이미지")) {
@@ -193,7 +199,7 @@ struct AppCommands: Commands {
         store.pauseSlideshow()
         store.showsAIUpscaling = true
       }
-      .disabled(store.currentAsset == nil || store.currentAsset?.isVideo == true || store.motionMediaAsset != nil || store.isBatchBusy)
+      .disabled(store.currentAsset == nil || store.currentAsset?.isPlaybackMedia == true || store.motionMediaAsset != nil || store.isBatchBusy)
       Divider()
       Button(L10n.format("%@…  %@", ShortcutAction.setWallpaper.title,
         shortcuts.binding(for: .setWallpaper).displayText)) {
@@ -228,13 +234,14 @@ struct AppCommands: Commands {
       Button(BatchActionsL10n.text("share.menu")) { store.shareSelectedFiles() }
         .disabled(!store.canStartBatchOperation)
       Divider()
-      Button(L10n.text("왼쪽으로 회전")) { store.rotateCounterclockwise() }
-      Button(L10n.text("오른쪽으로 회전")) { store.rotateClockwise() }
-      Button(L10n.text("좌우 반전하기")) { store.flipHorizontally() }
-        .disabled(store.currentAsset == nil)
-      Button(L10n.text("상하 반전하기")) { store.flipVertically() }
-        .disabled(store.currentAsset == nil)
-      Button(L10n.text("조정 초기화")) { store.resetAdjustments() }
+      Group {
+        Button(L10n.text("왼쪽으로 회전")) { store.rotateCounterclockwise() }
+        Button(L10n.text("오른쪽으로 회전")) { store.rotateClockwise() }
+        Button(L10n.text("좌우 반전하기")) { store.flipHorizontally() }
+        Button(L10n.text("상하 반전하기")) { store.flipVertically() }
+        Button(L10n.text("조정 초기화")) { store.resetAdjustments() }
+      }
+      .disabled(store.currentAsset == nil || store.currentAsset?.isPlaybackMedia == true)
       Divider()
       Button(
         L10n.format(
@@ -243,7 +250,7 @@ struct AppCommands: Commands {
       ) {
         store.exportCurrentImage()
       }
-      .disabled(store.currentAsset == nil || store.currentAsset?.isVideo == true)
+      .disabled(store.currentAsset == nil || store.currentAsset?.isPlaybackMedia == true)
       }.disabled(store.isVideoFullScreenPresented || store.showsHome || store.presentationMode == .folderComparison)
     }
 
@@ -267,26 +274,31 @@ struct AppCommands: Commands {
         Divider()
         Button(
           L10n.format(
-            "%@  %@", store.isMultiImageViewer ? L10n.text("프레임 맞춤") : ShortcutAction.fitToWindow.title,
+            "%@  %@", store.isMultiImageViewer ? ImageFitL10n.text("menu.frame") : ImageFitL10n.text("whole.title"),
             shortcuts.binding(for: .fitToWindow).displayText)
         ) {
           store.setFitToWindow()
         }
         if !store.isMultiImageViewer {
-          Button(L10n.text("가로 맞춤")) { store.setScaleMode(.fitWidth) }
-          Button(L10n.text("세로 맞춤")) { store.setScaleMode(.fitHeight) }
+          Button(ImageFitL10n.text("width.title")) { store.setScaleMode(.fitWidth) }
+            .help(ImageFitL10n.text("width.help"))
+          Button(ImageFitL10n.text("height.title")) { store.setScaleMode(.fitHeight) }
+            .help(ImageFitL10n.text("height.help"))
         }
-        Button(L10n.text("가운데 정렬")) { store.centerImage() }
+        Button(ImageFitL10n.text("center.title")) { store.centerImage() }
+          .help(ImageFitL10n.text("center.help"))
         if !store.isMultiImageViewer {
           Button(
             L10n.format(
-              "%@  %@", ShortcutAction.actualPixels.title,
+              "%@  %@", ImageFitL10n.text("actual.title"),
               shortcuts.binding(for: .actualPixels).displayText)
           ) {
             store.setActualPixels()
           }
         }
-      }.disabled(store.isVideoFullScreenPresented || store.showsHome || comparison.isEditingNames)
+      }.disabled(store.isVideoFullScreenPresented || store.showsHome || comparison.isEditingNames
+        || store.presentationMode == .overview
+        || (store.presentationMode == .map && !mapPreview.hasSelection))
     }
   }
 }

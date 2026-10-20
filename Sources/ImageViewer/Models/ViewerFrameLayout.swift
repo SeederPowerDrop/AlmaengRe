@@ -7,6 +7,12 @@ enum ViewerFrameLayoutPreset: String, Codable, CaseIterable, Identifiable, Senda
   var id: Self { self }
 }
 
+enum ViewerSelectionDirection: String, CaseIterable, Sendable {
+  case left, right, up, down
+
+  var key: String { rawValue }
+}
+
 /// Slot IDs refer to the unchanged source page, rather than to files or sort order.
 /// Changing a layout only moves those IDs between visual positions.
 struct ViewerFrameLayoutConfiguration: Codable, Equatable, Sendable {
@@ -167,13 +173,26 @@ struct ViewerFrameLayoutConfiguration: Codable, Equatable, Sendable {
     return result
   }
 
-  /// Moves one frame through physical row-major order and wraps within this page.
-  /// Source indices stay stable even when the user has swapped visual positions.
-  func selectionTarget(from sourceSlot: Int, direction: Int) -> Int {
-    let slots = normalized(count: count).visualSlots
-    guard direction != 0, let position = slots.firstIndex(of: sourceSlot) else { return sourceSlot }
-    let next = (position + (direction < 0 ? -1 : 1) + slots.count) % slots.count
-    return slots[next]
+  /// Moves spatially from the current frame, wrapping only within the chosen
+  /// row or column direction. Source indices remain stable after frame swaps.
+  func selectionTarget(from sourceSlot: Int, direction: ViewerSelectionDirection,
+    in size: CGSize? = nil) -> Int {
+    let clean = normalized(count: count)
+    guard let currentRow = clean.rows.firstIndex(where: { $0.slots.contains(sourceSlot) }) else {
+      return sourceSlot
+    }
+    switch direction {
+    case .left, .right:
+      let slots = clean.rows[currentRow].slots
+      guard slots.count > 1, let position = slots.firstIndex(of: sourceSlot) else { return sourceSlot }
+      let offset = direction == .left ? -1 : 1
+      return slots[(position + offset + slots.count) % slots.count]
+    case .up, .down:
+      guard clean.rows.count > 1 else { return sourceSlot }
+      let offset = direction == .up ? -1 : 1
+      let targetRow = (currentRow + offset + clean.rows.count) % clean.rows.count
+      return clean.nearestSlot(to: sourceSlot, inRow: targetRow, size: size)
+    }
   }
 
   /// Follows the displayed row and nearest physical column even after swaps and
@@ -184,9 +203,13 @@ struct ViewerFrameLayoutConfiguration: Codable, Equatable, Sendable {
       direction != 0 else { return sourceSlot }
     let targetRow = currentRow + (direction < 0 ? -1 : 1)
     guard clean.rows.indices.contains(targetRow) else { return sourceSlot }
-    let centers = clean.geometry(in: size ?? CGSize(width: 10_000, height: 10_000)).frames
+    return clean.nearestSlot(to: sourceSlot, inRow: targetRow, size: size)
+  }
+
+  private func nearestSlot(to sourceSlot: Int, inRow targetRow: Int, size: CGSize?) -> Int {
+    let centers = geometry(in: size ?? CGSize(width: 10_000, height: 10_000)).frames
     guard let currentX = centers.first(where: { $0.slot == sourceSlot })?.rect.midX else { return sourceSlot }
-    let candidates = centers.filter { clean.rows[targetRow].slots.contains($0.slot) }
+    let candidates = rows[targetRow].slots.compactMap { slot in centers.first { $0.slot == slot } }
     return candidates.min {
       let lhs = abs($0.rect.midX - currentX)
       let rhs = abs($1.rect.midX - currentX)

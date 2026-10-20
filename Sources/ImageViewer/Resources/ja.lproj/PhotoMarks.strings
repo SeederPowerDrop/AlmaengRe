@@ -3,13 +3,13 @@
 "mode.help" = "分類 ON で1–4、QWER、ASDFを使い、分類を付け外しします。";
 "mode.toggle" = "分類モードの切り替え";
 "mode.active" = "分類モード";
-"mode.unavailable" = "写真・動画を開くと分類できます。";
+"mode.unavailable" = "ファイルを開くと分類できます。";
 "menu.title" = "写真の分類";
 "menu.edit" = "分類名・色を編集…";
 "panel.title" = "写真の分類";
 "panel.hint" = "← → 項目を移動 · 1–4、QWER、ASDFで分類";
-"panel.multipleHint" = "1つの写真・動画に複数の分類を付けられます。";
-"panel.noPhoto" = "分類する写真・動画を開いてください。";
+"panel.multipleHint" = "1つのファイルに複数の分類を付けられます。";
+"panel.noPhoto" = "分類するファイルを開いてください。";
 "panel.loading" = "分類を読み込み中…";
 "panel.close" = "分類モードを終了";
 "labels.edit" = "分類名・色を編集";
@@ -61,7 +61,7 @@
 "labels.previewFormat" = "%@ → %@";
 "mark.addHelpFormat" = "%@ → %@：分類 ONでキーを押すかクリックして付け、もう一度で外します。複数の分類を付けられ、元のファイルは変わりません。";
 "mark.removeHelpFormat" = "%@ → %@：この分類は付いています。分類 ONでキーを押すかクリックして外します。他の分類と元のファイルは変わりません。";
-"mode.detailHelp" = "⌘⇧Mで分類を切り替えます。ONでは1–4、QWER、ASDFまたは分類パネルで選択した写真・動画すべてを分類します。チェックボックス・⌘クリックで複数選択、⇧クリックで範囲選択ができます。各カードの分類メニューはその項目だけに適用されます。OFFでは通常の表示ショートカットを使用します。画像比較では適用先をAのみ・Bのみ・両方から選びます。";
+"mode.detailHelp" = "⌘⇧Mで分類を切り替えます。ONでは1–4、QWER、ASDFまたは分類パネルで選択したファイルすべてを分類します。チェックボックス・⌘クリックで複数選択、⇧クリックで範囲選択ができます。各カードの分類メニューはその項目だけに適用されます。OFFでは通常の表示ショートカットを使用します。画像比較では適用先をAのみ・Bのみ・両方から選びます。";
 "labels.settingsLink" = "分類名・色を編集…";
 "labels.revert" = "変更を取り消す";
 "labels.revertHelp" = "設定画面を閉じずに、保存済みの分類名と色に戻します。未保存の変更は取り消されます。";
@@ -98,7 +98,7 @@
 
 "card.title" = "分類";
 
-"card.help" = "この写真・動画の分類を選びます。";
+"card.help" = "このファイルの分類を選びます。";
 
 "card.accessibilityFormat" = "%@ の分類";
 
@@ -122,7 +122,7 @@
 
 "panel.selectionHint" = "チェックボックス・⌘クリックで追加選択、⇧クリックで範囲選択。分類キーとパネルは選択項目すべてに、各カードの分類メニューはその項目だけに適用されます。";
 
-"selection.help" = "この項目を選択に追加・解除します。分類キーとパネルのボタンは選択した写真・動画すべてに適用されます。";
+"selection.help" = "この項目を選択に追加・解除します。分類キーとパネルのボタンは選択したファイルすべてに適用されます。";
 
 "selection.accessibilityFormat" = "%@ を選択";
 
@@ -136,4 +136,18 @@
 "inheritance.originals" = "元のファイルを移動したり、ゴミ箱から戻したりした場合は、この設定にかかわらず分類が保持されます。";
 
 "panel.viewerSelectionHint" = "%@ 写真を選択";
-"panel.viewerSelectionHelp" = "%@ で現在のページ内の写真・動画を1つずつ選択します。端に達すると、同じページの反対側の端に移ります。分類モードをオンにしてから、1–4、QWER、ASDFキーで選択した項目を分類できます。";
+"panel.viewerSelectionHelp" = "%@ で現在のフレームから、左右は同じ行、上下は最も近い列のファイルを選択します。行・列の端では反対側の端に移ります。分類モードをオンにすると、1–4、QWER、ASDFキーで選択した項目を分類できます。";
+
+/* Include/exclude conditions stay within the currently opened collection. */
+"filter.scope" = "現在開いているフォルダとファイルの範囲内だけを検索します。";
+"filter.conditions" = "分類条件";
+"filter.includeCountFormat" = "含む · %d";
+"filter.excludeCountFormat" = "除外 · %d";
+"filter.includeHelp" = "含める分類を選び、下で「いずれか」または「すべて」の一致を指定します。";
+"filter.excludeHelp" = "選んだ分類が1つでも付いたファイルを除外します。例：Sを含めてEを除外。";
+"filter.included" = "含む";
+"filter.excluded" = "除外";
+"filter.ignored" = "条件なし";
+"filter.includeRule" = "含める分類の一致条件";
+"filter.includeSummaryFormat" = "含む：%@";
+"filter.excludeSummaryFormat" = "除外：%@";

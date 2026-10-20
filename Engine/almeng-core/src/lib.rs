@@ -1,6 +1,8 @@
 mod archive;
 mod geography;
 mod policy;
+#[cfg(test)]
+mod query_profile;
 mod raster;
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
@@ -103,8 +105,9 @@ fn normalized(s: &str) -> String {
     s.nfc().flat_map(char::to_lowercase).collect()
 }
 fn natural(a: &str, b: &str) -> Ordering {
-    let a = normalized(a);
-    let b = normalized(b);
+    natural_normalized(&normalized(a), &normalized(b))
+}
+fn natural_normalized(a: &str, b: &str) -> Ordering {
     let aa = a.as_bytes();
     let bb = b.as_bytes();
     let (mut i, mut j) = (0, 0);
@@ -210,8 +213,37 @@ fn format_group(name: &str) -> &'static str {
     }
 }
 fn sort_order(a: &Asset, b: &Asset, sort: &str) -> Ordering {
+    sort_order_with_keys(a, b, sort, None)
+}
+struct QuerySortKey {
+    name: String,
+    text: Option<String>,
+}
+fn query_name_order(a: &Asset, b: &Asset, ka: &QuerySortKey, kb: &QuerySortKey) -> Ordering {
+    natural_normalized(&ka.name, &kb.name).then_with(|| a.path.cmp(&b.path))
+}
+fn sort_order_with_keys(
+    a: &Asset,
+    b: &Asset,
+    sort: &str,
+    keys: Option<(&QuerySortKey, &QuerySortKey)>,
+) -> Ordering {
+    let names = || match keys {
+        Some((ka, kb)) => query_name_order(a, b, ka, kb),
+        None => name_order(a, b),
+    };
+    let text = |a, b, descending| match keys {
+        Some((ka, kb)) => match (ka.text.as_deref(), kb.text.as_deref()) {
+            (Some(a), Some(b)) if descending => natural_normalized(b, a),
+            (Some(a), Some(b)) => natural_normalized(a, b),
+            (Some(_), None) => Ordering::Less,
+            (None, Some(_)) => Ordering::Greater,
+            _ => Ordering::Equal,
+        },
+        None => text_order(a, b, descending),
+    };
     match sort {
-        "nameDescending" => name_order(b, a),
+        "nameDescending" => names().reverse(),
         "modifiedNewest" => number_order(a.modified, b.modified, true),
         "modifiedOldest" => number_order(a.modified, b.modified, false),
         "createdNewest" => number_order(a.created, b.created, true),
@@ -248,34 +280,55 @@ fn sort_order(a: &Asset, b: &Asset, sort: &str) -> Ordering {
         }
         "apertureAscending" => number_order(positive(a.aperture), positive(b.aperture), false),
         "apertureDescending" => number_order(positive(a.aperture), positive(b.aperture), true),
-        "makeAscending" => text_order(a.camera_make.as_deref(), b.camera_make.as_deref(), false),
-        "makeDescending" => text_order(a.camera_make.as_deref(), b.camera_make.as_deref(), true),
-        "modelAscending" => text_order(a.camera_model.as_deref(), b.camera_model.as_deref(), false),
-        "modelDescending" => text_order(a.camera_model.as_deref(), b.camera_model.as_deref(), true),
-        "colorSpaceAscending" => {
-            text_order(a.color_space.as_deref(), b.color_space.as_deref(), false)
+        "makeAscending" => text(a.camera_make.as_deref(), b.camera_make.as_deref(), false),
+        "makeDescending" => text(a.camera_make.as_deref(), b.camera_make.as_deref(), true),
+        "modelAscending" => text(a.camera_model.as_deref(), b.camera_model.as_deref(), false),
+        "modelDescending" => text(a.camera_model.as_deref(), b.camera_model.as_deref(), true),
+        "colorSpaceAscending" => text(a.color_space.as_deref(), b.color_space.as_deref(), false),
+        "colorSpaceDescending" => text(a.color_space.as_deref(), b.color_space.as_deref(), true),
+        "typeAscending" | "typeDescending" => {
+            let descending = sort == "typeDescending";
+            if keys.is_some() {
+                text(None, None, descending)
+            } else {
+                text(
+                    file_type(&a.name).as_deref(),
+                    file_type(&b.name).as_deref(),
+                    descending,
+                )
+            }
         }
-        "colorSpaceDescending" => {
-            text_order(a.color_space.as_deref(), b.color_space.as_deref(), true)
-        }
-        "typeAscending" => text_order(
-            file_type(&a.name).as_deref(),
-            file_type(&b.name).as_deref(),
-            false,
-        ),
-        "typeDescending" => text_order(
-            file_type(&a.name).as_deref(),
-            file_type(&b.name).as_deref(),
-            true,
-        ),
         "northToSouth" => number_order(a.latitude, b.latitude, true),
         "southToNorth" => number_order(a.latitude, b.latitude, false),
         "eastToWest" => number_order(a.longitude, b.longitude, true),
         "westToEast" => number_order(a.longitude, b.longitude, false),
-        _ => name_order(a, b),
+        _ => names(),
     }
 }
-fn query(assets: Vec<Asset>, options: Options) -> Result<Vec<usize>> {
+struct QueryItem {
+    index: usize,
+    key: QuerySortKey,
+}
+struct PreparedQuery {
+    items: Vec<QueryItem>,
+    sort: String,
+}
+fn query_text_key(asset: &Asset, sort: &str) -> Option<String> {
+    let value = match sort {
+        "makeAscending" | "makeDescending" => asset.camera_make.as_deref(),
+        "modelAscending" | "modelDescending" => asset.camera_model.as_deref(),
+        "colorSpaceAscending" | "colorSpaceDescending" => asset.color_space.as_deref(),
+        "typeAscending" | "typeDescending" => {
+            return file_type(&asset.name).map(|value| normalized(&value));
+        }
+        _ => None,
+    };
+    value
+        .map(str::trim)
+        .filter(|value| !value.is_empty())
+        .map(normalized)
+}
+fn prepare_query(assets: &[Asset], options: Options) -> Result<PreparedQuery> {
     if assets.len() > MAX_ASSETS {
         return Err("Too many images".into());
     }
@@ -285,26 +338,51 @@ fn query(assets: Vec<Asset>, options: Options) -> Result<Vec<usize>> {
         .transpose()?;
     let search = normalized(options.search_text.trim());
     let terms: Vec<_> = search.split_whitespace().collect();
-    let mut indices: Vec<_> = (0..assets.len())
-        .filter(|&i| {
-            let name = normalized(&assets[i].name);
-            geographic
-                .as_ref()
-                .is_none_or(|selection| selection.contains(assets[i].latitude, assets[i].longitude))
-                && terms.iter().all(|term| name.contains(term))
-                && (options.formats.is_empty()
-                    || options
-                        .formats
-                        .iter()
-                        .any(|f| f == format_group(&assets[i].name)))
-        })
-        .collect();
-    indices.sort_by(|&i, &j| {
-        let (a, b) = (&assets[i], &assets[j]);
-        let order = sort_order(a, b, &options.sort);
-        order.then_with(|| name_order(a, b)).then(i.cmp(&j))
+    let mut items = Vec::with_capacity(assets.len());
+    for (index, asset) in assets.iter().enumerate() {
+        if geographic
+            .as_ref()
+            .is_some_and(|selection| !selection.contains(asset.latitude, asset.longitude))
+            || (!options.formats.is_empty()
+                && !options
+                    .formats
+                    .iter()
+                    .any(|format| format == format_group(&asset.name)))
+        {
+            continue;
+        }
+        // A query owns only short-lived sort keys. Reuse each normalized name for
+        // search, every comparison and every metadata tie instead of allocating
+        // two Unicode buffers on each O(n log n) comparator invocation.
+        let name = normalized(&asset.name);
+        if terms.iter().all(|term| name.contains(term)) {
+            items.push(QueryItem {
+                index,
+                key: QuerySortKey {
+                    name,
+                    text: query_text_key(asset, &options.sort),
+                },
+            });
+        }
+    }
+    Ok(PreparedQuery {
+        items,
+        sort: options.sort,
+    })
+}
+fn sort_query(assets: &[Asset], prepared: &mut PreparedQuery) {
+    prepared.items.sort_by(|left, right| {
+        let (a, b) = (&assets[left.index], &assets[right.index]);
+        let order = sort_order_with_keys(a, b, &prepared.sort, Some((&left.key, &right.key)));
+        order
+            .then_with(|| query_name_order(a, b, &left.key, &right.key))
+            .then(left.index.cmp(&right.index))
     });
-    Ok(indices)
+}
+fn query(assets: Vec<Asset>, options: Options) -> Result<Vec<usize>> {
+    let mut prepared = prepare_query(&assets, options)?;
+    sort_query(&assets, &mut prepared);
+    Ok(prepared.items.into_iter().map(|item| item.index).collect())
 }
 fn stem(name: &str) -> String {
     normalized(

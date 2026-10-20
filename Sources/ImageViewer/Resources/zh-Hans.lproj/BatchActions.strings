@@ -12,3 +12,9 @@
 "quick.export" = "格式与尺寸";
 "quick.watermark" = "水印";
 "quick.share" = "共享";
+
+"classify.menu" = "分类所选文件…";
+"quick.classify" = "分类";
+
+"selection.focused" = "键盘导航位置";
+"selection.overviewHelp" = "⌘点按：选择或取消\n⌘方向键：移动并切换目标项目的选择状态\n⇧点按 / ⇧方向键：选择范围\n⌘⇧点按 / ⌘⇧方向键：将范围添加到现有选择";

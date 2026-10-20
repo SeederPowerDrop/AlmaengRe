@@ -1,0 +1,16 @@
+/* Image fitting menu and contextual help. */
+"menu.image" = "이미지 맞춤";
+"menu.frame" = "프레임 맞춤";
+"menu.help" = "전체 보기, 가로·세로 맞춤, 가운데 이동 또는 실제 크기를 선택합니다.";
+"menu.frameHelp" = "프레임 안에서 전체 이미지 보기 또는 가운데 이동을 선택합니다.";
+"whole.title" = "전체 이미지 보기";
+"whole.help" = "비율을 유지하면서 이미지 전체가 보이도록 맞춥니다.";
+"frame.wholeHelp" = "각 이미지의 비율을 유지해 프레임 안에 전체가 보이도록 맞춥니다.";
+"width.title" = "좌우 여백 채우기";
+"width.help" = "비율을 유지해 좌우에 맞춥니다. 이미지의 위아래가 잘릴 수 있습니다.";
+"height.title" = "상하 여백 채우기";
+"height.help" = "비율을 유지해 위아래에 맞춥니다. 이미지의 좌우가 잘릴 수 있습니다.";
+"center.title" = "가운데로 이동";
+"center.help" = "확대 비율을 바꾸지 않고 이미지를 가운데로 옮깁니다.";
+"actual.title" = "실제 크기 (1:1)";
+"actual.help" = "이미지 1픽셀을 화면 1픽셀에 맞춥니다.";

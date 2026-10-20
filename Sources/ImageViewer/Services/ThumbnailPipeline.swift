@@ -35,6 +35,24 @@ enum ThumbnailBitmapDecoder {
       allowsUndersizedPreview: true)
   }
 
+  /// Cheap preparation never asks ImageIO to synthesize a missing preview.
+  /// The bound must be met by real pixels; a smaller embedded image falls back
+  /// to the existing precise decoder under its separate, conservative pacing.
+  static func embeddedOverviewThumbnail(sourceURL: URL, maxPixelSize: Int = 256) throws -> CGImage? {
+    try Task.checkCancellation()
+    let requested = min(4_096, max(96, maxPixelSize))
+    return try autoreleasepool {
+      guard let source = CGImageSourceCreateWithURL(sourceURL as CFURL,
+        [kCGImageSourceShouldCache: false] as CFDictionary),
+        let embedded = try embeddedThumbnail(in: source, maxPixelSize: requested),
+        max(embedded.width, embedded.height) >= requested else { return nil }
+      // CopyPropertiesAtIndex is unnecessary here: there is no source-size
+      // generation branch, and the embedded decoder has applied orientation.
+      try Task.checkCancellation()
+      return rasterized(embedded, maxPixelSize: requested)?.image
+    }
+  }
+
   /// Visible thumbnails use an embedded preview when it has enough pixels. A RAW
   /// without one goes straight to the source thumbnail decoder: Quick Look can
   /// return a black bitmap that would otherwise require this same decode anyway.
@@ -170,11 +188,20 @@ enum ThumbnailBitmapDecoder {
 /// 경로뿐 아니라 파일 버전 정보도 포함해 같은 위치의 이미지가 교체됐을 때
 /// 앱 메모리 캐시에서 예전 썸네일을 반환하지 않게 합니다.
 struct ThumbnailCacheKey: Hashable, Sendable {
+  struct SourceVersion: Hashable, Sendable {
+    let url: URL
+    let byteCount: Int64?
+    let modificationDate: Date?
+  }
   let fileURL: URL
   let byteCount: Int64?
   let modificationDate: Date?
   let pixelSize: Int
   let isBrowsingPreview: Bool
+
+  var sourceVersion: SourceVersion {
+    SourceVersion(url: fileURL, byteCount: byteCount, modificationDate: modificationDate)
+  }
 
   init(asset: ImageAsset, pixelSize: Int, isBrowsingPreview: Bool = false) {
     fileURL = asset.url.standardizedFileURL
@@ -204,7 +231,11 @@ struct ThumbnailMemoryCache {
 
   private(set) var byteLimit: Int
   private var entries: [ThumbnailCacheKey: Entry] = [:]
+  // First-pixel requests inspect only this file version's few size variants,
+  // rather than scanning every other photo in the bounded bitmap cache.
+  private var sourceEntries: [ThumbnailCacheKey.SourceVersion: Set<ThumbnailCacheKey>] = [:]
   private var accessClock: UInt64 = 0
+  private var visibleSources: Set<ThumbnailCacheKey.SourceVersion> = []
   private(set) var totalBytes = 0
   var count: Int { entries.count }
 
@@ -215,14 +246,17 @@ struct ThumbnailMemoryCache {
   mutating func image(for key: ThumbnailCacheKey) -> CGImage? {
     // Returning from a viewer/map or reducing grid size should reuse a detailed
     // thumbnail instead of sending the same RAW file through Quick Look again.
-    // Small browsing-only previews must never satisfy an exact-quality request.
+    // Undersized browsing previews must never satisfy an exact-quality request.
     let selected: ThumbnailCacheKey
     if entries[key] != nil {
       selected = key
-    } else if !key.isBrowsingPreview, let larger = entries.keys.filter({
-      !$0.isBrowsingPreview && $0.fileURL == key.fileURL
-        && $0.byteCount == key.byteCount && $0.modificationDate == key.modificationDate
-        && $0.pixelSize >= key.pixelSize
+    } else if !key.isBrowsingPreview, let larger = sourceEntries[key.sourceVersion]?.filter({ candidate in
+      if !candidate.isBrowsingPreview { return candidate.pixelSize >= key.pixelSize }
+      // A browsing preview can be undersized, so its requested bucket is not
+      // evidence of quality. Its actual pixels can still cover a smaller map
+      // marker or filmstrip, without decoding the same RAW a second time.
+      guard let image = entries[candidate]?.image else { return false }
+      return max(image.width, image.height) >= key.pixelSize
     }).min(by: { $0.pixelSize < $1.pixelSize }) {
       selected = larger
     } else {
@@ -239,46 +273,77 @@ struct ThumbnailMemoryCache {
   /// exact size. Match the complete file version so replacements never show stale pixels.
   mutating func browsingImage(for key: ThumbnailCacheKey) -> CGImage? {
     if let exact = image(for: key) { return exact }
-    let matching = entries.keys.filter {
-      $0.fileURL == key.fileURL && $0.byteCount == key.byteCount
-        && $0.modificationDate == key.modificationDate
-    }
-    let selected = matching.filter { $0.pixelSize >= key.pixelSize }
+    guard let matching = sourceEntries[key.sourceVersion] else { return nil }
+    let selected = matching.lazy.filter { $0.pixelSize >= key.pixelSize }
       .min { $0.pixelSize < $1.pixelSize }
       ?? matching.max { $0.pixelSize < $1.pixelSize }
     guard let selected else { return nil }
     return image(for: selected)
   }
 
-  mutating func insert(_ image: CGImage, for key: ThumbnailCacheKey) {
+  mutating func protectVisibleAssets(_ assets: [ImageAsset]) {
+    visibleSources = Set(assets.map { ThumbnailCacheKey(asset: $0, pixelSize: 128).sourceVersion })
+  }
+
+  mutating func insert(_ image: CGImage, for key: ThumbnailCacheKey,
+    isSpeculative: Bool = false) {
     let (cost, overflow) = image.bytesPerRow.multipliedReportingOverflow(by: image.height)
     guard !overflow, cost > 0, cost <= byteLimit else { return }
-    if let previous = entries.removeValue(forKey: key) {
-      totalBytes -= previous.cost
+    if isSpeculative {
+      let protectedBytes = entries.filter { $0.key != key && visibleSources.contains($0.key.sourceVersion) }
+        .values.reduce(0) { $0 + $1.cost }
+      guard protectedBytes <= byteLimit - cost else { return }
     }
+    remove(key)
     while totalBytes > byteLimit - cost,
-      let oldest = entries.min(by: { $0.value.lastAccess < $1.value.lastAccess })
+      let oldest = evictionCandidate()
     {
-      totalBytes -= oldest.value.cost
-      entries.removeValue(forKey: oldest.key)
+      remove(oldest.key)
     }
     accessClock &+= 1
     entries[key] = Entry(image: image, cost: cost, lastAccess: accessClock)
+    sourceEntries[key.sourceVersion, default: []].insert(key)
     totalBytes += cost
   }
 
   mutating func setByteLimit(_ value: Int) {
     byteLimit = max(0, value)
     while totalBytes > byteLimit,
-      let oldest = entries.min(by: { $0.value.lastAccess < $1.value.lastAccess })
+      let oldest = evictionCandidate()
     {
-      totalBytes -= oldest.value.cost
-      entries.removeValue(forKey: oldest.key)
+      remove(oldest.key)
+    }
+  }
+
+  private func evictionCandidate() -> Dictionary<ThumbnailCacheKey, Entry>.Element? {
+    // A returning grid inserts many small bitmaps. Find the two oldest choices
+    // in one pass without allocating a filtered dictionary for every eviction.
+    var oldest: Dictionary<ThumbnailCacheKey, Entry>.Element?
+    var oldestUnprotected: Dictionary<ThumbnailCacheKey, Entry>.Element?
+    for candidate in entries {
+      if oldest == nil || candidate.value.lastAccess < oldest!.value.lastAccess {
+        oldest = candidate
+      }
+      if !visibleSources.contains(candidate.key.sourceVersion),
+        oldestUnprotected == nil || candidate.value.lastAccess < oldestUnprotected!.value.lastAccess {
+        oldestUnprotected = candidate
+      }
+    }
+    return oldestUnprotected ?? oldest
+  }
+
+  private mutating func remove(_ key: ThumbnailCacheKey) {
+    guard let previous = entries.removeValue(forKey: key) else { return }
+    totalBytes -= previous.cost
+    sourceEntries[key.sourceVersion]?.remove(key)
+    if sourceEntries[key.sourceVersion]?.isEmpty == true {
+      sourceEntries.removeValue(forKey: key.sourceVersion)
     }
   }
 
   mutating func removeAll() {
     entries.removeAll(keepingCapacity: false)
+    sourceEntries.removeAll(keepingCapacity: false)
     totalBytes = 0
   }
 }
@@ -375,6 +440,20 @@ private final class NativeThumbnailRequest: @unchecked Sendable {
   }
 }
 
+struct OverviewCachedAssetCounts: Sendable {
+  let preview: Int
+  let exact: Int
+  let total: Int
+}
+
+struct CachedPreviewDiagnosticRecord: Sendable {
+  let phase: String
+  let assetURL: URL
+  let elapsedSeconds: Double
+  let cacheHit: Bool
+  let cancelled: Bool
+}
+
 /// Quick Look shares the same app-wide I/O budget as precise image decoding.
 actor ThumbnailPipeline {
   private struct WorkKey: Hashable, Sendable {
@@ -384,27 +463,47 @@ actor ThumbnailPipeline {
 
   private var cache = ThumbnailMemoryCache(byteLimit: 0)
   private let governor: ImageResourceGovernor
+  private let diskCache: ThumbnailDiskCache?
+  private let beginOverviewWarmActivity: @Sendable (ProcessInfo.ActivityOptions) -> OverviewWarmActivity
   private let namespace = UUID()
   private let browsingNamespace = UUID()
+  private let cachedPreviewNamespace = UUID()
+  private let warmingNamespace = UUID()
   private let cacheClientID = UUID()
   private var cacheGeneration: UInt64 = 0
   private var resourceRevision: UInt64 = 0
   private var registeredCacheClient = false
+  private var cachedPreviewDiagnosticPhase: String?
+  private var cachedPreviewDiagnosticRecords: [CachedPreviewDiagnosticRecord] = []
 
-  init(governor: ImageResourceGovernor? = nil) {
+  init(governor: ImageResourceGovernor? = nil, diskCache: ThumbnailDiskCache? = .shared,
+    beginOverviewWarmActivity: @escaping @Sendable (ProcessInfo.ActivityOptions) -> OverviewWarmActivity = {
+      OverviewWarmActivity.begin(options: $0)
+    }) {
     self.governor = governor ?? ImageResourceGovernor()
+    self.diskCache = diskCache
+    self.beginOverviewWarmActivity = beginOverviewWarmActivity
   }
 
   /// Small, promptly scheduled frames let fast navigation keep presenting images.
   /// Sharing the thumbnail cache preserves the same strict app-wide byte budget.
-  func browsingThumbnail(for asset: ImageAsset, maxPixelSize: Int = 512) async throws -> CGImage {
+  func browsingThumbnail(for asset: ImageAsset, maxPixelSize: Int = 512,
+    preciseRAWFallbackPixelSize: Int? = nil
+  ) async throws -> CGImage {
     try Task.checkCancellation()
+    if asset.isAudio {
+      return try AudioMediaPreview.frame(for: asset.url, maxPixelSize: maxPixelSize).image
+    }
     await registerCacheClientIfNeeded()
     let url = asset.url
     if ["qoi", "pcx"].contains(url.pathExtension.lowercased()) {
       throw ThumbnailPipelineError.generationFailed(url)
     }
     let pixelSize = Self.pixelBucket(min(1_024, maxPixelSize))
+    let fallbackPixelSize = preciseRAWFallbackPixelSize.flatMap { requested -> Int? in
+      guard ImageFormatRegistry.cameraRAWExtensions.contains(asset.fileExtension) else { return nil }
+      return Self.pixelBucket(min(1_024, max(pixelSize, requested)))
+    }
     // An embedded camera preview may be smaller than the requested bound. Keep
     // that result distinct from exact-quality thumbnails used by the overview.
     let key = ThumbnailCacheKey(asset: asset, pixelSize: pixelSize, isBrowsingPreview: true)
@@ -416,6 +515,8 @@ actor ThumbnailPipeline {
       url: url, priority: .interactivePreview
     ) { _ in
       if let cached = await self.cachedThumbnail(for: key, generation: generation) { return cached }
+      if let cached = await self.restoreFromDisk(for: key, generation: generation,
+        allowsSmaller: true) { return cached }
       if asset.isVideo {
         let frame = try await VideoMediaReader.posterFrame(for: url, maxPixelSize: pixelSize)
         return try await self.remember(frame.image, for: key, generation: generation)
@@ -424,6 +525,29 @@ actor ThumbnailPipeline {
         sourceURL: url, maxPixelSize: pixelSize)
       {
         return try await self.remember(image, for: key, generation: generation)
+      }
+      if let fallbackPixelSize {
+        // No embedded first bitmap exists. An opted-in unedited SDR overview
+        // cell will need this same source decode at display size after quiet.
+        // Prepare it once inside the existing worker slot, then return compact
+        // pixels while the normal refinement task reuses the precise cache.
+        let exactKey = ThumbnailCacheKey(asset: asset, pixelSize: fallbackPixelSize)
+        var exact = await self.cachedThumbnail(for: exactKey, generation: generation)?.image
+        if exact == nil {
+          exact = await self.restoreFromDisk(for: exactKey, generation: generation)?.image
+        }
+        if exact == nil {
+          do {
+            if let image = try ThumbnailBitmapDecoder.directThumbnail(
+              sourceURL: url, maxPixelSize: fallbackPixelSize) {
+              exact = try await self.remember(image, for: exactKey, generation: generation).image
+            }
+          } catch is CancellationError { throw CancellationError() } catch {
+            // Preserve Quick Look and its validated source repair below.
+          }
+        }
+        if let exact, let compact = try await self.compactBrowsingResult(exact,
+          for: key, generation: generation) { return compact }
       }
       try Task.checkCancellation()
       let request = NativeThumbnailRequest(url: url, pixelSize: pixelSize)
@@ -437,9 +561,13 @@ actor ThumbnailPipeline {
   }
 
   func thumbnail(
-    for asset: ImageAsset, maxPixelSize: Int, priority: ImageWorkPriority = .visible
+    for asset: ImageAsset, maxPixelSize: Int, priority: ImageWorkPriority = .visible,
+    waitsForStableVisibility: Bool = false, retainsInMemory: Bool = true
   ) async throws -> CGImage {
     try Task.checkCancellation()
+    if asset.isAudio {
+      return try AudioMediaPreview.frame(for: asset.url, maxPixelSize: maxPixelSize).image
+    }
     await registerCacheClientIfNeeded()
     let url = asset.url
     if url.pathExtension.lowercased() == "qoi" || url.pathExtension.lowercased() == "pcx" {
@@ -449,6 +577,17 @@ actor ThumbnailPipeline {
     let key = ThumbnailCacheKey(asset: asset, pixelSize: pixelSize)
     if let cached = cache.image(for: key) { return cached }
 
+    // ImageIO's synchronous RAW decoder cannot be interrupted once it starts.
+    // Let transient grid/map cells disappear before admitting their work. Cached
+    // pixels and the selected photo's interactive preview remain immediate.
+    let hasDiskImage = await diskCache?.contains(for: key) ?? false
+    if waitsForStableVisibility && !hasDiskImage
+      && ImageFormatRegistry.cameraRAWExtensions.contains(asset.fileExtension) {
+      try await Task.sleep(for: .milliseconds(100))
+      try Task.checkCancellation()
+      if let cached = cache.image(for: key) { return cached }
+    }
+
     let generation = cacheGeneration
     let generated = try await governor.value(
       for: ImageResourceWorkKey(namespace: namespace,
@@ -456,22 +595,30 @@ actor ThumbnailPipeline {
       url: url, priority: priority
     ) { _ in
       if let cached = await self.cachedThumbnail(for: key, generation: generation) { return cached }
+      if let cached = await self.restoreFromDisk(for: key, generation: generation,
+        retainsInMemory: retainsInMemory, isSpeculative: priority <= .prefetch) { return cached }
       if asset.isVideo {
         let frame = try await VideoMediaReader.posterFrame(for: url, maxPixelSize: pixelSize)
-        return try await self.remember(frame.image, for: key, generation: generation)
+        return try await self.remember(frame.image, for: key, generation: generation,
+          retainsInMemory: retainsInMemory, isSpeculative: priority <= .prefetch)
       }
       if let image = try ThumbnailBitmapDecoder.directThumbnail(
         sourceURL: url, maxPixelSize: pixelSize)
       {
-        return try await self.remember(image, for: key, generation: generation)
+        return try await self.remember(image, for: key, generation: generation,
+          retainsInMemory: retainsInMemory, isSpeculative: priority <= .prefetch)
       }
       let request = NativeThumbnailRequest(url: url, pixelSize: pixelSize)
       let generated = try await request.value()
       let image = try ThumbnailBitmapDecoder.validatedThumbnail(
         generated.image, sourceURL: url, maxPixelSize: pixelSize)
-      return try await self.remember(image, for: key, generation: generation)
+      return try await self.remember(image, for: key, generation: generation,
+        retainsInMemory: retainsInMemory, isSpeculative: priority <= .prefetch)
     }
     try Task.checkCancellation()
+    if retainsInMemory, cacheGeneration == generation {
+      cache.insert(generated.image, for: key, isSpeculative: priority <= .prefetch)
+    }
     return generated.image
   }
 
@@ -484,12 +631,236 @@ actor ThumbnailPipeline {
     return image.map { GeneratedThumbnail(image: $0) }
   }
 
-  private func remember(_ image: CGImage, for key: ThumbnailCacheKey, generation: UInt64)
-    throws -> GeneratedThumbnail
+  private func compactBrowsingResult(_ exact: CGImage, for key: ThumbnailCacheKey,
+    generation: UInt64) throws -> GeneratedThumbnail? {
+    try Task.checkCancellation()
+    guard let compact = ThumbnailBitmapDecoder.rasterized(exact,
+      maxPixelSize: key.pixelSize)?.image else { return nil }
+    try Task.checkCancellation()
+    if cacheGeneration == generation { cache.insert(compact, for: key) }
+    // remember(exact) already persisted both tiers; do not encode/write the
+    // same compact PNG again merely to return its smaller first bitmap.
+    return GeneratedThumbnail(image: compact)
+  }
+
+  private func remember(_ image: CGImage, for key: ThumbnailCacheKey, generation: UInt64,
+    retainsInMemory: Bool = true, isSpeculative: Bool = false)
+    async throws -> GeneratedThumbnail
   {
     try Task.checkCancellation()
-    if cacheGeneration == generation { cache.insert(image, for: key) }
+    if cacheGeneration == generation {
+      if retainsInMemory { cache.insert(image, for: key, isSpeculative: isSpeculative) }
+      let diskGeneration = await diskCache?.generationToken()
+      guard cacheGeneration == generation else { return GeneratedThumbnail(image: image) }
+      // Await one serial disk writer inside the governed job. No unbounded write queue.
+      await diskCache?.store(image, for: key, generation: diskGeneration)
+      // Keep a compact copy in its own tier as well. Otherwise a long tour could
+      // evict an old detailed entry before that photo ever received a small preview.
+      if cacheGeneration == generation, diskCache != nil, !key.isBrowsingPreview,
+        let compact = ThumbnailBitmapDecoder.rasterized(image, maxPixelSize: 256)?.image {
+        let compactKey = ThumbnailCacheKey(asset: ImageAsset(url: key.fileURL,
+          byteCount: key.byteCount, modificationDate: key.modificationDate),
+          pixelSize: 256, isBrowsingPreview: true)
+        await diskCache?.store(compact, for: compactKey, generation: diskGeneration)
+      }
+    }
+    try Task.checkCancellation()
     return GeneratedThumbnail(image: image)
+  }
+
+  private func restoreFromDisk(for key: ThumbnailCacheKey, generation: UInt64,
+    allowsSmaller: Bool = false, retainsInMemory: Bool = true,
+    isSpeculative: Bool = false) async -> GeneratedThumbnail? {
+    guard !Task.isCancelled, let image = await diskCache?.image(for: key, allowsSmaller: allowsSmaller),
+      !Task.isCancelled else { return nil }
+    if retainsInMemory, cacheGeneration == generation {
+      // A smaller fallback must never masquerade as an exact-quality result.
+      let restoredKey = allowsSmaller ? ThumbnailCacheKey(
+        asset: ImageAsset(url: key.fileURL, byteCount: key.byteCount,
+          modificationDate: key.modificationDate), pixelSize: max(image.width, image.height),
+        isBrowsingPreview: true) : key
+      cache.insert(image, for: restoredKey, isSpeculative: isSpeculative)
+    }
+    return GeneratedThumbnail(image: image)
+  }
+
+  /// Cache-only first pixels for returning grid cells. A miss never reads the RAW.
+  func cachedPreview(for asset: ImageAsset, maxPixelSize: Int,
+    prefersCompact: Bool = false) async -> CGImage? {
+    // Capture before the first await: an outbound request that completes after
+    // the next phase starts must still be attributed to its original viewport.
+    guard let phase = cachedPreviewDiagnosticPhase else {
+      return await cachedPreviewImage(for: asset, maxPixelSize: maxPixelSize,
+        prefersCompact: prefersCompact)
+    }
+    let started = ProcessInfo.processInfo.systemUptime
+    let image = await cachedPreviewImage(for: asset, maxPixelSize: maxPixelSize,
+      prefersCompact: prefersCompact)
+    let record = CachedPreviewDiagnosticRecord(phase: phase, assetURL: asset.url,
+      elapsedSeconds: max(0, ProcessInfo.processInfo.systemUptime - started),
+      cacheHit: image != nil, cancelled: Task.isCancelled)
+    if cachedPreviewDiagnosticRecords.count >= 4_096 {
+      cachedPreviewDiagnosticRecords.removeFirst(cachedPreviewDiagnosticRecords.count - 4_095)
+    }
+    cachedPreviewDiagnosticRecords.append(record)
+    return image
+  }
+
+  /// Enables optional pipeline-return timing without decoding, drawing, or
+  /// changing scheduling. Nil disables new records; in-flight phases remain intact.
+  func setCachedPreviewDiagnosticPhase(_ phase: String?) {
+    cachedPreviewDiagnosticPhase = phase
+  }
+
+  /// Timing ends when the pipeline returns a bitmap, not when the screen paints.
+  /// Clear at measurement start; changing phases deliberately retains prior records.
+  func cachedPreviewDiagnosticsSnapshot(clear: Bool = false) -> [CachedPreviewDiagnosticRecord] {
+    let result = cachedPreviewDiagnosticRecords
+    if clear { cachedPreviewDiagnosticRecords.removeAll(keepingCapacity: true) }
+    return result
+  }
+
+  private func cachedPreviewImage(for asset: ImageAsset, maxPixelSize: Int,
+    prefersCompact: Bool) async -> CGImage? {
+    await registerCacheClientIfNeeded()
+    let key = ThumbnailCacheKey(asset: asset, pixelSize: Self.pixelBucket(maxPixelSize))
+    if let image = cache.browsingImage(for: key) { return image }
+    // Overview first pixels use the compact PNG when one exists. Returning a
+    // larger bitmap already in RAM remains free; only disk restore preference
+    // changes, leaving viewer/map exact-quality lookups untouched.
+    let lookupKey = prefersCompact ? ThumbnailCacheKey(asset: asset,
+      pixelSize: min(256, key.pixelSize), isBrowsingPreview: true) : key
+    guard await diskCache?.contains(for: lookupKey, allowsSmaller: true) == true else { return nil }
+    let generation = cacheGeneration
+    let result = try? await governor.value(for: ImageResourceWorkKey(namespace: cachedPreviewNamespace,
+      key: WorkKey(thumbnail: lookupKey, generation: generation)), url: asset.url,
+      priority: .interactivePreview, workload: .cachedThumbnail) { _ in
+        if let cached = await self.cachedBrowsingThumbnail(for: key, generation: generation) {
+          return cached
+        }
+        return await self.restoreFromDisk(for: lookupKey, generation: generation, allowsSmaller: true)
+      }
+    return result?.image
+  }
+
+  private func cachedBrowsingThumbnail(for key: ThumbnailCacheKey,
+    generation: UInt64) -> GeneratedThumbnail? {
+    guard cacheGeneration == generation else { return nil }
+    return cache.browsingImage(for: key).map { GeneratedThumbnail(image: $0) }
+  }
+
+  /// A warm navigation destination can overtake an older source decode. This
+  /// lookup never restores disk data, classifies storage, or admits decoder work.
+  func cachedMemoryPreview(for asset: ImageAsset, maxPixelSize: Int) -> CGImage? {
+    cache.browsingImage(for: ThumbnailCacheKey(asset: asset,
+      pixelSize: Self.pixelBucket(maxPixelSize)))
+  }
+
+  func updateOverviewVisibleAssets(_ assets: [ImageAsset]) {
+    cache.protectVisibleAssets(assets)
+  }
+
+  @discardableResult
+  func prefetchOverview(assets: [ImageAsset], maxPixelSize: Int, retainsInMemory: Bool,
+    waitsForQuietInterval: Bool = true) async -> Bool {
+    guard let first = assets.first else { return true }
+    let limits = await governor.limits(for: first.url)
+    guard limits.permitsSpeculation else { return false }
+    do {
+      if waitsForQuietInterval {
+        try await Task.sleep(for: .milliseconds(max(250, limits.prefetchDelayMilliseconds)))
+      }
+      for asset in assets {
+        try Task.checkCancellation()
+        guard await governor.limits(for: asset.url).permitsSpeculation else { return false }
+        do {
+          _ = try await thumbnail(for: asset, maxPixelSize: maxPixelSize, priority: .prefetch,
+            retainsInMemory: retainsInMemory)
+        } catch is CancellationError { return false } catch { /* Skip unsupported/broken media. */ }
+      }
+      return true
+    } catch { return false }
+  }
+
+  @discardableResult
+  func warmOverviewPreviews(assets: [ImageAsset]) async -> Bool {
+    guard let diskCache else { return false }
+    await registerCacheClientIfNeeded()
+    for asset in assets {
+      guard !Task.isCancelled else {
+        return false
+      }
+      let key = ThumbnailCacheKey(asset: asset, pixelSize: 256, isBrowsingPreview: true)
+      // An existing detailed disk image also covers the compact tier: no duplicate decode.
+      if await diskCache.contains(for: key, allowsSmaller: true) { continue }
+      if asset.isAudio || ["qoi", "pcx"].contains(asset.fileExtension) { continue }
+      let generation = cacheGeneration
+      var activity: OverviewWarmActivity?
+      // A protected retry or already-prepared item holds no activity. An
+      // admitted item includes its adaptive sleep, and permits system idle sleep.
+      defer { withExtendedLifetime(activity) {} }
+      do {
+        if !asset.isVideo {
+          guard let delay = await governor.overviewWarmDelay(for: asset.url, workKind: .embeddedPreview)
+          else { return false }
+          try Task.checkCancellation()
+          activity = beginOverviewWarmActivity(.userInitiatedAllowingIdleSystemSleep)
+          try await Task.sleep(for: .milliseconds(delay))
+          let prepared = try await governor.value(for: ImageResourceWorkKey(namespace: warmingNamespace,
+            key: WorkKey(thumbnail: key, generation: generation)), url: asset.url,
+            priority: .idleThumbnail, workload: .overviewPreview) { [activity] _ in
+              // Cancelling a waiter cannot interrupt synchronous ImageIO. Keep
+              // the lease until the governed native operation actually returns.
+              defer { withExtendedLifetime(activity) {} }
+              if await diskCache.contains(for: key, allowsSmaller: true) { return true }
+              let workStarted = ProcessInfo.processInfo.systemUptime
+              let cpuStarted = OverviewWarmCPUCost.processCPUSeconds()
+              let image = try ThumbnailBitmapDecoder.embeddedOverviewThumbnail(sourceURL: asset.url)
+              if let image {
+                _ = try await self.remember(image, for: key, generation: generation, retainsInMemory: false)
+              }
+              let cpuFinished = OverviewWarmCPUCost.processCPUSeconds()
+              let workCost = OverviewWarmCPUCost.embeddedCostSeconds(
+                wallSeconds: ProcessInfo.processInfo.systemUptime - workStarted,
+                cpuBefore: cpuStarted, cpuAfter: cpuFinished)
+              await self.governor.recordOverviewWarmDuration(
+                workCost, for: asset.url, workKind: .embeddedPreview)
+              return image != nil
+            }
+          if prepared { continue }
+        }
+        guard let delay = await governor.overviewWarmDelay(for: asset.url, workKind: .sourceFallback)
+        else { return false }
+        try Task.checkCancellation()
+        if activity == nil {
+          activity = beginOverviewWarmActivity(.userInitiatedAllowingIdleSystemSleep)
+        }
+        try await Task.sleep(for: .milliseconds(delay))
+        _ = try await governor.value(for: ImageResourceWorkKey(namespace: warmingNamespace,
+          key: WorkKey(thumbnail: key, generation: generation)), url: asset.url,
+          priority: .idleThumbnail, workload: .overviewPreview) { [activity] _ in
+            defer { withExtendedLifetime(activity) {} }
+            if await diskCache.contains(for: key, allowsSmaller: true) { return true }
+            let workStarted = ProcessInfo.processInfo.systemUptime
+            let image: CGImage
+            if asset.isVideo {
+              image = try await VideoMediaReader.posterFrame(for: asset.url, maxPixelSize: 256).image
+            } else if let direct = try ThumbnailBitmapDecoder.directThumbnail(
+              sourceURL: asset.url, maxPixelSize: 256) {
+              image = direct
+            } else {
+              let native = try await NativeThumbnailRequest(url: asset.url, pixelSize: 256).value()
+              image = try ThumbnailBitmapDecoder.validatedThumbnail(native.image,
+                sourceURL: asset.url, maxPixelSize: 256)
+            }
+            _ = try await self.remember(image, for: key, generation: generation, retainsInMemory: false)
+            await self.governor.recordOverviewWarmDuration(
+              ProcessInfo.processInfo.systemUptime - workStarted, for: asset.url, workKind: .sourceFallback)
+            return true
+          }
+      } catch is CancellationError { return false } catch { /* Continue past broken media. */ }
+    }
+    return true
   }
 
   func prefetch(assets: [ImageAsset], maxPixelSize: Int) async {
@@ -514,9 +885,38 @@ actor ThumbnailPipeline {
     cache.removeAll()
   }
 
+  /// Explicit Settings action reclaims persisted previews as well. Ordinary
+  /// library changes and memory pressure use the RAM-only operation above.
+  @discardableResult
+  func purgeAllCaches() async -> Bool {
+    purgeCache()
+    return await diskCache?.removeAll() ?? true
+  }
+
   func cacheSnapshot() -> ImageCacheSnapshot {
     ImageCacheSnapshot(entryCount: cache.count, byteCount: cache.totalBytes,
       byteLimit: cache.byteLimit)
+  }
+
+  /// Persisted disk coverage only: consults versioned thumbnail metadata without
+  /// reading source files, decoding PNGs, or counting RAM-only cache entries.
+  /// Preview includes any cached size; exact requires the requested bucket or larger.
+  func overviewCachedAssetCounts(assets: [ImageAsset], maxPixelSize: Int) async
+    -> OverviewCachedAssetCounts {
+    guard let diskCache else { return OverviewCachedAssetCounts(preview: 0, exact: 0, total: 0) }
+    let pixels = Self.pixelBucket(maxPixelSize)
+    var preview = 0
+    var exact = 0
+    for asset in assets {
+      let key = ThumbnailCacheKey(asset: asset, pixelSize: pixels)
+      if await diskCache.contains(for: key, allowsSmaller: true) { preview += 1 }
+      if await diskCache.contains(for: key) { exact += 1 }
+    }
+    return OverviewCachedAssetCounts(preview: preview, exact: exact, total: assets.count)
+  }
+
+  func diskCacheSnapshot() async -> ThumbnailDiskCacheSnapshot? {
+    await diskCache?.snapshot()
   }
 
   private func registerCacheClientIfNeeded() async {
@@ -530,7 +930,9 @@ actor ThumbnailPipeline {
   private func applyResourceLimits(_ update: ImageResourceUpdate) {
     guard update.revision >= resourceRevision else { return }
     resourceRevision = update.revision
-    if update.limits.thumbnailCacheBytes < cache.byteLimit { purgeCache() }
+    // Ordinary shrinking evicts only the oldest entries. Losing focus must not
+    // discard every already decoded thumbnail. Critical pressure still invalidates work.
+    if update.limits.thumbnailCacheBytes == 0 { purgeCache() }
     cache.setByteLimit(update.limits.thumbnailCacheBytes)
   }
 

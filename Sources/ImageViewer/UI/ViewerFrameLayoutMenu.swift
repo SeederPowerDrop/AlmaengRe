@@ -36,7 +36,7 @@ struct ViewerFrameLayoutMenu: View {
       Group {
         if compact {
           Image(systemName: "rectangle.split.2x2")
-            .frame(width: 18)
+            .viewerFrame(width: 18)
         } else {
           Label(FrameLayoutL10n.text("title"), systemImage: "rectangle.split.2x2")
         }

@@ -10,14 +10,14 @@ struct EmptyLibraryView: View {
         if store.currentFolderURL != nil {
           VStack(spacing: 8) {
             Text(store.activeFolderName)
-              .font(.system(size: 22, weight: .semibold))
+              .font(ViewerUIMetrics.font(size: 22, weight: .semibold))
               .lineLimit(2).truncationMode(.middle)
             Text("이미지가 없는 폴더입니다.")
-              .font(.system(size: 13))
+              .font(ViewerUIMetrics.font(size: 13))
               .foregroundStyle(.secondary)
               .fixedSize(horizontal: false, vertical: true)
             Text("폴더 트리에서 다른 폴더를 선택하거나 파일을 열어 주세요.")
-              .font(.caption).foregroundStyle(.secondary)
+              .font(ViewerUIMetrics.font(.caption)).foregroundStyle(.secondary)
               .fixedSize(horizontal: false, vertical: true)
           }
           .multilineTextAlignment(.center)
@@ -25,13 +25,13 @@ struct EmptyLibraryView: View {
 
         Button { store.chooseItems() } label: {
           Label("열기…", systemImage: "folder")
-            .font(.system(size: 14, weight: .semibold))
-            .frame(minWidth: 140, minHeight: 44)
+            .font(ViewerUIMetrics.font(size: 14, weight: .semibold))
+            .viewerFrame(minWidth: 140, minHeight: 44)
         }
         .buttonStyle(ViewerActionButtonStyle(prominent: true))
         .controlSize(.large)
       }
-      .frame(maxWidth: 550)
+      .viewerFrame(maxWidth: 550)
       Spacer(minLength: 24)
       VStack(spacing: 12) {
         HStack(spacing: 3) {
@@ -43,14 +43,14 @@ struct EmptyLibraryView: View {
         .opacity(0.8)
         .accessibilityHidden(true)
         Text("Mac에 꼭 필요한 도구, 누구나 자유롭게.")
-          .font(.system(size: 11)).foregroundStyle(.secondary)
+          .font(ViewerUIMetrics.font(size: 11)).foregroundStyle(.secondary)
           .multilineTextAlignment(.center)
           .fixedSize(horizontal: false, vertical: true)
-          .frame(maxWidth: 420)
+          .viewerFrame(maxWidth: 420)
       }
-      .padding(.bottom, 26)
+      .viewerPadding(.bottom, 26)
     }
-    .padding(.horizontal, 36)
+    .viewerPadding(.horizontal, 36)
     .frame(maxWidth: .infinity, maxHeight: .infinity)
     .background(ViewerTheme.chromeGradient)
   }

@@ -1,6 +1,11 @@
-"grid.playAll" = "Play visible videos";
-"grid.playSelected" = "Play selected (%d)";
-"grid.pauseAll" = "Pause all videos";
-"grid.select" = "Select video for playback";
-"grid.play" = "Play video";
-"grid.pause" = "Pause video";
+"grid.playAll" = "Play All";
+"grid.playNextPages" = "Play Next Pages";
+"grid.pageAutoplayOn" = "Page Autoplay On";
+"grid.playAll.help" = "Play all videos and audio on the current page. Press again to play automatically when you change pages. Photos stay displayed.";
+"grid.playNextPages.help" = "Automatically play videos and audio on each new page as you navigate. Items that leave the screen stop playing, and photos stay displayed.";
+"grid.pageAutoplayOn.help" = "Videos and audio play automatically when you change pages. Press again to play only the current page. Pause All also turns autoplay off.";
+"grid.playSelected" = "Play Selected (%d)";
+"grid.pauseAll" = "Pause All";
+"grid.select" = "Select for Playback";
+"grid.play" = "Play";
+"grid.pause" = "Pause";

@@ -12,3 +12,9 @@
 "quick.export" = "Formato y tamaño";
 "quick.watermark" = "Marca de agua";
 "quick.share" = "Compartir";
+
+"classify.menu" = "Clasificar archivos seleccionados…";
+"quick.classify" = "Clasificar";
+
+"selection.focused" = "Posición de navegación con teclado";
+"selection.overviewHelp" = "⌘-clic: seleccionar/quitar\n⌘-flecha: mover y alternar la selección del elemento de destino\n⇧-clic / ⇧-flecha: seleccionar un intervalo\n⌘⇧-clic / ⌘⇧-flecha: añadir un intervalo a la selección actual";

@@ -3,7 +3,7 @@
 "wildcard.hint" = "用 * 或 % 代替未知字符：img* · *.png · *旅行* · *（全部）。普通文本匹配文件名的一部分。";
 "metadata.title" = "拍摄信息 · 元数据";
 "metadata.placeholder" = "相机、镜头、ISO、描述、关键词…";
-"metadata.hint" = "搜索文件中保存的 EXIF、IPTC 信息和视频标签。";
+"metadata.hint" = "搜索文件内的EXIF、IPTC信息及视频、音频标签。";
 "location.title" = "位置";
 "location.placeholder" = "已保存的城市、国家名或 GPS 坐标…";
 "location.hint" = "搜索文件中记录的地名和坐标，不会将 GPS 坐标转换为地名。";

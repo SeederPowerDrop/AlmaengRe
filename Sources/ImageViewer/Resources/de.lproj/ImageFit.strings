@@ -1,0 +1,16 @@
+/* Image fitting menu and contextual help. */
+"menu.image" = "Bildanpassung";
+"menu.frame" = "Rahmenanpassung";
+"menu.help" = "Ganzes Bild, Breiten- oder Höhenanpassung, Zentrierung oder Originalgröße wählen.";
+"menu.frameHelp" = "Das ganze Bild anzeigen oder es im jeweiligen Rahmen zentrieren.";
+"whole.title" = "Ganzes Bild anzeigen";
+"whole.help" = "Passt das ganze Bild ein und behält das Seitenverhältnis bei.";
+"frame.wholeHelp" = "Passt jedes ganze Bild in seinen Rahmen ein und behält das Seitenverhältnis bei.";
+"width.title" = "Seitliche Ränder füllen";
+"width.help" = "Passt die Breite bei gleichem Seitenverhältnis an. Oben oder unten können Bildteile außerhalb des sichtbaren Bereichs liegen.";
+"height.title" = "Obere/untere Ränder füllen";
+"height.help" = "Passt die Höhe bei gleichem Seitenverhältnis an. Links oder rechts können Bildteile außerhalb des sichtbaren Bereichs liegen.";
+"center.title" = "In die Mitte verschieben";
+"center.help" = "Zentriert das Bild, ohne die Zoomstufe zu ändern.";
+"actual.title" = "Originalgröße (1:1)";
+"actual.help" = "Zeigt einen Bildpixel pro Bildschirmpixel an.";

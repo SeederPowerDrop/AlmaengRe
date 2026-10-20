@@ -200,12 +200,14 @@ final class FolderComparisonPane: ObservableObject {
   var onCollectionOpened: ((OpenedImageLibrary, [URL]) -> Void)?
 
   private let library = ImageLibrary()
+  private let loadingGovernor: ImageResourceGovernor?
   private var loadTask: Task<Void, Never>?
   private var loadGeneration = UUID()
   private var access: [ImageLibraryAccess] = []
 
-  init(photoMarks: PhotoMarkStore? = nil) {
+  init(photoMarks: PhotoMarkStore? = nil, loadingGovernor: ImageResourceGovernor? = nil) {
     self.photoMarks = photoMarks
+    self.loadingGovernor = loadingGovernor
     markSubscription = photoMarks?.$revision.dropFirst().sink { [weak self] _ in
       // @Published emits before the mark dictionary update has fully completed.
       Task { @MainActor [weak self] in
@@ -366,7 +368,7 @@ final class FolderComparisonPane: ObservableObject {
     let retryUnavailable = needsSourceReconciliation
     isFiltering = true
     onContentsChanged?()
-    queryTask = Task { [weak self, library, photoMarks] in
+    queryTask = Task { [weak self, library, photoMarks, loadingGovernor] in
       do {
         // Rapid typing should not launch a full scan/sort for every intermediate query.
         try await Task.sleep(for: .milliseconds(100))
@@ -378,8 +380,10 @@ final class FolderComparisonPane: ObservableObject {
           await photoMarks.reconcileAssets(source, retryUnavailable: retryUnavailable)?.wait()
           try Task.checkCancellation()
         }
-        let located = needsLocations ? try await library.enrichLocations(source) : source
-        let prepared = try await library.enrichQueryMetadata(located, for: options)
+        let located = needsLocations
+          ? try await library.enrichLocations(source, governor: loadingGovernor) : source
+        let prepared = try await library.enrichQueryMetadata(located, for: options,
+          governor: loadingGovernor)
         try Task.checkCancellation()
         let work = Task.detached(priority: .userInitiated) {
           try Task.checkCancellation()
@@ -617,10 +621,10 @@ final class FolderComparisonStore: ObservableObject {
   private var isSynchronizingNavigationTarget = false
 
   init(defaults: UserDefaults = .standard, alignment: ComparisonAlignment? = nil,
-    photoMarks: PhotoMarkStore? = nil
+    photoMarks: PhotoMarkStore? = nil, loadingGovernor: ImageResourceGovernor? = nil
   ) {
-    first = FolderComparisonPane(photoMarks: photoMarks)
-    second = FolderComparisonPane(photoMarks: photoMarks)
+    first = FolderComparisonPane(photoMarks: photoMarks, loadingGovernor: loadingGovernor)
+    second = FolderComparisonPane(photoMarks: photoMarks, loadingGovernor: loadingGovernor)
     self.defaults = defaults
     let savedAlignment = alignment ?? defaults.string(forKey: "ImageViewer.ComparisonAlignment.v1")
       .flatMap(ComparisonAlignment.init(rawValue:)) ?? .sequence
@@ -802,7 +806,7 @@ final class FolderComparisonStore: ObservableObject {
     initialFilter: PhotoMarkFilter
   ) -> Bool {
     guard !isEditingControls, !first.isLocked, !second.isLocked else { return false }
-    let images = assets.filter { !$0.isVideo }
+    let images = assets.filter { !$0.isPlaybackMedia }
     guard !images.isEmpty else { return false }
     resetLiveInput()
     restoreGeneration = UUID()

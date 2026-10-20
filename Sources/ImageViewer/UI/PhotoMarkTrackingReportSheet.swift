@@ -14,7 +14,7 @@ struct PhotoMarkTrackingReportSheet: View {
     VStack(alignment: .leading, spacing: 14) {
       HStack {
         Label(PhotoMarkReportL10n.text("title"), systemImage: "doc.text.magnifyingglass")
-          .font(.title3.weight(.semibold))
+          .font(ViewerUIMetrics.font(.title3).weight(.semibold))
         Spacer()
         if marks.isRefreshingTracking { ProgressView().controlSize(.small) }
         Button(PhotoMarkReportL10n.text("refresh")) {
@@ -23,25 +23,25 @@ struct PhotoMarkTrackingReportSheet: View {
         .disabled(!marks.isReady || marks.isRefreshingTracking)
       }
       Text(PhotoMarkReportL10n.text("explanation"))
-        .font(.callout).foregroundStyle(.secondary)
+        .font(ViewerUIMetrics.font(.callout)).foregroundStyle(.secondary)
         .fixedSize(horizontal: false, vertical: true)
       exportControls
       HStack {
         Text(PhotoMarkReportL10n.format("unavailableFormat", marks.unavailableCount))
-          .font(.callout.weight(.medium))
+          .font(ViewerUIMetrics.font(.callout).weight(.medium))
         Spacer()
         Text(PhotoMarkReportL10n.format("historyFormat", marks.trackingReports.count))
-          .font(.caption).foregroundStyle(.secondary)
+          .font(ViewerUIMetrics.font(.caption)).foregroundStyle(.secondary)
       }
       if let error = marks.errorMessage {
-        Text(error).font(.caption).foregroundStyle(.red).textSelection(.enabled)
+        Text(error).font(ViewerUIMetrics.font(.caption)).foregroundStyle(.red).textSelection(.enabled)
       }
       ScrollView {
         LazyVStack(alignment: .leading, spacing: 0) {
           if marks.trackingReports.isEmpty {
             Text(PhotoMarkReportL10n.text("empty"))
               .foregroundStyle(.secondary)
-              .frame(maxWidth: .infinity, minHeight: 170)
+              .viewerFrame(maxWidth: .infinity, minHeight: 170)
           }
           ForEach(marks.trackingReports) { report in
             reportRow(report)
@@ -52,9 +52,9 @@ struct PhotoMarkTrackingReportSheet: View {
       .background(ViewerTheme.controlFill, in: RoundedRectangle(cornerRadius: 8))
       VStack(alignment: .leading, spacing: 3) {
         Text(PhotoMarkReportL10n.text("storage"))
-          .font(.caption).foregroundStyle(.secondary)
+          .font(ViewerUIMetrics.font(.caption)).foregroundStyle(.secondary)
         Text((marks.storageURL.path as NSString).abbreviatingWithTildeInPath)
-          .font(.caption2).foregroundStyle(.secondary).textSelection(.enabled)
+          .font(ViewerUIMetrics.font(.caption2)).foregroundStyle(.secondary).textSelection(.enabled)
           .lineLimit(2).truncationMode(.middle)
       }
       HStack {
@@ -64,8 +64,8 @@ struct PhotoMarkTrackingReportSheet: View {
           .disabled(isExporting)
       }
     }
-    .padding(20)
-    .frame(minWidth: 650, idealWidth: 780, maxWidth: 960, minHeight: 580, idealHeight: 740)
+    .viewerPadding(20)
+    .viewerFrame(minWidth: 650, idealWidth: 780, maxWidth: 960, minHeight: 580, idealHeight: 740)
     .task { await marks.refreshTracking() }
     .alert(PhotoMarkReportL10n.text("export.failure"), isPresented: $showsExportError) {
       Button(L10n.text("확인"), role: .cancel) {}
@@ -79,7 +79,7 @@ struct PhotoMarkTrackingReportSheet: View {
       HStack(spacing: 12) {
         Label(PhotoMarkReportL10n.format("export.countFormat", marks.classifiedFileCount),
           systemImage: "tag")
-          .font(.callout.weight(.semibold))
+          .font(ViewerUIMetrics.font(.callout).weight(.semibold))
         Spacer()
         if isExporting { ProgressView().controlSize(.small) }
         Button(action: exportCSV) {
@@ -90,20 +90,20 @@ struct PhotoMarkTrackingReportSheet: View {
         .accessibilityIdentifier("classification.report.exportCSV")
       }
       Text(PhotoMarkReportL10n.text("export.detail"))
-        .font(.caption).foregroundStyle(.secondary)
+        .font(ViewerUIMetrics.font(.caption)).foregroundStyle(.secondary)
         .fixedSize(horizontal: false, vertical: true)
       Text(PhotoMarkReportL10n.text("export.historyHint"))
-        .font(.caption2).foregroundStyle(.secondary)
+        .font(ViewerUIMetrics.font(.caption2)).foregroundStyle(.secondary)
         .fixedSize(horizontal: false, vertical: true)
       if isExporting {
-        Text(PhotoMarkReportL10n.text("export.progress")).font(.caption)
+        Text(PhotoMarkReportL10n.text("export.progress")).font(ViewerUIMetrics.font(.caption))
       } else if let exportStatus {
         Label(exportStatus, systemImage: "checkmark.circle")
-          .font(.caption).foregroundStyle(.secondary)
+          .font(ViewerUIMetrics.font(.caption)).foregroundStyle(.secondary)
           .accessibilityIdentifier("classification.report.exportSuccess")
       }
     }
-    .padding(12)
+    .viewerPadding(12)
     .background(ViewerTheme.controlFill, in: RoundedRectangle(cornerRadius: 8))
   }
 
@@ -137,34 +137,34 @@ struct PhotoMarkTrackingReportSheet: View {
     VStack(alignment: .leading, spacing: 5) {
       HStack(alignment: .firstTextBaseline, spacing: 10) {
         Label(PhotoMarkReportL10n.text("event.\(report.event.rawValue)"), systemImage: icon(for: report.event))
-          .font(.caption.weight(.semibold))
+          .font(ViewerUIMetrics.font(.caption).weight(.semibold))
           .foregroundStyle(report.event == .unavailable ? Color.orange : Color.secondary)
         Text(report.filename).fontWeight(.medium).lineLimit(1).truncationMode(.middle)
         Spacer(minLength: 0)
         Text(report.observedAt, format: .dateTime.year().month().day().hour().minute())
-          .font(.caption2).foregroundStyle(.secondary)
+          .font(ViewerUIMetrics.font(.caption2)).foregroundStyle(.secondary)
       }
-      Text(report.classificationDescription).font(.caption).foregroundStyle(.secondary)
+      Text(report.classificationDescription).font(ViewerUIMetrics.font(.caption)).foregroundStyle(.secondary)
       if let previous = report.previousURL,
         report.currentURL?.standardizedFileURL != previous.standardizedFileURL {
         Text(PhotoMarkReportL10n.format("previousFormat", previous.path))
-          .font(.caption2).foregroundStyle(.secondary).textSelection(.enabled)
+          .font(ViewerUIMetrics.font(.caption2)).foregroundStyle(.secondary).textSelection(.enabled)
       }
       if let current = report.currentURL {
         Text(PhotoMarkReportL10n.format("currentFormat", current.path))
-          .font(.caption2).foregroundStyle(.secondary).textSelection(.enabled)
+          .font(ViewerUIMetrics.font(.caption2)).foregroundStyle(.secondary).textSelection(.enabled)
       }
       if let entry = report.archiveEntryPath {
         Text(PhotoMarkReportL10n.format("archiveEntryFormat", entry))
-          .font(.caption2).foregroundStyle(.secondary).textSelection(.enabled)
+          .font(ViewerUIMetrics.font(.caption2)).foregroundStyle(.secondary).textSelection(.enabled)
       }
       if report.event == .unavailable {
         Text(PhotoMarkReportL10n.text("unavailableHint"))
-          .font(.caption2).foregroundStyle(.secondary)
+          .font(ViewerUIMetrics.font(.caption2)).foregroundStyle(.secondary)
       }
     }
-    .padding(12)
-    .frame(maxWidth: .infinity, alignment: .leading)
+    .viewerPadding(12)
+    .viewerFrame(maxWidth: .infinity, alignment: .leading)
   }
 
   private func icon(for event: PhotoMarkTrackingReport.Event) -> String {

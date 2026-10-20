@@ -1,7 +1,7 @@
 "items.count" = "%d items";
-"open.message" = "Choose images, supported videos, folders, or ZIP archives.";
-"showVideos" = "Show Videos";
-"showVideos.help" = "Show photos and videos together in folders. This is on by default and remembers your choice. GIFs remain visible either way.";
+"open.message" = "Choose images, videos, audio, folders, or ZIP files.";
+"showVideos" = "Video & Audio";
+"showVideos.help" = "Show photos, videos, and audio together in folders. This is on by default and remembers your choice. GIFs remain visible either way.";
 "editor.open" = "Frames & Clips…";
 "editor.title" = "Frames & Clips";
 "video.unavailable" = "Unable to Play Video";
@@ -48,19 +48,19 @@
 "saved" = "Saved %@ · %@";
 "cancelled" = "Cancelled. Incomplete output was removed.";
 "basicUsage" = "Use Frames & Clips on a video or GIF to step through frames, extract PNGs, save clips, or reduce size.";
-"hiddenVideos" = "Videos are hidden. Turn on Show Videos to include them.";
-"supported" = "Video: MP4, MOV and other formats that macOS can decode. Support depends on the container and its codecs. No external codec installation is required.";
+"hiddenVideos" = "Videos and audio are hidden. Turn on Video & Audio to include them.";
+"supported" = "Video and audio: MP4, MOV, MP3, M4A, WAV, and other files macOS can decode. Playback depends on the format and codecs inside the file. No external codecs are installed.";
 
-"video.error.sourceUnavailable" = "The source video file is not accessible.";
+"video.error.sourceUnavailable" = "The source file cannot be accessed.";
 "video.error.noVideoTrack" = "This file has no readable video track.";
-"video.error.invalidDuration" = "Unable to determine the video duration.";
+"video.error.invalidDuration" = "The file’s duration could not be determined.";
 "video.error.invalidDimensions" = "Unable to determine the video dimensions.";
 "video.error.invalidRange" = "Set the start and end within the video duration, with the end after the start.";
 "video.error.invalidFrameTime" = "Choose a frame time within the video duration.";
 "video.error.protectedContent" = "Frames and clips cannot be saved from protected video.";
 "video.error.notExportable" = "macOS cannot export this video.";
 "video.error.sourceOverwrite" = "The source video file cannot be overwritten.";
-"video.error.sourceChanged" = "The source video changed during processing. Open it again.";
+"video.error.sourceChanged" = "The source file changed during this operation. Open it again.";
 "video.error.invalidDestination" = "Choose a destination folder and a filename with the extension for the selected format.";
 "video.error.destinationExists" = "A file or folder with the same name already exists.";
 "video.error.unsupportedPreset" = "The selected export quality is not available for this video.";
@@ -125,3 +125,17 @@
 
 "study.automaticHint" = "Matching subtitles turn on automatically. The app language comes first, with up to two different languages shown together.";
 "study.fontsLoading" = "Loading fonts…";
+
+"audio.title" = "Audio";
+
+"audio.play" = "Play Audio";
+
+"audio.pause" = "Pause Audio";
+
+"audio.ready" = "Ready to Play";
+
+"audio.unavailable" = "Audio unavailable";
+
+"audio.help" = "Uses macOS built-in codecs. Playback depends on the format and codecs inside the file.";
+
+"audio.manageHint" = "Manage audio by playing, tagging, renaming, and moving files.";

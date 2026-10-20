@@ -6,7 +6,7 @@
 "unsupported" = "This format or codec is not supported.";
 "unreadableData" = "The file data could not be read. It may be damaged or in an unsupported format.";
 "noVideoTrack" = "This file has no video track to display.";
-"protected" = "Protected videos cannot be played.";
+"protected" = "Protected files cannot be played.";
 "invalidVideo" = "The video's duration or display information is invalid.";
 "rendering" = "The image could not be displayed. Try opening it again.";
 "resource" = "The device or memory needed to display this file is unavailable. Try again shortly.";

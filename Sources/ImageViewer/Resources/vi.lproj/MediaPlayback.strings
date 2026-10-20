@@ -1,6 +1,11 @@
-"grid.playAll" = "Phát các video đang hiển thị";
-"grid.playSelected" = "Phát video đã chọn (%d)";
-"grid.pauseAll" = "Tạm dừng tất cả video";
-"grid.select" = "Chọn video để phát";
-"grid.play" = "Phát video";
-"grid.pause" = "Tạm dừng video";
+"grid.playAll" = "Phát tất cả";
+"grid.playNextPages" = "Phát cả các trang sau";
+"grid.pageAutoplayOn" = "Tự phát khi chuyển trang";
+"grid.playAll.help" = "Phát tất cả video và âm thanh trên trang hiện tại. Nhấn lần nữa để tự động phát khi chuyển trang. Ảnh vẫn được hiển thị.";
+"grid.playNextPages.help" = "Tự động phát video và âm thanh trên trang mới khi bạn chuyển trang. Các mục rời khỏi màn hình sẽ dừng phát, còn ảnh vẫn được hiển thị.";
+"grid.pageAutoplayOn.help" = "Video và âm thanh tự động phát mỗi khi bạn chuyển trang. Nhấn lần nữa để chỉ phát trang hiện tại. Nhấn Tạm dừng tất cả cũng sẽ tắt tự động phát.";
+"grid.playSelected" = "Phát mục đã chọn (%d)";
+"grid.pauseAll" = "Tạm dừng tất cả";
+"grid.select" = "Chọn mục để phát";
+"grid.play" = "Phát";
+"grid.pause" = "Tạm dừng";

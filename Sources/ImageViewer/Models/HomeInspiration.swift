@@ -36,7 +36,8 @@ enum HomeInspiration {
     return collection
   }()
 
-  static let launchQuote = choose(from: quotes, defaults: .standard)
+  static let launchQuote = choose(from: quotes,
+    defaults: OverviewReleaseBenchmark.isolatedDefaults ?? ManualViewerQAContext.active?.defaults ?? .standard)
 
   static func choose(from quotes: [HomeQuote], defaults: UserDefaults) -> HomeQuote? {
     let previousID = defaults.string(forKey: previousQuoteKey)

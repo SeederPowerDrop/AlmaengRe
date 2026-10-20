@@ -36,7 +36,7 @@ struct FolderTreeView: View {
                 folderRow(row).id(row.id)
               }
             }
-            .padding(.vertical, 6)
+            .viewerPadding(.vertical, 6)
             .frame(width: max(240, CGFloat(tree.rows.map(\.depth).max() ?? 0) * 14 + 170), alignment: .topLeading)
             // 양축 스크롤의 짧은 목록도 화면 높이를 채워 위쪽에 고정합니다.
             .frame(minHeight: viewport.size.height, alignment: .topLeading)
@@ -53,11 +53,11 @@ struct FolderTreeView: View {
       Divider()
       Text(L10n.text(locked ? "잠긴 칸은 폴더를 바꿀 수 없습니다."
         : "폴더 이름을 누르면 해당 폴더의 사진을 엽니다."))
-        .font(.system(size: 10))
+        .font(ViewerUIMetrics.font(size: 10))
         .foregroundStyle(.secondary)
         .fixedSize(horizontal: false, vertical: true)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(.horizontal, 12).padding(.vertical, 8)
+        .viewerPadding(.horizontal, 12).viewerPadding(.vertical, 8)
     }
     .background(ViewerTheme.sidebar)
   }
@@ -66,7 +66,7 @@ struct FolderTreeView: View {
     VStack(spacing: 9) {
       HStack {
         Label("폴더 트리", systemImage: "list.bullet.indent")
-          .font(.system(size: 12, weight: .semibold))
+          .font(ViewerUIMetrics.font(size: 12, weight: .semibold))
         Spacer(minLength: 4)
         if let folder = selectedFolder ?? tree.rootURL {
           Button { store.toggleFavoriteFolder(folder) } label: {
@@ -78,7 +78,7 @@ struct FolderTreeView: View {
           .accessibilityLabel(store.isFavoriteFolder(folder) ? "즐겨찾는 폴더에서 해제" : "즐겨찾는 폴더에 고정")
         }
         Button { store.showsFolderTree = false } label: {
-          Image(systemName: "xmark").font(.system(size: 10, weight: .semibold))
+          Image(systemName: "xmark").font(ViewerUIMetrics.font(size: 10, weight: .semibold))
         }
         .buttonStyle(.plain)
         .foregroundStyle(.secondary)
@@ -120,14 +120,14 @@ struct FolderTreeView: View {
         .controlSize(.small)
       }
     }
-    .padding(.horizontal, 12).padding(.vertical, 11)
+    .viewerPadding(.horizontal, 12).viewerPadding(.vertical, 11)
   }
 
   private var favorites: some View {
     VStack(alignment: .leading, spacing: 4) {
       Text("즐겨찾는 폴더")
-        .font(.system(size: 10, weight: .semibold)).foregroundStyle(.secondary)
-        .padding(.horizontal, 12)
+        .font(ViewerUIMetrics.font(size: 10, weight: .semibold)).foregroundStyle(.secondary)
+        .viewerPadding(.horizontal, 12)
       ScrollView {
         VStack(spacing: 2) {
           ForEach(store.favoriteFolders) { favorite in
@@ -138,7 +138,7 @@ struct FolderTreeView: View {
                   Text(verbatim: favorite.name).lineLimit(1).truncationMode(.middle)
                   Spacer(minLength: 0)
                 }
-                .frame(height: 27).contentShape(Rectangle())
+                .viewerFrame(height: 27).contentShape(Rectangle())
               }
               .buttonStyle(.plain)
               .disabled(!store.canOpenFolderFromTree)
@@ -149,15 +149,15 @@ struct FolderTreeView: View {
               .help("즐겨찾는 폴더에서 해제")
               .accessibilityLabel("즐겨찾는 폴더에서 해제")
             }
-            .padding(.horizontal, 12)
+            .viewerPadding(.horizontal, 12)
             .help(favorite.location.url.path)
           }
         }
       }
-      .frame(height: min(145, CGFloat(store.favoriteFolders.count) * 29))
+      .viewerFrame(height: min(145, CGFloat(store.favoriteFolders.count) * 29))
     }
-    .font(.system(size: 12))
-    .padding(.vertical, 8)
+    .font(ViewerUIMetrics.font(size: 12))
+    .viewerPadding(.vertical, 8)
   }
 
   private func folderRow(_ row: FolderTreeRow) -> some View {
@@ -165,10 +165,10 @@ struct FolderTreeView: View {
       HStack(spacing: 2) {
         Button { Task { await tree.toggleExpansion(row.url) } } label: {
           Image(systemName: row.isExpanded ? "chevron.down" : "chevron.right")
-            .font(.system(size: 9, weight: .semibold))
+            .font(ViewerUIMetrics.font(size: 9, weight: .semibold))
             .foregroundStyle(.secondary)
             .opacity(row.canExpand ? 1 : 0)
-            .frame(width: 20, height: 28)
+            .viewerFrame(width: 20, height: 28)
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
@@ -180,12 +180,12 @@ struct FolderTreeView: View {
             Image(systemName: selectedFolder == row.url ? "folder.fill" : "folder")
               .foregroundStyle(selectedFolder == row.url ? ViewerTheme.accent : Color.secondary)
             Text(verbatim: folderName(row.url))
-              .font(.system(size: 12, weight: selectedFolder == row.url ? .semibold : .regular))
+              .font(ViewerUIMetrics.font(size: 12, weight: selectedFolder == row.url ? .semibold : .regular))
               .lineLimit(1).truncationMode(.middle)
             Spacer(minLength: 4)
             if row.isLoading { ProgressView().controlSize(.mini) }
           }
-          .frame(height: 28)
+          .viewerFrame(height: 28)
           .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
@@ -194,8 +194,8 @@ struct FolderTreeView: View {
         .accessibilityHint("이 폴더 열기")
         .accessibilityAddTraits(selectedFolder == row.url ? .isSelected : [])
       }
-      .padding(.leading, CGFloat(row.depth) * 14 + 6)
-      .padding(.trailing, 10)
+      .viewerPadding(.leading, CGFloat(row.depth) * 14 + 6)
+      .viewerPadding(.trailing, 10)
       .background(selectedFolder == row.url ? ViewerTheme.selection : Color.clear,
         in: RoundedRectangle(cornerRadius: 5))
       .help(row.url.path)
@@ -206,16 +206,16 @@ struct FolderTreeView: View {
       }
       if let error = row.errorMessage {
         Label("폴더를 읽을 수 없습니다.", systemImage: "exclamationmark.circle")
-          .font(.system(size: 10)).foregroundStyle(.secondary)
-          .padding(.leading, CGFloat(row.depth) * 14 + 28)
+          .font(ViewerUIMetrics.font(size: 10)).foregroundStyle(.secondary)
+          .viewerPadding(.leading, CGFloat(row.depth) * 14 + 28)
           .help(error)
       } else if row.isExpanded && !row.isLoading && !row.canExpand {
         Text("하위 폴더 없음")
-          .font(.system(size: 10)).foregroundStyle(.tertiary)
-          .padding(.leading, CGFloat(row.depth) * 14 + 28)
+          .font(ViewerUIMetrics.font(size: 10)).foregroundStyle(.tertiary)
+          .viewerPadding(.leading, CGFloat(row.depth) * 14 + 28)
       }
     }
-    .padding(.horizontal, 4)
+    .viewerPadding(.horizontal, 4)
   }
 
   private func folderName(_ url: URL) -> String {

@@ -6,7 +6,7 @@
 "unsupported" = "Este formato o códec no es compatible.";
 "unreadableData" = "No se pueden leer los datos del archivo. Puede estar dañado o tener un formato no compatible.";
 "noVideoTrack" = "Este archivo no contiene una pista de vídeo que se pueda mostrar.";
-"protected" = "No se pueden reproducir vídeos protegidos.";
+"protected" = "No se pueden reproducir archivos protegidos.";
 "invalidVideo" = "La duración o la información de visualización del vídeo no es válida.";
 "rendering" = "No se pudo mostrar la imagen. Intenta abrirla de nuevo.";
 "resource" = "Un dispositivo o la memoria necesaria para mostrar el contenido no está disponible. Inténtalo de nuevo en unos instantes.";

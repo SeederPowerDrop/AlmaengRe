@@ -29,7 +29,15 @@ struct LocalizedControlsLayoutTests {
     let store = AppStore(defaults: defaults, monitorsSystemResources: false,
       photoMarkDatabaseURL: temporary.appendingPathComponent("marks.sqlite"))
     let shortcuts = ShortcutStore(defaults: defaults)
-    defer { store.folderComparison.cancelLoads() }
+    let singleStore = AppStore(defaults: defaults, monitorsSystemResources: false,
+      photoMarkDatabaseURL: temporary.appendingPathComponent("single-marks.sqlite"))
+    singleStore.presentationMode = .viewer
+    singleStore.imagesPerPage = 1
+    singleStore.photoMapPreview.focus(on: temporary.appendingPathComponent("synthetic-map-photo.jpg"))
+    defer {
+      store.folderComparison.cancelLoads()
+      singleStore.folderComparison.cancelLoads()
+    }
     store.presentationMode = .viewer
     store.imagesPerPage = width == 660 ? 3 : 10
     let video = ImageAsset(url: temporary.appendingPathComponent("synthetic-video.mp4"),
@@ -39,7 +47,7 @@ struct LocalizedControlsLayoutTests {
     playback.toggleSelection(video.id)
 
     let gutter: CGFloat = 40
-    let height: CGFloat = 1_400
+    let height: CGFloat = 1_650
     let root = VStack(spacing: 20) {
       HStack(spacing: 12) {
         ViewerPageNavigationHint(store: store, shortcuts: shortcuts)
@@ -50,6 +58,16 @@ struct LocalizedControlsLayoutTests {
       LibraryControlsView(store: store).padding(.horizontal, 16)
       VideoGridPlaybackControls(state: playback, visibleAssets: [video])
       BottomControlBar(store: store, shortcuts: shortcuts)
+      BottomControlBar(store: singleStore, shortcuts: shortcuts)
+      // A map photo preview is narrower than the main viewport. Its full menu
+      // title must remain discoverable at the real card width in every language.
+      HStack {
+        PhotoMapPreviewControls(preview: singleStore.photoMapPreview)
+          .frame(width: 252)
+          .padding(12)
+          .background(ViewerTheme.panel)
+        Spacer(minLength: 0)
+      }
       PhotoMarkPanel(store: store, marks: store.photoMarks, shortcuts: shortcuts)
       FolderComparisonView(store: store, shortcuts: shortcuts, comparison: store.folderComparison)
         .frame(height: 700)
@@ -59,6 +77,7 @@ struct LocalizedControlsLayoutTests {
     .background(ViewerTheme.chrome)
     .padding(.horizontal, gutter)
     .background(Color(red: 1, green: 0, blue: 1))
+    .font(ViewerUIMetrics.font(.body))
     .environment(\.locale, Locale(identifier: language))
     .environment(\.layoutDirection, language == "ar" ? .rightToLeft : .leftToRight)
     .environment(\.colorScheme, isDark ? .dark : .light)

@@ -38,7 +38,7 @@ struct BatchRenameView: View {
     VStack(alignment: .leading, spacing: 14) {
       HStack {
         Label("이름 일괄 변경", systemImage: "character.cursor.ibeam")
-          .font(.title2.bold())
+          .font(ViewerUIMetrics.font(.title2).bold())
         Spacer()
         Text(L10n.format("%d개 선택", urls.count)).foregroundStyle(.secondary)
       }
@@ -102,7 +102,7 @@ struct BatchRenameView: View {
                 Picker("자릿수", selection: $options.numberDigits) {
                   ForEach(1...20, id: \.self) { count in Text("\(count)").tag(count) }
                 }
-                .frame(width: 110)
+                .viewerFrame(width: 110)
                 numberField("구분자", text: $options.numberSeparator)
               }
             }
@@ -118,7 +118,7 @@ struct BatchRenameView: View {
               Text("직접 지정").tag(BatchRenameOptions.ExtensionMode.custom)
             }.labelsHidden()
             if options.extensionMode == .custom {
-              TextField("예: jpeg", text: $options.customExtension).frame(width: 130)
+              TextField("예: jpeg", text: $options.customExtension).viewerFrame(width: 130)
             }
           }
         }
@@ -127,19 +127,19 @@ struct BatchRenameView: View {
       .disabled(store.isRenaming)
 
       Text(BatchRenameL10n.format("numbering.help", BatchActionsL10n.text("export.menu")))
-        .font(.caption).foregroundStyle(.secondary)
+        .font(ViewerUIMetrics.font(.caption)).foregroundStyle(.secondary)
       if options.nameMode == .classification {
         Text(BatchRenameL10n.text("classification.help"))
-          .font(.caption).foregroundStyle(.secondary)
+          .font(ViewerUIMetrics.font(.caption)).foregroundStyle(.secondary)
       }
       if !numbersAreValid {
         Text("시작 번호는 0 이상, 증가 값은 1 이상, 자릿수는 1~20으로 입력해 주세요.")
-          .font(.caption).foregroundStyle(.red)
+          .font(ViewerUIMetrics.font(.caption)).foregroundStyle(.red)
       }
 
       Divider()
       HStack {
-        Text("변경 미리보기").font(.headline)
+        Text("변경 미리보기").font(ViewerUIMetrics.font(.headline))
         Spacer()
         if let plan, previewRequest == currentRequest {
           Text(L10n.format("%d개 변경", plan.changedCount))
@@ -150,11 +150,11 @@ struct BatchRenameView: View {
       }
       if let plan {
         if let issue = plan.issue {
-          Text(issue).font(.caption).foregroundStyle(.red)
+          Text(issue).font(ViewerUIMetrics.font(.caption)).foregroundStyle(.red)
         }
         if options.nameMode == .classification, plan.issue == nil {
           Text(BatchRenameL10n.format("classification.scope", plan.entries.count, urls.count))
-            .font(.caption).foregroundStyle(.secondary)
+            .font(ViewerUIMetrics.font(.caption)).foregroundStyle(.secondary)
         }
         Table(plan.entries) {
           TableColumn("현재 이름") { entry in
@@ -167,7 +167,7 @@ struct BatchRenameView: View {
                 .foregroundStyle(entry.issue == nil ? Color.primary : Color.red)
                 .lineLimit(1).truncationMode(.middle)
               if let issue = entry.issue {
-                Text(issue).font(.caption).foregroundStyle(.red).lineLimit(2)
+                Text(issue).font(ViewerUIMetrics.font(.caption)).foregroundStyle(.red).lineLimit(2)
               }
             }
             .help(entry.issue ?? entry.destinationURL.path)
@@ -175,11 +175,11 @@ struct BatchRenameView: View {
         }
         .opacity(previewRequest == currentRequest ? 1 : 0.45)
       } else {
-        Color.clear.frame(maxWidth: .infinity, maxHeight: .infinity)
+        Color.clear.viewerFrame(maxWidth: .infinity, maxHeight: .infinity)
       }
       HStack {
         Text("적용하면 선택한 원본 파일의 이름이 변경됩니다.")
-          .font(.caption).foregroundStyle(.secondary)
+          .font(ViewerUIMetrics.font(.caption)).foregroundStyle(.secondary)
         Spacer()
         Button("취소", role: .cancel) { dismiss() }
           .keyboardShortcut(.cancelAction).disabled(store.isRenaming)
@@ -193,8 +193,8 @@ struct BatchRenameView: View {
         .disabled(store.isRenaming || !numbersAreValid || previewRequest != currentRequest || plan?.canApply != true)
       }
     }
-    .padding(20)
-    .frame(width: 780, height: 710)
+    .viewerPadding(20)
+    .viewerFrame(width: 780, height: 710)
     .interactiveDismissDisabled(store.isRenaming)
     .onChange(of: startNumberText) { _, text in
       if let number = Int(text) { options.startNumber = number }
@@ -235,9 +235,9 @@ struct BatchRenameView: View {
 
   private func numberField(_ title: LocalizedStringKey, text: Binding<String>) -> some View {
     VStack(alignment: .leading, spacing: 3) {
-      Text(title).font(.caption)
+      Text(title).font(ViewerUIMetrics.font(.caption))
       TextField(title, text: text)
-        .frame(width: 90)
+        .viewerFrame(width: 90)
     }
   }
 

@@ -12,3 +12,9 @@
 "quick.export" = "形式・サイズ";
 "quick.watermark" = "透かし";
 "quick.share" = "共有";
+
+"classify.menu" = "選択したファイルを分類…";
+"quick.classify" = "分類";
+
+"selection.focused" = "キーボードの移動位置";
+"selection.overviewHelp" = "⌘クリック：選択・解除\n⌘矢印キー：移動先の項目を選択・解除\n⇧クリック / ⇧矢印キー：範囲選択\n⌘⇧クリック / ⌘⇧矢印キー：現在の選択に範囲を追加";

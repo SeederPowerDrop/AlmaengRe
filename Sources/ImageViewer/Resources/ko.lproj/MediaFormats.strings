@@ -1,5 +1,5 @@
 "kind.title" = "파일 종류";
-"kind.all" = "사진과 영상";
+"kind.all" = "사진 · 영상 · 음성";
 "kind.images" = "이미지만";
 "kind.videos" = "영상만";
 "extensions.folder" = "이 폴더의 확장자";
@@ -12,11 +12,17 @@
 "picker.kind.all" = "전체";
 "picker.kind.images" = "이미지";
 "picker.kind.videos" = "영상";
-"picker.search" = "확장자 검색 (예: jpg, mp4)";
+"picker.search" = "확장자 검색: jpg, mp4, mp3";
 "picker.clearSearch" = "검색 지우기";
 "picker.source" = "확장자 범위";
 "picker.folder" = "이 폴더";
-"picker.supported" = "모든 지원 형식";
+"picker.supported" = "모든 확장자";
 "picker.empty" = "일치하는 확장자가 없습니다.";
 "picker.hint" = "여러 개를 선택할 수 있습니다.";
 "picker.done" = "완료";
+
+"kind.audio" = "음성만";
+
+"picker.kind.audio" = "음성";
+
+"extensions.audio" = "음성 확장자";

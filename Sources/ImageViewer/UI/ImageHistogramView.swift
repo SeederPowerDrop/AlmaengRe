@@ -27,7 +27,7 @@ struct ImageHistogramView: View {
     VStack(alignment: .leading, spacing: 9) {
       HStack {
         Label(L10n.text("히스토그램"), systemImage: "chart.bar.xaxis")
-          .font(.system(size: 12, weight: .semibold))
+          .font(ViewerUIMetrics.font(size: 12, weight: .semibold))
         Spacer()
       }
       Picker(L10n.text("히스토그램 채널"), selection: $channel) {
@@ -45,7 +45,7 @@ struct ImageHistogramView: View {
             Spacer(minLength: 4)
             Text(L10n.format("완전 흰색 %.1f%%", histogram.whitePercentage))
           }
-          .font(.system(size: 10, design: .monospaced))
+          .font(ViewerUIMetrics.font(size: 10, design: .monospaced))
           .foregroundStyle(.secondary)
           .help(L10n.text("미리보기에서 RGB가 모두 0 또는 255인 픽셀의 투명도 가중 비율입니다."))
         } else {
@@ -63,7 +63,7 @@ struct ImageHistogramView: View {
       }
 
       Text(L10n.text("SDR 미리보기 · 투명도 가중"))
-        .font(.system(size: 10))
+        .font(ViewerUIMetrics.font(size: 10))
         .foregroundStyle(.secondary)
         .help(L10n.text("보정된 sRGB 미리보기의 256구간 분포입니다. 휘도는 0.2126R + 0.7152G + 0.0722B로 계산하며 HDR 원본 분포와 다를 수 있습니다."))
     }
@@ -95,7 +95,7 @@ struct ImageHistogramView: View {
 
   private func placeholder(_ text: String) -> some View {
     Text(text)
-      .font(.system(size: 11))
+      .font(ViewerUIMetrics.font(size: 11))
       .foregroundStyle(.secondary)
       .frame(maxWidth: .infinity)
       .frame(height: 112)

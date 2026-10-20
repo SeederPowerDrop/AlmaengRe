@@ -1,6 +1,11 @@
-"grid.playAll" = "表示中の動画をすべて再生";
-"grid.playSelected" = "選択した動画を再生 (%d)";
-"grid.pauseAll" = "動画をすべて一時停止";
-"grid.select" = "再生する動画を選択";
-"grid.play" = "動画を再生";
-"grid.pause" = "動画を一時停止";
+"grid.playAll" = "すべて再生";
+"grid.playNextPages" = "次のページも再生";
+"grid.pageAutoplayOn" = "ページの自動再生オン";
+"grid.playAll.help" = "現在の画面の動画と音声をすべて再生します。もう一度押すと、ページを切り替えたときも自動で再生します。写真はそのまま表示されます。";
+"grid.playNextPages.help" = "ページを切り替えると、新しい画面の動画と音声も自動で再生します。画面から外れた項目は停止し、写真はそのまま表示されます。";
+"grid.pageAutoplayOn.help" = "ページを切り替えるたびに動画と音声を自動再生します。もう一度押すと現在の画面だけを再生します。「すべて一時停止」を押すと自動再生もオフになります。";
+"grid.playSelected" = "選択項目を再生（%d）";
+"grid.pauseAll" = "すべて一時停止";
+"grid.select" = "再生する項目を選択";
+"grid.play" = "再生";
+"grid.pause" = "一時停止";
