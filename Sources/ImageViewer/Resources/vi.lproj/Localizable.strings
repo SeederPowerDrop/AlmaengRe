@@ -440,7 +440,7 @@
 "전자 앨범 반복 재생" = "Lặp lại album ảnh";
 "%d초 간격" = "Mỗi %d giây";
 "전자 앨범 재생 완료" = "Đã phát xong album ảnh";
-"1~300초. 사진은 표시된 뒤 시간을 세고, 영상은 끝까지 재생한 뒤 넘어갑니다. 집중 보기를 나가거나 다른 앱으로 전환하면 일시정지합니다." = "1–300 giây, tính từ khi ảnh xuất hiện. Video phát đến hết trước khi chuyển tiếp. Thoát chế độ tập trung hoặc chuyển ứng dụng sẽ tạm dừng phát.";
+"1~300초. 사진은 표시된 뒤 시간을 세고, 영상은 끝까지 재생한 뒤 넘어갑니다. 집중 보기를 나가거나 다른 앱으로 전환하면 일시정지합니다." = "1–300 giây. Ảnh bắt đầu tính giờ sau khi hiển thị; video và âm thanh phát hết rồi mới chuyển tiếp. Thoát chế độ Tập trung hoặc chuyển ứng dụng sẽ tạm dừng.";
 "탐색 → 전자 앨범 또는 집중 보기 하단의 재생 버튼으로 시작합니다. 사진 두 장 이상 또는 영상이 있으면 재생할 수 있습니다." = "Bắt đầu từ Điều hướng → Album ảnh hoặc nút phát trong chế độ tập trung. Cần ít nhất hai ảnh hoặc một video.";
 "현재 이미지를 바탕화면으로 설정" = "Đặt ảnh hiện tại làm hình nền";
 "사진 전체 맞춤" = "Hiển thị toàn bộ ảnh";
@@ -817,7 +817,7 @@
 "aiPreview.basicUsage" = "Trong Phóng to bằng AI, điều chỉnh thu phóng và kéo đường phân chia để so sánh ảnh gốc với kết quả, rồi lưu bản sao PNG.";
 
 /* Branded home and recent-photo history */
-"home.subtitle" = "Ngắm những khoảnh khắc trong ảnh và video, rồi sắp xếp theo cách của bạn.";
+"home.subtitle" = "Khám phá ảnh, video và âm thanh, rồi sắp xếp theo cách của bạn.";
 "home.recent" = "Thư mục đã mở gần đây";
 "home.recent.detail" = "Tối đa 3 thư mục đã mở gần đây, mới nhất trước, mỗi thư mục có tối đa 4 hình ảnh bạn vừa xem hoặc thao tác.";
 "home.empty" = "Chưa có thư mục gần đây";
@@ -853,10 +853,23 @@
 "appearance.dark" = "Tối";
 "appearance.help" = "Chế độ Hệ thống tự động theo cài đặt giao diện của macOS.";
 
-"%@ 영상을 재생할 수 없어 전자 앨범을 일시정지했습니다." = "Album ảnh đã tạm dừng vì không thể phát video %@.";
+"%@ 영상을 재생할 수 없어 전자 앨범을 일시정지했습니다." = "Album ảnh đã tạm dừng vì không thể phát tệp %@.";
 "‘%@’은 비어 있는 파일입니다(0바이트). 원본이나 백업에서 다시 복사해 주세요." = "‘%@’ là tệp trống (0 byte). Hãy sao chép lại từ bản gốc hoặc bản sao lưu.";
 
 "지원 이미지 모두 연결" = "Liên kết mọi định dạng ảnh được hỗ trợ";
-"Finder에서 이미지를 열면 한 장 보기로 시작합니다. 이미지·영상·폴더를 창에 끌어 놓아도 열 수 있습니다." = "Ảnh mở từ Finder sẽ hiển thị ở chế độ xem từng ảnh. Bạn cũng có thể kéo ảnh, video và thư mục vào cửa sổ để mở.";
+"Finder에서 이미지를 열면 한 장 보기로 시작합니다. 이미지·영상·폴더를 창에 끌어 놓아도 열 수 있습니다." = "Ảnh mở từ Finder sẽ bắt đầu ở chế độ xem một ảnh. Bạn cũng có thể kéo ảnh, video, âm thanh và thư mục vào cửa sổ để mở.";
 "연결 확인이 필요한 형식: %@" = "Định dạng cần kiểm tra liên kết: %@";
-"이미지·영상·폴더를 여기에 놓으세요." = "Thả ảnh, video hoặc thư mục vào đây.";
+"이미지·영상·폴더를 여기에 놓으세요." = "Thả ảnh, video, âm thanh hoặc thư mục vào đây.";
+
+/* Image cache management */
+"cache.title" = "Bộ nhớ đệm ảnh";
+"cache.memoryUsage" = "RAM ảnh tái sử dụng: %@";
+"cache.diskUsage" = "Ảnh thu nhỏ trên ổ đĩa: %@";
+"cache.usageUnknown" = "Không xác định";
+"cache.diskUsageUnavailableHelp" = "Kiểm tra quyền truy cập thư mục bộ nhớ đệm, rồi làm mới dung lượng.";
+"cache.calculating" = "Đang tính dung lượng…";
+"cache.refresh" = "Cập nhật dung lượng";
+"cache.clearing" = "Đang xóa bộ nhớ đệm…";
+"cache.usageHelp" = "RAM là dung lượng ước tính của bitmap tái sử dụng, khác với tổng bộ nhớ của ứng dụng. Dung lượng ổ đĩa là tổng các tệp ảnh thu nhỏ đã lưu.";
+"cache.clearHelp" = "Việc xóa giữ nguyên bản gốc, cài đặt và chế độ xem hiện tại. Bản xem trước được tạo lại khi cần.";
+"cache.clearFailed" = "Không thể xóa một số tệp bộ nhớ đệm trên ổ đĩa. Hãy kiểm tra dung lượng còn lại rồi thử lại.";

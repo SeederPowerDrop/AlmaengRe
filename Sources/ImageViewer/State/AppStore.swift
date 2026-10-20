@@ -26,6 +26,12 @@ final class AppStore: ObservableObject {
   private var recentActivityGeneration = UUID()
   @Published private(set) var assets: [ImageAsset] = [] {
     didSet {
+      assetURLIndex = nil
+      cachedSelectedAssets = nil
+      if assets.count != oldValue.count
+        || !assets.lazy.map(\.id).elementsEqual(oldValue.lazy.map(\.id)) {
+        assetOrderRevision = UUID()
+      }
       libraryRevision = UUID()
       overviewSelectionSession = nil
       pauseSlideshow()
@@ -33,13 +39,32 @@ final class AppStore: ObservableObject {
     }
   }
   /// The complete source collection stays intact when search or format filters change.
-  @Published private(set) var allAssets: [ImageAsset] = []
-  @Published private(set) var mapAssets: [ImageAsset] = []
+  @Published private(set) var allAssets: [ImageAsset] = [] {
+    didSet { cachedLibraryExtensions = nil }
+  }
+  @Published private(set) var mapAssets: [ImageAsset] = [] {
+    didSet { mapAssetURLIndex = nil }
+  }
+  // Scalar indices avoid scanning the full library for every visible cell's
+  // context menu. Invalidate with the collection, including metadata updates.
+  private var assetURLIndex: AssetURLIndex?
+  private var mapAssetURLIndex: AssetURLIndex?
+  private var cachedSelectedAssets: [ImageAsset]?
+  private var cachedLibraryExtensions: [String]?
+
+  var availableFileExtensions: [String] {
+    if let cachedLibraryExtensions { return cachedLibraryExtensions }
+    let extensions = Set(allAssets.map(\.fileExtension)).sorted()
+    cachedLibraryExtensions = extensions
+    return extensions
+  }
   @Published private(set) var mapCollectionID = UUID()
   // View changes destroy the native map; retain its camera for this collection.
   // Panning deliberately does not publish a change to every image view.
   private(set) var photoMapViewport = PhotoMapViewportState()
+  let photoMapPreview = PhotoMapPreviewState()
   var overviewColumnCount = 1
+  var overviewIsRightToLeft = false
   var viewerColumnCount = 1
   var viewerViewportSize: CGSize?
   @Published private(set) var isIndexingLocations = false
@@ -57,6 +82,7 @@ final class AppStore: ObservableObject {
     didSet {
       guard oldValue != showsVideos else { return }
       preferences.set(showsVideos, forKey: Self.showsVideosDefaultsKey)
+      if !showsVideos { videoGridPlayback.reset() }
       applyLibraryQuery()
     }
   }
@@ -91,12 +117,17 @@ final class AppStore: ObservableObject {
     }
   }
   @Published private(set) var libraryRevision = UUID()
+  /// Metadata-only updates still invalidate library work, but do not move the
+  /// user's viewport or recreate measurements for the same ordered photo IDs.
+  @Published private(set) var assetOrderRevision = UUID()
   @Published private(set) var currentFolderURL: URL?
   @Published var showsFolderTree: Bool {
     didSet { preferences.set(showsFolderTree, forKey: Self.folderTreeDefaultsKey) }
   }
   @Published private(set) var overviewSelectionSession: OverviewSelectionSession?
-  @Published private(set) var selectedURLs: Set<URL> = []
+  @Published private(set) var selectedURLs: Set<URL> = [] {
+    didSet { cachedSelectedAssets = nil }
+  }
   @Published var batchSheet: BatchSheet? {
     didSet {
       if batchSheet != nil { pauseSlideshow() }
@@ -133,7 +164,9 @@ final class AppStore: ObservableObject {
         cancelLibraryLoad()
       }
       if oldValue == .folderComparison { folderComparison.cancelLoads() }
+      if oldValue == .map { photoMapPreview.clearSelection() }
       if presentationMode != .viewer {
+        videoGridPlayback.reset()
         frameLayout.isEditing = false
         pauseSlideshow()
         slideshowPresentedAsset = nil
@@ -150,6 +183,7 @@ final class AppStore: ObservableObject {
   @Published var imagesPerPage = 1 {
     didSet {
       if oldValue != imagesPerPage { frameLayout.isEditing = false }
+      if oldValue != imagesPerPage && imagesPerPage == 1 { videoGridPlayback.reset() }
       normalizeMultiImageScale()
     }
   }
@@ -250,6 +284,11 @@ final class AppStore: ObservableObject {
     didSet { if alert != nil { pauseSlideshow() } }
   }
   @Published var statusMessage: String?
+  @Published private(set) var imageCacheUsage: ImageCacheUsage?
+  @Published private(set) var isRefreshingImageCacheUsage = false
+  @Published private(set) var isPurgingImageCaches = false
+  @Published private(set) var imageCachePurgeFailed = false
+  private var cacheUsageRequestID = UUID()
 
   let aiUpscaling: AIUpscalingStore
   let pipeline: ImagePipeline
@@ -291,6 +330,7 @@ final class AppStore: ObservableObject {
   private var loadingModeUpdateTask: Task<Void, Never>?
   private var resourceMonitor: ImageSystemResourceMonitor?
   private var viewerPrefetchPixels = 512
+  private var viewerPrefetchDirection: ViewerPrefetchPlan.Direction = .forward
   private var libraryAccess: [ImageLibraryAccess] = []
   private var slideshowTask: Task<Void, Never>?
   private var slideshowGeneration = UUID()
@@ -311,7 +351,8 @@ final class AppStore: ObservableObject {
   private static let slideshowRepeatsDefaultsKey = "ImageViewer.SlideshowRepeats.v1"
 
   init(defaults: UserDefaults = .standard, monitorsSystemResources: Bool = true,
-    photoMarkDatabaseURL: URL? = nil, batchFileOperator: BatchFileOperator = BatchFileOperator()) {
+    photoMarkDatabaseURL: URL? = nil, batchFileOperator: BatchFileOperator = BatchFileOperator(),
+    thumbnailDiskCache: ThumbnailDiskCache? = .shared) {
     self.batchFileOperator = batchFileOperator
     preferences = defaults
     frameLayout = ViewerFrameLayoutStore(defaults: defaults)
@@ -323,7 +364,6 @@ final class AppStore: ObservableObject {
     sessionPersistence = ViewerSessionPersistence(defaults: defaults)
     favoriteFolders = sessionPersistence.loadFavorites()
     showsFolderTree = defaults.bool(forKey: Self.folderTreeDefaultsKey)
-    folderComparison = FolderComparisonStore(defaults: defaults, photoMarks: photoMarks)
     managesSlideshowDisplaySleep = monitorsSystemResources
     slideshowInterval = SlideshowSettings.normalized(
       defaults.object(forKey: Self.slideshowIntervalDefaultsKey) == nil
@@ -347,11 +387,13 @@ final class AppStore: ObservableObject {
       .flatMap(ImageInterpolationMode.init(rawValue:)) ?? .smooth
     let loadingGovernor = ImageResourceGovernor(mode: loadingMode)
     self.loadingGovernor = loadingGovernor
+    folderComparison = FolderComparisonStore(defaults: defaults, photoMarks: photoMarks,
+      loadingGovernor: loadingGovernor)
     let pipeline = ImagePipeline(governor: loadingGovernor)
     self.pipeline = pipeline
     aiUpscaling = AIUpscalingStore(pipeline: pipeline)
     wallpaperService = WallpaperService(pipeline: pipeline)
-    thumbnailPipeline = ThumbnailPipeline(governor: loadingGovernor)
+    thumbnailPipeline = ThumbnailPipeline(governor: loadingGovernor, diskCache: thumbnailDiskCache)
     exporter = ImageExporter(pipeline: pipeline)
     batchExporter = BatchImageExporter(pipeline: pipeline)
 
@@ -436,7 +478,22 @@ final class AppStore: ObservableObject {
   }
 
   var selectedAssets: [ImageAsset] {
-    assets.filter { selectedURLs.contains($0.url) }
+    if let cachedSelectedAssets { return cachedSelectedAssets }
+    let selected = visibleAssets(matching: selectedURLs)
+    cachedSelectedAssets = selected
+    return selected
+  }
+
+  func visibleAsset(at url: URL) -> ImageAsset? {
+    if assetURLIndex == nil { assetURLIndex = AssetURLIndex(assets) }
+    guard let index = assetURLIndex?.firstIndex(for: url) else { return nil }
+    return assets[index]
+  }
+
+  private func visibleAssets(matching urls: Set<URL>) -> [ImageAsset] {
+    guard !urls.isEmpty else { return [] }
+    if assetURLIndex == nil { assetURLIndex = AssetURLIndex(assets) }
+    return assetURLIndex!.assets(matching: urls, in: assets)
   }
 
   /// Freeze map targets separately from the thumbnail selection, including pins
@@ -445,7 +502,9 @@ final class AppStore: ObservableObject {
 
   func batchTargets(urls: Set<URL>?) -> [ImageAsset] {
     guard let urls else { return selectedAssets }
-    return mapAssets.filter { urls.contains($0.url) }
+    guard !urls.isEmpty else { return [] }
+    if mapAssetURLIndex == nil { mapAssetURLIndex = AssetURLIndex(mapAssets) }
+    return mapAssetURLIndex!.assets(matching: urls, in: mapAssets)
   }
 
   var isBatchBusy: Bool { isRenaming || isBatchExporting || isManagingFiles }
@@ -462,7 +521,7 @@ final class AppStore: ObservableObject {
   }
 
   func canExportBatchImages(urls: Set<URL>? = nil) -> Bool {
-    canStartBatchOperation(urls: urls) && !batchTargets(urls: urls).contains(where: \.isVideo)
+    canStartBatchOperation(urls: urls) && !batchTargets(urls: urls).contains(where: \.isPlaybackMedia)
   }
 
   var canOpenMotionMedia: Bool {
@@ -473,7 +532,7 @@ final class AppStore: ObservableObject {
   }
 
   func presentMotionMedia(_ asset: ImageAsset? = nil) {
-    guard let target = asset ?? currentAsset,
+    guard let target = asset ?? currentAsset, !target.isAudio,
       canStartBatchOperation(urls: [target.url]) else { return }
     motionMediaAsset = target
   }
@@ -482,7 +541,11 @@ final class AppStore: ObservableObject {
     guard motionMediaAsset == nil, assets.indices.contains(index), batchSheet == nil, !isBatchBusy,
       overviewSelectionSession == nil else { return }
     if modifiers.contains(.shift) {
-      let anchor = selectionAnchor ?? currentIndex
+      let candidate = selectionAnchor ?? currentIndex
+      let anchor = assets.indices.contains(candidate) ? candidate : index
+      // Keep the first endpoint fixed even after Clear Selection. Otherwise
+      // each Shift-click moves the anchor to the previous range's far end.
+      selectionAnchor = anchor
       let range = Set(assets[min(anchor, index)...max(anchor, index)].map(\.url))
       selectedURLs = modifiers.contains(.command) ? selectedURLs.union(range) : range
     } else if modifiers.contains(.command) {
@@ -495,6 +558,19 @@ final class AppStore: ObservableObject {
       selectionAnchor = index
     }
     focus(index: index)
+  }
+
+  /// Tap recognition may finish after a sort, filter, or folder change. Resolve
+  /// the card's identity again instead of selecting whatever now has its index.
+  @discardableResult
+  func selectOverviewCard(url: URL, modifiers: NSEvent.ModifierFlags) -> Bool {
+    guard presentationMode == .overview, !showsHome, !isLoading, !isFiltering,
+      motionMediaAsset == nil, batchSheet == nil, !isBatchBusy,
+      overviewSelectionSession == nil else { return false }
+    if assetURLIndex == nil { assetURLIndex = AssetURLIndex(assets) }
+    guard let index = assetURLIndex?.firstIndex(for: url) else { return false }
+    selectForBatch(index: index, modifiers: modifiers)
+    return true
   }
 
   /// A context menu can outlive the list order that opened it. Resolve its file
@@ -597,14 +673,14 @@ final class AppStore: ObservableObject {
     guard !showsHome, !isVideoFullScreenPresented,
       presentationMode == .viewer || presentationMode == .overview,
       canStartBatchOperation(urls: urls) else { return false }
-    let targets = urls.map { urls in assets.filter { urls.contains($0.url) } } ?? selectedAssets
+    let targets = urls.map { visibleAssets(matching: $0) } ?? selectedAssets
     guard !targets.isEmpty, urls == nil || targets.count == urls?.count else { return false }
     return operation == .copy || !targets.contains(where: \.isReadOnly)
   }
 
   func presentFileOperation(_ operation: BatchFileOperation, urls: Set<URL>? = nil) {
     guard canPerformFileOperation(operation, urls: urls) else { return }
-    let targets = urls.map { urls in assets.filter { urls.contains($0.url) } } ?? selectedAssets
+    let targets = urls.map { visibleAssets(matching: $0) } ?? selectedAssets
     fileOperationRequest = BatchFileOperationRequest(operation: operation, assets: targets)
     explicitBatchAssets = targets
     batchSheet = .fileOperation
@@ -868,7 +944,7 @@ final class AppStore: ObservableObject {
   }
 
   var canPan: Bool {
-    !isEditingViewerFrames && currentAsset?.isVideo != true
+    !isEditingViewerFrames && currentAsset?.isPlaybackMedia != true
       && (zoom > 1 || baseScaleMode.canOverflowAtBaseScale)
   }
 
@@ -910,7 +986,7 @@ final class AppStore: ObservableObject {
   }
 
   var canEditCurrentEmbeddedMetadata: Bool {
-    currentAsset?.isVideo != true && currentAsset?.isReadOnly != true && ImageMetadataWriter.supportsEmbeddedMetadata(
+    currentAsset?.isPlaybackMedia != true && currentAsset?.isReadOnly != true && ImageMetadataWriter.supportsEmbeddedMetadata(
       typeIdentifier: currentMetadata?.typeIdentifier
     )
   }
@@ -939,7 +1015,7 @@ final class AppStore: ObservableObject {
       folderComparison.open(urls: urls, for: folderComparison.activeSide)
       return
     }
-    if urls.contains(where: MediaFormatRegistry.isVideo) { showsVideos = true }
+    if urls.contains(where: MediaFormatRegistry.isPlaybackMedia) { showsVideos = true }
     load(urls: urls)
   }
 
@@ -971,7 +1047,7 @@ final class AppStore: ObservableObject {
     // A folder drop requests its images and videos even if an earlier collection
     // hid videos. Resolve directory identity instead of relying on a trailing slash.
     if urls.contains(where: { url in
-      MediaFormatRegistry.isVideo(url)
+      MediaFormatRegistry.isPlaybackMedia(url)
         || (try? url.resolvingSymlinksInPath().resourceValues(forKeys: [.isDirectoryKey]).isDirectory) == true
     }) { showsVideos = true }
     load(urls: urls)
@@ -992,6 +1068,9 @@ final class AppStore: ObservableObject {
   }
 
   private func focus(index: Int) {
+    if index != currentIndex {
+      viewerPrefetchDirection = index > currentIndex ? .forward : .backward
+    }
     queryFocusID = assets[index].sessionID
     let visibleRange = pageStartIndex..<min(assets.count, pageStartIndex + imagesPerPage)
     if !visibleRange.contains(index) {
@@ -1028,6 +1107,9 @@ final class AppStore: ObservableObject {
     } else {
       target = min(max(0, target), lastFullPageStart)
     }
+    if target != pageStartIndex || target != currentIndex {
+      viewerPrefetchDirection = direction > 0 ? .forward : .backward
+    }
     pageStartIndex = target
     currentIndex = target
     queryFocusID = assets[target].sessionID
@@ -1062,11 +1144,13 @@ final class AppStore: ObservableObject {
   }
 
   func zoomIn() {
+    if presentationMode == .map { photoMapPreview.zoomIn(); return }
     if presentationMode == .folderComparison { folderComparison.updateZoom(1.25); return }
     zoom = min(16, zoom * 1.25)
   }
 
   func zoomOut() {
+    if presentationMode == .map { photoMapPreview.zoomOut(); return }
     if presentationMode == .folderComparison { folderComparison.updateZoom(1 / 1.25); return }
     zoom = max(0.1, zoom / 1.25)
     if zoom <= 1, !baseScaleMode.canOverflowAtBaseScale { panOffset = .zero }
@@ -1081,6 +1165,7 @@ final class AppStore: ObservableObject {
   }
 
   func setScaleMode(_ mode: BaseScaleMode) {
+    if presentationMode == .map { photoMapPreview.setScaleMode(mode); return }
     if presentationMode == .folderComparison { folderComparison.setScale(mode); return }
     baseScaleMode = isMultiImageViewer ? .fit : mode
     resetViewport()
@@ -1088,6 +1173,7 @@ final class AppStore: ObservableObject {
 
   /// Bring the image back to the center without discarding its chosen scale.
   func centerImage() {
+    if presentationMode == .map { photoMapPreview.centerImage(); return }
     if presentationMode == .folderComparison { folderComparison.centerImage(); return }
     panOffset = .zero
   }
@@ -1099,6 +1185,10 @@ final class AppStore: ObservableObject {
   }
 
   func updateZoom(with magnification: CGFloat) {
+    if presentationMode == .map {
+      photoMapPreview.setZoom(photoMapPreview.zoom * magnification)
+      return
+    }
     zoom = min(16, max(0.1, zoom * magnification))
     if zoom <= 1, !baseScaleMode.canOverflowAtBaseScale { panOffset = .zero }
   }
@@ -1126,7 +1216,7 @@ final class AppStore: ObservableObject {
   }
 
   func updateAdjustments(_ change: (inout ImageAdjustments) -> Void) {
-    guard let currentAsset, !currentAsset.isVideo else { return }
+    guard let currentAsset, !currentAsset.isPlaybackMedia else { return }
     pauseSlideshow()
     var value = currentAdjustments
     change(&value)
@@ -1141,7 +1231,7 @@ final class AppStore: ObservableObject {
   func applyCrop(_ crop: NormalizedCrop?, to asset: ImageAsset,
     relativeTo reference: ImageAdjustments? = nil)
   {
-    guard !asset.isVideo, assets.contains(asset) else { return }
+    guard !asset.isPlaybackMedia, assets.contains(asset) else { return }
     pauseSlideshow()
     var value = adjustments(for: asset)
     var adjustedCrop = crop?.normalized
@@ -1183,7 +1273,7 @@ final class AppStore: ObservableObject {
   }
 
   func resetAdjustments() {
-    guard let currentAsset, !currentAsset.isVideo, !currentAdjustments.isIdentity else { return }
+    guard let currentAsset, !currentAsset.isPlaybackMedia, !currentAdjustments.isIdentity else { return }
     adjustments[currentAsset.url] = .identity
     makeRecentWorkRecorder()([currentAsset])
     objectWillChange.send()
@@ -1233,7 +1323,7 @@ final class AppStore: ObservableObject {
     _ draft: ImageMetadataEditDraft,
     replacing originalDraft: ImageMetadataEditDraft
   ) async throws {
-    guard let asset = currentAsset, !asset.isVideo else {
+    guard let asset = currentAsset, !asset.isPlaybackMedia else {
       throw ImageMetadataWriterError.noCurrentImage
     }
 
@@ -1321,9 +1411,14 @@ final class AppStore: ObservableObject {
       let direction = shortcuts.viewerSelectionDirection(matching: event) {
       return navigateViewerSelection(direction)
     }
+    let selectionKey = event.charactersIgnoringModifiers?.lowercased()
+    // Ignore Caps Lock/Fn state and fall back to the physical key for Korean
+    // input, while retaining the typed key on alternate Latin layouts.
+    let hasASCIIKey = selectionKey?.count == 1 && selectionKey?.unicodeScalars.first?.isASCII == true
+    let isSelectAllKey = selectionKey == "a" || (event.keyCode == 0 && !hasASCIIKey)
     if presentationMode != .folderComparison,
-      event.modifierFlags.intersection(.deviceIndependentFlagsMask) == .command,
-      event.charactersIgnoringModifiers?.lowercased() == "a" {
+      event.modifierFlags.intersection([.command, .option, .control, .shift]) == .command,
+      isSelectAllKey {
       selectAllAssets()
       return true
     }
@@ -1332,6 +1427,7 @@ final class AppStore: ObservableObject {
       perform(action)
       return true
     }
+    if handleOverviewSelectionKeyDown(event) { return true }
     if event.modifierFlags.intersection([.command, .option, .control, .shift]).isEmpty,
       event.keyCode == 125 || event.keyCode == 126,
       navigateGridRow(event.keyCode == 126 ? -1 : 1) {
@@ -1354,6 +1450,17 @@ final class AppStore: ObservableObject {
   var isFullScreenVideoReadyToMark: Bool {
     videoFullScreenController?.playback.document != nil
       && videoFullScreenController?.playback.player.currentItem?.status == .readyToPlay
+  }
+
+  /// An explicit open from the overview starts the chosen recording audibly.
+  func openAudioForPlayback(_ asset: ImageAsset) {
+    guard allowsVideoPlayback, asset.isAudio, assets.contains(where: { $0.id == asset.id }) else { return }
+    pauseSlideshow()
+    select(asset: asset)
+    setImagesPerPage(1)
+    presentationMode = .viewer
+    videoGridPlayback.updateVisibleAssets(visibleAssets)
+    if videoGridPlayback.audioID != asset.id { videoGridPlayback.toggleSound(asset.id) }
   }
 
   func openVideoFullScreen(_ asset: ImageAsset, at seconds: Double = 0, isMuted: Bool = false) {
@@ -1398,7 +1505,7 @@ final class AppStore: ObservableObject {
 
   var canStartSlideshow: Bool {
     !showsHome && motionMediaAsset == nil && presentationMode != .folderComparison
-      && (assets.count > 1 || assets.first?.isVideo == true)
+      && (assets.count > 1 || assets.first?.isPlaybackMedia == true)
       && !isLoading && !isFiltering && !isVideoFullScreenPresented && batchSheet == nil && !isBatchBusy && !isExporting
       && !isSavingMetadata && wallpaperRequest == nil && !isSettingWallpaper && alert == nil
       && !isPhotoMarking && !showsPhotoMarkEditor && !showsPhotoMarkTrackingReport && !showsAIUpscaling
@@ -1407,6 +1514,7 @@ final class AppStore: ObservableObject {
   func toggleSlideshow() {
     if isSlideshowPlaying { pauseSlideshow(); return }
     guard canStartSlideshow else { return }
+    videoGridPlayback.pauseAll()
     setComparisonLayout(.off)
     presentationMode = .viewer
     isFocusMode = true
@@ -1420,8 +1528,10 @@ final class AppStore: ObservableObject {
   }
 
   func pauseSlideshow() {
-    isSlideshowPlaying = false
-    slideshowVideoPlaybackID = nil
+    // Slider bindings pause on every value; an already paused slideshow needs
+    // no extra whole-window @Published invalidations for identical state.
+    if isSlideshowPlaying { isSlideshowPlaying = false }
+    if slideshowVideoPlaybackID != nil { slideshowVideoPlaybackID = nil }
     invalidateSlideshowCountdown()
     slideshowActivity = nil
   }
@@ -1436,7 +1546,7 @@ final class AppStore: ObservableObject {
 
   /// Videos advance only at their actual end, never when a poster is displayed.
   func slideshowVideoFinished(_ asset: ImageAsset, playbackID: UUID) {
-    guard isSlideshowPlaying, currentAsset == asset, asset.isVideo,
+    guard isSlideshowPlaying, currentAsset == asset, asset.isPlaybackMedia,
       slideshowVideoPlaybackID == playbackID else { return }
     slideshowPresentedAsset = asset
     advanceSlideshow()
@@ -1450,7 +1560,7 @@ final class AppStore: ObservableObject {
   }
 
   private func updateSlideshowVideoPlayback() {
-    slideshowVideoPlaybackID = isSlideshowPlaying && currentAsset?.isVideo == true ? UUID() : nil
+    slideshowVideoPlaybackID = isSlideshowPlaying && currentAsset?.isPlaybackMedia == true ? UUID() : nil
   }
 
   private func invalidateSlideshowCountdown() {
@@ -1462,7 +1572,7 @@ final class AppStore: ObservableObject {
   private func restartSlideshowCountdown() {
     invalidateSlideshowCountdown()
     guard isSlideshowPlaying, isFocusMode, presentationMode == .viewer,
-      let asset = currentAsset, !asset.isVideo, slideshowPresentedAsset == asset else { return }
+      let asset = currentAsset, !asset.isPlaybackMedia, slideshowPresentedAsset == asset else { return }
     let generation = slideshowGeneration
     let interval = slideshowInterval
     slideshowTask = Task { [weak self] in
@@ -1498,7 +1608,7 @@ final class AppStore: ObservableObject {
   // MARK: - 바탕화면
 
   var canSetWallpaper: Bool {
-    presentationMode != .folderComparison && currentAsset != nil && currentAsset?.isVideo != true && motionMediaAsset == nil && !isLoading && !isBatchBusy && !isExporting && !isSavingMetadata
+    presentationMode != .folderComparison && currentAsset != nil && currentAsset?.isPlaybackMedia != true && motionMediaAsset == nil && !isLoading && !isBatchBusy && !isExporting && !isSavingMetadata
       && batchSheet == nil && wallpaperRequest == nil && !isSettingWallpaper
   }
 
@@ -1583,7 +1693,7 @@ final class AppStore: ObservableObject {
   }
 
   var canCompareCurrentCollectionByMarks: Bool {
-    allAssets.contains(where: { !$0.isVideo }) && !sourceLocations.isEmpty && !isLoading && !isFiltering
+    allAssets.contains(where: { !$0.isPlaybackMedia }) && !sourceLocations.isEmpty && !isLoading && !isFiltering
       && !isBatchBusy && batchSheet == nil && !isSavingMetadata && !isExporting
       && photoMarks.isReady && !folderComparison.first.isLocked && !folderComparison.second.isLocked
       && !folderComparison.isEditingNames && folderComparison.editingPhotoMarkSide == nil
@@ -1649,7 +1759,7 @@ final class AppStore: ObservableObject {
   }
 
   func exportCurrentImage() {
-    guard let asset = currentAsset, !asset.isVideo, motionMediaAsset == nil, batchSheet == nil, !isBatchBusy, !isSavingMetadata,
+    guard let asset = currentAsset, !asset.isPlaybackMedia, motionMediaAsset == nil, batchSheet == nil, !isBatchBusy, !isSavingMetadata,
       !isExporting else { return }
     pauseSlideshow()
 
@@ -1695,10 +1805,41 @@ final class AppStore: ObservableObject {
     recordWork([asset])
   }
 
-  func purgeCaches() {
-    Task {
-      await pipeline.purgeCaches()
-      await thumbnailPipeline.purgeCache()
+  func refreshImageCacheUsage() async {
+    guard !isPurgingImageCaches else { return }
+    let requestID = UUID()
+    cacheUsageRequestID = requestID
+    isRefreshingImageCacheUsage = true
+    defer {
+      if cacheUsageRequestID == requestID { isRefreshingImageCacheUsage = false }
+    }
+    async let rendered = pipeline.cacheSnapshot()
+    async let thumbnails = thumbnailPipeline.cacheSnapshot()
+    async let disk = thumbnailPipeline.diskCacheSnapshot()
+    let usage = await ImageCacheUsage(rendered: rendered, thumbnails: thumbnails, disk: disk)
+    guard !Task.isCancelled, cacheUsageRequestID == requestID, !isPurgingImageCaches else { return }
+    imageCacheUsage = usage
+  }
+
+  /// Explicit Settings action clears disk too. Display preference changes only
+  /// invalidate RAM, preserving reusable SDR thumbnail files between HDR modes.
+  @discardableResult
+  func purgeCaches(clearDisk: Bool = true) -> Task<Void, Never>? {
+    guard !isPurgingImageCaches else { return nil }
+    isPurgingImageCaches = true
+    cacheUsageRequestID = UUID()
+    isRefreshingImageCacheUsage = false
+    if clearDisk { imageCachePurgeFailed = false }
+    return Task {
+      async let rendered: Void = pipeline.purgeCaches()
+      if clearDisk {
+        imageCachePurgeFailed = !(await thumbnailPipeline.purgeAllCaches())
+      } else {
+        await thumbnailPipeline.purgeCache()
+      }
+      await rendered
+      isPurgingImageCaches = false
+      await refreshImageCacheUsage()
     }
   }
 
@@ -1724,11 +1865,15 @@ final class AppStore: ObservableObject {
     retryUnavailable: Bool = true, includesVideos: Bool? = nil) async throws
     -> (all: [ImageAsset], visible: [ImageAsset], map: [ImageAsset])
   {
+    let queryStarted = QueryPerformanceTrace.start()
+    defer { QueryPerformanceTrace.record("store.query_assets_total", since: queryStarted, count: source.count) }
     // Match the load/restore loop's visibility snapshot across every suspension.
     let showsQueryVideos = includesVideos ?? showsVideos
     await photoMarks.waitUntilReady()
     try Task.checkCancellation()
+    let reconcileStarted = QueryPerformanceTrace.start()
     await photoMarks.reconcileAssets(source, retryUnavailable: retryUnavailable)?.wait()
+    QueryPerformanceTrace.record("store.reconcile_marks", since: reconcileStarted, count: source.count)
     try Task.checkCancellation()
     var enriched = source
     let scanToken = UUID()
@@ -1743,14 +1888,19 @@ final class AppStore: ObservableObject {
       if locationScanGeneration == scanToken { isIndexingLocations = false }
     }
     if needsLocations {
-      enriched = try await library.enrichLocations(source) { [weak self] count in
+      let locationStarted = QueryPerformanceTrace.start()
+      enriched = try await library.enrichLocations(source, governor: loadingGovernor) { [weak self] count in
         await self?.updateLocationProgress(count, generation: scanToken)
       }
+      QueryPerformanceTrace.record("store.enrich_locations", since: locationStarted, count: source.count)
     }
     try Task.checkCancellation()
-    var inputs = showsQueryVideos ? enriched : enriched.filter { !$0.isVideo }
+    var inputs = showsQueryVideos ? enriched : enriched.filter { !$0.isPlaybackMedia }
     if options.requiresMetadata {
+      let metadataStarted = QueryPerformanceTrace.start()
       inputs = try await library.enrichQueryMetadata(inputs, for: options, governor: loadingGovernor)
+      QueryPerformanceTrace.record("store.enrich_metadata", since: metadataStarted, count: inputs.count)
+      let mergeStarted = QueryPerformanceTrace.start()
       let metadataByURL = Dictionary(inputs.map { ($0.url, $0) },
         uniquingKeysWith: { _, newest in newest })
       enriched = enriched.map { asset in
@@ -1761,6 +1911,7 @@ final class AppStore: ObservableObject {
         }
         return updated
       }
+      QueryPerformanceTrace.record("store.merge_metadata", since: mergeStarted, count: source.count, synchronous: true)
     }
     let preparedInputs = inputs
     let work = Task.detached(priority: .userInitiated) {
@@ -1825,20 +1976,48 @@ final class AppStore: ObservableObject {
         try await Task.sleep(for: .milliseconds(100))
         let result = try await queryAssets(source, options: options, retryUnavailable: false)
         guard !Task.isCancelled, queryGeneration == generation else { return }
-        let oldID = currentAsset?.sessionID
+        let commitStarted = QueryPerformanceTrace.start()
+        let oldAsset = currentAsset
+        let oldID = oldAsset?.sessionID
         let previousFocus = queryFocusID ?? oldID
         let previousSelected = selectedURLs
-        allAssets = result.all
-        mapAssets = result.map
-        assets = result.visible
-        currentIndex = assets.firstIndex { $0.sessionID == previousFocus } ?? 0
-        pageStartIndex = currentIndex
-        selectedURLs = previousSelected.intersection(Set(assets.map(\.url)))
-        selectionAnchor = assets.firstIndex { selectedURLs.contains($0.url) }
+        // A filename/order change usually leaves the source collection intact.
+        // Avoid notifying every grid/map/sidebar subscriber about identical
+        // collections and clearing their derived indices and selection caches.
+        if allAssets != result.all { allAssets = result.all }
+        if mapAssets != result.map { mapAssets = result.map }
+        if assets != result.visible { assets = result.visible }
+        else {
+          // Preserve a query commit's interaction contract even when its result
+          // is unchanged; only the expensive collection notification is omitted.
+          if overviewSelectionSession != nil { overviewSelectionSession = nil }
+          pauseSlideshow()
+          slideshowPresentedAsset = nil
+        }
+        QueryPerformanceTrace.record("store.publish_collections", since: commitStarted, count: result.visible.count, synchronous: true)
+        let selectionStarted = QueryPerformanceTrace.start()
+        let nextIndex = assets.firstIndex { $0.sessionID == previousFocus } ?? 0
+        if currentIndex != nextIndex { currentIndex = nextIndex }
+        if pageStartIndex != nextIndex { pageStartIndex = nextIndex }
+        let retainedSelection = previousSelected.intersection(Set(assets.map(\.url)))
+        if selectedURLs != retainedSelection { selectedURLs = retainedSelection }
+        let nextAnchor = assets.firstIndex { retainedSelection.contains($0.url) }
+        if selectionAnchor != nextAnchor { selectionAnchor = nextAnchor }
         if currentAsset?.sessionID != oldID { resetViewport() }
         isFiltering = false
-        refreshMetadata()
+        QueryPerformanceTrace.record("store.restore_selection", since: selectionStarted, count: assets.count, synchronous: true)
+        let metadataRefreshStarted = QueryPerformanceTrace.start()
+        if oldAsset?.url != currentAsset?.url
+          || oldAsset?.byteCount != currentAsset?.byteCount
+          || oldAsset?.modificationDate != currentAsset?.modificationDate
+          || oldAsset?.sortMetadataVersion != currentAsset?.sortMetadataVersion {
+          refreshMetadata()
+        }
+        QueryPerformanceTrace.record("store.refresh_metadata_schedule", since: metadataRefreshStarted, synchronous: true)
+        let prefetchStarted = QueryPerformanceTrace.start()
         prefetchAroundCurrentPosition()
+        QueryPerformanceTrace.record("store.prefetch_schedule", since: prefetchStarted, synchronous: true)
+        QueryPerformanceTrace.record("store.commit_total", since: commitStarted, count: assets.count, synchronous: true)
       } catch is CancellationError {
       } catch {
         guard !Task.isCancelled, queryGeneration == generation else { return }
@@ -1988,7 +2167,7 @@ final class AppStore: ObservableObject {
       sourceLocations = [SessionLocation(url: url)]
       currentFolderURL = opened.folderURL?.standardizedFileURL
       allAssets = opened.assets
-      let visible = opened.assets.filter { showsVideos || !$0.isVideo }
+      let visible = opened.assets.filter { showsVideos || !$0.isPlaybackMedia }
       mapAssets = visible
       applyLoadedAssets(visible, focusing: target?.url)
       showsHome = false
@@ -2018,7 +2197,7 @@ final class AppStore: ObservableObject {
       try Task.checkCancellation()
       guard loadGeneration == generation else { return }
       guard let target = opened.assets.first(where: { photo.matches($0, sourceURL: url) }),
-        !target.isVideo else { throw CocoaError(.fileNoSuchFile) }
+        !target.isPlaybackMedia else { throw CocoaError(.fileNoSuchFile) }
 
       // Opening a recent photo is an explicit selection, independent of an old
       // search, map area, classification filter or active comparison pane.
@@ -2032,7 +2211,7 @@ final class AppStore: ObservableObject {
       sourceLocations = [SessionLocation(url: url)]
       currentFolderURL = opened.folderURL?.standardizedFileURL
       allAssets = opened.assets
-      let visible = opened.assets.filter { showsVideos || !$0.isVideo }
+      let visible = opened.assets.filter { showsVideos || !$0.isPlaybackMedia }
       mapAssets = visible
       applyLoadedAssets(visible, focusing: target.url)
       showsHome = false
@@ -2050,7 +2229,7 @@ final class AppStore: ObservableObject {
   /// Called only when a viewer/comparison tile has actually displayed pixels.
   /// Browsing thumbnails, prefetches and late teardown callbacks are not visits.
   func recordRecentlyViewed(_ asset: ImageAsset) {
-    guard !showsHome, !asset.isVideo else { return }
+    guard !showsHome, !asset.isPlaybackMedia else { return }
     let isPresented = presentationMode == .viewer ? visibleAssets.contains(where: { $0.id == asset.id })
       : presentationMode == .folderComparison
         && [folderComparison.first.currentAsset, folderComparison.second.currentAsset]
@@ -2077,7 +2256,7 @@ final class AppStore: ObservableObject {
       var seen: Set<String> = []
       var folderCounts: [String: Int] = [:]
       var retained: [ImageAsset] = []
-      for asset in workedAssets where !asset.isVideo {
+      for asset in workedAssets where !asset.isPlaybackMedia {
         guard available.contains(PresentedAssetVersion(asset)),
           seen.insert(asset.sessionID).inserted,
           previousDates[asset.sessionID].map({ $0 <= date }) ?? true else { continue }
@@ -2344,6 +2523,7 @@ final class AppStore: ObservableObject {
   }
 
   private func load(urls: [URL], fromTree: Bool = false) {
+    videoGridPlayback.reset()
     invalidateSessionRestore()
     cancelQuery()
     cancelLibraryLoad()
@@ -2393,9 +2573,11 @@ final class AppStore: ObservableObject {
   private func applyLoadedAssets(_ newAssets: [ImageAsset], focusing selectedURL: URL?, mode: PresentationMode = .viewer) {
     // Replace the object so late teardown of an old map cannot overwrite the new collection.
     photoMapViewport = PhotoMapViewportState()
+    photoMapPreview.clearSelection()
     mapCollectionID = UUID()
     metadataTask?.cancel()
     prefetchTask?.cancel()
+    viewerPrefetchDirection = .forward
     assets = newAssets
     let focusedIndex =
       selectedURL.flatMap { selected in
@@ -2448,15 +2630,9 @@ final class AppStore: ObservableObject {
     prefetchTask?.cancel()
     prefetchTask = nil
     guard presentationMode == .viewer, !assets.isEmpty, !isLoading else { return }
-    let pageStart = min(assets.count, max(0, pageStartIndex))
-    let pageCount = min(10, max(1, imagesPerPage))
-    let visibleEnd = min(assets.count, pageStart + pageCount)
-    let nextEnd = min(assets.count, visibleEnd + pageCount)
-    let nextAssets = Array(assets[visibleEnd..<nextEnd])
-    let previousCount = min(2, 10 - nextAssets.count)
-    let previousStart = max(0, pageStart - previousCount)
-    // 다음 페이지를 먼저 준비하고, 여유가 있을 때만 직전 이미지도 준비합니다.
-    let nearbyAssets = nextAssets + Array(assets[previousStart..<pageStart].reversed())
+    let plan = ViewerPrefetchPlan(assetCount: assets.count, pageStartIndex: pageStartIndex,
+      imagesPerPage: imagesPerPage, direction: viewerPrefetchDirection)
+    let nearbyAssets = plan.indices.map { assets[$0] }
     guard !nearbyAssets.isEmpty else { return }
     let pixels = viewerPrefetchPixels
 

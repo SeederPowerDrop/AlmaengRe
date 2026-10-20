@@ -126,7 +126,8 @@ enum PhotoMapThumbnailRepresentatives {
       loader?.invalidate()
       self.pipeline = pipeline
       let loader = PhotoMapThumbnailLoader { asset in
-        try await pipeline.thumbnail(for: asset, maxPixelSize: 128, priority: .visible)
+        try await pipeline.thumbnail(for: asset, maxPixelSize: 128, priority: .visible,
+          waitsForStableVisibility: true)
       }
       loader.onImageChange = { [weak self] in self?.needsDisplay = true }
       self.loader = loader

@@ -129,11 +129,56 @@ struct PhotoMarkFilter: Codable, Equatable, Sendable {
   var slots: Set<PhotoMarkSlot> = []
   var matchesAll = false
   var unmarkedOnly = false
+  var excludedSlots: Set<PhotoMarkSlot> = []
 
-  var isActive: Bool { unmarkedOnly || !slots.isEmpty }
+  init(slots: Set<PhotoMarkSlot> = [], matchesAll: Bool = false,
+    unmarkedOnly: Bool = false, excludedSlots: Set<PhotoMarkSlot> = []) {
+    self.slots = slots
+    self.matchesAll = matchesAll
+    self.unmarkedOnly = unmarkedOnly
+    self.excludedSlots = excludedSlots
+  }
+
+  // Existing comparison sessions predate exclusions. Keep those conditions
+  // intact, rather than dropping the complete saved session during decoding.
+  private enum CodingKeys: String, CodingKey { case slots, matchesAll, unmarkedOnly, excludedSlots }
+
+  init(from decoder: Decoder) throws {
+    let container = try decoder.container(keyedBy: CodingKeys.self)
+    slots = try container.decodeIfPresent(Set<PhotoMarkSlot>.self, forKey: .slots) ?? []
+    matchesAll = try container.decodeIfPresent(Bool.self, forKey: .matchesAll) ?? false
+    unmarkedOnly = try container.decodeIfPresent(Bool.self, forKey: .unmarkedOnly) ?? false
+    excludedSlots = try container.decodeIfPresent(Set<PhotoMarkSlot>.self, forKey: .excludedSlots) ?? []
+  }
+
+  var conditionCount: Int { slots.union(excludedSlots).count }
+  var isActive: Bool { unmarkedOnly || conditionCount > 0 }
+
+  mutating func setIncluded(_ slot: PhotoMarkSlot, enabled: Bool) {
+    if enabled {
+      slots.insert(slot)
+      excludedSlots.remove(slot)
+      unmarkedOnly = false
+    } else { slots.remove(slot) }
+  }
+
+  mutating func setExcluded(_ slot: PhotoMarkSlot, enabled: Bool) {
+    if enabled {
+      excludedSlots.insert(slot)
+      slots.remove(slot)
+      unmarkedOnly = false
+    } else { excludedSlots.remove(slot) }
+  }
+
+  mutating func setUnmarkedOnly(_ enabled: Bool) {
+    unmarkedOnly = enabled
+    if enabled { slots = []; excludedSlots = [] }
+  }
 
   func matches(_ marks: Set<PhotoMarkSlot>) -> Bool {
     if unmarkedOnly { return marks.isEmpty }
+    // A single excluded mark rejects a file, regardless of the include mode.
+    guard excludedSlots.isDisjoint(with: marks) else { return false }
     guard !slots.isEmpty else { return true }
     return matchesAll ? slots.isSubset(of: marks) : !slots.isDisjoint(with: marks)
   }

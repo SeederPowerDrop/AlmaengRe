@@ -6,7 +6,7 @@
 "unsupported" = "Ce format ou codec n’est pas pris en charge.";
 "unreadableData" = "Impossible de lire les données du fichier. Il est peut-être endommagé ou dans un format non pris en charge.";
 "noVideoTrack" = "Ce fichier ne contient aucune piste vidéo à afficher.";
-"protected" = "Les vidéos protégées ne peuvent pas être lues.";
+"protected" = "Les fichiers protégés ne peuvent pas être lus.";
 "invalidVideo" = "La durée ou les informations d’affichage de la vidéo ne sont pas valides.";
 "rendering" = "Impossible d’afficher l’image. Essayez de la rouvrir.";
 "resource" = "Un appareil ou la mémoire nécessaire à l’affichage est indisponible. Réessayez dans un instant.";

@@ -1,7 +1,7 @@
 "items.count" = "%d Objekte";
-"open.message" = "Wähle Bilder, unterstützte Videos, Ordner oder ZIP-Archive.";
-"showVideos" = "Videos anzeigen";
-"showVideos.help" = "Zeigt Fotos und Videos in Ordnern zusammen an. Standardmäßig aktiviert; deine Auswahl wird gespeichert. GIFs bleiben unabhängig davon sichtbar.";
+"open.message" = "Wähle Bilder, Videos, Audio, Ordner oder ZIP-Dateien.";
+"showVideos" = "Video & Audio";
+"showVideos.help" = "Zeigt Fotos, Videos und Audio in Ordnern zusammen an. Standardmäßig aktiviert; deine Auswahl wird gespeichert. GIFs bleiben unabhängig davon sichtbar.";
 "editor.open" = "Einzelbilder und Clips…";
 "editor.title" = "Einzelbilder und Clips";
 "video.unavailable" = "Video kann nicht abgespielt werden";
@@ -48,19 +48,19 @@
 "saved" = "Gesichert: %@ · %@";
 "cancelled" = "Abgebrochen. Die unvollständige Ausgabe wurde entfernt.";
 "basicUsage" = "Nutze Einzelbilder und Clips für ein Video oder GIF, um Einzelbilder anzusehen, PNGs zu extrahieren, Clips zu speichern oder die Größe zu reduzieren.";
-"hiddenVideos" = "Videos sind ausgeblendet. Aktiviere „Videos anzeigen“, um sie einzubeziehen.";
-"supported" = "Video: MP4, MOV und andere von macOS decodierbare Formate. Die Unterstützung hängt vom Container und seinen Codecs ab. Es müssen keine externen Codecs installiert werden.";
+"hiddenVideos" = "Videos und Audio sind ausgeblendet. Aktiviere „Video & Audio“, um sie anzuzeigen.";
+"supported" = "Video und Audio: MP4, MOV, MP3, M4A, WAV und weitere von macOS dekodierbare Dateien. Die Wiedergabe hängt vom Format und den Codecs in der Datei ab. Es werden keine externen Codecs installiert.";
 
-"video.error.sourceUnavailable" = "Auf die Quellvideodatei kann nicht zugegriffen werden.";
+"video.error.sourceUnavailable" = "Auf die Quelldatei kann nicht zugegriffen werden.";
 "video.error.noVideoTrack" = "Diese Datei hat keine lesbare Videospur.";
-"video.error.invalidDuration" = "Die Videodauer kann nicht ermittelt werden.";
+"video.error.invalidDuration" = "Die Spieldauer der Datei konnte nicht ermittelt werden.";
 "video.error.invalidDimensions" = "Die Videoabmessungen können nicht ermittelt werden.";
 "video.error.invalidRange" = "Setze Start und Ende innerhalb der Videodauer. Das Ende muss nach dem Start liegen.";
 "video.error.invalidFrameTime" = "Wähle einen Einzelbildzeitpunkt innerhalb der Videodauer.";
 "video.error.protectedContent" = "Aus geschützten Videos können keine Einzelbilder oder Clips gesichert werden.";
 "video.error.notExportable" = "macOS kann dieses Video nicht exportieren.";
 "video.error.sourceOverwrite" = "Die Quellvideodatei kann nicht überschrieben werden.";
-"video.error.sourceChanged" = "Das Quellvideo wurde während der Verarbeitung geändert. Öffne es erneut.";
+"video.error.sourceChanged" = "Die Quelldatei wurde während des Vorgangs geändert. Öffne sie erneut.";
 "video.error.invalidDestination" = "Wähle einen Zielordner und einen Dateinamen mit der Endung des gewählten Formats.";
 "video.error.destinationExists" = "Eine Datei oder ein Ordner mit demselben Namen ist bereits vorhanden.";
 "video.error.unsupportedPreset" = "Die gewählte Exportqualität ist für dieses Video nicht verfügbar.";
@@ -125,3 +125,17 @@
 
 "study.automaticHint" = "Passende Untertitel werden automatisch aktiviert. Die App-Sprache hat Vorrang; bis zu zwei verschiedene Sprachen werden gleichzeitig angezeigt.";
 "study.fontsLoading" = "Schriften werden geladen…";
+
+"audio.title" = "Audio";
+
+"audio.play" = "Audio abspielen";
+
+"audio.pause" = "Audio pausieren";
+
+"audio.ready" = "Wiedergabe bereit";
+
+"audio.unavailable" = "Audio nicht abspielbar";
+
+"audio.help" = "Verwendet die integrierten Codecs von macOS. Die Wiedergabe hängt vom Format und den Codecs in der Datei ab.";
+
+"audio.manageHint" = "Audiodateien lassen sich abspielen, markieren, umbenennen und verschieben.";

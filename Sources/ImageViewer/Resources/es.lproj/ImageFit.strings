@@ -1,0 +1,16 @@
+/* Image fitting menu and contextual help. */
+"menu.image" = "Ajustar imagen";
+"menu.frame" = "Ajustar marco";
+"menu.help" = "Elige la imagen completa, el ajuste al ancho o al alto, centrar o el tamaño real.";
+"menu.frameHelp" = "Elige ver la imagen completa o centrarla dentro de cada marco.";
+"whole.title" = "Ver imagen completa";
+"whole.help" = "Ajusta la imagen para verla completa, conservando sus proporciones.";
+"frame.wholeHelp" = "Ajusta cada imagen completa dentro de su marco, conservando sus proporciones.";
+"width.title" = "Llenar márgenes laterales";
+"width.help" = "Ajusta al ancho sin deformar la imagen. Las partes superior o inferior pueden quedar fuera de la vista.";
+"height.title" = "Llenar márgenes superior/inferior";
+"height.help" = "Ajusta al alto sin deformar la imagen. Los lados izquierdo o derecho pueden quedar fuera de la vista.";
+"center.title" = "Mover al centro";
+"center.help" = "Centra la imagen sin cambiar el nivel de zoom.";
+"actual.title" = "Tamaño real (1:1)";
+"actual.help" = "Muestra un píxel de la imagen por cada píxel de la pantalla.";

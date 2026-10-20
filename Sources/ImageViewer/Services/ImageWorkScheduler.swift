@@ -1,6 +1,8 @@
 import Foundation
 
 enum ImageWorkPriority: Int, Comparable, Sendable {
+  /// Compact overview preparation can continue on an idle machine in the background.
+  case idleThumbnail = -1
   case prefetch
   case visible
   /// A small first bitmap unblocks navigation before metadata or full-size rendering.
@@ -69,6 +71,7 @@ actor ImageWorkScheduler<Key: Hashable & Sendable, Value: Sendable> {
   private var runningSlots: [Int: UUID] = [:]
   private var executionPriority: ImageExecutionPriority = .userInitiated
   private var permitsPrefetch = true
+  private var permitsIdleThumbnails = false
   private var configurationRevision: UInt64 = 0
 
   init(maxConcurrentTasks: Int) {
@@ -84,6 +87,7 @@ actor ImageWorkScheduler<Key: Hashable & Sendable, Value: Sendable> {
   ) async throws -> Value {
     try Task.checkCancellation()
     if priority == .prefetch, !permitsPrefetch { throw CancellationError() }
+    if priority == .idleThumbnail, !permitsIdleThumbnails { throw CancellationError() }
     let waiterID = UUID()
     let cancellation = ImageWorkCancellation()
     let value: Value = try await withTaskCancellationHandler {
@@ -122,14 +126,15 @@ actor ImageWorkScheduler<Key: Hashable & Sendable, Value: Sendable> {
   /// Revision checks also protect against reordered actor hops during fast mode changes.
   func configure(
     concurrencyLimit: Int, executionPriority: ImageExecutionPriority,
-    permitsPrefetch: Bool, revision: UInt64
+    permitsPrefetch: Bool, permitsIdleThumbnails: Bool = false, revision: UInt64
   ) {
     guard revision >= configurationRevision else { return }
     configurationRevision = revision
     self.concurrencyLimit = min(maximumConcurrency, max(1, concurrencyLimit))
     self.executionPriority = executionPriority
     self.permitsPrefetch = permitsPrefetch
-    if !permitsPrefetch {
+    self.permitsIdleThumbnails = permitsIdleThumbnails
+    if !permitsPrefetch || !permitsIdleThumbnails {
       // Shared work promoted by a visible waiter survives speculative cancellation.
       for job in Array(jobs.values) { removeCancelledWaiters(from: job) }
     }
@@ -188,6 +193,7 @@ actor ImageWorkScheduler<Key: Hashable & Sendable, Value: Sendable> {
     } else {
       job.priority = job.waiters.values.map(\.priority).max() ?? .prefetch
       if !permitsPrefetch, job.priority == .prefetch { abandon(job) }
+      if !permitsIdleThumbnails, job.priority == .idleThumbnail { abandon(job) }
     }
   }
 
@@ -229,7 +235,11 @@ actor ImageWorkScheduler<Key: Hashable & Sendable, Value: Sendable> {
       runningSlots[slot] = id
       let operation = job.operation
       let taskPriority: TaskPriority
-      if job.priority == .prefetch {
+      if job.priority == .idleThumbnail {
+        // Explicitly requested folder preparation must make progress under
+        // contention. Queue order, admission and adaptive pacing remain idle work.
+        taskPriority = .utility
+      } else if job.priority == .prefetch {
         taskPriority = .background
       } else {
         switch executionPriority {

@@ -6,6 +6,34 @@ import UniformTypeIdentifiers
 @testable import ImageViewer
 
 struct ImagePipelineLoadingTests {
+  private actor FirstStorageLookupGate {
+    private var count = 0
+    private var blocked: CheckedContinuation<Void, Never>?
+    private var observer: CheckedContinuation<Void, Never>?
+
+    func resolve() async -> ImageStorageKind {
+      count += 1
+      if count == 1 {
+        await withCheckedContinuation { continuation in
+          blocked = continuation
+          observer?.resume()
+          observer = nil
+        }
+      }
+      return .internalSSD
+    }
+
+    func waitUntilBlocked() async {
+      if blocked != nil { return }
+      await withCheckedContinuation { observer = $0 }
+    }
+
+    func release() {
+      blocked?.resume()
+      blocked = nil
+    }
+  }
+
   @Test("Empty RAW files report missing data rather than an unsupported codec")
   func emptyRAWFile() async throws {
     let url = temporaryURL().deletingPathExtension().appendingPathExtension("DNG")
@@ -133,6 +161,43 @@ struct ImagePipelineLoadingTests {
     }
     #expect(frames.count == 10)
     #expect(frames.allSatisfy { $0.image === frames[0].image })
+  }
+
+  @Test("Delayed storage admission shares completed pixels without repopulating purged caches",
+    arguments: [false, true])
+  func delayedAdmissionRechecksCache(purgeWhileWaiting: Bool) async throws {
+    let url = temporaryURL()
+    defer { try? FileManager.default.removeItem(at: url) }
+    try writePNG(url: url, width: 800, height: 400)
+    let gate = FirstStorageLookupGate()
+    let governor = ImageResourceGovernor(mode: .priority,
+      storageResolver: { _ in await gate.resolve() })
+    let pipeline = ImagePipeline(governor: governor)
+    let load: @Sendable () async throws -> RenderedFrame = {
+      try await pipeline.renderFrame(url: url, maxPixelSize: 512,
+        adjustments: .identity, prefersHDR: true)
+    }
+    // The first caller misses the cache but cannot enqueue yet. A second caller
+    // completely finishes; this deterministically reproduces the admission race.
+    let delayed = Task { try await load() }
+    defer { Task { await gate.release() } }
+    await gate.waitUntilBlocked()
+    let completed = try await load()
+    let retained: RenderedFrame
+    if purgeWhileWaiting {
+      await pipeline.purgeCaches()
+      retained = try await load()
+      #expect(retained.image !== completed.image)
+    } else {
+      retained = completed
+    }
+    await gate.release()
+    let resumed = try await delayed.value
+    if purgeWhileWaiting { #expect(resumed.image !== retained.image) }
+    else { #expect(resumed.image === retained.image) }
+    #expect(await pipeline.cacheSnapshot().entryCount == 1)
+    let again = try await load()
+    #expect(again.image === retained.image)
   }
 
   @Test("A canceled request can be retried and a purge prevents cache reuse")

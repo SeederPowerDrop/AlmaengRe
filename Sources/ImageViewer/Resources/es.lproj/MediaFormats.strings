@@ -1,5 +1,5 @@
 "kind.title" = "Tipo de archivo";
-"kind.all" = "Fotos y vídeos";
+"kind.all" = "Fotos, vídeo y audio";
 "kind.images" = "Solo imágenes";
 "kind.videos" = "Solo vídeos";
 "extensions.folder" = "Extensiones de esta carpeta";
@@ -12,11 +12,17 @@
 "picker.kind.all" = "Todos";
 "picker.kind.images" = "Imágenes";
 "picker.kind.videos" = "Vídeos";
-"picker.search" = "Buscar extensiones (p. ej., jpg, mp4)";
+"picker.search" = "Buscar extensión: jpg, mp4, mp3";
 "picker.clearSearch" = "Borrar búsqueda";
 "picker.source" = "Origen de extensiones";
 "picker.folder" = "Esta carpeta";
-"picker.supported" = "Todos los formatos compatibles";
+"picker.supported" = "Todas las extensiones";
 "picker.empty" = "No hay extensiones coincidentes.";
 "picker.hint" = "Puedes seleccionar varios formatos.";
 "picker.done" = "Listo";
+
+"kind.audio" = "Solo audio";
+
+"picker.kind.audio" = "Audio";
+
+"extensions.audio" = "Extensiones de audio";

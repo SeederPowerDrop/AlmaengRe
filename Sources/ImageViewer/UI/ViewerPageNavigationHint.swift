@@ -18,7 +18,7 @@ struct ViewerPageNavigationHint: View {
         Text(L10n.format("%@ · %d장씩 이동", pageKeys, store.imagesPerPage)).fixedSize()
         Text(verbatim: pageKeys).fixedSize()
       }
-      .font(.system(size: 10))
+      .font(ViewerUIMetrics.font(size: 10))
       .foregroundStyle(.secondary)
       .help(help)
       .accessibilityElement(children: .ignore)
@@ -36,8 +36,9 @@ enum ViewerNavigationHintText {
   }
 
   static func selectionKeys(shortcuts: ShortcutStore) -> String {
-    [-1, 1].compactMap { shortcuts.viewerSelectionBinding(direction: $0)?.displayText }
-      .joined(separator: " / ")
+    ViewerSelectionDirection.allCases.compactMap {
+      shortcuts.viewerSelectionBinding(direction: $0)?.displayText
+    }.joined(separator: " / ")
   }
 
   /// Keyboard directions retain their physical order in right-to-left text.

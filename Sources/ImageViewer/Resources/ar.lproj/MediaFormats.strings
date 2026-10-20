@@ -1,5 +1,5 @@
 "kind.title" = "نوع الملف";
-"kind.all" = "الصور والفيديو";
+"kind.all" = "الصور والفيديو والصوت";
 "kind.images" = "الصور فقط";
 "kind.videos" = "الفيديو فقط";
 "extensions.folder" = "الامتدادات في هذا المجلد";
@@ -12,11 +12,17 @@
 "picker.kind.all" = "الكل";
 "picker.kind.images" = "صور";
 "picker.kind.videos" = "فيديو";
-"picker.search" = "ابحث عن امتداد (مثل jpg، mp4)";
+"picker.search" = "بحث عن امتداد: jpg، mp4، mp3";
 "picker.clearSearch" = "مسح البحث";
 "picker.source" = "نطاق الامتدادات";
 "picker.folder" = "هذا المجلد";
-"picker.supported" = "كل التنسيقات المدعومة";
+"picker.supported" = "كل الامتدادات";
 "picker.empty" = "لا توجد امتدادات مطابقة.";
 "picker.hint" = "يمكنك اختيار عدة تنسيقات.";
 "picker.done" = "تم";
+
+"kind.audio" = "الصوت فقط";
+
+"picker.kind.audio" = "الصوت";
+
+"extensions.audio" = "امتدادات الصوت";

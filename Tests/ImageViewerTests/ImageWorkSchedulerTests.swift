@@ -5,6 +5,48 @@ import Testing
 
 @Suite("이미지 로딩 작업 제한·우선순위·취소")
 struct ImageWorkSchedulerTests {
+  @Test("요청한 폴더 준비는 utility로 진행하고 추측 선읽기는 background로 유지한다")
+  func idlePreparationUsesUtilityWhileSpeculativePrefetchStaysBackground() async throws {
+    let scheduler = ImageWorkScheduler<Int, TaskPriority>(maxConcurrentTasks: 1)
+    await scheduler.configure(concurrencyLimit: 1, executionPriority: .userInitiated,
+      permitsPrefetch: true, permitsIdleThumbnails: true, revision: 1)
+    let idlePriority = try await scheduler.value(for: 1, priority: .idleThumbnail) { _ in
+      Task.currentPriority
+    }
+    #expect(idlePriority == .utility)
+    let prefetchPriority = try await scheduler.value(for: 2, priority: .prefetch) { _ in
+      Task.currentPriority
+    }
+    #expect(prefetchPriority == .background)
+    #expect(ImageWorkPriority.idleThumbnail < .prefetch)
+    #expect(ImageWorkPriority.idleThumbnail < .visible)
+    #expect(await scheduler.stateSnapshot().runningCount == 0)
+  }
+
+  @Test("작은 백그라운드 미리보기는 표시 요청 뒤에 실행하고 압박 때 취소한다")
+  func idleThumbnailPriorityAndRevocation() async throws {
+    let scheduler = ImageWorkScheduler<Int, Int>(maxConcurrentTasks: 1)
+    await scheduler.configure(concurrencyLimit: 1, executionPriority: .userInitiated,
+      permitsPrefetch: false, permitsIdleThumbnails: true, revision: 1)
+    let probe = ControlledImageWork()
+    let blocker = request(0, scheduler: scheduler, probe: probe)
+    try await probe.waitForStarts(1)
+    let idle = request(1, priority: .idleThumbnail, scheduler: scheduler, probe: probe)
+    try await waitFor(scheduler, running: 1, queued: 1, waiters: 2)
+    let visible = request(2, scheduler: scheduler, probe: probe)
+    try await waitFor(scheduler, running: 1, queued: 2, waiters: 3)
+    await probe.release(0)
+    #expect(try await blocker.value == 0)
+    try await probe.waitForStarts(2)
+    #expect(await probe.starts.map(\.label) == [0, 2])
+    await scheduler.configure(concurrencyLimit: 1, executionPriority: .utility,
+      permitsPrefetch: false, permitsIdleThumbnails: false, revision: 2)
+    await expectCancellation(idle)
+    await probe.release(2)
+    #expect(try await visible.value == 2)
+    #expect(await probe.starts.map(\.label) == [0, 2])
+  }
+
   @Test("동시 디코딩 수를 제한하고 완료된 작업의 슬롯만 재사용한다")
   func boundsWorkAndReusesOnlyFreeSlots() async throws {
     let scheduler = ImageWorkScheduler<Int, Int>(maxConcurrentTasks: 2)

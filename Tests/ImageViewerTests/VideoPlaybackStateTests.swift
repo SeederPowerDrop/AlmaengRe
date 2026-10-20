@@ -251,6 +251,46 @@ struct VideoPlaybackStateTests {
     #expect(state.player.rate == 0)
   }
 
+  @Test("재생 중 실패 알림은 준비된 항목도 종료하고 이유를 남기며 이전 항목의 오류는 무시한다")
+  func midstreamFailureRemainsVisibleWithoutFailingTheNextItem() async throws {
+    let fixture = try await Fixture.make()
+    defer { fixture.remove() }
+    let state = VideoPlaybackState()
+    state.player.isMuted = true
+    let firstMonitor = Task { await state.monitor(fixture.asset) }
+    defer { firstMonitor.cancel(); state.stop() }
+    try await waitUntil { state.player.currentItem?.status == .readyToPlay }
+    let oldItem = try #require(state.player.currentItem)
+    state.resume()
+    try await waitUntil { state.player.currentTime().seconds > 0.05 }
+
+    // This notification may be the only terminal signal from AVFoundation;
+    // item.status need not change from readyToPlay. Use the real observer path.
+    NotificationCenter.default.post(name: .AVPlayerItemFailedToPlayToEndTime,
+      object: oldItem, userInfo: [AVPlayerItemFailedToPlayToEndTimeErrorKey: AVError(.decoderNotFound)])
+    try await waitUntil { state.errorMessage != nil && state.player.currentItem == nil }
+    await firstMonitor.value
+    #expect(state.errorMessage == MediaLoadFailure.unsupported.message)
+    #expect(state.document == nil && state.player.rate == 0 && !state.isPlaying)
+    #expect(state.completedPlaybackCount == 0)
+
+    let nextMonitor = Task { await state.monitor(fixture.asset) }
+    defer { nextMonitor.cancel() }
+    try await waitUntil { state.player.currentItem?.status == .readyToPlay }
+    let nextItem = try #require(state.player.currentItem)
+    #expect(nextItem !== oldItem && state.errorMessage == nil)
+    NotificationCenter.default.post(name: .AVPlayerItemFailedToPlayToEndTime,
+      object: oldItem, userInfo: [AVPlayerItemFailedToPlayToEndTimeErrorKey: AVError(.decodeFailed)])
+    // Buffering and user-driven cancellation must not turn into a terminal
+    // failure. The new item's real playback confirms all three were ignored.
+    NotificationCenter.default.post(name: .AVPlayerItemPlaybackStalled, object: nextItem)
+    NotificationCenter.default.post(name: .AVPlayerItemFailedToPlayToEndTime,
+      object: nextItem, userInfo: [AVPlayerItemFailedToPlayToEndTimeErrorKey: AVError(.operationCancelled)])
+    state.resume()
+    try await waitUntil { state.player.currentTime().seconds > 0.2 }
+    #expect(state.errorMessage == nil && state.player.currentItem === nextItem)
+  }
+
   private func waitUntil(_ predicate: () -> Bool) async throws {
     let deadline = ContinuousClock.now + .seconds(10)
     while !predicate(), ContinuousClock.now < deadline {

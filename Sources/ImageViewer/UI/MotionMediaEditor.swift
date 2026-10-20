@@ -63,7 +63,7 @@ struct MotionMediaEditor: View {
     VStack(alignment: .leading, spacing: 12) {
       HStack {
         Label(MotionMediaL10n.text("editor.title"), systemImage: "film.stack")
-          .font(.title3.weight(.semibold))
+          .font(ViewerUIMetrics.font(.title3).weight(.semibold))
         Spacer()
         Text(asset.filename).lineLimit(1).truncationMode(.middle).foregroundStyle(.secondary)
       }
@@ -75,9 +75,9 @@ struct MotionMediaEditor: View {
       Divider()
       exportOptions.disabled(!isReady || isWorking)
       Text(MotionMediaL10n.text(asset.isVideo ? "video.exportHint" : "animation.exportHint"))
-        .font(.caption).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
+        .font(ViewerUIMetrics.font(.caption)).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
       if let error = errorMessage ?? playback.errorMessage {
-        Text(error).font(.caption).foregroundStyle(.red)
+        Text(error).font(ViewerUIMetrics.font(.caption)).foregroundStyle(.red)
           .textSelection(.enabled).fixedSize(horizontal: false, vertical: true)
       }
       if isWorking {
@@ -88,7 +88,7 @@ struct MotionMediaEditor: View {
       } else if let outputURL {
         HStack {
           Text(outputSummary ?? outputURL.lastPathComponent)
-            .font(.caption).lineLimit(2).textSelection(.enabled)
+            .font(ViewerUIMetrics.font(.caption)).lineLimit(2).textSelection(.enabled)
           Spacer()
           Button(MotionMediaL10n.text("showInFinder")) {
             NSWorkspace.shared.activateFileViewerSelecting([outputURL])
@@ -110,7 +110,7 @@ struct MotionMediaEditor: View {
           .buttonStyle(.borderedProminent).disabled(!isReady || isWorking || !validRange)
       }
     }
-    .padding(20).frame(width: 840)
+    .viewerPadding(20).viewerFrame(width: 840)
     .frame(minHeight: 670, idealHeight: 730)
     .interactiveDismissDisabled(isWorking)
     .task {
@@ -202,14 +202,14 @@ struct MotionMediaEditor: View {
           in: 0...max(0.001, playback.document?.durationSeconds ?? 0))
           .accessibilityLabel(MotionMediaL10n.text("position"))
         Text(String(format: "%.3f / %.3f s", playback.currentSeconds, playback.document?.durationSeconds ?? 0))
-          .font(.caption.monospacedDigit()).frame(minWidth: 132)
+          .font(ViewerUIMetrics.font(.caption).monospacedDigit()).viewerFrame(minWidth: 132)
       } else {
         Slider(value: Binding(get: { Double(frameIndex) }, set: { animationPlaying = false; frameIndex = Int($0) }),
           in: 0...Double(max(1, (animation?.frameCount ?? 1) - 1)), step: 1)
           .disabled((animation?.frameCount ?? 1) <= 1)
           .accessibilityLabel(MotionMediaL10n.text("position"))
         Text(MotionMediaL10n.format("frame.position", frameIndex + 1, animation?.frameCount ?? 0))
-          .font(.caption.monospacedDigit()).frame(minWidth: 100)
+          .font(ViewerUIMetrics.font(.caption).monospacedDigit()).viewerFrame(minWidth: 100)
       }
     }
   }
@@ -217,7 +217,7 @@ struct MotionMediaEditor: View {
   private var exportOptions: some View {
     VStack(alignment: .leading, spacing: 10) {
       HStack {
-        Text(MotionMediaL10n.text("range.title")).font(.headline)
+        Text(MotionMediaL10n.text("range.title")).font(ViewerUIMetrics.font(.headline))
         Spacer()
         Button(MotionMediaL10n.text("range.startHere")) {
           animationPlaying = false; playback.pause()
@@ -240,17 +240,17 @@ struct MotionMediaEditor: View {
         if asset.isVideo {
           Text(MotionMediaL10n.text("range.startSeconds"))
           TextField("", value: $startSeconds, format: .number.precision(.fractionLength(0...6)))
-            .frame(width: 90).accessibilityLabel(MotionMediaL10n.text("range.startSeconds"))
+            .viewerFrame(width: 90).accessibilityLabel(MotionMediaL10n.text("range.startSeconds"))
           Text(MotionMediaL10n.text("range.endSeconds"))
           TextField("", value: $endSeconds, format: .number.precision(.fractionLength(0...6)))
-            .frame(width: 90).accessibilityLabel(MotionMediaL10n.text("range.endSeconds"))
+            .viewerFrame(width: 90).accessibilityLabel(MotionMediaL10n.text("range.endSeconds"))
         } else {
           Text(MotionMediaL10n.text("range.firstFrame"))
           TextField("", value: $firstFrame, format: .number.grouping(.never))
-            .frame(width: 75).accessibilityLabel(MotionMediaL10n.text("range.firstFrame"))
+            .viewerFrame(width: 75).accessibilityLabel(MotionMediaL10n.text("range.firstFrame"))
           Text(MotionMediaL10n.text("range.lastFrame"))
           TextField("", value: $lastFrame, format: .number.grouping(.never))
-            .frame(width: 75).accessibilityLabel(MotionMediaL10n.text("range.lastFrame"))
+            .viewerFrame(width: 75).accessibilityLabel(MotionMediaL10n.text("range.lastFrame"))
         }
         Spacer()
         Button(MotionMediaL10n.text("compress.preset")) {
@@ -262,26 +262,26 @@ struct MotionMediaEditor: View {
         if asset.isVideo {
           Picker(MotionMediaL10n.text("format"), selection: $videoContainer) {
             ForEach(VideoContainer.allCases) { Text($0.rawValue.uppercased()).tag($0) }
-          }.frame(width: 170)
+          }.viewerFrame(width: 170)
           Picker(MotionMediaL10n.text("quality"), selection: $videoPreset) {
             ForEach(VideoExportPreset.allCases) {
               Text(MotionMediaL10n.text("preset." + $0.rawValue)).tag($0)
             }
-          }.frame(width: 290)
+          }.viewerFrame(width: 290)
         } else {
           Picker(MotionMediaL10n.text("format"), selection: $animationFormat) {
             ForEach(AnimatedImageExportFormat.available) { Text($0.title).tag($0) }
-          }.frame(width: 150)
+          }.viewerFrame(width: 150)
           Picker(MotionMediaL10n.text("size"), selection: $resizeMode) {
             Text(MotionMediaL10n.text("size.original")).tag(0)
             Text(MotionMediaL10n.text("size.longestEdge")).tag(1)
             Text(MotionMediaL10n.text("size.percent")).tag(2)
-          }.frame(width: 210)
+          }.viewerFrame(width: 210)
           if resizeMode == 1 {
-            TextField("px", value: $longestEdge, format: .number.grouping(.never)).frame(width: 70)
+            TextField("px", value: $longestEdge, format: .number.grouping(.never)).viewerFrame(width: 70)
               .accessibilityLabel(MotionMediaL10n.text("size.longestEdge"))
           } else if resizeMode == 2 {
-            TextField("%", value: $percent, format: .number).frame(width: 55)
+            TextField("%", value: $percent, format: .number).viewerFrame(width: 55)
               .accessibilityLabel(MotionMediaL10n.text("size.percent"))
             Text("%")
           }
@@ -290,7 +290,7 @@ struct MotionMediaEditor: View {
             Text(MotionMediaL10n.text("frames.every2")).tag(2)
             Text(MotionMediaL10n.text("frames.every3")).tag(3)
             Text(MotionMediaL10n.text("frames.every4")).tag(4)
-          }.frame(width: 220)
+          }.viewerFrame(width: 220)
         }
         Spacer(minLength: 0)
       }

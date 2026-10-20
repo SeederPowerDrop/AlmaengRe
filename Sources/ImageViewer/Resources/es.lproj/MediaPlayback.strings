@@ -1,6 +1,11 @@
-"grid.playAll" = "Reproducir vídeos visibles";
+"grid.playAll" = "Reproducir todo";
+"grid.playNextPages" = "Reproducir páginas siguientes";
+"grid.pageAutoplayOn" = "Reproducción automática activa";
+"grid.playAll.help" = "Reproduce todos los vídeos y audios de la página actual. Pulsa de nuevo para reproducirlos automáticamente al cambiar de página. Las fotos siguen visibles.";
+"grid.playNextPages.help" = "Reproduce automáticamente los vídeos y audios de cada nueva página al navegar. Los elementos que salen de la pantalla se detienen y las fotos siguen visibles.";
+"grid.pageAutoplayOn.help" = "Los vídeos y audios se reproducen automáticamente al cambiar de página. Pulsa de nuevo para reproducir solo la página actual. Pausar todo también desactiva la reproducción automática.";
 "grid.playSelected" = "Reproducir selección (%d)";
-"grid.pauseAll" = "Pausar todos los vídeos";
-"grid.select" = "Seleccionar vídeo para reproducir";
-"grid.play" = "Reproducir vídeo";
-"grid.pause" = "Pausar vídeo";
+"grid.pauseAll" = "Pausar todo";
+"grid.select" = "Seleccionar para reproducir";
+"grid.play" = "Reproducir";
+"grid.pause" = "Pausar";

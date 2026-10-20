@@ -6,7 +6,7 @@
 "unsupported" = "不支持此格式或编解码器。";
 "unreadableData" = "无法读取文件数据。文件可能已损坏，或格式不受支持。";
 "noVideoTrack" = "此文件没有可显示的视频轨道。";
-"protected" = "无法播放受保护的视频。";
+"protected" = "无法播放受保护的文件。";
 "invalidVideo" = "视频时长或画面信息无效。";
 "rendering" = "无法显示图像。请重新打开。";
 "resource" = "显示所需的设备或内存不可用。请稍后重试。";

@@ -4,7 +4,8 @@ import SwiftUI
 /// Finder의 “다음으로 열기”와 파일 더블클릭을 SwiftUI 화면으로 전달합니다.
 @MainActor
 final class ApplicationDelegate: NSObject, NSApplicationDelegate, ObservableObject {
-  let appearance = AppearanceStore()
+  let appearance = AppearanceStore(defaults: OverviewReleaseBenchmark.isolatedDefaults
+    ?? ManualViewerQAContext.active?.defaults ?? .standard)
   private var pendingOpenURLs: [URL] = []
   private var openHandler: (@MainActor ([URL]) -> Void)?
 

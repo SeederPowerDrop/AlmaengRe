@@ -1,7 +1,7 @@
 "items.count" = "%d項目";
-"open.message" = "画像、対応する動画、フォルダ、またはZIPアーカイブを選択してください。";
-"showVideos" = "動画を表示";
-"showVideos.help" = "フォルダ内の写真と動画を一緒に表示します。初期設定はオンで、選択を保持します。GIFはこの設定に関係なく表示します。";
+"open.message" = "画像、動画、音声、フォルダ、またはZIPを選択してください。";
+"showVideos" = "動画・音声を表示";
+"showVideos.help" = "フォルダ内の写真・動画・音声を一緒に表示します。初期設定はオンで、選択を保持します。GIFはこの設定に関係なく表示します。";
 "editor.open" = "フレーム・区間編集…";
 "editor.title" = "フレームの確認・区間保存";
 "video.unavailable" = "動画を再生できません";
@@ -48,19 +48,19 @@
 "saved" = "%@を保存しました・%@";
 "cancelled" = "キャンセルしました。未完成のコピーは残りません。";
 "basicUsage" = "動画やGIFの「フレーム・区間編集…」では、コマ送り、PNG抽出、区間保存、容量削減ができます。";
-"hiddenVideos" = "動画は非表示です。「動画を表示」をオンにすると表示できます。";
-"supported" = "動画：macOSが読み取れるMP4、MOVなど。コンテナと内部コーデックによって対応が異なります。外部コーデックのインストールは不要です。";
+"hiddenVideos" = "動画と音声は非表示です。「動画・音声を表示」をオンにすると表示できます。";
+"supported" = "動画・音声：macOSでデコードできるMP4・MOV・MP3・M4A・WAVなど。再生できるかは形式と内部コーデックによって異なります。外部コーデックはインストールしません。";
 
-"video.error.sourceUnavailable" = "元の動画ファイルにアクセスできません。";
+"video.error.sourceUnavailable" = "元のファイルにアクセスできません。";
 "video.error.noVideoTrack" = "このファイルには読み取り可能な動画トラックがありません。";
-"video.error.invalidDuration" = "動画の再生時間を確認できません。";
+"video.error.invalidDuration" = "ファイルの再生時間を確認できません。";
 "video.error.invalidDimensions" = "動画の画面サイズを確認できません。";
 "video.error.invalidRange" = "開始と終了を動画の長さの範囲内で指定し、終了を開始より後に設定してください。";
 "video.error.invalidFrameTime" = "抽出するフレームの時刻を動画の長さの範囲内で指定してください。";
 "video.error.protectedContent" = "保護された動画からはフレームや区間を保存できません。";
 "video.error.notExportable" = "この動画はmacOSで書き出せません。";
 "video.error.sourceOverwrite" = "元の動画ファイルは上書きできません。";
-"video.error.sourceChanged" = "処理中に元の動画が変更されました。動画を開き直してください。";
+"video.error.sourceChanged" = "操作中に元のファイルが変更されました。もう一度開いてください。";
 "video.error.invalidDestination" = "保存先フォルダと、選択した形式の拡張子を含むファイル名を指定してください。";
 "video.error.destinationExists" = "同じ名前のファイルまたはフォルダがすでに存在します。";
 "video.error.unsupportedPreset" = "この動画には選択した保存品質を使用できません。";
@@ -125,3 +125,17 @@
 
 "study.automaticHint" = "動画と名前が一致する字幕を自動で表示します。アプリの言語を優先し、異なる言語を最大2つまで同時に表示します。";
 "study.fontsLoading" = "フォントを読み込み中…";
+
+"audio.title" = "音声";
+
+"audio.play" = "音声を再生";
+
+"audio.pause" = "音声を一時停止";
+
+"audio.ready" = "再生準備完了";
+
+"audio.unavailable" = "音声を再生できません";
+
+"audio.help" = "macOS標準のコーデックを使用します。再生できるかは形式と内部コーデックによって異なります。";
+
+"audio.manageHint" = "音声は再生・分類・名前変更・移動で管理できます。";

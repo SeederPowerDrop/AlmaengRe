@@ -10,10 +10,10 @@ struct ComparisonNavigationSelector: View {
         let title = comparison.navigationTitle(for: target)
         Button { comparison.navigationTarget = target } label: {
           Text(title)
-            .font(.system(size: 12, weight: .medium))
+            .font(ViewerUIMetrics.font(size: 12, weight: .medium))
             .lineLimit(1).truncationMode(.middle)
-            .frame(maxWidth: .infinity, minHeight: 24)
-            .padding(.horizontal, 5)
+            .viewerFrame(maxWidth: .infinity, minHeight: 24)
+            .viewerPadding(.horizontal, 5)
             .contentShape(Rectangle())
             .background(comparison.navigationTarget == target
               ? Color.primary.opacity(0.16) : Color.clear,
@@ -25,7 +25,7 @@ struct ComparisonNavigationSelector: View {
         .accessibilityAddTraits(comparison.navigationTarget == target ? .isSelected : [])
       }
     }
-    .padding(2)
+    .viewerPadding(2)
     .background(Color.primary.opacity(0.05), in: RoundedRectangle(cornerRadius: 7))
     .overlay {
       RoundedRectangle(cornerRadius: 7).strokeBorder(ViewerTheme.separator, lineWidth: 0.75)
@@ -50,11 +50,11 @@ struct ComparisonNamesEditor: View {
 
   var body: some View {
     VStack(alignment: .leading, spacing: 18) {
-      Text(ComparisonNamesL10n.text("editor.title")).font(.title2.bold())
+      Text(ComparisonNamesL10n.text("editor.title")).font(ViewerUIMetrics.font(.title2).bold())
       nameField(.first, text: $firstName)
       nameField(.second, text: $secondName)
       Text(ComparisonNamesL10n.text("editor.help"))
-        .font(.callout).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
+        .font(ViewerUIMetrics.font(.callout)).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
       HStack {
         Button(ComparisonNamesL10n.text("editor.reset")) {
           firstName = ""
@@ -67,8 +67,8 @@ struct ComparisonNamesEditor: View {
           .keyboardShortcut(.defaultAction)
       }
     }
-    .padding(24)
-    .frame(width: 470)
+    .viewerPadding(24)
+    .viewerFrame(width: 470)
   }
 
   private func nameField(_ side: FolderComparisonSide, text: Binding<String>) -> some View {
@@ -80,7 +80,7 @@ struct ComparisonNamesEditor: View {
     }
     let automatic = comparison.automaticName(for: side)
     return VStack(alignment: .leading, spacing: 6) {
-      Text(ComparisonNamesL10n.text(position)).font(.headline)
+      Text(ComparisonNamesL10n.text(position)).font(ViewerUIMetrics.font(.headline))
       TextField(automatic, text: text)
         .textFieldStyle(.roundedBorder)
         .accessibilityLabel(ComparisonNamesL10n.text(position))
@@ -89,7 +89,7 @@ struct ComparisonNamesEditor: View {
         }
         .onSubmit { save() }
       Text(ComparisonNamesL10n.format("automatic.label", automatic))
-        .font(.caption).foregroundStyle(.secondary)
+        .font(ViewerUIMetrics.font(.caption)).foregroundStyle(.secondary)
         .lineLimit(2).truncationMode(.middle).help(automatic)
     }
   }

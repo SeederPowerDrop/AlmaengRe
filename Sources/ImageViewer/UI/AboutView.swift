@@ -21,7 +21,7 @@ struct AboutView: View {
   // Fit the introduction to its contents, including restored windows that used
   // to be small enough to hide the support cards below a scroll view.
   static var windowWidth: CGFloat {
-    min(1_000, (NSScreen.main?.visibleFrame.width ?? 1_040) - 40)
+    min(ViewerUIMetrics.scale(1_000), (NSScreen.main?.visibleFrame.width ?? 1_040) - 40)
   }
 
   @Environment(\.dismiss) private var dismiss
@@ -76,18 +76,18 @@ struct AboutView: View {
   private var titleBar: some View {
     HStack(spacing: 12) {
       Text(verbatim: showsLicenses ? text("licenses") : text("windowTitle"))
-        .font(.system(size: 17, weight: .bold))
+        .font(ViewerUIMetrics.font(size: 17, weight: .bold))
         .foregroundStyle(.white)
         .shadow(color: .black.opacity(0.4), radius: 0, x: 1, y: 1)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
-        .padding(.leading, 13)
+        .viewerPadding(.leading, 13)
         .background(AboutTitlebarDragArea())
       Button { dismiss() } label: {
         Image(systemName: "xmark")
-          .font(.system(size: 16, weight: .bold))
+          .font(ViewerUIMetrics.font(size: 16, weight: .bold))
           .foregroundStyle(.white)
           .shadow(color: .black.opacity(0.3), radius: 0, x: 1, y: 1)
-          .frame(width: 29, height: 29)
+          .viewerFrame(width: 29, height: 29)
           .background(LinearGradient(colors: [Color(red: 1, green: 0.55, blue: 0.43),
             Color(red: 0.82, green: 0.12, blue: 0.09)], startPoint: .topLeading, endPoint: .bottomTrailing))
           .clipShape(RoundedRectangle(cornerRadius: 4))
@@ -97,9 +97,9 @@ struct AboutView: View {
       .keyboardShortcut(.cancelAction)
       .accessibilityLabel(text("close"))
       .help(text("close"))
-      .padding(.trailing, 7)
+      .viewerPadding(.trailing, 7)
     }
-    .frame(height: 42)
+    .viewerFrame(height: 42)
     .background {
       LinearGradient(colors: [RetroAboutTheme.titleStart, RetroAboutTheme.titleEnd],
         startPoint: .leading, endPoint: .trailing)
@@ -117,7 +117,7 @@ struct AboutView: View {
           }
         }
         .frame(width: 120, height: 120)
-        .padding(4)
+        .viewerPadding(4)
         .background(.white)
         .overlay { RetroBevel(inset: true) }
         .accessibilityLabel(text("profile"))
@@ -125,7 +125,7 @@ struct AboutView: View {
         VStack(alignment: .leading, spacing: 12) {
           VStack(alignment: .leading, spacing: 8) {
             Text(verbatim: appHeading)
-              .font(.system(size: 22, weight: .bold))
+              .font(ViewerUIMetrics.font(size: 22, weight: .bold))
             Text(verbatim: text("subtitle"))
               .foregroundStyle(RetroAboutTheme.secondaryText)
           }
@@ -148,10 +148,10 @@ struct AboutView: View {
       }
       supportSection
     }
-    .font(.system(size: 13))
-    .padding(.horizontal, 24)
-    .padding(.top, 20)
-    .padding(.bottom, 12)
+    .font(ViewerUIMetrics.font(size: 13))
+    .viewerPadding(.horizontal, 24)
+    .viewerPadding(.top, 20)
+    .viewerPadding(.bottom, 12)
     .fixedSize(horizontal: false, vertical: true)
   }
 
@@ -183,9 +183,9 @@ struct AboutView: View {
   private var supportSection: some View {
     VStack(alignment: .leading, spacing: 10) {
       Rectangle().fill(RetroAboutTheme.separator).frame(height: 1)
-        .padding(.vertical, 4)
+        .viewerPadding(.vertical, 4)
       Text(verbatim: text("supportTitle"))
-        .font(.system(size: 16, weight: .bold))
+        .font(ViewerUIMetrics.font(size: 16, weight: .bold))
       paragraph("supportMessage")
       HStack(spacing: 10) {
         Link(destination: AboutSupport.buyMeACoffeeURL) {
@@ -207,10 +207,10 @@ struct AboutView: View {
         .accessibilityValue(showsBitcoin ? text("bitcoinDescription") : "Bitcoin (BTC)")
         .popover(isPresented: $showsBitcoin, arrowEdge: .bottom) {
           bitcoinDetails
-            .font(.system(size: 13))
+            .font(ViewerUIMetrics.font(size: 13))
             .foregroundStyle(RetroAboutTheme.text)
-            .frame(width: 540)
-            .padding(12)
+            .viewerFrame(width: 540)
+            .viewerPadding(12)
             .background(RetroAboutTheme.paper)
             .environment(\.layoutDirection, layoutDirection)
             .fixedSize(horizontal: false, vertical: true)
@@ -229,27 +229,27 @@ struct AboutView: View {
         .resizable()
         .scaledToFit()
         .foregroundStyle(Color(white: 0.15))
-        .frame(width: 24, height: 24)
-        .frame(width: 40, height: 40)
+        .viewerFrame(width: 24, height: 24)
+        .viewerFrame(width: 40, height: 40)
         .background(tint, in: RoundedRectangle(cornerRadius: 8))
         .accessibilityHidden(true)
       VStack(alignment: .leading, spacing: 3) {
-        Text(verbatim: title).font(.system(size: 15, weight: .bold))
+        Text(verbatim: title).font(ViewerUIMetrics.font(size: 15, weight: .bold))
           .fixedSize(horizontal: true, vertical: false)
         if let subtitle {
-          Text(verbatim: subtitle).font(.system(size: 12)).foregroundStyle(RetroAboutTheme.secondaryText)
+          Text(verbatim: subtitle).font(ViewerUIMetrics.font(size: 12)).foregroundStyle(RetroAboutTheme.secondaryText)
         }
       }
       Spacer(minLength: 0)
       if let expanded {
         Image(systemName: expanded ? "chevron.up" : "chevron.down")
-          .font(.system(size: 11, weight: .bold))
+          .font(ViewerUIMetrics.font(size: 11, weight: .bold))
           .accessibilityHidden(true)
       }
     }
     .foregroundStyle(RetroAboutTheme.cardText)
-    .padding(12)
-    .frame(maxWidth: .infinity, minHeight: 76, alignment: .leading)
+    .viewerPadding(12)
+    .viewerFrame(maxWidth: .infinity, minHeight: 76, alignment: .leading)
     .background(RetroAboutTheme.card, in: RoundedRectangle(cornerRadius: 6))
     .overlay { RoundedRectangle(cornerRadius: 6).strokeBorder(RetroAboutTheme.cardBorder, lineWidth: 1) }
     .contentShape(RoundedRectangle(cornerRadius: 6))
@@ -263,17 +263,17 @@ struct AboutView: View {
           .resizable()
           .scaledToFit()
           .frame(width: 144, height: 144)
-          .padding(16)
+          .viewerPadding(16)
           .background(.white)
           .accessibilityLabel(text("bitcoinQR"))
       }
       VStack(alignment: .leading, spacing: 12) {
         paragraph("bitcoinDescription")
         Text(verbatim: AboutSupport.bitcoinAddress)
-          .font(.system(size: 12, design: .monospaced))
+          .font(ViewerUIMetrics.font(size: 12, design: .monospaced))
           .textSelection(.enabled)
           .fixedSize(horizontal: false, vertical: true)
-          .padding(10)
+          .viewerPadding(10)
           .frame(maxWidth: .infinity, alignment: .leading)
           .background(RetroAboutTheme.surface)
           .overlay { RetroBevel(inset: true) }
@@ -287,13 +287,13 @@ struct AboutView: View {
         }
         .buttonStyle(RetroAboutButtonStyle())
         if let supportStatus {
-          Text(verbatim: supportStatus).font(.system(size: 12))
+          Text(verbatim: supportStatus).font(ViewerUIMetrics.font(size: 12))
             .fixedSize(horizontal: false, vertical: true)
         }
       }
       .frame(maxWidth: .infinity, alignment: .leading)
     }
-    .padding(16)
+    .viewerPadding(16)
     .background(RetroAboutTheme.details)
     .overlay { RetroBevel(inset: true) }
   }
@@ -321,10 +321,10 @@ struct AboutView: View {
         .keyboardShortcut(.defaultAction)
     }
     .fixedSize(horizontal: false, vertical: true)
-    .font(.system(size: 14, weight: .semibold))
-    .padding(.horizontal, 24)
-    .padding(.bottom, 18)
-    .padding(.top, 10)
+    .font(ViewerUIMetrics.font(size: 14, weight: .semibold))
+    .viewerPadding(.horizontal, 24)
+    .viewerPadding(.bottom, 18)
+    .viewerPadding(.top, 10)
   }
 
   private struct LicenseDocument: Identifiable {
@@ -359,7 +359,7 @@ struct AboutView: View {
       AboutLicenseTextView(text: document.flatMap { try? String(contentsOf: $0.url, encoding: .utf8) } ?? "")
         .overlay { RetroBevel(inset: true) }
     }
-    .padding(24)
+    .viewerPadding(24)
     .frame(maxWidth: .infinity)
     .frame(height: 540)
   }
@@ -411,8 +411,8 @@ private struct RetroAboutButtonStyle: ButtonStyle {
     configuration.label
       .fixedSize(horizontal: true, vertical: false)
       .foregroundStyle(RetroAboutTheme.text)
-      .padding(.horizontal, 12)
-      .padding(.vertical, 8)
+      .viewerPadding(.horizontal, 12)
+      .viewerPadding(.vertical, 8)
       .background(RetroAboutTheme.paper)
       .overlay { RetroBevel(inset: configuration.isPressed) }
       .contentShape(Rectangle())
@@ -503,7 +503,7 @@ private struct AboutLicenseTextView: NSViewRepresentable {
     view.maxSize = NSSize(width: CGFloat.greatestFiniteMagnitude, height: CGFloat.greatestFiniteMagnitude)
     view.textContainer?.widthTracksTextView = true
     view.textContainer?.containerSize = NSSize(width: 600, height: CGFloat.greatestFiniteMagnitude)
-    view.font = .monospacedSystemFont(ofSize: 12, weight: .regular)
+    view.font = .monospacedSystemFont(ofSize: ViewerUIMetrics.scale(12), weight: .regular)
     view.textContainerInset = NSSize(width: 12, height: 12)
     view.updateAppearanceColors()
     scroll.documentView = view

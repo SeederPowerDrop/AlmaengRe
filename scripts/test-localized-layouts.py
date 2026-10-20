@@ -20,7 +20,15 @@ import tempfile
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--skip-build", action="store_true")
+    parser.add_argument("--configuration", choices=("debug", "release"), default="debug")
+    parser.add_argument("--scratch-path", type=Path)
+    parser.add_argument("--triple", help="Match an already built target triple")
     parser.add_argument("--language", action="append", help="Default: all app languages")
+    parser.add_argument("--filter", default=(
+        "LocalizedControlsLayoutTests|ViewerFrameLayoutRenderTests|"
+        "ImageCacheManagementLayoutTests|PhotoMarkLabelLayoutTests|"
+        "LanguageSettingsTests.currentLanguageMatchesUI"),
+        help="Swift Testing filter for the controls changed in this task")
     parser.add_argument("--output", type=Path,
                         default=Path(tempfile.gettempdir()) / "almaeng-localized-layouts")
     args = parser.parse_args()
@@ -32,11 +40,16 @@ def main():
     output = args.output.resolve()
     output.mkdir(parents=True, exist_ok=True)
 
+    build_arguments = ["--disable-sandbox", "-c", args.configuration]
+    if args.scratch_path:
+        build_arguments += ["--scratch-path", str(args.scratch_path.resolve())]
+    if args.triple:
+        build_arguments += ["--triple", args.triple]
     if not args.skip_build:
-        subprocess.run(["swift", "build", "--disable-sandbox", "--build-tests"],
+        subprocess.run(["swift", "build", *build_arguments, "--build-tests"],
                        cwd=root, check=True)
     binary_directory = Path(subprocess.check_output(
-        ["swift", "build", "--disable-sandbox", "--show-bin-path"], cwd=root,
+        ["swift", "build", *build_arguments, "--show-bin-path"], cwd=root,
         text=True).strip())
     test_bundle = binary_directory / "ImageViewerPackageTests.xctest/Contents/MacOS/ImageViewerPackageTests"
     swift = Path(subprocess.check_output(["xcrun", "--find", "swift"], text=True).strip())
@@ -65,6 +78,11 @@ def main():
             env = os.environ.copy()
             env["DYLD_FRAMEWORK_PATH"] = ":".join(str(frameworks / name) for name in
                                                   ("Frameworks", "PrivateFrameworks"))
+            # A bundle that also contains native XCTest cases needs Xcode's
+            # support dylib when loaded by this standalone Swift Testing helper.
+            support = str(platform / "Developer/usr/lib")
+            env["DYLD_LIBRARY_PATH"] = os.pathsep.join(filter(None, (
+                support, env.get("DYLD_LIBRARY_PATH"))))
             env["EXPECTED_APP_LANGUAGE"] = language
             env["IMAGEVIEWER_LOCALIZED_CONTROLS_OUTPUT"] = str(output)
             log = output / f"{language}.log"
@@ -72,7 +90,7 @@ def main():
                 result = subprocess.run([
                     str(runner), "--test-bundle-path", str(test_bundle),
                     "--testing-library", "swift-testing", "--filter",
-                    "LocalizedControlsLayoutTests|ViewerFrameLayoutRenderTests|PhotoMarkLabelLayoutTests|LanguageSettingsTests.currentLanguageMatchesUI",
+                    args.filter,
                     "-AppleLanguages", f"({language})",
                 ], cwd=root, env=env, stdout=stream, stderr=subprocess.STDOUT)
             results.append({"language": language, "passed": result.returncode == 0,

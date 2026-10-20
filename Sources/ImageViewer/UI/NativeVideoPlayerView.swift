@@ -8,6 +8,7 @@ struct NativeVideoPlayerView: NSViewRepresentable {
   var isInteractive = true
   var onDoubleClick: (() -> Void)? = nil
   var showsFullScreenToggleButton = true
+  var keepsControlsVisibleWhenInactive = false
 
   func makeNSView(context: Context) -> PlayerView {
     let view = PlayerView()
@@ -24,8 +25,12 @@ struct NativeVideoPlayerView: NSViewRepresentable {
     if view.player !== player { view.player = player }
     view.isInteractive = isInteractive
     view.onDoubleClick = onDoubleClick
-    view.controlsStyle = isInteractive ? .inline : .none
-    view.showsFullScreenToggleButton = showsFullScreenToggleButton
+    let controlsStyle: AVPlayerViewControlsStyle =
+      isInteractive || keepsControlsVisibleWhenInactive ? .inline : .none
+    if view.controlsStyle != controlsStyle { view.controlsStyle = controlsStyle }
+    if view.showsFullScreenToggleButton != showsFullScreenToggleButton {
+      view.showsFullScreenToggleButton = showsFullScreenToggleButton
+    }
   }
 
   static func dismantleNSView(_ view: PlayerView, coordinator: ()) {

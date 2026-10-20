@@ -1,7 +1,7 @@
 "items.count" = "%d 个项目";
-"open.message" = "选择图像、支持的视频、文件夹或 ZIP 压缩包。";
-"showVideos" = "显示视频";
-"showVideos.help" = "在文件夹中同时显示照片和视频。默认开启，并记住你的选择。GIF不受此选项影响，始终显示。";
+"open.message" = "选择图像、视频、音频、文件夹或ZIP文件。";
+"showVideos" = "显示视频/音频";
+"showVideos.help" = "在文件夹中同时显示照片、视频和音频。默认开启，并记住你的选择。GIF不受此选项影响，始终显示。";
 "editor.open" = "帧与片段编辑…";
 "editor.title" = "浏览帧与保存片段";
 "video.unavailable" = "无法播放视频";
@@ -48,19 +48,19 @@
 "saved" = "已保存%@ · %@";
 "cancelled" = "已取消。未完成的副本不会保留。";
 "basicUsage" = "在视频或GIF的“帧与片段编辑…”中，可逐帧查看、提取PNG、保存片段或减小体积。";
-"hiddenVideos" = "视频已隐藏。启用“显示视频”即可显示。";
-"supported" = "视频：macOS能够解码的MP4、MOV等格式。支持情况取决于容器及其内部编解码器，无需安装外部编解码器。";
+"hiddenVideos" = "视频和音频已隐藏。启用“显示视频/音频”即可显示。";
+"supported" = "视频和音频：macOS可解码的MP4、MOV、MP3、M4A、WAV等。是否能播放取决于文件格式及内部编解码器。无需安装外部编解码器。";
 
-"video.error.sourceUnavailable" = "无法访问原始视频文件。";
+"video.error.sourceUnavailable" = "无法访问源文件。";
 "video.error.noVideoTrack" = "此文件没有可读取的视频轨道。";
-"video.error.invalidDuration" = "无法确定视频时长。";
+"video.error.invalidDuration" = "无法确定文件的播放时长。";
 "video.error.invalidDimensions" = "无法确定视频画面尺寸。";
 "video.error.invalidRange" = "请在视频时长范围内设置起点和终点，并确保终点晚于起点。";
 "video.error.invalidFrameTime" = "请在视频时长范围内指定要提取的帧时间。";
 "video.error.protectedContent" = "无法从受保护的视频中保存帧或片段。";
 "video.error.notExportable" = "macOS无法导出此视频。";
 "video.error.sourceOverwrite" = "无法覆盖原始视频文件。";
-"video.error.sourceChanged" = "处理期间原始视频发生了变化。请重新打开视频。";
+"video.error.sourceChanged" = "操作期间源文件已更改。请重新打开文件。";
 "video.error.invalidDestination" = "请选择目标文件夹，并指定带有所选格式扩展名的文件名。";
 "video.error.destinationExists" = "已存在同名文件或文件夹。";
 "video.error.unsupportedPreset" = "此视频无法使用所选保存质量。";
@@ -125,3 +125,17 @@
 
 "study.automaticHint" = "自动开启与视频同名的字幕。优先使用应用语言，最多同时显示两种不同语言。";
 "study.fontsLoading" = "正在载入字体…";
+
+"audio.title" = "音频";
+
+"audio.play" = "播放音频";
+
+"audio.pause" = "暂停音频";
+
+"audio.ready" = "准备就绪";
+
+"audio.unavailable" = "无法播放音频";
+
+"audio.help" = "使用macOS内置编解码器。是否能播放取决于文件格式及内部编解码器。";
+
+"audio.manageHint" = "可通过播放、分类、重命名和移动来管理音频。";

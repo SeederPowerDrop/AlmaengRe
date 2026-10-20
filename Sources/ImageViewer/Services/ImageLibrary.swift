@@ -171,9 +171,12 @@ actor ImageLibrary {
     return try enrichPhotoMarkIdentities(assets)
   }
 
-  /// GPS is read lazily for map viewing, filtering and sorting, without pixel decoding.
-  /// Negative lookups travel with the file-versioned asset to avoid rescanning on every draw.
+  /// GPS shares the header cache used by EXIF filters and sorting. A map followed by
+  /// a capture-date filter must not reopen every large RAW file a second time.
+  /// Negative lookups travel with the asset until the next folder scan.
   func enrichLocations(_ assets: [ImageAsset],
+    governor: ImageResourceGovernor? = nil,
+    cache: LibrarySortMetadataCache = .shared,
     progress: (@Sendable (Int) async -> Void)? = nil
   ) async throws -> [ImageAsset] {
     var result = assets
@@ -185,27 +188,26 @@ actor ImageLibrary {
         try Task.checkCancellation()
       }
       if result[index].hasReadLocation || result[index].location != nil { continue }
-      if result[index].isVideo {
-        // Video GPS metadata is outside the supported map scope. Do not feed a
-        // movie into ImageIO or retry a negative lookup on every filter change.
+      if result[index].isPlaybackMedia {
+        // Playback-media GPS metadata is outside the supported map scope. Do not feed a
+        // video or audio file into ImageIO or retry a negative lookup on every filter change.
         result[index].hasReadLocation = true
         continue
       }
-      result[index].location = autoreleasepool {
-        guard let source = CGImageSourceCreateWithURL(result[index].url as CFURL,
-          [kCGImageSourceShouldCache: false] as CFDictionary),
-          let properties = CGImageSourceCopyPropertiesAtIndex(source, 0, nil) as? [CFString: Any],
-          let gps = properties[kCGImagePropertyGPSDictionary] as? [CFString: Any],
-          let latitude = (gps[kCGImagePropertyGPSLatitude] as? NSNumber)?.doubleValue,
-          let longitude = (gps[kCGImagePropertyGPSLongitude] as? NSNumber)?.doubleValue,
-          latitude.isFinite, longitude.isFinite, latitude >= 0, latitude <= 90,
-          longitude >= 0, longitude <= 180 else { return nil }
-        let latRef = (gps[kCGImagePropertyGPSLatitudeRef] as? String)?.uppercased()
-        let lonRef = (gps[kCGImagePropertyGPSLongitudeRef] as? String)?.uppercased()
-        guard ["N", "S"].contains(latRef ?? ""), ["E", "W"].contains(lonRef ?? "") else { return nil }
-        return ImageLocation(latitude: latRef == "S" ? -latitude : latitude,
-          longitude: lonRef == "W" ? -longitude : longitude)
+      let version = LibrarySortFileVersion(url: result[index].url)
+      let metadata: LibrarySortMetadata
+      if let retained = result[index].sortMetadata, result[index].sortMetadataVersion == version {
+        metadata = retained
+      } else {
+        metadata = try await cache.metadata(for: version, isVideo: false, governor: governor)
       }
+      try Task.checkCancellation()
+      // A source can be edited or replaced while its header is being inspected.
+      // Leave it unread so a later query can retry against the replacement.
+      guard LibrarySortFileVersion(url: result[index].url) == version else { continue }
+      result[index].sortMetadata = metadata
+      result[index].sortMetadataVersion = version
+      result[index].location = metadata.embeddedLocation
       result[index].hasReadLocation = true
     }
     await progress?(result.count)
@@ -252,7 +254,7 @@ actor ImageLibrary {
       if index.isMultiple(of: 32) { await Task.yield() }
       let version = LibrarySortFileVersion(url: result[index].url)
       if result[index].sortMetadata != nil, result[index].sortMetadataVersion == version { continue }
-      let metadata = try await cache.metadata(for: version, isVideo: result[index].isVideo,
+      let metadata = try await cache.metadata(for: version, isVideo: result[index].isPlaybackMedia,
         governor: governor)
       try Task.checkCancellation()
       // A file replaced during inspection must not receive metadata from its old bytes.
@@ -281,11 +283,11 @@ actor ImageLibrary {
     } else {
       metadataURL = url
     }
-    let isAcceptedVideo = MediaFormatRegistry.isVideo(url) && includesVideos
-    // A video-named input is never admitted through a misleading image UTI
-    // when the user has disabled videos. Extensionless image symlinks retain
-    // the existing ImageIO behavior without misclassifying video symlinks.
-    guard isAcceptedVideo || (!MediaFormatRegistry.isVideo(url)
+    let isAcceptedPlaybackMedia = MediaFormatRegistry.isPlaybackMedia(url) && includesVideos
+    // A playback-media input is never admitted through a misleading image UTI
+    // when the user has disabled playback media. Extensionless image symlinks retain
+    // the existing ImageIO behavior without misclassifying video/audio symlinks.
+    guard isAcceptedPlaybackMedia || (!MediaFormatRegistry.isPlaybackMedia(url)
       && (ImageFormatRegistry.canAttemptToDecode(url)
         || ImageFormatRegistry.canAttemptToDecode(metadataURL))) else { return nil }
     guard values?.isRegularFile != false, values?.isDirectory != true else { return nil }

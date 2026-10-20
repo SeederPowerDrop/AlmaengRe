@@ -1,6 +1,11 @@
-"grid.playAll" = "Sichtbare Videos abspielen";
+"grid.playAll" = "Alle abspielen";
+"grid.playNextPages" = "Weitere Seiten abspielen";
+"grid.pageAutoplayOn" = "Automatische Wiedergabe aktiv";
+"grid.playAll.help" = "Spielt alle Videos und Audiodateien auf der aktuellen Seite ab. Erneut drücken, um sie auch beim Seitenwechsel automatisch abzuspielen. Fotos bleiben sichtbar.";
+"grid.playNextPages.help" = "Spielt beim Seitenwechsel die Videos und Audiodateien der neuen Seite automatisch ab. Elemente, die den Bildschirm verlassen, werden angehalten. Fotos bleiben sichtbar.";
+"grid.pageAutoplayOn.help" = "Videos und Audiodateien werden bei jedem Seitenwechsel automatisch abgespielt. Erneut drücken, um nur die aktuelle Seite abzuspielen. Alle pausieren schaltet auch die automatische Wiedergabe aus.";
 "grid.playSelected" = "Auswahl abspielen (%d)";
-"grid.pauseAll" = "Alle Videos pausieren";
-"grid.select" = "Video zur Wiedergabe auswählen";
-"grid.play" = "Video abspielen";
-"grid.pause" = "Video pausieren";
+"grid.pauseAll" = "Alle pausieren";
+"grid.select" = "Zur Wiedergabe auswählen";
+"grid.play" = "Abspielen";
+"grid.pause" = "Pause";

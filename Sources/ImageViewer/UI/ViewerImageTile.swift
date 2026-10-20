@@ -73,7 +73,8 @@ struct ViewerImageTile: View {
         asset: asset,
         maxPixelSize: maxPixelSize,
         adjustments: adjustments,
-        prefersHDR: prefersHDR
+        prefersHDR: prefersHDR,
+        loadingPolicy: .forVisibleItemCount(itemCount)
       )
 
       ZStack {
@@ -88,7 +89,7 @@ struct ViewerImageTile: View {
             systemImage: "exclamationmark.triangle",
             description: Text(errorMessage)
           )
-          .padding()
+          .viewerPadding()
         } else {
           ProgressView()
             .controlSize(.large)
@@ -103,7 +104,7 @@ struct ViewerImageTile: View {
           ["gif", "png", "apng", "webp"].contains(presentation.request.asset.fileExtension),
           let onOpenMotionTools {
           Button(MotionMediaL10n.text("editor.open")) { onOpenMotionTools(presentation.request.asset) }
-            .buttonStyle(.bordered).padding(10).background(.black.opacity(0.65))
+            .buttonStyle(.bordered).viewerPadding(10).background(.black.opacity(0.65))
         }
       }
       .overlay(alignment: .bottomTrailing) {
@@ -111,16 +112,16 @@ struct ViewerImageTile: View {
           HStack(spacing: 7) {
             ProgressView().controlSize(.small)
             Text(asset.filename)
-              .font(.caption)
+              .font(ViewerUIMetrics.font(.caption))
               .lineLimit(1)
               .truncationMode(.middle)
           }
           .foregroundStyle(.white)
-          .padding(.horizontal, 11)
-          .padding(.vertical, 8)
+          .viewerPadding(.horizontal, 11)
+          .viewerPadding(.vertical, 8)
           .background(.black.opacity(0.78), in: Capsule())
           .frame(maxWidth: 260, alignment: .trailing)
-          .padding(12)
+          .viewerPadding(12)
           .help(L10n.text("이미지 로딩"))
           .accessibilityElement(children: .ignore)
           .accessibilityLabel(Text("\(L10n.text("이미지 로딩")): \(asset.filename)"))
@@ -167,7 +168,7 @@ struct ViewerImageTile: View {
         if let photoMarkStore, photoMarkStore.isPhotoMarking {
           PhotoMarkCardMenu(store: photoMarkStore, asset: asset)
             .disabled(loader.presentation?.request.asset.id != asset.id)
-            .font(.caption)
+            .font(ViewerUIMetrics.font(.caption))
         }
 
         if let frame, frame.frameCount > 1 {
@@ -181,11 +182,11 @@ struct ViewerImageTile: View {
             .accessibilityLabel("조작창 표시")
         }
       }
-      .font(.system(size: max(12, filenameDisplaySize.fontSize), weight: .semibold))
+      .font(ViewerUIMetrics.font(size: max(12, filenameDisplaySize.fontSize), weight: .semibold))
       // 불투명 검정과 완전한 흰색을 써 밝은 이미지 위에서도 대비를 보장합니다.
       .foregroundStyle(Color.white)
-      .padding(.horizontal, max(onExitFocus == nil ? 0 : 6, filenameDisplaySize.horizontalPadding))
-      .padding(.vertical, max(onExitFocus == nil ? 0 : 4, filenameDisplaySize.verticalPadding))
+      .viewerPadding(.horizontal, max(onExitFocus == nil ? 0 : 6, filenameDisplaySize.horizontalPadding))
+      .viewerPadding(.vertical, max(onExitFocus == nil ? 0 : 4, filenameDisplaySize.verticalPadding))
       .frame(maxWidth: .infinity)
       .background(Color.black)
     } else if let frame, frame.frameCount > 1 {
@@ -193,12 +194,12 @@ struct ViewerImageTile: View {
       HStack {
         Spacer()
         Text("\(frame.frameIndex + 1)/\(frame.frameCount)")
-          .font(.caption.monospacedDigit())
+          .font(ViewerUIMetrics.font(.caption).monospacedDigit())
           .foregroundStyle(Color.white)
-          .padding(.horizontal, 7)
-          .padding(.vertical, 4)
+          .viewerPadding(.horizontal, 7)
+          .viewerPadding(.vertical, 4)
           .background(Color.black, in: RoundedRectangle(cornerRadius: 5))
-          .padding(6)
+          .viewerPadding(6)
       }
     }
   }
@@ -269,13 +270,13 @@ struct ViewerImageTile: View {
     .overlay(alignment: .topLeading) {
       if let label {
         Text(L10n.text(label))
-          .font(.caption.weight(.semibold))
+          .font(ViewerUIMetrics.font(.caption).weight(.semibold))
           .lineLimit(1)
           .minimumScaleFactor(0.65)
           .foregroundStyle(.white)
-          .padding(6)
+          .viewerPadding(6)
           .background(.black)
-          .padding(6)
+          .viewerPadding(6)
       }
     }
   }
@@ -302,7 +303,12 @@ struct ViewerImageTile: View {
   }
 
   private func load(_ request: ViewerFrameRequest) {
-    loader.load(request, preview: { [thumbnailPipeline, pipeline] request in
+    loader.load(request, cachedPreview: { [thumbnailPipeline] request in
+      guard request.adjustments.isIdentity,
+        let image = await thumbnailPipeline.cachedMemoryPreview(for: request.asset,
+          maxPixelSize: 512) else { return nil }
+      return RenderedFrame(image: image, frameIndex: 0, frameCount: 1, duration: nil)
+    }, preview: { [thumbnailPipeline, pipeline] request in
       if request.adjustments.isIdentity {
         do {
           let image = try await thumbnailPipeline.browsingThumbnail(for: request.asset)

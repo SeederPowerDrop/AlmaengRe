@@ -41,6 +41,32 @@ struct ComparisonPhotoMarkFilterTests {
     #expect(comparison.second.sourceURLs == [fixture.photos])
   }
 
+  @Test("비교 양쪽의 포함·제외 조건을 독립적으로 검색과 결합한다")
+  func independentExclusionsIntersectSharedQuery() async throws {
+    let fixture = try Fixture()
+    let marks = PhotoMarkStore(inMemory: true)
+    let comparison = fixture.comparison(marks)
+    defer { comparison.cancelLoads(); marks.flush(); fixture.remove() }
+    let assets = try await fixture.assets()
+    await marks.waitUntilReady()
+    markFixture(assets, marks: marks)
+    try await open(comparison, fixture: fixture)
+    comparison.first.photoMarkFilter = PhotoMarkFilter(slots: [.one], excludedSlots: [.f])
+    comparison.second.photoMarkFilter = PhotoMarkFilter(slots: [.f], excludedSlots: [.one])
+    await ready(comparison)
+    #expect(names(comparison.first) == ["a.png"])
+    #expect(names(comparison.second) == ["b.png"])
+    comparison.query.searchText = "b"
+    await ready(comparison)
+    #expect(comparison.first.assets.isEmpty)
+    #expect(names(comparison.second) == ["b.png"])
+    comparison.query.searchText = ""
+    comparison.first.photoMarkFilter = PhotoMarkFilter(excludedSlots: [.f])
+    await ready(comparison)
+    #expect(names(comparison.first) == ["a.png", "d.png"])
+    #expect(names(comparison.second) == ["b.png"])
+  }
+
   @Test("분류 중 목록과 선택을 고정하고 종료하면 최신 분류를 한 번에 반영한다")
   func markingFreezesMembershipAcrossQueriesAndThenRefreshes() async throws {
     let fixture = try Fixture()
@@ -171,10 +197,15 @@ struct ComparisonPhotoMarkFilterTests {
     defer { original.cancelLoads(); restored.cancelLoads(); marks.flush(); fixture.remove() }
     let assets = try await fixture.assets()
     await marks.waitUntilReady()
-    for slot in PhotoMarkSlot.allCases { marks.toggle(slot, for: assets[2]) }
+    // Exercise all twelve persisted keys without making the expected locked
+    // asset contradictory: C has all included keys; A carries the excluded E.
+    let included = Set(PhotoMarkSlot.allCases).subtracting([.e])
+    for slot in included { marks.toggle(slot, for: assets[2]) }
     marks.toggle(.one, for: assets[0])
+    marks.toggle(.e, for: assets[0])
     try await open(original, fixture: fixture)
-    original.first.photoMarkFilter = PhotoMarkFilter(slots: Set(PhotoMarkSlot.allCases), matchesAll: true)
+    original.first.photoMarkFilter = PhotoMarkFilter(slots: included,
+      matchesAll: true, excludedSlots: [.e])
     original.second.photoMarkFilter = PhotoMarkFilter(unmarkedOnly: true)
     await ready(original)
     original.jump(.second, number: 2)

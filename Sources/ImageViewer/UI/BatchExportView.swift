@@ -85,7 +85,7 @@ struct BatchExportView: View {
     VStack(alignment: .leading, spacing: 16) {
       HStack {
         Label(BatchResizeL10n.text("일괄 변환 · 크기 변경"), systemImage: "photo.on.rectangle.angled")
-          .font(.title2.bold())
+          .font(ViewerUIMetrics.font(.title2).bold())
         Spacer()
         Text(L10n.format("%d개 선택", urls.count)).foregroundStyle(.secondary)
       }
@@ -93,23 +93,23 @@ struct BatchExportView: View {
         HStack {
           Picker("저장 형식", selection: $format) {
             ForEach(ExportFormat.available) { item in Text(item.title).tag(item) }
-          }.frame(width: 250)
+          }.viewerFrame(width: 250)
           if format.usesLossyQuality {
             Text("품질")
-            Slider(value: $quality, in: 0.1...1).frame(width: 180)
-            Text("\(Int(quality * 100))%").monospacedDigit().frame(width: 44)
+            Slider(value: $quality, in: 0.1...1).viewerFrame(width: 180)
+            Text("\(Int(quality * 100))%").monospacedDigit().viewerFrame(width: 44)
           }
         }
         HStack {
           Picker(BatchResizeL10n.text("이미지 크기"), selection: $resizeMode) {
             ForEach(ResizeMode.allCases) { mode in Text(mode.title).tag(mode) }
-          }.frame(width: 250)
+          }.viewerFrame(width: 250)
           if resizeMode == .longestEdge {
-            TextField(BatchResizeL10n.text("픽셀"), text: $longestEdge).frame(width: 90)
+            TextField(BatchResizeL10n.text("픽셀"), text: $longestEdge).viewerFrame(width: 90)
               .textFieldStyle(.roundedBorder)
             Text(BatchResizeL10n.text("픽셀"))
           } else if resizeMode == .percentage {
-            TextField("%", text: $percentage).frame(width: 90)
+            TextField("%", text: $percentage).viewerFrame(width: 90)
               .textFieldStyle(.roundedBorder)
             Text("%")
           }
@@ -122,17 +122,17 @@ struct BatchExportView: View {
           }.disabled(!ExportFormat.available.contains(.jpeg))
         }
         Text(BatchResizeL10n.text("현재 조정·자르기 후의 비율을 유지해 줄이며, 작은 이미지는 확대하지 않습니다."))
-          .font(.caption).foregroundStyle(.secondary)
+          .font(ViewerUIMetrics.font(.caption)).foregroundStyle(.secondary)
         Text(BatchResizeL10n.text("용량 줄이기는 JPEG·긴 변 1920픽셀·품질 75%로 설정합니다. 결과 용량은 사진마다 다르며 더 커질 수도 있습니다."))
-          .font(.caption).foregroundStyle(.secondary)
+          .font(ViewerUIMetrics.font(.caption)).foregroundStyle(.secondary)
         if resizeOptions == nil {
           Text(BatchResizeL10n.text("긴 변은 1~65536픽셀, 비율은 1~100%로 입력하세요."))
-            .font(.caption).foregroundStyle(.red)
+            .font(ViewerUIMetrics.font(.caption)).foregroundStyle(.red)
         }
         HStack {
           Button(WatermarkL10n.text("configure")) { showsWatermarkEditor = true }
           Text(WatermarkL10n.text(watermark.isEnabled ? "summary.on" : "summary.off"))
-            .font(.caption).foregroundStyle(.secondary)
+            .font(ViewerUIMetrics.font(.caption)).foregroundStyle(.secondary)
           Spacer()
           if watermark.isEnabled {
             Button(WatermarkL10n.text("disable")) { watermark.isEnabled = false }
@@ -145,7 +145,7 @@ struct BatchExportView: View {
             .help(destinationFolder?.path ?? "")
         }
         Text("원본을 보존하고 현재 조정값을 적용한 새 파일을 만듭니다. 이름이 겹치면 번호를 붙입니다. 애니메이션·다중 페이지는 첫 프레임만 저장합니다.")
-          .font(.caption).foregroundStyle(.secondary)
+          .font(ViewerUIMetrics.font(.caption)).foregroundStyle(.secondary)
       }
       .disabled(exportTask != nil || result != nil)
 
@@ -153,7 +153,7 @@ struct BatchExportView: View {
       if let result {
         resultView(result)
       } else {
-        Text("저장 미리보기").font(.headline)
+        Text("저장 미리보기").font(ViewerUIMetrics.font(.headline))
         Table(items) {
           TableColumn("현재 이름") { item in
             Text(item.sourceURL.lastPathComponent)
@@ -165,14 +165,14 @@ struct BatchExportView: View {
           }
         }
         if let errorMessage {
-          Text(errorMessage).font(.caption).foregroundStyle(.red).textSelection(.enabled)
+          Text(errorMessage).font(ViewerUIMetrics.font(.caption)).foregroundStyle(.red).textSelection(.enabled)
         }
       }
 
       if exportTask != nil {
         ProgressView(value: Double(progress), total: Double(max(1, items.count)))
         Text(L10n.format("%d / %d개 처리", progress, items.count))
-          .font(.caption).foregroundStyle(.secondary)
+          .font(ViewerUIMetrics.font(.caption)).foregroundStyle(.secondary)
       }
       HStack {
         Spacer()
@@ -198,28 +198,28 @@ struct BatchExportView: View {
         }
       }
     }
-    .padding(20)
-    .frame(width: 780, height: 730)
+    .viewerPadding(20)
+    .viewerFrame(width: 780, height: 730)
   }
 
   private func resultView(_ result: BatchExportResult) -> some View {
     VStack(alignment: .leading, spacing: 12) {
       Label(result.wasCancelled ? L10n.text("변환 중지됨") : L10n.text("변환 작업 완료"),
         systemImage: result.wasCancelled ? "stop.circle" : "checkmark.circle")
-        .font(.headline)
+        .font(ViewerUIMetrics.font(.headline))
       Text(L10n.format("%d개 저장 · %d개 실패 · %d개 미처리", result.completed.count,
         result.failures.count, max(0, items.count - result.completed.count - result.failures.count)))
       ScrollView {
         VStack(alignment: .leading, spacing: 10) {
           ForEach(Array(result.failures.enumerated()), id: \.offset) { _, failure in
             Text(failure.sourceURL.lastPathComponent + " — " + failure.message)
-              .font(.caption).foregroundStyle(.red).textSelection(.enabled)
+              .font(ViewerUIMetrics.font(.caption)).foregroundStyle(.red).textSelection(.enabled)
           }
-        }.frame(maxWidth: .infinity, alignment: .leading)
+        }.viewerFrame(maxWidth: .infinity, alignment: .leading)
       }
       Text("완료된 파일은 저장 폴더에 남아 있습니다.")
-        .font(.caption).foregroundStyle(.secondary)
-    }.frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .font(ViewerUIMetrics.font(.caption)).foregroundStyle(.secondary)
+    }.viewerFrame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
   }
 
   private func chooseDestination() {

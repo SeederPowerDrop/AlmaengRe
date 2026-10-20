@@ -125,6 +125,49 @@ struct VideoTilePlaybackControllerTests {
     #expect(!controller.pauseForFullScreen().isMuted)
   }
 
+  @Test("다음 페이지에 영상 하나만 남아도 모두 재생과 일시정지가 실제 플레이어에 적용된다")
+  func finalSingleVideoFollowsGridCommandsWithoutOverridingNativeControls() async throws {
+    let fixture = try await Fixture.make()
+    defer { fixture.remove() }
+    let grid = VideoGridPlaybackState()
+    let previous = ImageAsset(url: fixture.root.appendingPathComponent("previous.mp4"),
+      byteCount: nil, modificationDate: nil)
+    grid.updateVisibleAssets([previous])
+    grid.playAll()
+    grid.playAll()
+    grid.updateVisibleAssets([fixture.asset])
+    try #require(grid.followsPages && grid.playingIDs == [fixture.asset.id])
+    let controller = VideoTilePlaybackController(coordinator: VideoHoverPlaybackCoordinator())
+    defer { controller.stop() }
+    func update(hovered: Bool = false) {
+      controller.update(asset: fixture.asset, isMultiTile: false, isHovered: hovered,
+        allowsPlayback: true, appIsActive: true, command: grid.command(for: fixture.asset.id))
+    }
+    update()
+    let state = try #require(controller.playback)
+    try await waitUntil(phase: "last-page single video autoplay") { state.currentSeconds > 0.08 }
+    #expect(state.player.isMuted && state.player.rate > 0)
+
+    // This one-tile layout exposes native controls. Hover/metadata refresh must
+    // not undo an explicit native pause or sound choice on the same command.
+    state.pause()
+    state.player.isMuted = false
+    let pausedPosition = state.currentSeconds
+    update(hovered: true)
+    #expect(state.player.rate == 0 && !state.player.isMuted)
+    grid.pauseAll()
+    update()
+    #expect(state.player.rate == 0 && state.player.isMuted && !grid.followsPages)
+    grid.playAll()
+    update()
+    try await waitUntil(phase: "single video resumes after grid play") {
+      state.currentSeconds > pausedPosition + 0.04 && state.player.rate > 0
+    }
+    grid.pauseAll()
+    update()
+    #expect(state.player.rate == 0 && controller.playback === state)
+  }
+
   @Test("실제 영상 타일을 화면에서 제거하면 재생 중인 플레이어 항목도 해제한다")
   func removingHostedTileReleasesItsPlayingItem() async throws {
     let fixture = try await Fixture.make()

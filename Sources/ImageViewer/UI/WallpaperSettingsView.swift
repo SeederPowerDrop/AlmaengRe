@@ -11,7 +11,7 @@ struct WallpaperSettingsView: View {
   var body: some View {
     VStack(alignment: .leading, spacing: 18) {
       Label("현재 이미지를 바탕화면으로 설정", systemImage: "desktopcomputer")
-        .font(.title3.weight(.semibold))
+        .font(ViewerUIMetrics.font(.title3).weight(.semibold))
       Text(request.asset.filename)
         .lineLimit(2)
         .truncationMode(.middle)
@@ -28,13 +28,13 @@ struct WallpaperSettingsView: View {
       }
       Toggle("현재 보정 적용", isOn: $appliesAdjustments)
       Text("원본은 변경하지 않습니다. 별도 PNG 사본을 보관하며, 애니메이션은 첫 프레임·HDR은 SDR로 적용합니다. 다른 데스크탑 공간은 macOS 설정을 따릅니다.")
-        .font(.caption)
+        .font(ViewerUIMetrics.font(.caption))
         .foregroundStyle(.secondary)
         .fixedSize(horizontal: false, vertical: true)
       HStack {
         if store.isSettingWallpaper {
           ProgressView().controlSize(.small)
-          Text("바탕화면 이미지 준비 중…").font(.caption)
+          Text("바탕화면 이미지 준비 중…").font(ViewerUIMetrics.font(.caption))
         }
         Spacer()
         Button("취소", role: .cancel) { store.wallpaperRequest = nil }
@@ -48,7 +48,7 @@ struct WallpaperSettingsView: View {
         .keyboardShortcut(.defaultAction)
       }
     }
-    .padding(24)
+    .viewerPadding(24)
     .frame(width: 490)
     .disabled(store.isSettingWallpaper)
     .interactiveDismissDisabled(store.isSettingWallpaper)

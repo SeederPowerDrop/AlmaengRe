@@ -12,3 +12,9 @@
 "quick.export" = "형식·크기";
 "quick.watermark" = "워터마크";
 "quick.share" = "공유";
+
+"classify.menu" = "선택한 파일 분류…";
+"quick.classify" = "분류";
+
+"selection.focused" = "키보드 탐색 위치";
+"selection.overviewHelp" = "⌘ 클릭: 선택·해제\n⌘ 방향키: 이동한 항목 선택·해제\n⇧ 클릭 / ⇧ 방향키: 범위 선택\n⌘⇧ 클릭 / ⌘⇧ 방향키: 기존 선택에 범위 추가";

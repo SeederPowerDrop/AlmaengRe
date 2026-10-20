@@ -1,17 +1,18 @@
 import Foundation
 
 enum LibraryMediaKind: String, Codable, CaseIterable, Identifiable, Sendable {
-  case all, images, videos
+  case all, images, videos, audio
   var id: Self { self }
   var title: String { MediaFormatsL10n.text("kind.\(rawValue)") }
 }
 
 enum LibraryMediaFilter {
   static func matches(_ asset: ImageAsset, query: LibraryQuery) -> Bool {
-    if query.mediaKind == .images && asset.isVideo { return false }
+    if query.mediaKind == .images && asset.isPlaybackMedia { return false }
     if query.mediaKind == .videos && !asset.isVideo { return false }
-    // Image format families never include movies in the legacy "other" bucket.
-    if !query.formats.isEmpty && asset.isVideo { return false }
+    if query.mediaKind == .audio && !asset.isAudio { return false }
+    // Image format families never include playback media in the legacy "other" bucket.
+    if !query.formats.isEmpty && asset.isPlaybackMedia { return false }
     return query.fileExtensions.isEmpty
       || query.fileExtensions.contains { normalizedExtension($0) == asset.fileExtension }
   }

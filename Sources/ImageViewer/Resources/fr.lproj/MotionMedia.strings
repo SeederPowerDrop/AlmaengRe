@@ -1,7 +1,7 @@
 "items.count" = "%d éléments";
-"open.message" = "Choisissez des images, des vidéos prises en charge, des dossiers ou des archives ZIP.";
-"showVideos" = "Afficher les vidéos";
-"showVideos.help" = "Affiche les photos et vidéos des dossiers ensemble. Activé par défaut, ce choix est mémorisé. Les GIF restent visibles dans les deux cas.";
+"open.message" = "Choisissez des images, vidéos, fichiers audio, dossiers ou fichiers ZIP.";
+"showVideos" = "Vidéo et audio";
+"showVideos.help" = "Affiche les photos, vidéos et fichiers audio des dossiers ensemble. Activé par défaut, ce choix est mémorisé. Les GIF restent visibles dans les deux cas.";
 "editor.open" = "Images et extraits…";
 "editor.title" = "Images et extraits";
 "video.unavailable" = "Impossible de lire la vidéo";
@@ -48,18 +48,18 @@
 "saved" = "%@ enregistré · %@";
 "cancelled" = "Annulé. Le fichier incomplet a été supprimé.";
 "basicUsage" = "Utilisez Images et extraits sur une vidéo ou un GIF pour avancer image par image, extraire un PNG, enregistrer un extrait ou réduire sa taille.";
-"hiddenVideos" = "Les vidéos sont masquées. Activez Afficher les vidéos pour les inclure.";
-"supported" = "Vidéo : MP4, MOV et autres formats que macOS peut décoder. La prise en charge dépend du conteneur et de ses codecs. Aucun codec externe n’est nécessaire.";
-"video.error.sourceUnavailable" = "Le fichier vidéo d’origine n’est pas accessible.";
+"hiddenVideos" = "Les vidéos et fichiers audio sont masqués. Activez Vidéo et audio pour les inclure.";
+"supported" = "Vidéo et audio : MP4, MOV, MP3, M4A, WAV et autres fichiers décodables par macOS. La lecture dépend du format et des codecs du fichier. Aucun codec externe n’est installé.";
+"video.error.sourceUnavailable" = "Impossible d’accéder au fichier source.";
 "video.error.noVideoTrack" = "Ce fichier ne contient aucune piste vidéo lisible.";
-"video.error.invalidDuration" = "Impossible de déterminer la durée de la vidéo.";
+"video.error.invalidDuration" = "Impossible de déterminer la durée du fichier.";
 "video.error.invalidDimensions" = "Impossible de déterminer les dimensions de la vidéo.";
 "video.error.invalidRange" = "Définissez le début et la fin dans la durée de la vidéo, avec une fin située après le début.";
 "video.error.invalidFrameTime" = "Choisissez l’instant d’une image dans la durée de la vidéo.";
 "video.error.protectedContent" = "Il est impossible d’enregistrer des images ou des extraits d’une vidéo protégée.";
 "video.error.notExportable" = "macOS ne peut pas exporter cette vidéo.";
 "video.error.sourceOverwrite" = "Le fichier vidéo d’origine ne peut pas être remplacé.";
-"video.error.sourceChanged" = "La vidéo d’origine a été modifiée pendant le traitement. Ouvrez-la à nouveau.";
+"video.error.sourceChanged" = "Le fichier source a changé pendant l’opération. Ouvrez-le à nouveau.";
 "video.error.invalidDestination" = "Choisissez un dossier de destination et un nom de fichier avec l’extension du format sélectionné.";
 "video.error.destinationExists" = "Un fichier ou un dossier porte déjà ce nom.";
 "video.error.unsupportedPreset" = "La qualité d’exportation sélectionnée n’est pas disponible pour cette vidéo.";
@@ -124,3 +124,17 @@
 
 "study.automaticHint" = "Les sous-titres portant le nom de la vidéo sont activés automatiquement. La langue de l’app est prioritaire, avec jusqu’à deux langues différentes affichées ensemble.";
 "study.fontsLoading" = "Chargement des polices…";
+
+"audio.title" = "Audio";
+
+"audio.play" = "Lire l’audio";
+
+"audio.pause" = "Mettre en pause";
+
+"audio.ready" = "Prêt à lire";
+
+"audio.unavailable" = "Lecture audio impossible";
+
+"audio.help" = "Utilise les codecs intégrés à macOS. La lecture dépend du format et des codecs du fichier.";
+
+"audio.manageHint" = "Gérez les fichiers audio en les lisant, classant, renommant et déplaçant.";

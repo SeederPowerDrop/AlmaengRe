@@ -1,5 +1,5 @@
 "kind.title" = "Loại tệp";
-"kind.all" = "Ảnh và video";
+"kind.all" = "Ảnh, video và âm thanh";
 "kind.images" = "Chỉ hình ảnh";
 "kind.videos" = "Chỉ video";
 "extensions.folder" = "Phần mở rộng trong thư mục";
@@ -12,11 +12,17 @@
 "picker.kind.all" = "Tất cả";
 "picker.kind.images" = "Ảnh";
 "picker.kind.videos" = "Video";
-"picker.search" = "Tìm phần mở rộng (ví dụ: jpg, mp4)";
+"picker.search" = "Tìm đuôi tệp: jpg, mp4, mp3";
 "picker.clearSearch" = "Xóa tìm kiếm";
 "picker.source" = "Phạm vi phần mở rộng";
 "picker.folder" = "Thư mục này";
-"picker.supported" = "Mọi định dạng hỗ trợ";
+"picker.supported" = "Mọi phần mở rộng";
 "picker.empty" = "Không có phần mở rộng phù hợp.";
 "picker.hint" = "Bạn có thể chọn nhiều định dạng.";
 "picker.done" = "Xong";
+
+"kind.audio" = "Chỉ âm thanh";
+
+"picker.kind.audio" = "Âm thanh";
+
+"extensions.audio" = "Đuôi tệp âm thanh";

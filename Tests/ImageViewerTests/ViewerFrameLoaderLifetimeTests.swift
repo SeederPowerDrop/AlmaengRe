@@ -7,6 +7,24 @@ import Testing
 @MainActor
 @Suite("이미지 타일을 해제하면 대기 중 작업과 애니메이션도 종료")
 struct ViewerFrameLoaderLifetimeTests {
+  @Test("RAM 조회를 기다리는 타일도 해제되면 조회 작업을 취소한다")
+  func discardedLoaderReleasesDuringCacheLookup() async throws {
+    let cached = LifetimeFrameOperation()
+    let bitmap = try frame()
+    var loader: ViewerFrameLoader? = ViewerFrameLoader(settleDelay: .seconds(3_600))
+    weak var reference = loader
+    defer { reference?.stop() }
+    loader?.load(request, cachedPreview: { _ in await cached.run() },
+      preview: { _ in throw LifetimeFrameError.noPreview }, render: { _, _ in bitmap })
+    try await waitUntil { await cached.started }
+
+    loader = nil
+    #expect(reference == nil)
+    await cached.finish(bitmap)
+    try await waitUntil { await cached.finished }
+    #expect(await cached.wasCancelled)
+  }
+
   @Test("느린 미리보기가 사라진 타일을 계속 보유하지 않는다")
   func discardedLoaderReleasesDuringPreview() async throws {
     let preview = LifetimeFrameOperation()

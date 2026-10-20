@@ -12,3 +12,9 @@
 "quick.export" = "Format & Größe";
 "quick.watermark" = "Wasserzeichen";
 "quick.share" = "Teilen";
+
+"classify.menu" = "Ausgewählte Dateien zuordnen…";
+"quick.classify" = "Zuordnen";
+
+"selection.focused" = "Position der Tastaturnavigation";
+"selection.overviewHelp" = "⌘-Klick: Auswahl umschalten\n⌘-Pfeiltaste: bewegen und Auswahl des Zielobjekts umschalten\n⇧-Klick / ⇧-Pfeiltaste: Bereich auswählen\n⌘⇧-Klick / ⌘⇧-Pfeiltaste: Bereich zur bestehenden Auswahl hinzufügen";

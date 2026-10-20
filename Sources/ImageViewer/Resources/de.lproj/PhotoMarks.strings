@@ -3,13 +3,13 @@
 "mode.help" = "Bei Markieren AN schalten 1–4, QWER und ASDF die Markierungen um.";
 "mode.toggle" = "Markierungsmodus umschalten";
 "mode.active" = "Markierungsmodus";
-"mode.unavailable" = "Öffne ein Foto oder Video zum Markieren.";
+"mode.unavailable" = "Öffne eine Datei zum Markieren.";
 "menu.title" = "Fotomarkierungen";
 "menu.edit" = "Markierungsnamen und -farben bearbeiten…";
 "panel.title" = "Fotomarkierungen";
 "panel.hint" = "← → Blättern · 1–4, QWER, ASDF: Markierungen";
-"panel.multipleHint" = "Ein Foto oder Video kann mehrere Markierungen haben.";
-"panel.noPhoto" = "Öffne ein Foto oder Video zum Markieren.";
+"panel.multipleHint" = "Eine Datei kann mehrere Markierungen haben.";
+"panel.noPhoto" = "Öffne eine Datei zum Markieren.";
 "panel.loading" = "Fotomarkierungen werden geladen…";
 "panel.close" = "Markierungsmodus beenden";
 "labels.edit" = "Markierungsnamen und -farben bearbeiten";
@@ -61,7 +61,7 @@
 "labels.previewFormat" = "%@ → %@";
 "mark.addHelpFormat" = "%@ → %@: Bei Markieren AN setzt ein Tastendruck oder Klick die Markierung; Wiederholen entfernt sie. Mehrere Markierungen sind möglich, Originaldateien bleiben unverändert.";
 "mark.removeHelpFormat" = "%@ → %@: Diese Markierung ist gesetzt. Bei Markieren AN entfernt ein Tastendruck oder Klick sie. Andere Markierungen und Originaldateien bleiben unverändert.";
-"mode.detailHelp" = "⌘⇧M schaltet Markierungen ein oder aus. Wenn aktiviert, markieren 1–4, QWER, ASDF oder das Bedienfeld alle ausgewählten Fotos und Videos. Kontrollkästchen oder ⌘-Klick wählen mehrere Elemente aus, ⇧-Klick einen Bereich. Das Kartenmenü wirkt nur auf das jeweilige Element. Wenn deaktiviert, gelten die normalen Anzeige-Tastenkürzel. Im Bildvergleich wählen Sie Nur A, Nur B oder Beide.";
+"mode.detailHelp" = "⌘⇧M schaltet Markierungen ein oder aus. Wenn aktiviert, markieren 1–4, QWER, ASDF oder das Bedienfeld alle ausgewählten Dateien. Kontrollkästchen oder ⌘-Klick wählen mehrere Elemente aus, ⇧-Klick einen Bereich. Das Kartenmenü wirkt nur auf das jeweilige Element. Wenn deaktiviert, gelten die normalen Anzeige-Tastenkürzel. Im Bildvergleich wählen Sie Nur A, Nur B oder Beide.";
 "labels.settingsLink" = "Markierungsnamen und -farben bearbeiten…";
 "labels.revert" = "Änderungen zurücknehmen";
 "labels.revertHelp" = "Stellt die gesicherten Markierungsnamen und -farben wieder her, ohne die Einstellungen zu schließen. Nicht gesicherte Änderungen werden verworfen.";
@@ -98,7 +98,7 @@
 
 "card.title" = "Markierungen";
 
-"card.help" = "Wähle Markierungen für dieses Foto oder Video.";
+"card.help" = "Wähle Markierungen für diese Datei.";
 
 "card.accessibilityFormat" = "Markierungen für %@";
 
@@ -122,7 +122,7 @@
 
 "panel.selectionHint" = "Kontrollkästchen oder ⌘-Klick: Auswahl erweitern; ⇧-Klick: Bereich auswählen. Tasten und Bedienfeld wirken auf die ganze Auswahl, das Kartenmenü nur auf das jeweilige Element.";
 
-"selection.help" = "Dieses Element zur Auswahl hinzufügen oder daraus entfernen. Markierungstasten und Bedienfeld wirken auf alle ausgewählten Fotos und Videos.";
+"selection.help" = "Dieses Element zur Auswahl hinzufügen oder daraus entfernen. Markierungstasten und Bedienfeld wirken auf alle ausgewählten Dateien.";
 
 "selection.accessibilityFormat" = "%@ auswählen";
 
@@ -136,4 +136,18 @@
 "inheritance.originals" = "Beim Verschieben eines Originals oder Wiederherstellen aus dem Papierkorb bleiben seine Tags unabhängig von diesen Optionen erhalten.";
 
 "panel.viewerSelectionHint" = "%@ Foto auswählen";
-"panel.viewerSelectionHelp" = "Mit %@ wählst du Fotos oder Videos einzeln auf der aktuellen Seite aus. Am Anfang oder Ende springt die Auswahl zum anderen Ende derselben Seite. Aktiviere den Markierungsmodus und verwende dann 1–4, QWER oder ASDF, um das ausgewählte Element zu markieren.";
+"panel.viewerSelectionHelp" = "Mit %@ bewegst du die Auswahl räumlich: links/rechts in derselben Zeile, oben/unten in der nächstgelegenen Spalte. Am Zeilen- oder Spaltenende springt sie zum gegenüberliegenden Ende. Aktiviere den Markierungsmodus und markiere das ausgewählte Element mit 1–4, QWER oder ASDF.";
+
+/* Include/exclude conditions stay within the currently opened collection. */
+"filter.scope" = "Nur in den derzeit geöffneten Ordnern und Dateien suchen.";
+"filter.conditions" = "Markierungsbedingungen";
+"filter.includeCountFormat" = "Einschließen · %d";
+"filter.excludeCountFormat" = "Ausschließen · %d";
+"filter.includeHelp" = "Wählen Sie einzuschließende Markierungen. Legen Sie unten fest, ob eine oder alle zutreffen müssen.";
+"filter.excludeHelp" = "Dateien mit einer dieser Markierungen ausschließen. Beispiel: S einschließen und E ausschließen.";
+"filter.included" = "Eingeschlossen";
+"filter.excluded" = "Ausgeschlossen";
+"filter.ignored" = "Keine Bedingung";
+"filter.includeRule" = "Einzuschließende Markierungen abgleichen";
+"filter.includeSummaryFormat" = "Einschließen: %@";
+"filter.excludeSummaryFormat" = "Ausschließen: %@";

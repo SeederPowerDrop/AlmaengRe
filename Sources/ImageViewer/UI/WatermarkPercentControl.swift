@@ -12,7 +12,7 @@ struct WatermarkPercentControl: View {
 
   var body: some View {
     HStack(spacing: 8) {
-      Text(title).frame(width: 62, alignment: .leading)
+      Text(title).viewerFrame(width: 62, alignment: .leading)
       Slider(value: Binding(get: { value }, set: {
         value = $0
         synchronizeText()
@@ -29,7 +29,7 @@ struct WatermarkPercentControl: View {
         .textFieldStyle(.roundedBorder)
         .multilineTextAlignment(.trailing)
         .monospacedDigit()
-        .frame(width: 66)
+        .viewerFrame(width: 66)
         .focused($isFocused)
         .accessibilityLabel(title + " (%)")
         .onSubmit { commitDraft() }

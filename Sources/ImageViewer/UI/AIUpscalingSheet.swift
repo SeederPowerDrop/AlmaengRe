@@ -15,7 +15,7 @@ struct AIUpscalingSheet: View {
     VStack(alignment: .leading, spacing: 16) {
       HStack {
         VStack(alignment: .leading, spacing: 4) {
-          Text("AI 확대").font(.title2.weight(.semibold))
+          Text("AI 확대").font(ViewerUIMetrics.font(.title2).weight(.semibold))
           Text(sourceURL?.lastPathComponent ?? L10n.text("이미지를 먼저 열어 주세요."))
             .foregroundStyle(.secondary).lineLimit(1).truncationMode(.middle)
         }
@@ -23,7 +23,7 @@ struct AIUpscalingSheet: View {
         Button("닫기") { store.cancel(); dismiss() }.keyboardShortcut(.cancelAction)
       }
       Text("QuickSRNet으로 가로·세로를 2배 확대합니다. 모든 처리는 이 Mac에서 이루어집니다.")
-        .font(.callout).foregroundStyle(.secondary)
+        .font(ViewerUIMetrics.font(.callout)).foregroundStyle(.secondary)
 
       Group {
         if let result = store.result {
@@ -31,7 +31,7 @@ struct AIUpscalingSheet: View {
         } else if store.isRunning {
           VStack(spacing: 16) {
             ProgressView(value: store.progress)
-              .frame(width: 280)
+              .viewerFrame(width: 280)
             Text(L10n.format("AI 확대 중… %d%%", Int(store.progress * 100)))
               .monospacedDigit()
             Button("취소") { store.cancel() }
@@ -49,18 +49,18 @@ struct AIUpscalingSheet: View {
 
       if let error = store.errorMessage {
         Label(error, systemImage: "exclamationmark.triangle")
-          .font(.callout).foregroundStyle(.red).textSelection(.enabled)
+          .font(ViewerUIMetrics.font(.callout)).foregroundStyle(.red).textSelection(.enabled)
       }
       if let savedURL = store.savedURL {
         HStack {
           Label("사본을 저장했습니다.", systemImage: "checkmark.circle.fill").foregroundStyle(.green)
           Button("Finder에서 보기") { NSWorkspace.shared.activateFileViewerSelecting([savedURL]) }
-        }.font(.callout)
+        }.font(ViewerUIMetrics.font(.callout))
       }
       Text("결과는 SDR · sRGB입니다. 투명도는 유지하며, 움직이는 이미지는 첫 프레임만 확대합니다. 원본은 변경하지 않습니다.")
-        .font(.caption).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
+        .font(ViewerUIMetrics.font(.caption)).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
       HStack {
-        Text("2× · QuickSRNet Small").font(.caption).foregroundStyle(.secondary)
+        Text("2× · QuickSRNet Small").font(ViewerUIMetrics.font(.caption)).foregroundStyle(.secondary)
         Spacer()
         if store.isSaving { ProgressView().controlSize(.small) }
         Button("PNG 사본 저장…") { store.chooseSaveDestination(preparePhotoMarks: preparePhotoMarks) }
@@ -70,7 +70,7 @@ struct AIUpscalingSheet: View {
           .disabled(sourceURL == nil || store.isRunning || store.isSaving)
       }
     }
-    .padding(24)
+    .viewerPadding(24)
     .frame(minWidth: 720, idealWidth: 820, minHeight: 580, idealHeight: 680)
     .onChange(of: sourceURL, initial: true) { _, value in
       store.prepare(sourceURL: value)
@@ -88,13 +88,13 @@ struct AIUpscalingSheet: View {
         Picker("미리보기", selection: $comparesOriginal) {
           Text("AI 확대 결과").tag(false)
           Text("원본과 비교").tag(true)
-        }.pickerStyle(.segmented).frame(maxWidth: 440)
+        }.pickerStyle(.segmented).viewerFrame(maxWidth: 440)
         Spacer()
         Text("\(result.image.width) × \(result.image.height)")
-          .font(.caption.monospacedDigit()).foregroundStyle(.secondary)
-      }.padding(12)
+          .font(ViewerUIMetrics.font(.caption).monospacedDigit()).foregroundStyle(.secondary)
+      }.viewerPadding(12)
       previewControls
-      .padding(.horizontal, 12).padding(.bottom, 10)
+      .viewerPadding(.horizontal, 12).viewerPadding(.bottom, 10)
       Divider()
       AIUpscalingPreview(original: result.original, upscaled: result.image,
         comparesOriginal: comparesOriginal, comparisonAxis: comparisonAxis,
@@ -115,12 +115,12 @@ struct AIUpscalingSheet: View {
                 previewLabel("aiPreview.result")
               }
             }
-          }.padding(12).allowsHitTesting(false)
+          }.viewerPadding(12).allowsHitTesting(false)
         }
       }
       Text(verbatim: L10n.text("aiPreview.hint"))
-        .font(.caption).foregroundStyle(.secondary)
-        .frame(maxWidth: .infinity, alignment: .leading).padding(12)
+        .font(ViewerUIMetrics.font(.caption)).foregroundStyle(.secondary)
+        .frame(maxWidth: .infinity, alignment: .leading).viewerPadding(12)
     }
   }
 
@@ -170,8 +170,8 @@ struct AIUpscalingSheet: View {
         .help(L10n.text("aiPreview.zoomOut"))
         .disabled(zoom <= 0.01)
       Text(Double(zoom).formatted(.percent.precision(.fractionLength(zoom < 0.1 ? 1 : 0))))
-        .font(.callout.monospacedDigit())
-        .frame(minWidth: 54)
+        .font(ViewerUIMetrics.font(.callout).monospacedDigit())
+        .viewerFrame(minWidth: 54)
         .accessibilityLabel(L10n.text("aiPreview.zoom"))
         .accessibilityValue(Double(zoom).formatted(.percent))
       Button { setZoom(zoom * 1.25) } label: { Image(systemName: "plus.magnifyingglass") }
@@ -190,8 +190,8 @@ struct AIUpscalingSheet: View {
 
   private func previewLabel(_ key: String) -> some View {
     Text(verbatim: L10n.text(key))
-      .font(.caption.weight(.semibold)).foregroundStyle(.white)
-      .padding(.horizontal, 10).padding(.vertical, 5)
+      .font(ViewerUIMetrics.font(.caption).weight(.semibold)).foregroundStyle(.white)
+      .viewerPadding(.horizontal, 10).viewerPadding(.vertical, 5)
       .background(.black.opacity(0.7), in: Capsule())
   }
 }

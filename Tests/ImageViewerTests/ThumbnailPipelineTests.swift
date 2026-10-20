@@ -57,6 +57,35 @@ struct ThumbnailPipelineTests {
     #expect(cache.image(for: key(0)) == nil)
   }
 
+  @Test("예산 축소·교체·비우기 뒤에도 파일 버전과 실제 크기에 맞는 픽셀만 재사용한다")
+  func browsingReuseSurvivesEvictionReplacementAndClear() throws {
+    let pixels = try image(side: 256)
+    let cost = pixels.bytesPerRow * pixels.height
+    let original = ImageAsset(url: URL(fileURLWithPath: "/test/replaced.dng"),
+      byteCount: 10, modificationDate: Date(timeIntervalSinceReferenceDate: 0))
+    let replaced = ImageAsset(url: original.url, byteCount: 11,
+      modificationDate: Date(timeIntervalSinceReferenceDate: 1))
+    let oldKey = ThumbnailCacheKey(asset: original, pixelSize: 1024, isBrowsingPreview: true)
+    let newKey = ThumbnailCacheKey(asset: replaced, pixelSize: 512)
+    var cache = ThumbnailMemoryCache(byteLimit: cost * 3)
+    cache.insert(pixels, for: oldKey)
+    cache.insert(pixels, for: key(0))
+    cache.insert(pixels, for: newKey)
+    cache.setByteLimit(cost)
+    #expect(cache.browsingImage(for: ThumbnailCacheKey(asset: original, pixelSize: 128)) == nil)
+    #expect(cache.image(for: ThumbnailCacheKey(asset: replaced, pixelSize: 256)) === pixels)
+    #expect(cache.count == 1)
+    #expect(cache.totalBytes == cost)
+    cache.removeAll()
+    cache.insert(pixels, for: oldKey)
+    #expect(cache.browsingImage(for: newKey) == nil)
+    #expect(cache.image(for: ThumbnailCacheKey(asset: original, pixelSize: 384)) == nil)
+    #expect(cache.image(for: ThumbnailCacheKey(asset: original, pixelSize: 256)) === pixels)
+    cache.setByteLimit(0)
+    #expect(cache.browsingImage(for: oldKey) == nil)
+    #expect(cache.totalBytes == 0)
+  }
+
   @Test("continuation 등록 전 취소도 네이티브 콜백 없이 즉시 완료된다")
   func cancellationBeforeRegistration() async {
     let completion = ThumbnailRequestCompletion<Int>()
@@ -107,6 +136,46 @@ struct ThumbnailPipelineTests {
     cache.insert(small, for: regular)
     #expect(cache.browsingImage(for: browsing) === small)
     #expect(cache.totalBytes == cost)
+  }
+
+  @Test("탐색 미리보기의 실제 픽셀이 충분하면 지도·필름스트립에서 재사용한다")
+  func browsingPixelsCanSatisfySmallerExactThumbnail() throws {
+    let asset = ImageAsset(url: URL(fileURLWithPath: "/test/preview-reuse.dng"),
+      byteCount: 10, modificationDate: Date(timeIntervalSinceReferenceDate: 0))
+    let preview = try image(side: 256)
+    var cache = ThumbnailMemoryCache(byteLimit: 1_000_000)
+    cache.insert(preview, for: ThumbnailCacheKey(asset: asset, pixelSize: 1024,
+      isBrowsingPreview: true))
+    let bytes = cache.totalBytes
+    #expect(cache.image(for: ThumbnailCacheKey(asset: asset, pixelSize: 128)) === preview)
+    #expect(cache.image(for: ThumbnailCacheKey(asset: asset, pixelSize: 256)) === preview)
+    #expect(cache.image(for: ThumbnailCacheKey(asset: asset, pixelSize: 384)) == nil)
+    #expect(cache.count == 1)
+    #expect(cache.totalBytes == bytes)
+    let replaced = ImageAsset(url: asset.url, byteCount: 11,
+      modificationDate: Date(timeIntervalSinceReferenceDate: 1))
+    #expect(cache.image(for: ThumbnailCacheKey(asset: replaced, pixelSize: 128)) == nil)
+  }
+
+  @Test("빠르게 지나친 RAW 셀은 저장장치 조회나 디코딩을 시작하지 않는다")
+  func transientRAWThumbnailCancelsBeforeAdmission() async throws {
+    actor Lookups {
+      var count = 0
+      func resolve() -> ImageStorageKind { count += 1; return .internalSSD }
+    }
+    let lookups = Lookups()
+    let governor = ImageResourceGovernor(storageResolver: { _ in await lookups.resolve() })
+    let pipeline = ThumbnailPipeline(governor: governor)
+    let task = Task {
+      try await pipeline.thumbnail(for: ImageAsset(
+        url: URL(fileURLWithPath: "/nonexistent/scrolling.dng"), byteCount: 50_000_000,
+        modificationDate: nil), maxPixelSize: 256, waitsForStableVisibility: true).width
+    }
+    try await Task.sleep(for: .milliseconds(10))
+    task.cancel()
+    await #expect(throws: CancellationError.self) { try await task.value }
+    #expect(await lookups.count == 0)
+    #expect(await pipeline.cacheSnapshot().entryCount == 0)
   }
 
   @Test("지도·몽땅보기 사이 크기가 줄면 충분한 썸네일을 중복 디코딩 없이 재사용한다")
@@ -333,6 +402,7 @@ struct ThumbnailBitmapDecoderTests {
     let source = try #require(CGImageSourceCreateWithURL(url as CFURL,
       [kCGImageSourceShouldCache: false] as CFDictionary))
     #expect(try ThumbnailBitmapDecoder.embeddedThumbnail(in: source, maxPixelSize: 512) == nil)
+    #expect(try ThumbnailBitmapDecoder.embeddedOverviewThumbnail(sourceURL: url) == nil)
     let reduced = try #require(try ThumbnailBitmapDecoder.directThumbnail(sourceURL: url,
       maxPixelSize: 512))
     #expect(reduced.width == 512)
@@ -352,6 +422,16 @@ struct ThumbnailBitmapDecoderTests {
       maxPixelSize: 512))
     #expect(embedded.width < embedded.height)
     #expect(embedded.height < 512)
+    #expect(try ThumbnailBitmapDecoder.embeddedOverviewThumbnail(sourceURL: url,
+      maxPixelSize: 512) == nil)
+    let compact = try #require(try ThumbnailBitmapDecoder.embeddedOverviewThumbnail(sourceURL: url,
+      maxPixelSize: 96))
+    let previousCompact = try #require(try ThumbnailBitmapDecoder.directThumbnail(sourceURL: url,
+      maxPixelSize: 96))
+    #expect(compact.width == previousCompact.width)
+    #expect(compact.height == previousCompact.height)
+    #expect(compact.colorSpace?.copyICCData() == previousCompact.colorSpace?.copyICCData())
+    #expect(compact.dataProvider?.data == previousCompact.dataProvider?.data)
     let browsing = try #require(try ThumbnailBitmapDecoder.browsingThumbnail(sourceURL: url,
       maxPixelSize: 512))
     #expect(browsing.width == embedded.width)
@@ -440,6 +520,10 @@ struct ThumbnailBitmapDecoderTests {
     #expect(first.height == 256)
     let otherSize = try await pipeline.browsingThumbnail(for: asset, maxPixelSize: 256)
     #expect(otherSize === first)
+    let filmstrip = try await pipeline.thumbnail(for: asset, maxPixelSize: 128)
+    #expect(filmstrip === first)
+    #expect(filmstrip.width == 512 && filmstrip.height == 256)
+    #expect(await pipeline.cacheSnapshot().entryCount == 1)
     await pipeline.purgeCache()
     let fresh = try await pipeline.browsingThumbnail(for: asset, maxPixelSize: 512)
     #expect(fresh !== first)
@@ -472,6 +556,44 @@ struct ThumbnailBitmapDecoderTests {
     #expect(await pipeline.cacheSnapshot().entryCount == 1)
     let again = try await load()
     #expect(again.image === completed.image)
+  }
+
+  @Test("비우기 전에 대기하던 디코딩은 화면용 결과만 반환하고 RAM·디스크를 다시 채우지 않는다",
+    arguments: [false, true])
+  func pendingThumbnailDoesNotRepopulateClearedCaches(browsing: Bool) async throws {
+    let source = try writeSource(bitmap(width: 800, height: 400, opaque: true))
+    let directory = FileManager.default.temporaryDirectory
+      .appendingPathComponent("ThumbnailPurgeRace-\(UUID())")
+    defer {
+      try? FileManager.default.removeItem(at: source)
+      try? FileManager.default.removeItem(at: directory)
+    }
+    let gate = FirstStorageLookupGate()
+    let governor = ImageResourceGovernor(mode: .priority,
+      storageResolver: { _ in await gate.resolve() })
+    let disk = ThumbnailDiskCache(directory: directory)
+    let pipeline = ThumbnailPipeline(governor: governor, diskCache: disk)
+    let asset = ImageAsset(url: source, byteCount: nil, modificationDate: nil)
+    let load: @Sendable () async throws -> SharedImage = {
+      let image: CGImage
+      if browsing { image = try await pipeline.browsingThumbnail(for: asset, maxPixelSize: 512) }
+      else { image = try await pipeline.thumbnail(for: asset, maxPixelSize: 512) }
+      return SharedImage(image: image)
+    }
+    let pending = Task { try await load() }
+    defer { Task { await gate.release() } }
+    await gate.waitUntilBlocked()
+    #expect(await pipeline.purgeAllCaches())
+    await gate.release()
+    let result = try await pending.value
+    #expect(result.image.width == 512)
+    #expect(await pipeline.cacheSnapshot().byteCount == 0)
+    #expect(await disk.snapshot().byteCount == 0)
+    #expect(!FileManager.default.fileExists(atPath: directory.path))
+    let fresh = try await load()
+    #expect(fresh.image.width == 512)
+    #expect(await pipeline.cacheSnapshot().byteCount > 0)
+    #expect(await disk.snapshot().byteCount > 0)
   }
 
   @Test("취소한 빠른 탐색과 정밀 전용 포맷은 네이티브 요청을 시작하지 않는다")

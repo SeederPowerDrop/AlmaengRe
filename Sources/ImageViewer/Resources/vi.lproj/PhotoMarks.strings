@@ -3,13 +3,13 @@
 "mode.help" = "Khi Phân loại ON, dùng 1–4, QWER và ASDF để bật/tắt nhãn.";
 "mode.toggle" = "Bật/tắt chế độ phân loại";
 "mode.active" = "Chế độ phân loại";
-"mode.unavailable" = "Mở ảnh hoặc video để gắn nhãn.";
+"mode.unavailable" = "Mở tệp để gắn nhãn.";
 "menu.title" = "Nhãn ảnh";
 "menu.edit" = "Sửa tên và màu nhãn…";
 "panel.title" = "Nhãn ảnh";
 "panel.hint" = "← → Chuyển mục · 1–4, QWER, ASDF: nhãn";
-"panel.multipleHint" = "Một ảnh hoặc video có thể có nhiều nhãn.";
-"panel.noPhoto" = "Mở ảnh hoặc video cần phân loại.";
+"panel.multipleHint" = "Một tệp có thể có nhiều nhãn.";
+"panel.noPhoto" = "Mở tệp cần phân loại.";
 "panel.loading" = "Đang tải nhãn ảnh…";
 "panel.close" = "Thoát chế độ phân loại";
 "labels.edit" = "Sửa tên và màu nhãn";
@@ -61,7 +61,7 @@
 "labels.previewFormat" = "%@ → %@";
 "mark.addHelpFormat" = "%@ → %@: khi Phân loại ON, nhấn phím hoặc bấm để thêm; lặp lại để bỏ. Có thể gắn nhiều nhãn và tệp gốc không đổi.";
 "mark.removeHelpFormat" = "%@ → %@: nhãn này đã được gắn. Khi Phân loại ON, nhấn phím hoặc bấm để bỏ. Các nhãn khác và tệp gốc được giữ nguyên.";
-"mode.detailHelp" = "⌘⇧M bật hoặc tắt chế độ gắn nhãn. Khi bật, dùng 1–4, QWER, ASDF hoặc bảng nhãn cho toàn bộ ảnh và video đã chọn. Dùng ô chọn hoặc ⌘-nhấp để chọn nhiều mục, ⇧-nhấp để chọn một khoảng. Menu trên mỗi thẻ chỉ áp dụng cho mục đó. Khi tắt, các phím tắt xem thông thường được sử dụng. Trong So sánh ảnh, chọn Chỉ A, Chỉ B hoặc Cả hai.";
+"mode.detailHelp" = "⌘⇧M bật hoặc tắt chế độ gắn nhãn. Khi bật, dùng 1–4, QWER, ASDF hoặc bảng nhãn cho toàn bộ tệp đã chọn. Dùng ô chọn hoặc ⌘-nhấp để chọn nhiều mục, ⇧-nhấp để chọn một khoảng. Menu trên mỗi thẻ chỉ áp dụng cho mục đó. Khi tắt, các phím tắt xem thông thường được sử dụng. Trong So sánh ảnh, chọn Chỉ A, Chỉ B hoặc Cả hai.";
 "labels.settingsLink" = "Sửa tên và màu nhãn…";
 "labels.revert" = "Hủy thay đổi";
 "labels.revertHelp" = "Khôi phục tên và màu nhãn đã lưu mà không đóng Cài đặt. Các thay đổi chưa lưu sẽ bị hủy.";
@@ -98,7 +98,7 @@
 
 "card.title" = "Nhãn";
 
-"card.help" = "Chọn nhãn cho ảnh hoặc video này.";
+"card.help" = "Chọn nhãn cho tệp này.";
 
 "card.accessibilityFormat" = "Nhãn của %@";
 
@@ -122,7 +122,7 @@
 
 "panel.selectionHint" = "Ô chọn hoặc ⌘-nhấp để thêm mục; ⇧-nhấp để chọn một khoảng. Phím nhãn và bảng áp dụng cho toàn bộ mục đã chọn; menu trên thẻ chỉ áp dụng cho mục đó.";
 
-"selection.help" = "Thêm hoặc bỏ mục này khỏi vùng chọn. Phím nhãn và nút trên bảng áp dụng cho toàn bộ ảnh và video đã chọn.";
+"selection.help" = "Thêm hoặc bỏ mục này khỏi vùng chọn. Phím nhãn và nút trên bảng áp dụng cho toàn bộ tệp đã chọn.";
 
 "selection.accessibilityFormat" = "Chọn %@";
 
@@ -136,4 +136,18 @@
 "inheritance.originals" = "Di chuyển tệp gốc hoặc khôi phục từ Thùng rác sẽ giữ nguyên nhãn, bất kể các tùy chọn này.";
 
 "panel.viewerSelectionHint" = "%@ Chọn ảnh";
-"panel.viewerSelectionHelp" = "Dùng %@ để chọn từng ảnh hoặc video trên trang hiện tại. Khi đến đầu hoặc cuối trang, lựa chọn chuyển vòng sang đầu bên kia của cùng trang. Bật chế độ phân loại, rồi dùng các phím 1–4, QWER, ASDF để gắn nhãn cho mục đã chọn.";
+"panel.viewerSelectionHelp" = "Dùng %@ để chuyển lựa chọn theo vị trí khung: trái/phải trong cùng hàng, lên/xuống ở cột gần nhất. Khi đến cuối hàng hoặc cột, lựa chọn chuyển vòng sang đầu bên kia. Bật chế độ phân loại, rồi dùng 1–4, QWER, ASDF để gắn nhãn cho mục đã chọn.";
+
+/* Include/exclude conditions stay within the currently opened collection. */
+"filter.scope" = "Chỉ tìm trong các thư mục và tệp đang mở.";
+"filter.conditions" = "Điều kiện nhãn";
+"filter.includeCountFormat" = "Bao gồm · %d";
+"filter.excludeCountFormat" = "Loại trừ · %d";
+"filter.includeHelp" = "Chọn nhãn cần bao gồm. Bên dưới, chọn khớp bất kỳ hay tất cả các nhãn này.";
+"filter.excludeHelp" = "Loại tệp có bất kỳ nhãn nào đã chọn. Ví dụ: bao gồm S và loại trừ E.";
+"filter.included" = "Bao gồm";
+"filter.excluded" = "Loại trừ";
+"filter.ignored" = "Không điều kiện";
+"filter.includeRule" = "Khớp các nhãn bao gồm";
+"filter.includeSummaryFormat" = "Bao gồm: %@";
+"filter.excludeSummaryFormat" = "Loại trừ: %@";

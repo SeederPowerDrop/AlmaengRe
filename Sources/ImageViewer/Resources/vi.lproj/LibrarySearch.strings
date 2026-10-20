@@ -3,7 +3,7 @@
 "wildcard.hint" = "Dùng * hoặc % thay cho ký tự chưa biết: img* · *.png · *chuyến đi* · * (tất cả). Văn bản thường khớp một phần tên tệp.";
 "metadata.title" = "Thông tin chụp · Siêu dữ liệu";
 "metadata.placeholder" = "Máy ảnh, ống kính, ISO, mô tả, từ khóa…";
-"metadata.hint" = "Tìm thông tin EXIF/IPTC và thẻ video được lưu trong tệp.";
+"metadata.hint" = "Tìm thông tin EXIF/IPTC và thẻ video hoặc âm thanh trong tệp.";
 "location.title" = "Vị trí";
 "location.placeholder" = "Tên thành phố/quốc gia đã lưu hoặc tọa độ GPS…";
 "location.hint" = "Tìm địa danh và tọa độ đã ghi. Không chuyển tọa độ GPS thành địa danh.";

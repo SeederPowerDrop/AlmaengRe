@@ -14,6 +14,7 @@ struct AboutLayoutTests {
     // Keep the width below the production window's usual 1,000 points, so a
     // narrower screen also exercises the longest translated paragraphs.
     let root = AboutView(localeIdentifier: language, width: 960)
+      .font(ViewerUIMetrics.font(.body))
       .environment(\.colorScheme, isDark ? .dark : .light)
     let host = NSHostingView(rootView: root)
     host.appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)

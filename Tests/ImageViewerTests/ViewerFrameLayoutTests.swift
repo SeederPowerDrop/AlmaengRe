@@ -203,6 +203,92 @@ struct ViewerFrameLayoutTests {
     #expect(abs(geometry.frames[2].rect.width - 80) < 0.001)
     #expect(configuration.rowTarget(from: 0, direction: 1, in: size) == 2)
   }
+
+  @Test("여섯 장의 네 방향 선택은 행·열을 유지하며 해당 방향의 반대쪽 끝으로 순환한다")
+  func spatialSelectionFollowsRowsAndColumns() {
+    let configuration = ViewerFrameLayoutConfiguration(count: 6)
+    let cases: [(direction: ViewerSelectionDirection, targets: [Int])] = [
+      (.left, [2, 0, 1, 5, 3, 4]), (.right, [1, 2, 0, 4, 5, 3]),
+      (.up, [3, 4, 5, 0, 1, 2]), (.down, [3, 4, 5, 0, 1, 2]),
+    ]
+    for item in cases {
+      for source in 0..<6 {
+        #expect(configuration.selectionTarget(from: source, direction: item.direction) == item.targets[source])
+      }
+    }
+  }
+
+  @Test("프레임을 교환하면 네 방향 선택은 파일 번호 대신 바뀐 위치를 따른다")
+  func spatialSelectionFollowsSwappedFrames() {
+    let configuration = ViewerFrameLayoutConfiguration(count: 4).swapping(0, with: 3)
+    #expect(configuration.rows.map(\.slots) == [[3, 1], [2, 0]])
+    let cases: [(direction: ViewerSelectionDirection, targets: [Int])] = [
+      (.left, [2, 3, 0, 1]), (.right, [2, 3, 0, 1]),
+      (.up, [1, 0, 3, 2]), (.down, [1, 0, 3, 2]),
+    ]
+    for item in cases {
+      for source in 0..<4 {
+        #expect(configuration.selectionTarget(from: source, direction: item.direction) == item.targets[source])
+      }
+    }
+  }
+
+  @Test("짧은 행과 맨 위·아래의 순환도 가장 가까운 가로 중심을 고른다")
+  func spatialSelectionUsesNearestCenterOnUnequalRows() {
+    let configuration = ViewerFrameLayoutConfiguration(count: 7, preset: .customColumns, columns: 3)
+    #expect(configuration.selectionTarget(from: 6, direction: .left) == 6)
+    #expect(configuration.selectionTarget(from: 6, direction: .right) == 6)
+    #expect(configuration.selectionTarget(from: 6, direction: .up) == 4)
+    #expect(configuration.selectionTarget(from: 6, direction: .down) == 1)
+    #expect(configuration.selectionTarget(from: 1, direction: .up) == 6)
+    #expect(configuration.selectionTarget(from: 5, direction: .down) == 6)
+  }
+
+  @Test("프레임 너비 변경과 좁은 화면의 최소 너비가 네 방향 선택의 실제 중심에 반영된다")
+  func spatialSelectionUsesResizingAndClampedGeometry() throws {
+    let original = ViewerFrameLayoutConfiguration(count: 5)
+    let large = CGSize(width: 1_200, height: 800)
+    let divider = try #require(original.geometry(in: large).dividers.first { $0.row == 1 })
+    let resized = original.resizing(divider, translation: CGSize(width: -400, height: 0), in: large)
+    #expect(original.selectionTarget(from: 1, direction: .down, in: large) == 3)
+    #expect(resized.selectionTarget(from: 1, direction: .down, in: large) == 4)
+    #expect(resized.selectionTarget(from: 1, direction: .up, in: large) == 4)
+    #expect(resized.selectionTarget(from: 0, direction: .right, in: large) == 1)
+
+    var narrow = ViewerFrameLayoutConfiguration(count: 4)
+    narrow.rows[0].widths = [0.8, 0.2]
+    narrow.rows[1].widths = [0.2, 0.8]
+    for direction in [ViewerSelectionDirection.up, .down] {
+      #expect(narrow.selectionTarget(from: 0, direction: direction, in: large) == 3)
+      #expect(narrow.selectionTarget(from: 0, direction: direction,
+        in: CGSize(width: 200, height: 400)) == 2)
+      #expect(narrow.selectionTarget(from: 3, direction: direction, in: large) == 0)
+      #expect(narrow.selectionTarget(from: 3, direction: direction,
+        in: CGSize(width: 200, height: 400)) == 1)
+    }
+  }
+
+  @Test("한 행의 위아래·한 열의 좌우·한 프레임의 모든 방향은 제자리에 머문다")
+  func spatialSelectionStaysWhenNoNeighborAxisExists() {
+    let row = ViewerFrameLayoutConfiguration(count: 4, preset: .horizontal)
+    let column = ViewerFrameLayoutConfiguration(count: 4, preset: .vertical)
+    for source in 0..<4 {
+      for direction in [ViewerSelectionDirection.up, .down] {
+        #expect(row.selectionTarget(from: source, direction: direction) == source)
+      }
+      for direction in [ViewerSelectionDirection.left, .right] {
+        #expect(column.selectionTarget(from: source, direction: direction) == source)
+      }
+    }
+    #expect(row.selectionTarget(from: 3, direction: .right) == 0)
+    #expect(column.selectionTarget(from: 3, direction: .down) == 0)
+    for direction in ViewerSelectionDirection.allCases {
+      #expect(ViewerFrameLayoutConfiguration(count: 1).selectionTarget(from: 0, direction: direction) == 0)
+      #expect(ViewerFrameLayoutConfiguration(count: 0).selectionTarget(from: 0, direction: direction) == 0)
+      #expect(row.selectionTarget(from: -1, direction: direction) == -1)
+      #expect(row.selectionTarget(from: 99, direction: direction) == 99)
+    }
+  }
 }
 
 @Suite("프레임 배치 저장과 복원")
@@ -218,6 +304,11 @@ struct ViewerFrameLayoutStoreTests {
       store.set(configuration, for: 4, persist: false)
       #expect(store.rowTarget(from: 0, direction: 1, count: 4) == 3)
       #expect(store.rowTarget(from: 0, direction: 1, count: 4, in: CGSize(width: 200, height: 400)) == 2)
+      for direction in [ViewerSelectionDirection.up, .down] {
+        #expect(store.selectionTarget(from: 0, direction: direction, count: 4) == 3)
+        #expect(store.selectionTarget(from: 0, direction: direction, count: 4,
+          in: CGSize(width: 200, height: 400)) == 2)
+      }
     }
   }
 

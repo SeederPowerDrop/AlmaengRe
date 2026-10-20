@@ -1,0 +1,16 @@
+/* Image fitting menu and contextual help. */
+"menu.image" = "画像の合わせ方";
+"menu.frame" = "枠の合わせ方";
+"menu.help" = "画像全体、幅・高さ、中央への移動、実際のサイズから選びます。";
+"menu.frameHelp" = "枠内に画像全体を表示するか、中央へ移動するかを選びます。";
+"whole.title" = "画像全体を表示";
+"whole.help" = "縦横比を保ち、画像全体が見える大きさに合わせます。";
+"frame.wholeHelp" = "各画像の縦横比を保ち、枠内に全体が収まる大きさに合わせます。";
+"width.title" = "左右の余白を埋める";
+"width.help" = "縦横比を保って幅を合わせます。画像の上下が切れる場合があります。";
+"height.title" = "上下の余白を埋める";
+"height.help" = "縦横比を保って高さを合わせます。画像の左右が切れる場合があります。";
+"center.title" = "中央へ移動";
+"center.help" = "拡大率を変えずに画像を中央へ移動します。";
+"actual.title" = "実際のサイズ (1:1)";
+"actual.help" = "画像の1ピクセルを画面の1ピクセルで表示します。";

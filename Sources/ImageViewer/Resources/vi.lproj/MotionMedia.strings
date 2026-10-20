@@ -1,7 +1,7 @@
 "items.count" = "%d mục";
-"open.message" = "Chọn hình ảnh, video được hỗ trợ, thư mục hoặc tệp ZIP.";
-"showVideos" = "Hiển thị video";
-"showVideos.help" = "Hiển thị ảnh và video trong thư mục cùng nhau. Mặc định bật và ghi nhớ lựa chọn của bạn. GIF luôn hiển thị dù chọn cách nào.";
+"open.message" = "Chọn ảnh, video, âm thanh, thư mục hoặc tệp ZIP.";
+"showVideos" = "Video / âm thanh";
+"showVideos.help" = "Hiển thị ảnh, video và âm thanh trong thư mục cùng nhau. Mặc định bật và ghi nhớ lựa chọn của bạn. GIF luôn hiển thị dù chọn cách nào.";
 "editor.open" = "Khung hình và đoạn phim…";
 "editor.title" = "Khung hình và đoạn phim";
 "video.unavailable" = "Không thể phát video";
@@ -48,18 +48,18 @@
 "saved" = "Đã lưu %@ · %@";
 "cancelled" = "Đã hủy. Tệp đầu ra chưa hoàn tất đã được xóa.";
 "basicUsage" = "Dùng Khung hình và đoạn phim trên video hoặc GIF để duyệt từng khung hình, trích xuất PNG, lưu đoạn phim hoặc giảm dung lượng.";
-"hiddenVideos" = "Video đang bị ẩn. Bật Hiển thị video để xem.";
-"supported" = "Video: MP4, MOV và các định dạng khác mà macOS có thể giải mã. Khả năng hỗ trợ tùy thuộc vào định dạng vùng chứa và codec bên trong. Không cần cài đặt codec bên ngoài.";
-"video.error.sourceUnavailable" = "Không thể truy cập tệp video gốc.";
+"hiddenVideos" = "Video và âm thanh đang bị ẩn. Bật Video / âm thanh để xem.";
+"supported" = "Video và âm thanh: MP4, MOV, MP3, M4A, WAV và các tệp khác mà macOS giải mã được. Khả năng phát tùy thuộc vào định dạng và codec bên trong tệp. Không cài codec bên ngoài.";
+"video.error.sourceUnavailable" = "Không thể truy cập tệp gốc.";
 "video.error.noVideoTrack" = "Tệp này không có luồng video có thể đọc được.";
-"video.error.invalidDuration" = "Không thể xác định thời lượng video.";
+"video.error.invalidDuration" = "Không xác định được thời lượng của tệp.";
 "video.error.invalidDimensions" = "Không thể xác định kích thước khung hình video.";
 "video.error.invalidRange" = "Đặt điểm bắt đầu và kết thúc trong thời lượng video, với điểm kết thúc sau điểm bắt đầu.";
 "video.error.invalidFrameTime" = "Chọn thời điểm khung hình trong thời lượng video.";
 "video.error.protectedContent" = "Không thể lưu khung hình hoặc đoạn phim từ video được bảo vệ.";
 "video.error.notExportable" = "macOS không thể xuất video này.";
 "video.error.sourceOverwrite" = "Không thể ghi đè tệp video gốc.";
-"video.error.sourceChanged" = "Video gốc đã thay đổi trong khi xử lý. Hãy mở lại video.";
+"video.error.sourceChanged" = "Tệp gốc đã thay đổi trong khi thao tác. Hãy mở lại tệp.";
 "video.error.invalidDestination" = "Chọn thư mục đích và tên tệp có phần mở rộng phù hợp với định dạng đã chọn.";
 "video.error.destinationExists" = "Đã có tệp hoặc thư mục cùng tên.";
 "video.error.unsupportedPreset" = "Video này không hỗ trợ chất lượng xuất đã chọn.";
@@ -124,3 +124,17 @@
 
 "study.automaticHint" = "Tự động bật phụ đề có tên khớp với video. Ưu tiên ngôn ngữ ứng dụng và hiển thị đồng thời tối đa hai ngôn ngữ khác nhau.";
 "study.fontsLoading" = "Đang tải phông chữ…";
+
+"audio.title" = "Âm thanh";
+
+"audio.play" = "Phát âm thanh";
+
+"audio.pause" = "Tạm dừng âm thanh";
+
+"audio.ready" = "Sẵn sàng phát";
+
+"audio.unavailable" = "Không thể phát âm thanh";
+
+"audio.help" = "Dùng codec có sẵn của macOS. Khả năng phát tùy thuộc vào định dạng và codec bên trong tệp.";
+
+"audio.manageHint" = "Quản lý âm thanh bằng cách phát, gắn nhãn, đổi tên và di chuyển tệp.";

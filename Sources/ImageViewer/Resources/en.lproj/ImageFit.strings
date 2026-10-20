@@ -1,0 +1,16 @@
+/* Image fitting menu and contextual help. */
+"menu.image" = "Image fit";
+"menu.frame" = "Frame fit";
+"menu.help" = "Choose the whole image, width or height fit, centering, or actual size.";
+"menu.frameHelp" = "Choose the whole image or centering within each frame.";
+"whole.title" = "Show entire image";
+"whole.help" = "Fit the whole image while preserving its proportions.";
+"frame.wholeHelp" = "Fit each whole image inside its frame while preserving its proportions.";
+"width.title" = "Fill left/right margins";
+"width.help" = "Fit the width while preserving proportions. The top or bottom may be cropped.";
+"height.title" = "Fill top/bottom margins";
+"height.help" = "Fit the height while preserving proportions. The left or right may be cropped.";
+"center.title" = "Move to center";
+"center.help" = "Center the image without changing the zoom level.";
+"actual.title" = "Actual size (1:1)";
+"actual.help" = "Display one image pixel per screen pixel.";

@@ -213,6 +213,38 @@ struct PhotoMarkIntegrationTests {
     #expect(store.assets.count == 4 && !store.hasLibraryQuery)
   }
 
+  @Test("포함 S·제외 E는 현재 열린 폴더만 거르고 다른 폴더의 저장된 분류를 끌어오지 않는다")
+  func includeExcludeFiltersStayWithinOpenedFolder() async throws {
+    let fixture = try Fixture()
+    let store = fixture.makeStore()
+    defer { cleanup(store, fixture: fixture) }
+    try await openPhotos(store, fixture: fixture)
+    let photos = store.assets
+    let outside = try fixture.makeFolder("OtherFolder", names: ["outside.png"])
+    let otherAssets = try await ImageLibrary().scan(folder: outside)
+    try #require(otherAssets.count == 1)
+    store.photoMarks.set(.s, enabled: true, for: [photos[0], photos[1]] + otherAssets)
+    store.photoMarks.set(.e, enabled: true, for: [photos[1], photos[2]])
+    try #require(await store.photoMarks.flushAsync())
+
+    store.photoMarkFilter = PhotoMarkFilter(slots: [.s], excludedSlots: [.e])
+    try await ready(store)
+    #expect(store.assets.map(\.filename) == ["photo1.png"])
+    #expect(store.allAssets.map(\.url) == photos.map(\.url))
+    #expect(store.photoMarks.marks(for: otherAssets[0]) == [.s])
+    #expect(!store.assets.contains { $0.url == otherAssets[0].url })
+
+    store.photoMarkFilter = PhotoMarkFilter(excludedSlots: [.e])
+    try await ready(store)
+    #expect(store.assets.map(\.filename) == ["photo1.png", "photo4.png"])
+    store.libraryQuery.searchText = "photo4"
+    try await ready(store)
+    #expect(store.assets.map(\.filename) == ["photo4.png"])
+    store.resetLibraryQuery()
+    try await ready(store)
+    #expect(store.assets.map(\.url) == photos.map(\.url))
+  }
+
   @Test("실제 파일명 일괄 변경 뒤에도 사진 분류를 새 경로로 옮기고 재실행해 읽는다")
   func appRenameTransfersPersistentMarks() async throws {
     let fixture = try Fixture()

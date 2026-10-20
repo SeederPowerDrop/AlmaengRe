@@ -30,17 +30,17 @@ struct MetadataEditorView: View {
     VStack(spacing: 0) {
       HStack(spacing: 10) {
         Image(systemName: "info.circle.fill")
-          .font(.title2)
+          .font(ViewerUIMetrics.font(.title2))
         VStack(alignment: .leading, spacing: 2) {
           Text("이미지 정보 수정")
-            .font(.headline)
+            .font(ViewerUIMetrics.font(.headline))
           Text("계산된 이미지 속성은 그대로 두고 파일 및 표준 메타데이터를 수정합니다.")
-            .font(.caption)
+            .font(ViewerUIMetrics.font(.caption))
             .foregroundStyle(.secondary)
         }
         Spacer()
       }
-      .padding(18)
+      .viewerPadding(18)
 
       Divider()
 
@@ -62,7 +62,7 @@ struct MetadataEditorView: View {
 
       HStack {
         Text("저장 전 임시 파일을 완성한 뒤 원본 경로를 교체합니다.")
-          .font(.caption)
+          .font(ViewerUIMetrics.font(.caption))
           .foregroundStyle(.secondary)
         Spacer()
         Button("취소", role: .cancel) { dismiss() }
@@ -80,9 +80,9 @@ struct MetadataEditorView: View {
         .keyboardShortcut(.defaultAction)
         .disabled(draft == originalDraft || store.isSavingMetadata)
       }
-      .padding(16)
+      .viewerPadding(16)
     }
-    .frame(width: 640, height: 720)
+    .viewerFrame(width: 640, height: 720)
     .interactiveDismissDisabled(store.isSavingMetadata)
     .alert(item: $presentedAlert) { alert in
       Alert(
@@ -102,7 +102,7 @@ struct MetadataEditorView: View {
         displayedComponents: [.date, .hourAndMinute]
       )
       Text("확장자를 바꾸려면 e 편집 패널의 ‘다른 형식으로 저장’을 사용하세요.")
-        .font(.caption)
+        .font(ViewerUIMetrics.font(.caption))
         .foregroundStyle(.secondary)
     }
   }
@@ -115,7 +115,7 @@ struct MetadataEditorView: View {
           "이 형식은 내장 메타데이터의 무손실 수정을 지원하지 않아 파일 이름과 수정일만 변경할 수 있습니다.",
           systemImage: "exclamationmark.triangle"
         )
-        .font(.caption)
+        .font(ViewerUIMetrics.font(.caption))
         .foregroundStyle(.secondary)
       }
     }
@@ -129,7 +129,7 @@ struct MetadataEditorView: View {
       TextField("저작권", text: $draft.copyright)
       TextField("소프트웨어", text: $draft.software)
       Text("값을 비우고 저장하면 해당 태그를 제거합니다.")
-        .font(.caption)
+        .font(ViewerUIMetrics.font(.caption))
         .foregroundStyle(.secondary)
     }
   }
@@ -154,7 +154,7 @@ struct MetadataEditorView: View {
       TextField("렌즈", text: $draft.lensModel)
       TextField("촬영 시각", text: $draft.capturedAt)
       Text("예: 2025:11:30 12:10:00 또는 ISO 8601")
-        .font(.caption)
+        .font(ViewerUIMetrics.font(.caption))
         .foregroundStyle(.secondary)
 
       HStack {
@@ -162,7 +162,7 @@ struct MetadataEditorView: View {
         TextField("조리개", text: $draft.aperture)
       }
       Text("노출 시간은 0.008 또는 1/125처럼 입력할 수 있습니다.")
-        .font(.caption)
+        .font(ViewerUIMetrics.font(.caption))
         .foregroundStyle(.secondary)
 
       HStack {
@@ -188,7 +188,7 @@ struct MetadataEditorView: View {
       }
 
       Text("GPS를 끄고 저장하면 표준 EXIF/XMP 위치 태그를 제거합니다.")
-        .font(.caption)
+        .font(ViewerUIMetrics.font(.caption))
         .foregroundStyle(.secondary)
     }
   }

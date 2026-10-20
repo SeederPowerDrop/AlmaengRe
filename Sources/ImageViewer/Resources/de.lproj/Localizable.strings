@@ -440,7 +440,7 @@
 "전자 앨범 반복 재생" = "Fotoalbum wiederholen";
 "%d초 간격" = "Alle %d Sekunden";
 "전자 앨범 재생 완료" = "Fotoalbum beendet";
-"1~300초. 사진은 표시된 뒤 시간을 세고, 영상은 끝까지 재생한 뒤 넘어갑니다. 집중 보기를 나가거나 다른 앱으로 전환하면 일시정지합니다." = "1–300 Sekunden ab dem Erscheinen jedes Fotos. Videos werden vor dem Weiterblättern bis zum Ende abgespielt. Beim Verlassen des Fokusmodus oder Wechseln der App pausiert die Wiedergabe.";
+"1~300초. 사진은 표시된 뒤 시간을 세고, 영상은 끝까지 재생한 뒤 넘어갑니다. 집중 보기를 나가거나 다른 앱으로 전환하면 일시정지합니다." = "1–300 Sekunden. Bei Fotos beginnt die Zeit nach der Anzeige; Video und Audio werden vor dem Weiterblättern bis zum Ende abgespielt. Beim Verlassen der Fokusansicht oder beim App-Wechsel wird pausiert.";
 "탐색 → 전자 앨범 또는 집중 보기 하단의 재생 버튼으로 시작합니다. 사진 두 장 이상 또는 영상이 있으면 재생할 수 있습니다." = "Starten Sie über Navigation → Fotoalbum oder die Wiedergabetaste im Fokusmodus. Mindestens zwei Fotos oder ein Video sind erforderlich.";
 "현재 이미지를 바탕화면으로 설정" = "Aktuelles Bild als Hintergrund festlegen";
 "사진 전체 맞춤" = "Gesamtes Foto einpassen";
@@ -817,7 +817,7 @@
 "aiPreview.basicUsage" = "In der KI-Vergrößerung den Zoom anpassen und die Trennlinie ziehen, um Original und Ergebnis zu vergleichen. Danach eine PNG-Kopie sichern.";
 
 /* Branded home and recent-photo history */
-"home.subtitle" = "Entdecke Momente in Fotos und Videos und ordne sie auf deine Weise.";
+"home.subtitle" = "Entdecke Fotos, Videos und Audio und ordne sie auf deine Art.";
 "home.recent" = "Zuletzt geöffnete Ordner";
 "home.recent.detail" = "Bis zu 3 zuletzt geöffnete Ordner, neueste zuerst, mit jeweils bis zu 4 Bildern, die du zuletzt angesehen oder verwendet hast.";
 "home.empty" = "Noch keine zuletzt geöffneten Ordner";
@@ -853,10 +853,23 @@
 "appearance.dark" = "Dunkel";
 "appearance.help" = "Im Systemmodus wird automatisch das Erscheinungsbild von macOS übernommen.";
 
-"%@ 영상을 재생할 수 없어 전자 앨범을 일시정지했습니다." = "Das Fotoalbum wurde pausiert, weil das Video %@ nicht abgespielt werden konnte.";
+"%@ 영상을 재생할 수 없어 전자 앨범을 일시정지했습니다." = "Das Fotoalbum wurde pausiert, weil die Datei %@ nicht abgespielt werden konnte.";
 "‘%@’은 비어 있는 파일입니다(0바이트). 원본이나 백업에서 다시 복사해 주세요." = "„%@“ ist eine leere Datei (0 Byte). Kopiere sie erneut vom Original oder aus einer Sicherung.";
 
 "지원 이미지 모두 연결" = "Alle unterstützten Bildformate zuordnen";
-"Finder에서 이미지를 열면 한 장 보기로 시작합니다. 이미지·영상·폴더를 창에 끌어 놓아도 열 수 있습니다." = "Bilder aus dem Finder werden in der Einzelbildansicht geöffnet. Du kannst auch Bilder, Videos und Ordner zum Öffnen in das Fenster ziehen.";
+"Finder에서 이미지를 열면 한 장 보기로 시작합니다. 이미지·영상·폴더를 창에 끌어 놓아도 열 수 있습니다." = "Bilder aus dem Finder werden einzeln geöffnet. Du kannst auch Bilder, Videos, Audio und Ordner in das Fenster ziehen, um sie zu öffnen.";
 "연결 확인이 필요한 형식: %@" = "Formate, deren Zuordnung geprüft werden muss: %@";
-"이미지·영상·폴더를 여기에 놓으세요." = "Bilder, Videos oder Ordner hier ablegen.";
+"이미지·영상·폴더를 여기에 놓으세요." = "Bilder, Videos, Audio oder Ordner hier ablegen.";
+
+/* Image cache management */
+"cache.title" = "Bildcache";
+"cache.memoryUsage" = "RAM für wiederverwendbare Bilder: %@";
+"cache.diskUsage" = "Vorschaubilder auf dem Datenträger: %@";
+"cache.usageUnknown" = "Nicht ermittelbar";
+"cache.diskUsageUnavailableHelp" = "Prüfe die Zugriffsrechte für den Cacheordner und aktualisiere die Größe.";
+"cache.calculating" = "Größe wird berechnet…";
+"cache.refresh" = "Größe aktualisieren";
+"cache.clearing" = "Cache wird geleert…";
+"cache.usageHelp" = "RAM schätzt den Speicher wiederverwendbarer Bitmaps, nicht den gesamten App-Speicher. Die Datenträgergröße ist die Summe der gespeicherten Vorschaubilddateien.";
+"cache.clearHelp" = "Originale, Einstellungen und die aktuelle Ansicht bleiben erhalten. Vorschauen werden bei Bedarf neu erstellt.";
+"cache.clearFailed" = "Einige Cachedateien auf dem Datenträger konnten nicht gelöscht werden. Prüfen Sie die verbleibende Größe und versuchen Sie es erneut.";

@@ -39,7 +39,7 @@ struct BatchFileOperationSheet: View {
     VStack(alignment: .leading, spacing: 16) {
       HStack(alignment: .firstTextBaseline) {
         Label(FileOperationsL10n.text(operationKey + ".title"), systemImage: symbol)
-          .font(.title2.bold())
+          .font(ViewerUIMetrics.font(.title2).bold())
         Spacer()
         Text(FileOperationsL10n.format("selected.count", request.assets.count))
           .foregroundStyle(.secondary).monospacedDigit()
@@ -54,7 +54,7 @@ struct BatchFileOperationSheet: View {
         if request.operation != .trash { destinationPicker }
 
         HStack {
-          Text(FileOperationsL10n.text("preview.title")).font(.headline)
+          Text(FileOperationsL10n.text("preview.title")).font(ViewerUIMetrics.font(.headline))
           Spacer()
           if isPlanning { ProgressView().controlSize(.small) }
         }
@@ -63,7 +63,7 @@ struct BatchFileOperationSheet: View {
 
         if let planningError {
           Label(planningError, systemImage: "exclamationmark.triangle")
-            .font(.callout).foregroundStyle(.red)
+            .font(ViewerUIMetrics.font(.callout)).foregroundStyle(.red)
             .fixedSize(horizontal: false, vertical: true).textSelection(.enabled)
         }
       }
@@ -71,8 +71,8 @@ struct BatchFileOperationSheet: View {
       Divider()
       footer
     }
-    .padding(20)
-    .frame(minWidth: 620, idealWidth: 700, maxWidth: 820, minHeight: 460, idealHeight: 560)
+    .viewerPadding(20)
+    .viewerFrame(minWidth: 620, idealWidth: 700, maxWidth: 820, minHeight: 460, idealHeight: 560)
     .interactiveDismissDisabled(isRunning)
     .accessibilityIdentifier("fileOperation.sheet")
     .task(id: destinationFolder) { await updatePreview() }
@@ -84,11 +84,11 @@ struct BatchFileOperationSheet: View {
 
   private var destinationPicker: some View {
     HStack(spacing: 12) {
-      Image(systemName: "folder.fill").font(.title2).foregroundStyle(.secondary)
+      Image(systemName: "folder.fill").font(ViewerUIMetrics.font(.title2)).foregroundStyle(.secondary)
       VStack(alignment: .leading, spacing: 4) {
-        Text(FileOperationsL10n.text("destination.title")).font(.headline)
+        Text(FileOperationsL10n.text("destination.title")).font(ViewerUIMetrics.font(.headline))
         Text(destinationFolder?.path ?? FileOperationsL10n.text("destination.none"))
-          .font(.callout).foregroundStyle(.secondary)
+          .font(ViewerUIMetrics.font(.callout)).foregroundStyle(.secondary)
           .lineLimit(2).truncationMode(.middle)
           .help(destinationFolder?.path ?? "")
           .accessibilityIdentifier("fileOperation.destination")
@@ -98,7 +98,7 @@ struct BatchFileOperationSheet: View {
         .disabled(isRunning)
         .accessibilityIdentifier("fileOperation.chooseDestination")
     }
-    .padding(12)
+    .viewerPadding(12)
     .background(Color.secondary.opacity(0.08), in: RoundedRectangle(cornerRadius: 10))
   }
 
@@ -123,7 +123,7 @@ struct BatchFileOperationSheet: View {
       .opacity(isPlanning ? 0.5 : 1)
     } else {
       List(request.assets) { asset in
-        Label(asset.filename, systemImage: asset.isVideo ? "film" : "photo")
+        Label(asset.filename, systemImage: asset.isAudio ? "waveform" : asset.isVideo ? "film" : "photo")
           .lineLimit(1).truncationMode(.middle).help(asset.url.path)
       }
     }
@@ -134,39 +134,39 @@ struct BatchFileOperationSheet: View {
       Label(FileOperationsL10n.text("result.title"),
         systemImage: result.wasCancelled ? "stop.circle" :
           (result.failures.isEmpty ? "checkmark.circle" : "exclamationmark.triangle"))
-        .font(.headline)
+        .font(ViewerUIMetrics.font(.headline))
       Text(FileOperationsL10n.format("result.summary", result.completed.count, result.failures.count))
         .monospacedDigit()
       if result.wasCancelled {
         Text(FileOperationsL10n.text("result.cancelled"))
-          .font(.callout).foregroundStyle(.secondary)
+          .font(ViewerUIMetrics.font(.callout)).foregroundStyle(.secondary)
         Text(FileOperationsL10n.format("result.remaining",
           max(0, request.assets.count - result.completed.count - result.failures.count)))
-          .font(.caption).foregroundStyle(.secondary).monospacedDigit()
+          .font(ViewerUIMetrics.font(.caption)).foregroundStyle(.secondary).monospacedDigit()
       }
       List {
         ForEach(Array(result.failures.enumerated()), id: \.offset) { _, failure in
           VStack(alignment: .leading, spacing: 4) {
             Label(sourceName(for: failure.sourceURL), systemImage: "exclamationmark.circle")
               .lineLimit(1).truncationMode(.middle)
-            Text(failure.message).font(.caption).textSelection(.enabled)
+            Text(failure.message).font(ViewerUIMetrics.font(.caption)).textSelection(.enabled)
           }
-          .foregroundStyle(.red).padding(.vertical, 3)
+          .foregroundStyle(.red).viewerPadding(.vertical, 3)
         }
         ForEach(result.completed) { entry in
           VStack(alignment: .leading, spacing: 3) {
             Label(entry.displayName, systemImage: "checkmark.circle.fill")
               .lineLimit(1).truncationMode(.middle)
             if request.operation != .trash, let destination = entry.destinationURL {
-              Text(destination.path).font(.caption).foregroundStyle(.secondary)
+              Text(destination.path).font(ViewerUIMetrics.font(.caption)).foregroundStyle(.secondary)
                 .lineLimit(2).truncationMode(.middle).textSelection(.enabled)
             }
           }
-          .padding(.vertical, 3)
+          .viewerPadding(.vertical, 3)
         }
       }
     }
-    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+    .viewerFrame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
   }
 
   private var footer: some View {
@@ -175,7 +175,7 @@ struct BatchFileOperationSheet: View {
         VStack(alignment: .leading, spacing: 5) {
           Text(cancellationRequested ? FileOperationsL10n.text("progress.stopping") :
             FileOperationsL10n.format("progress", progress, request.assets.count))
-            .font(.caption).foregroundStyle(.secondary)
+            .font(ViewerUIMetrics.font(.caption)).foregroundStyle(.secondary)
           ProgressView(value: Double(progress), total: Double(max(1, request.assets.count)))
         }
         Spacer(minLength: 12)

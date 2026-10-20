@@ -16,7 +16,7 @@ struct LibraryFormatMenu: View {
   }
   private var matchingExtensions: [String] {
     let source = searchesAllFormats
-      ? Array(ImageFormatRegistry.knownExtensions.union(MediaFormatRegistry.videoExtensions))
+      ? Array(ImageFormatRegistry.knownExtensions.union(MediaFormatRegistry.videoExtensions).union(MediaFormatRegistry.audioExtensions))
       : folderExtensions
     return LibraryFormatPicker.extensions(source, kind: query.mediaKind, search: extensionSearch)
   }
@@ -41,7 +41,7 @@ struct LibraryFormatMenu: View {
         Label(selectedCount > 0 ? L10n.format("형식 %d", selectedCount)
           : query.mediaKind == .all ? L10n.text("형식") : query.mediaKind.title,
           systemImage: "line.3.horizontal.decrease.circle")
-        Image(systemName: "chevron.down").font(.system(size: 9, weight: .semibold))
+        Image(systemName: "chevron.down").font(ViewerUIMetrics.font(size: 9, weight: .semibold))
       }
     }
     .fixedSize()
@@ -50,10 +50,10 @@ struct LibraryFormatMenu: View {
     .popover(isPresented: $showsPicker, arrowEdge: .bottom) { picker }
   }
 
-  private var picker: some View {
+  var picker: some View {
     VStack(alignment: .leading, spacing: 12) {
       HStack {
-        Text(MediaFormatsL10n.text("picker.title")).font(.headline)
+        Text(MediaFormatsL10n.text("picker.title")).font(ViewerUIMetrics.font(.headline))
         Spacer()
         Button(MediaFormatsL10n.text("picker.reset")) {
           query.formats = []
@@ -90,7 +90,7 @@ struct LibraryFormatMenu: View {
           .accessibilityLabel(MediaFormatsL10n.text("picker.clearSearch"))
         }
       }
-      .padding(9)
+      .viewerPadding(9)
       .background(.quaternary.opacity(0.6), in: RoundedRectangle(cornerRadius: 8))
 
       Picker(MediaFormatsL10n.text("picker.source"), selection: $searchesAllFormats) {
@@ -102,7 +102,7 @@ struct LibraryFormatMenu: View {
 
       ScrollView {
         VStack(alignment: .leading, spacing: 12) {
-          if query.mediaKind != .videos && extensionSearch.isEmpty {
+          if (query.mediaKind == .all || query.mediaKind == .images) && extensionSearch.isEmpty {
             DisclosureGroup(isExpanded: $showsFamilies) {
               LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 7), count: 3), spacing: 7) {
                 ForEach(ImageFormatFilter.allCases) { format in
@@ -114,23 +114,23 @@ struct LibraryFormatMenu: View {
                   }
                 }
               }
-              .padding(.top, 8)
+              .viewerPadding(.top, 8)
             } label: {
-              Text(MediaFormatsL10n.text("families")).font(.callout)
+              Text(MediaFormatsL10n.text("families")).font(ViewerUIMetrics.font(.callout))
             }
           }
           if matchingExtensions.isEmpty {
             VStack(spacing: 10) {
               Image(systemName: "line.3.horizontal.decrease.circle")
-                .font(.title2).foregroundStyle(.secondary)
+                .font(ViewerUIMetrics.font(.title2)).foregroundStyle(.secondary)
               Text(MediaFormatsL10n.text("picker.empty"))
-                .font(.callout).foregroundStyle(.secondary)
+                .font(ViewerUIMetrics.font(.callout)).foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
               if !searchesAllFormats {
                 Button(MediaFormatsL10n.text("picker.supported")) { searchesAllFormats = true }
               }
             }
-            .frame(maxWidth: .infinity, minHeight: 150)
+            .viewerFrame(maxWidth: .infinity, minHeight: 150)
           } else {
             LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 7), count: 4), spacing: 7) {
               ForEach(matchingExtensions, id: \.self) { fileExtension in
@@ -144,17 +144,17 @@ struct LibraryFormatMenu: View {
             }
           }
         }
-        .padding(2)
+        .viewerPadding(2)
       }
-      .frame(height: 230)
+      .viewerFrame(height: 230)
 
       Divider()
       HStack(alignment: .center, spacing: 12) {
         VStack(alignment: .leading, spacing: 3) {
-          Text(selectionSummary).font(.system(size: 12, weight: .medium))
+          Text(selectionSummary).font(ViewerUIMetrics.font(size: 12, weight: .medium))
             .lineLimit(2).help(selectionSummary)
           Text(MediaFormatsL10n.text("picker.hint"))
-            .font(.system(size: 11)).foregroundStyle(.secondary)
+            .font(ViewerUIMetrics.font(size: 11)).foregroundStyle(.secondary)
         }
         Spacer(minLength: 0)
         Button(MediaFormatsL10n.text("picker.done")) { showsPicker = false }
@@ -162,8 +162,8 @@ struct LibraryFormatMenu: View {
           .accessibilityIdentifier("library.formats.done")
       }
     }
-    .padding(16)
-    .frame(width: 440)
+    .viewerPadding(16)
+    .viewerFrame(width: 440)
     .controlSize(.regular)
   }
 }
@@ -177,13 +177,13 @@ private struct FormatChoice: View {
     Button(action: action) {
       HStack(spacing: 4) {
         Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
-          .font(.system(size: 11))
-        Text(title).font(.system(size: 12, weight: .medium)).lineLimit(1)
+          .font(ViewerUIMetrics.font(size: 11))
+        Text(title).font(ViewerUIMetrics.font(size: 12, weight: .medium)).lineLimit(1)
         Spacer(minLength: 0)
       }
       .foregroundStyle(isSelected ? Color.accentColor : Color.primary)
-      .padding(.horizontal, 8)
-      .frame(maxWidth: .infinity, minHeight: 32)
+      .viewerPadding(.horizontal, 8)
+      .viewerFrame(maxWidth: .infinity, minHeight: 32)
       .background(isSelected ? Color.accentColor.opacity(0.14) : Color.secondary.opacity(0.08),
         in: RoundedRectangle(cornerRadius: 7))
       .overlay(RoundedRectangle(cornerRadius: 7)
@@ -199,7 +199,7 @@ private struct FormatChoice: View {
 enum LibraryFormatPicker {
   /// Put familiar formats first; retain uncommon native formats behind search/scroll.
   private static let commonExtensions = ["jpg", "jpeg", "png", "heic", "gif", "webp", "tiff", "bmp",
-    "avif", "jxl", "mp4", "mov", "m4v", "mpeg", "mpg", "qt"]
+    "avif", "jxl", "mp4", "mov", "m4v", "mpeg", "mpg", "qt", "m4a", "mp3", "wav", "aac", "aiff", "caf", "flac"]
 
   static func extensions(_ values: [String], kind: LibraryMediaKind, search: String = "") -> [String] {
     let terms = search.components(separatedBy: CharacterSet.whitespacesAndNewlines
@@ -208,7 +208,10 @@ enum LibraryFormatPicker {
     return Set(values.map(LibraryMediaFilter.normalizedExtension).filter { !$0.isEmpty })
       .filter { value in
         let isVideo = MediaFormatRegistry.videoExtensions.contains(value)
-        return (kind == .all || (kind == .videos ? isVideo : !isVideo))
+        let isAudio = MediaFormatRegistry.audioExtensions.contains(value)
+        let matchesKind = kind == .all || (kind == .videos && isVideo)
+          || (kind == .audio && isAudio) || (kind == .images && !isVideo && !isAudio)
+        return matchesKind
           && (terms.isEmpty || terms.contains { value.contains($0) })
       }
       .sorted { lhs, rhs in

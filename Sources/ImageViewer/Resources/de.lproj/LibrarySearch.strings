@@ -3,7 +3,7 @@
 "wildcard.hint" = "* oder % ersetzt unbekannte Zeichen: img* · *.png · *Reise* · * (alle). Normaler Text findet Teile des Dateinamens.";
 "metadata.title" = "Aufnahmeinformationen · Metadaten";
 "metadata.placeholder" = "Kamera, Objektiv, ISO, Beschreibung, Stichwörter…";
-"metadata.hint" = "Durchsucht im Dateikopf gespeicherte EXIF-/IPTC-Daten und Video-Tags.";
+"metadata.hint" = "Durchsucht EXIF/IPTC-Daten sowie Video- und Audio-Tags in der Datei.";
 "location.title" = "Ort";
 "location.placeholder" = "Gespeicherte Stadt, Land oder GPS-Koordinaten…";
 "location.hint" = "Sucht gespeicherte Ortsnamen und Koordinaten. GPS-Koordinaten werden nicht in Ortsnamen umgewandelt.";

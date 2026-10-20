@@ -24,13 +24,13 @@ struct LibraryAdvancedSearchView: View {
     VStack(alignment: .leading, spacing: 0) {
       HStack {
         Label(LibrarySearchL10n.text("advanced.title"), systemImage: "line.3.horizontal.decrease.circle")
-          .font(.system(size: 16, weight: .semibold))
+          .font(ViewerUIMetrics.font(size: 16, weight: .semibold))
         Spacer()
         Button { dismiss() } label: { Image(systemName: "xmark") }
           .buttonStyle(.plain)
           .accessibilityLabel(LibrarySearchL10n.text("cancel"))
       }
-      .padding(18)
+      .viewerPadding(18)
       Divider()
       ScrollView {
         VStack(alignment: .leading, spacing: 18) {
@@ -62,13 +62,13 @@ struct LibraryAdvancedSearchView: View {
             hint("size.hint")
             if !validSize {
               Text(LibrarySearchL10n.text("size.invalid"))
-                .font(.caption).foregroundStyle(.red).fixedSize(horizontal: false, vertical: true)
+                .font(ViewerUIMetrics.font(.caption)).foregroundStyle(.red).fixedSize(horizontal: false, vertical: true)
             }
           }
           Divider()
           VStack(alignment: .leading, spacing: 10) {
             Toggle(LibrarySearchL10n.text("date.title"), isOn: $usesDate)
-              .font(.system(size: 12, weight: .semibold))
+              .font(ViewerUIMetrics.font(size: 12, weight: .semibold))
               .accessibilityIdentifier("librarySearch.dateEnabled")
             if usesDate {
               HStack {
@@ -94,9 +94,9 @@ struct LibraryAdvancedSearchView: View {
         }
         .textFieldStyle(.roundedBorder)
         .controlSize(.regular)
-        .padding(18)
+        .viewerPadding(18)
       }
-      .frame(maxHeight: 560)
+      .viewerFrame(maxHeight: 560)
       Divider()
       HStack {
         Button(LibrarySearchL10n.text("clear")) {
@@ -117,9 +117,9 @@ struct LibraryAdvancedSearchView: View {
         .disabled(!validSize)
         .accessibilityIdentifier("librarySearch.apply")
       }
-      .padding(16)
+      .viewerPadding(16)
     }
-    .frame(width: 460)
+    .viewerFrame(width: 460)
     .accessibilityIdentifier("librarySearch.editor")
   }
 
@@ -131,11 +131,11 @@ struct LibraryAdvancedSearchView: View {
   }
 
   private func heading(_ key: String) -> some View {
-    Text(LibrarySearchL10n.text(key)).font(.system(size: 12, weight: .semibold))
+    Text(LibrarySearchL10n.text(key)).font(ViewerUIMetrics.font(size: 12, weight: .semibold))
   }
 
   private func hint(_ key: String) -> some View {
-    Text(LibrarySearchL10n.text(key)).font(.system(size: 11)).foregroundStyle(.secondary)
+    Text(LibrarySearchL10n.text(key)).font(ViewerUIMetrics.font(size: 11)).foregroundStyle(.secondary)
       .fixedSize(horizontal: false, vertical: true)
   }
 }

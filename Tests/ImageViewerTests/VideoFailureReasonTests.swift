@@ -11,6 +11,46 @@ import Testing
 @Suite("영상 불러오기 실패 원인", .serialized)
 @MainActor
 struct VideoFailureReasonTests {
+  @Test("읽을 수 없는 컨테이너의 빈 트랙 목록을 영상 없음으로 단정하지 않는다")
+  func unreadableTrackListsKeepAnEvidenceBasedReason() {
+    let url = URL(fileURLWithPath: "/test/unsupported-container.mkv")
+    let unreadable = VideoDocument.missingVideoTrackFailure(
+      isPlayable: false, hasProtectedContent: false, url: url)
+    #expect(MediaLoadFailure.reason(for: unreadable) == .unreadableData)
+    // A definite protection flag is stronger evidence than either playability
+    // value and should not be hidden behind an unsupported-container fallback.
+    for isPlayable in [false, true] {
+      let protected = VideoDocument.missingVideoTrackFailure(
+        isPlayable: isPlayable, hasProtectedContent: true, url: url)
+      #expect(MediaLoadFailure.reason(for: protected) == .protectedContent)
+    }
+  }
+
+  @Test("실제로 읽을 수 있는 오디오 전용 파일은 영상 트랙 없음 이유를 유지한다")
+  func readableAudioOnlySourceHasNoVideoTrack() async throws {
+    let folder = try makeFolder()
+    defer { try? FileManager.default.removeItem(at: folder) }
+    let url = folder.appendingPathComponent("audio-only.caf")
+    let format = try #require(AVAudioFormat(standardFormatWithSampleRate: 48_000, channels: 1))
+    let buffer = try #require(AVAudioPCMBuffer(pcmFormat: format, frameCapacity: 4_800))
+    buffer.frameLength = 4_800
+    let channel = try #require(buffer.floatChannelData?[0])
+    channel.initialize(repeating: 0, count: Int(buffer.frameLength))
+    do {
+      let output = try AVAudioFile(forWriting: url, settings: format.settings)
+      try output.write(from: buffer)
+    }
+    let source = AVURLAsset(url: url)
+    let playable = try await source.load(.isPlayable)
+    #expect(playable)
+    do {
+      _ = try await VideoDocument.load(url: url)
+      Issue.record("An audio-only source must not become a video document")
+    } catch {
+      #expect(MediaLoadFailure.reason(for: error) == .noVideoTrack)
+    }
+  }
+
   @Test("빈 영상은 이전 파일 크기에 관계없이 실제 0바이트 원인을 표시한다")
   func emptyMovieReportsFreshSourceReason() async throws {
     let folder = try makeFolder()

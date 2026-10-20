@@ -57,16 +57,26 @@ final class ExtendedRangeBackingView: NSView {
   ) {
     guard let layer else { return }
 
+    // Panning and selection update the SwiftUI wrapper even when the bitmap is
+    // unchanged. Do not resubmit a large RAW texture for those geometry updates.
+    let imageChanged = (layer.contents as AnyObject?) !== image
+    let scale = window?.backingScaleFactor ?? NSScreen.main?.backingScaleFactor ?? 2
+    let minification: CALayerContentsFilter = interpolationMode == .smooth ? .trilinear : .nearest
+    let magnification: CALayerContentsFilter = interpolationMode == .smooth ? .linear : .nearest
     CATransaction.begin()
     CATransaction.setDisableActions(true)
-    layer.contents = image
-    layer.contentsScale = window?.backingScaleFactor ?? NSScreen.main?.backingScaleFactor ?? 2
-    apply(interpolationMode)
+    if imageChanged { layer.contents = image }
+    if layer.contentsScale != scale { layer.contentsScale = scale }
+    if layer.minificationFilter != minification { layer.minificationFilter = minification }
+    if layer.magnificationFilter != magnification { layer.magnificationFilter = magnification }
 
     if #available(macOS 26.0, *) {
-      layer.preferredDynamicRange = prefersHDR ? .high : .standard
+      let range: CALayer.DynamicRange = prefersHDR ? .high : .standard
+      if layer.preferredDynamicRange != range { layer.preferredDynamicRange = range }
     } else {
-      layer.wantsExtendedDynamicRangeContent = prefersHDR
+      if layer.wantsExtendedDynamicRangeContent != prefersHDR {
+        layer.wantsExtendedDynamicRangeContent = prefersHDR
+      }
     }
     CATransaction.commit()
   }

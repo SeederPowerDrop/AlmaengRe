@@ -17,7 +17,7 @@ struct VideoDocument: Sendable, Equatable {
   var pixelSize: CGSize { CGSize(width: pixelWidth, height: pixelHeight) }
   var fullRange: VideoTimeRange { VideoTimeRange(start: 0, end: durationSeconds) }
 
-  static func load(url: URL) async throws -> Self {
+  static func load(url: URL, allowsAudioOnly: Bool = false) async throws -> Self {
     try Task.checkCancellation()
     guard url.isFileURL, FileManager.default.isReadableFile(atPath: url.path) else {
       throw VideoProcessingError.sourceUnavailable
@@ -27,11 +27,26 @@ struct VideoDocument: Sendable, Equatable {
       .isPlayable, .duration, .isExportable, .hasProtectedContent)
     try Task.checkCancellation()
     let videoTracks = try await asset.loadTracks(withMediaType: .video)
-    guard let track = videoTracks.first else { throw VideoProcessingError.noVideoTrack }
+    guard let track = videoTracks.first else {
+      if allowsAudioOnly {
+        if protected { throw VideoProcessingError.protectedContent }
+        guard playable else { throw ImagePipelineError.unsupported(url) }
+        let audioTracks = try await asset.loadTracks(withMediaType: .audio)
+        try Task.checkCancellation()
+        guard !audioTracks.isEmpty else { throw ImagePipelineError.unsupported(url) }
+        let seconds = CMTimeGetSeconds(duration)
+        guard seconds.isFinite, seconds > 0 else { throw ImagePipelineError.unsupported(url) }
+        return Self(sourceURL: url, durationSeconds: seconds,
+          pixelWidth: 0, pixelHeight: 0, nominalFrameRate: 0,
+          isPlayable: playable, isExportable: exportable, hasAudio: true, hasProtectedContent: false)
+      }
+      throw missingVideoTrackFailure(isPlayable: playable, hasProtectedContent: protected, url: url)
+    }
     let (naturalSize, transform, frameRate) = try await track.load(
       .naturalSize, .preferredTransform, .nominalFrameRate)
     let audioTracks = try await asset.loadTracks(withMediaType: .audio)
     try Task.checkCancellation()
+    if allowsAudioOnly && audioTracks.isEmpty { throw ImagePipelineError.unsupported(url) }
     let seconds = CMTimeGetSeconds(duration)
     guard seconds.isFinite, seconds > 0 else { throw VideoProcessingError.invalidDuration }
     let displayed = CGRect(origin: .zero, size: naturalSize).applying(transform).standardized.size
@@ -46,6 +61,14 @@ struct VideoDocument: Sendable, Equatable {
       nominalFrameRate: frameRate.isFinite && frameRate > 0 ? Double(frameRate) : 0,
       isPlayable: playable, isExportable: exportable,
       hasAudio: !audioTracks.isEmpty, hasProtectedContent: protected)
+  }
+
+  /// An empty track list is conclusive only when the container is readable.
+  /// Unsupported containers can expose no tracks even though they hold video.
+  static func missingVideoTrackFailure(isPlayable: Bool, hasProtectedContent: Bool, url: URL) -> any Error {
+    if hasProtectedContent { return VideoProcessingError.protectedContent }
+    if !isPlayable { return ImagePipelineError.unsupported(url) }
+    return VideoProcessingError.noVideoTrack
   }
 }
 

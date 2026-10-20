@@ -38,6 +38,7 @@ struct HomeLayoutTests {
 
     let size = CGSize(width: 960, height: 800)
     let root = HomeView(store: store, localeIdentifier: language)
+      .font(ViewerUIMetrics.font(.body))
       .environment(\.colorScheme, isDark ? .dark : .light)
       .frame(width: size.width, height: size.height)
     let host = NSHostingView(rootView: root)

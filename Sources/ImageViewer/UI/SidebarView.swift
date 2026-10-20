@@ -6,6 +6,27 @@ struct SidebarView: View {
   @ObservedObject var store: AppStore
   let placement: ThumbnailPanelPlacement
   var panelWidth: CGFloat = 220
+  @StateObject private var visibilityGate: OverviewRefinementGate
+  @State private var appliedScrollRequest: SidebarScrollRequest?
+  private let observesNativeWindowVisibility: Bool
+  private let onBitmapStateApplied: (@MainActor (ThumbnailBitmapStateEvent) -> Void)?
+
+  init(store: AppStore, placement: ThumbnailPanelPlacement, panelWidth: CGFloat = 220,
+    visibilityGate: OverviewRefinementGate = OverviewRefinementGate(),
+    observesNativeWindowVisibility: Bool = true,
+    onBitmapStateApplied: (@MainActor (ThumbnailBitmapStateEvent) -> Void)? = nil) {
+    self.store = store
+    self.placement = placement
+    self.panelWidth = panelWidth
+    _visibilityGate = StateObject(wrappedValue: visibilityGate)
+    self.observesNativeWindowVisibility = observesNativeWindowVisibility
+    self.onBitmapStateApplied = onBitmapStateApplied
+  }
+
+  private var focusScrollRequest: SidebarScrollRequest {
+    SidebarScrollRequest(focus: OverviewFocusScrollRequest(collectionRevision: store.assetOrderRevision,
+      assetID: store.currentAsset?.id), placement: placement)
+  }
 
   var body: some View {
     Group {
@@ -16,13 +37,28 @@ struct SidebarView: View {
       }
     }
     .background(ViewerTheme.sidebar)
+    .background(alignment: .topLeading) {
+      // One panel-level native bridge also sees fully covered inactive windows.
+      // Individual rows retain their bitmap and existing quality path on return.
+      if observesNativeWindowVisibility {
+        OverviewScrollMotionObserver(gate: visibilityGate)
+          .frame(width: 0, height: 0)
+          .allowsHitTesting(false)
+          .accessibilityHidden(true)
+      }
+    }
+    .onChange(of: placement) { _, _ in appliedScrollRequest = nil }
+    .onDisappear {
+      appliedScrollRequest = nil
+      visibilityGate.stop()
+    }
   }
 
   private var verticalPanel: some View {
     VStack(spacing: 0) {
       folderHeader
-        .padding(.horizontal, 14)
-        .padding(.vertical, 15)
+        .viewerPadding(.horizontal, 14)
+        .viewerPadding(.vertical, 15)
         .background(ViewerTheme.chromeGradient)
 
       Divider()
@@ -32,15 +68,9 @@ struct SidebarView: View {
           LazyVStack(spacing: 4) {
             thumbnailCells(width: 64, height: 52)
           }
-          .padding(8)
+          .viewerPadding(8)
         }
-        .onChange(of: store.currentIndex) { _, newIndex in
-          scrollToCurrent(newIndex, with: proxy)
-        }
-        .task(id: store.assets.first?.id) {
-          await Task.yield()
-          scrollToCurrent(store.currentIndex, with: proxy, animated: false)
-        }
+        .task(id: focusScrollRequest) { await revealCurrent(with: proxy) }
       }
     }
     .frame(width: panelWidth)
@@ -50,7 +80,7 @@ struct SidebarView: View {
     HStack(spacing: 0) {
       folderHeader
         .frame(width: 160, alignment: .leading)
-        .padding(.horizontal, 14)
+        .viewerPadding(.horizontal, 14)
         .frame(maxHeight: .infinity)
         .background(ViewerTheme.chromeGradient)
 
@@ -61,16 +91,10 @@ struct SidebarView: View {
           LazyHStack(spacing: 6) {
             thumbnailCells(width: 88, height: 58)
           }
-          .padding(.horizontal, 10)
-          .padding(.vertical, 8)
+          .viewerPadding(.horizontal, 10)
+          .viewerPadding(.vertical, 8)
         }
-        .onChange(of: store.currentIndex) { _, newIndex in
-          scrollToCurrent(newIndex, with: proxy)
-        }
-        .task(id: store.assets.first?.id) {
-          await Task.yield()
-          scrollToCurrent(store.currentIndex, with: proxy, animated: false)
-        }
+        .task(id: focusScrollRequest) { await revealCurrent(with: proxy) }
       }
     }
     .frame(height: 112)
@@ -79,28 +103,28 @@ struct SidebarView: View {
   private var folderHeader: some View {
     HStack(alignment: .top, spacing: 9) {
       Image(systemName: "folder")
-        .font(.system(size: 17, weight: .medium))
+        .font(ViewerUIMetrics.font(size: 17, weight: .medium))
         .foregroundStyle(ViewerTheme.accent.opacity(0.85))
-        .padding(.top, 1)
+        .viewerPadding(.top, 1)
         .accessibilityHidden(true)
 
       VStack(alignment: .leading, spacing: 4) {
         Text(store.activeFolderName)
-          .font(.system(size: 12, weight: .semibold))
+          .font(ViewerUIMetrics.font(size: 12, weight: .semibold))
           .lineLimit(1)
           .truncationMode(.middle)
           .help(store.activeFolderName)
         Text(MotionMediaL10n.format("items.count", store.assets.count))
-          .font(.system(size: 11))
+          .font(ViewerUIMetrics.font(size: 11))
           .foregroundStyle(.secondary)
           .monospacedDigit()
         if store.selectedURLs.count > 1 {
           Text(L10n.format("%d개 선택", store.selectedURLs.count))
-            .font(.system(size: 11, weight: .medium))
+            .font(ViewerUIMetrics.font(size: 11, weight: .medium))
             .foregroundStyle(ViewerTheme.accent)
             .monospacedDigit()
-            .padding(.horizontal, 6)
-            .padding(.vertical, 2)
+            .viewerPadding(.horizontal, 6)
+            .viewerPadding(.vertical, 2)
             .background(ViewerTheme.selection, in: RoundedRectangle(cornerRadius: 4))
         }
       }
@@ -114,7 +138,7 @@ struct SidebarView: View {
 
   @ViewBuilder
   private func thumbnailCells(width: CGFloat, height: CGFloat) -> some View {
-    ForEach(Array(store.assets.enumerated()), id: \.element.id) { index, asset in
+    ForEach(OverviewIndexedAssets(store.assets), id: \.element.id) { index, asset in
       let isSelected = store.selectedURLs.contains(asset.url)
       let isCurrent = store.currentIndex == index
       Button {
@@ -125,7 +149,7 @@ struct SidebarView: View {
             VStack(alignment: .leading, spacing: 6) {
               thumbnail(asset: asset, width: width, height: height, isSelected: isSelected)
               Text(asset.filename)
-                .font(.system(size: 10, weight: isCurrent ? .medium : .regular))
+                .font(ViewerUIMetrics.font(size: 10, weight: isCurrent ? .medium : .regular))
                 .lineLimit(1)
                 .truncationMode(.middle)
                 .frame(width: width, alignment: .leading)
@@ -135,23 +159,23 @@ struct SidebarView: View {
               thumbnail(asset: asset, width: width, height: height, isSelected: isSelected)
               VStack(alignment: .leading, spacing: 5) {
                 Text(asset.filename)
-                  .font(.system(size: 11, weight: isCurrent ? .semibold : .medium))
+                  .font(ViewerUIMetrics.font(size: 11, weight: isCurrent ? .semibold : .medium))
                   .foregroundStyle(.primary)
                   .lineLimit(1)
                   .truncationMode(.middle)
                 Text(verbatim: "\(asset.fileExtension.uppercased()) · \(asset.formattedFileSize)")
-                  .font(.system(size: 10))
+                  .font(ViewerUIMetrics.font(size: 10))
                   .foregroundStyle(.secondary)
                   .lineLimit(1)
                 Text(verbatim: "\(index + 1)")
-                  .font(.system(size: 10).monospacedDigit())
+                  .font(ViewerUIMetrics.font(size: 10).monospacedDigit())
                   .foregroundStyle(.tertiary)
               }
               .frame(maxWidth: .infinity, alignment: .leading)
             }
           }
         }
-        .padding(7)
+        .viewerPadding(7)
         .modifier(SidebarThumbnailRowSurface(isSelected: isSelected, isCurrent: isCurrent))
         .contentShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
       }
@@ -176,7 +200,9 @@ struct SidebarView: View {
       asset: asset,
       thumbnailPipeline: store.thumbnailPipeline,
       pipeline: store.pipeline,
-      maxPixelSize: 192
+      maxPixelSize: 192,
+      defersLoading: visibilityGate.isWindowSuppressed,
+      onBitmapStateApplied: onBitmapStateApplied
     )
     .frame(width: width, height: height)
     .background(ViewerTheme.panel, in: RoundedRectangle(cornerRadius: 5, style: .continuous))
@@ -189,31 +215,38 @@ struct SidebarView: View {
     .overlay(alignment: .topTrailing) {
       if isSelected && store.selectedURLs.count > 1 {
         Image(systemName: "checkmark.circle.fill")
-          .font(.system(size: 13))
+          .font(ViewerUIMetrics.font(size: 13))
           .symbolRenderingMode(.palette)
           .foregroundStyle(.white, ViewerTheme.accent)
-          .padding(3)
+          .viewerPadding(3)
           .accessibilityHidden(true)
       }
     }
   }
 
-  private func scrollToCurrent(
-    _ index: Int,
-    with proxy: ScrollViewProxy,
-    animated: Bool = true
-  ) {
-    guard store.assets.indices.contains(index) else { return }
-    let target = store.assets[index].id
-
+  private func revealCurrent(with proxy: ScrollViewProxy) async {
+    let request = focusScrollRequest
+    await Task.yield()
+    guard !Task.isCancelled, focusScrollRequest == request,
+      appliedScrollRequest != request, let target = request.focus.assetID else { return }
+    let animated = appliedScrollRequest?.focus.collectionRevision == request.focus.collectionRevision
+      && appliedScrollRequest?.placement == request.placement
+    appliedScrollRequest = request
     if animated {
       withAnimation(.easeOut(duration: 0.15)) {
         proxy.scrollTo(target, anchor: .center)
       }
     } else {
-      proxy.scrollTo(target, anchor: .center)
+      var transaction = Transaction(animation: nil)
+      transaction.disablesAnimations = true
+      withTransaction(transaction) { proxy.scrollTo(target, anchor: .center) }
     }
   }
+}
+
+private struct SidebarScrollRequest: Equatable {
+  let focus: OverviewFocusScrollRequest
+  let placement: ThumbnailPanelPlacement
 }
 
 /// 행의 호버 상태는 셀 안에 두어 커서 이동으로 전체 사진 목록을 갱신하지 않습니다.

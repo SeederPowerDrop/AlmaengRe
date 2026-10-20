@@ -244,9 +244,8 @@ final class ShortcutStore: ObservableObject {
 
   /// Option arrows select a photo within the visible viewer page. Comparison-only
   /// bindings use the same keys in their own screen; other assignments take priority.
-  func viewerSelectionBinding(direction: Int) -> KeyBinding? {
-    guard direction != 0 else { return nil }
-    let candidate = KeyBinding(key: direction < 0 ? "left" : "right", modifiers: [.option])
+  func viewerSelectionBinding(direction: ViewerSelectionDirection) -> KeyBinding? {
+    let candidate = KeyBinding(key: direction.key, modifiers: [.option])
     let occupied = ShortcutAction.allCases.contains { action in
       switch action {
       case .previousFirstFolder, .nextFirstFolder, .previousSecondFolder, .nextSecondFolder:
@@ -258,12 +257,14 @@ final class ShortcutStore: ObservableObject {
     return occupied ? nil : candidate
   }
 
-  func viewerSelectionDirection(matching event: NSEvent) -> Int? {
+  func viewerSelectionDirection(matching event: NSEvent) -> ViewerSelectionDirection? {
     guard event.type == .keyDown, Self.modifiers(from: event) == [.option] else { return nil }
-    let direction: Int
+    let direction: ViewerSelectionDirection
     switch event.keyCode {
-    case 123: direction = -1
-    case 124: direction = 1
+    case 123: direction = .left
+    case 124: direction = .right
+    case 125: direction = .down
+    case 126: direction = .up
     default: return nil
     }
     return viewerSelectionBinding(direction: direction) == nil ? nil : direction

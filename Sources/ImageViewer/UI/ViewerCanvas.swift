@@ -11,6 +11,7 @@ struct ViewerCanvas: View {
   @ObservedObject var shortcuts: ShortcutStore
   @ObservedObject private var panState: ViewerPanState
   @ObservedObject private var frameLayout: ViewerFrameLayoutStore
+  @ObservedObject private var videoPlayback: VideoGridPlaybackState
 
   @Environment(\.displayScale) private var displayScale
   @GestureState private var liveMagnification: CGFloat = 1
@@ -25,6 +26,7 @@ struct ViewerCanvas: View {
     self.shortcuts = shortcuts
     panState = store.viewerPan
     frameLayout = store.frameLayout
+    videoPlayback = store.videoGridPlayback
   }
 
   var body: some View {
@@ -62,7 +64,9 @@ struct ViewerCanvas: View {
   }
 
   private var showsVideoControls: Bool {
-    store.visibleAssets.count > 1 && store.visibleAssets.contains(where: \.isVideo)
+    // Keep the active toggle reachable on photo-only and partial final pages.
+    videoPlayback.followsPages ||
+      (store.visibleAssets.count > 1 && store.visibleAssets.contains(where: \.isPlaybackMedia))
   }
 
   private var videoControls: some View {
@@ -109,7 +113,7 @@ struct ViewerCanvas: View {
             let asset = visible[slot]
             let renderPixels = requestedRenderPixels(tileSize: tileSize, itemCount: visible.count)
             Group {
-            if asset.isVideo {
+            if asset.isPlaybackMedia {
               VideoViewerTile(asset: asset, itemCount: visible.count,
                 thumbnailPipeline: store.thumbnailPipeline, posterPixelSize: renderPixels,
                 allowsPlayback: store.allowsVideoPlayback,
@@ -177,12 +181,12 @@ struct ViewerCanvas: View {
             .gesture(TapGesture(count: 2).onEnded {
               focusImageCanvas()
               store.toggleImageFocus(on: asset)
-            }, including: asset.isVideo ? .subviews : .all)
+            }, including: asset.isPlaybackMedia ? .subviews : .all)
             .gesture(TapGesture().onEnded {
               selectAsset(asset, modifiers: NSEvent.modifierFlags)
-            }, including: asset.isVideo ? .subviews : .all)
+            }, including: asset.isPlaybackMedia ? .subviews : .all)
         }
-        .id(store.libraryRevision)
+        .id(store.assetOrderRevision)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
 
         VStack {
@@ -203,14 +207,14 @@ struct ViewerCanvas: View {
             }
               .frame(maxWidth: 780)
               .transition(.opacity)
-              .padding(16)
+              .viewerPadding(16)
           }
         }
 
         if let message = store.statusMessage {
           Text(message)
-            .padding(.horizontal, 14)
-            .padding(.vertical, 8)
+            .viewerPadding(.horizontal, 14)
+            .viewerPadding(.vertical, 8)
             .background(.ultraThinMaterial, in: Capsule())
             .transition(.opacity)
         }
@@ -227,9 +231,9 @@ struct ViewerCanvas: View {
       }
       // Disable canvas gestures for video without disabling the tile's buttons.
       // `.none` also suppresses pointer gestures throughout the subview hierarchy.
-      .simultaneousGesture(magnificationGesture, including: visible.contains(where: \.isVideo) ? .subviews : .all)
+      .simultaneousGesture(magnificationGesture, including: visible.contains(where: \.isPlaybackMedia) ? .subviews : .all)
       .simultaneousGesture(dragGesture(canPan: canPan, usesPrimaryDrag: usesPrimaryDrag),
-        including: visible.contains(where: \.isVideo) ? .subviews : .all)
+        including: visible.contains(where: \.isPlaybackMedia) ? .subviews : .all)
       .onChange(of: isDragging) { _, dragging in
         if !dragging { lastDragTranslation = .zero; hasDragTranslation = false }
       }

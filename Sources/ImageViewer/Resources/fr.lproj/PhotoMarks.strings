@@ -3,13 +3,13 @@
 "mode.help" = "Avec Marquage ON, 1–4, QWER et ASDF ajoutent ou retirent les étiquettes.";
 "mode.toggle" = "Activer/désactiver le marquage";
 "mode.active" = "Mode marquage";
-"mode.unavailable" = "Ouvrez une photo ou vidéo à marquer.";
+"mode.unavailable" = "Ouvrez un fichier à marquer.";
 "menu.title" = "Étiquettes des photos";
 "menu.edit" = "Modifier les noms et couleurs…";
 "panel.title" = "Étiquettes des photos";
 "panel.hint" = "← → Parcourir · 1–4, QWER, ASDF : étiquettes";
-"panel.multipleHint" = "Une photo ou vidéo peut porter plusieurs étiquettes.";
-"panel.noPhoto" = "Ouvrez une photo ou vidéo à marquer.";
+"panel.multipleHint" = "Un fichier peut porter plusieurs étiquettes.";
+"panel.noPhoto" = "Ouvrez un fichier à marquer.";
 "panel.loading" = "Chargement des étiquettes…";
 "panel.close" = "Quitter le mode marquage";
 "labels.edit" = "Modifier les noms et couleurs";
@@ -61,7 +61,7 @@
 "labels.previewFormat" = "%@ → %@";
 "mark.addHelpFormat" = "%@ → %@ : avec Marquage ON, appuyez sur la touche ou cliquez pour ajouter, puis recommencez pour retirer. Plusieurs étiquettes peuvent coexister ; les originaux restent inchangés.";
 "mark.removeHelpFormat" = "%@ → %@ : étiquette attribuée. Avec Marquage ON, appuyez sur la touche ou cliquez pour la retirer. Les autres étiquettes et les originaux restent inchangés.";
-"mode.detailHelp" = "⌘⇧M active ou désactive l’étiquetage. Lorsqu’il est actif, 1–4, QWER, ASDF ou le panneau appliquent les étiquettes à toutes les photos et vidéos sélectionnées. Utilisez les cases ou ⌘-clic pour sélectionner plusieurs éléments et ⇧-clic pour une plage. Le menu de chaque carte agit uniquement sur cet élément. Sinon, les raccourcis de visualisation habituels s’appliquent. Dans Comparaison d’images, choisissez A seulement, B seulement ou Les deux.";
+"mode.detailHelp" = "⌘⇧M active ou désactive l’étiquetage. Lorsqu’il est actif, 1–4, QWER, ASDF ou le panneau appliquent les étiquettes à tous les fichiers sélectionnés. Utilisez les cases ou ⌘-clic pour sélectionner plusieurs éléments et ⇧-clic pour une plage. Le menu de chaque carte agit uniquement sur cet élément. Sinon, les raccourcis de visualisation habituels s’appliquent. Dans Comparaison d’images, choisissez A seulement, B seulement ou Les deux.";
 "labels.settingsLink" = "Modifier les noms et couleurs…";
 "labels.revert" = "Annuler les modifications";
 "labels.revertHelp" = "Rétablir les noms et couleurs enregistrés sans fermer les réglages. Les changements non enregistrés sont annulés.";
@@ -98,7 +98,7 @@
 
 "card.title" = "Étiquettes";
 
-"card.help" = "Choisir les étiquettes de cette photo ou vidéo.";
+"card.help" = "Choisir les étiquettes de ce fichier.";
 
 "card.accessibilityFormat" = "Étiquettes de %@";
 
@@ -122,7 +122,7 @@
 
 "panel.selectionHint" = "Cases ou ⌘-clic : ajouter à la sélection ; ⇧-clic : sélectionner une plage. Les touches et le panneau agissent sur toute la sélection ; le menu d’une carte agit uniquement sur cet élément.";
 
-"selection.help" = "Ajouter cet élément à la sélection ou le retirer. Les touches et boutons du panneau agissent sur toutes les photos et vidéos sélectionnées.";
+"selection.help" = "Ajouter cet élément à la sélection ou le retirer. Les touches et boutons du panneau agissent sur tous les fichiers sélectionnés.";
 
 "selection.accessibilityFormat" = "Sélectionner %@";
 
@@ -136,4 +136,18 @@
 "inheritance.originals" = "Déplacer un original ou le restaurer depuis la corbeille conserve ses étiquettes, quels que soient ces réglages.";
 
 "panel.viewerSelectionHint" = "%@ Sélectionner une photo";
-"panel.viewerSelectionHelp" = "Utilisez %@ pour sélectionner les photos ou vidéos une par une sur la page actuelle. À chaque extrémité, la sélection reprend à l’autre bout de la même page. Activez le mode marquage, puis utilisez 1–4, QWER ou ASDF pour marquer l’élément sélectionné.";
+"panel.viewerSelectionHelp" = "Utilisez %@ pour déplacer la sélection selon la position des cadres : à gauche/droite dans la même ligne, en haut/bas dans la colonne la plus proche. Aux extrémités d’une ligne ou colonne, la sélection reprend à l’autre bout. Activez le mode marquage, puis utilisez 1–4, QWER ou ASDF pour marquer l’élément sélectionné.";
+
+/* Include/exclude conditions stay within the currently opened collection. */
+"filter.scope" = "Rechercher uniquement dans les dossiers et fichiers ouverts.";
+"filter.conditions" = "Conditions des étiquettes";
+"filter.includeCountFormat" = "Inclure · %d";
+"filter.excludeCountFormat" = "Exclure · %d";
+"filter.includeHelp" = "Choisissez les étiquettes à inclure, puis indiquez si une seule ou toutes doivent correspondre.";
+"filter.excludeHelp" = "Exclure les fichiers ayant au moins une de ces étiquettes. Exemple : inclure S et exclure E.";
+"filter.included" = "Incluse";
+"filter.excluded" = "Exclue";
+"filter.ignored" = "Sans condition";
+"filter.includeRule" = "Correspondance des étiquettes incluses";
+"filter.includeSummaryFormat" = "Inclure : %@";
+"filter.excludeSummaryFormat" = "Exclure : %@";

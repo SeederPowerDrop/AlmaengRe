@@ -6,7 +6,7 @@
 "unsupported" = "Dieses Format oder dieser Codec wird nicht unterstützt.";
 "unreadableData" = "Die Dateidaten können nicht gelesen werden. Die Datei ist möglicherweise beschädigt oder hat ein nicht unterstütztes Format.";
 "noVideoTrack" = "Diese Datei enthält keine anzeigbare Videospur.";
-"protected" = "Geschützte Videos können nicht wiedergegeben werden.";
+"protected" = "Geschützte Dateien können nicht abgespielt werden.";
 "invalidVideo" = "Die Dauer oder die Anzeigeinformationen des Videos sind ungültig.";
 "rendering" = "Das Bild konnte nicht angezeigt werden. Öffne es erneut.";
 "resource" = "Ein für die Anzeige benötigtes Gerät oder der nötige Speicher ist nicht verfügbar. Versuche es gleich noch einmal.";

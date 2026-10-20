@@ -65,19 +65,19 @@ struct PhotoMapView: View {
           HStack { mapActions; Spacer(minLength: 0) }
         }
       }
-      .padding(.horizontal, 14)
-      .padding(.vertical, 10)
+      .viewerPadding(.horizontal, 14)
+      .viewerPadding(.vertical, 10)
 
       if !areas.isEmpty { areaControls }
 
       if drawingMode == .polygon {
         HStack {
-          Text(drawingMode.instruction).font(.caption).foregroundStyle(.secondary)
+          Text(drawingMode.instruction).font(ViewerUIMetrics.font(.caption)).foregroundStyle(.secondary)
           Spacer(minLength: 8)
           Button(MapSelectionL10n.text("그리기 취소")) { drawingMode = .move }
         }
-        .padding(.horizontal, 14)
-        .padding(.bottom, 10)
+        .viewerPadding(.horizontal, 14)
+        .viewerPadding(.bottom, 10)
       }
 
       Divider()
@@ -102,14 +102,15 @@ struct PhotoMapView: View {
           onPickAssets: { values in
             pickedAssets = values
             pickedIndex = 0
+            store.photoMapPreview.focus(on: values.first?.id)
           })
 
         if selection == nil && drawingMode == .move {
           Text(drawingMode.instruction)
-            .font(.caption)
-            .padding(10)
+            .font(ViewerUIMetrics.font(.caption))
+            .viewerPadding(10)
             .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 8))
-            .padding(12)
+            .viewerPadding(12)
             .allowsHitTesting(false)
         }
 
@@ -125,7 +126,8 @@ struct PhotoMapView: View {
       .overlay {
         GeometryReader { geometry in
           if let asset = pickedAsset {
-            previewCard(asset, availableHeight: max(0, geometry.size.height - 28))
+            previewCard(asset, availableWidth: max(0, geometry.size.width - 28),
+              availableHeight: max(0, geometry.size.height - 28))
               .padding(14)
               .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomLeading)
           }
@@ -150,9 +152,9 @@ struct PhotoMapView: View {
         }
         Spacer(minLength: 0)
       }
-      .font(.caption)
-      .padding(.horizontal, 14)
-      .padding(.vertical, 9)
+      .font(ViewerUIMetrics.font(.caption))
+      .viewerPadding(.horizontal, 14)
+      .viewerPadding(.vertical, 9)
     }
     .background(ViewerTheme.chromeGradient)
     .onChange(of: selection, initial: true) { _, value in
@@ -163,6 +165,7 @@ struct PhotoMapView: View {
       // Keep the completed areas and their actions visible after editing a selection.
       pickedAssets = []
       pickedIndex = 0
+      store.photoMapPreview.clearSelection()
     }
     .onChange(of: activeAreaIndex) { _, _ in syncRadius() }
     .onChange(of: isLoading) { _, loading in
@@ -175,6 +178,10 @@ struct PhotoMapView: View {
       pickedAssets = pickedAssets.compactMap { available[$0.id] }
       pickedIndex = pickedAssets.firstIndex { $0.id == pickedID } ?? 0
     }
+    .onChange(of: pickedAsset?.id, initial: true) { _, id in
+      store.photoMapPreview.focus(on: id)
+    }
+    .onDisappear { store.photoMapPreview.clearSelection() }
   }
 
   /// Selection feedback belongs beside the map tools, with a full-sized primary action.
@@ -192,12 +199,12 @@ struct PhotoMapView: View {
       }
       .frame(maxWidth: .infinity, alignment: .leading)
     }
-    .padding(.horizontal, 16)
-    .padding(.vertical, 14)
+    .viewerPadding(.horizontal, 16)
+    .viewerPadding(.vertical, 14)
     .background(ViewerTheme.panelGradient)
     .overlay(alignment: .leading) {
       Capsule().fill(ViewerTheme.accent.opacity(0.7))
-        .frame(width: 3).padding(.vertical, 14)
+        .frame(width: 3).viewerPadding(.vertical, 14)
         .allowsHitTesting(false)
     }
   }
@@ -205,26 +212,26 @@ struct PhotoMapView: View {
   private var selectionSummary: some View {
     HStack(spacing: 12) {
       Image(systemName: matchingAssetURLs.isEmpty ? "viewfinder" : "checkmark.circle.fill")
-        .font(.system(size: 25))
+        .font(ViewerUIMetrics.font(size: 25))
         .foregroundStyle(ViewerTheme.accent)
         .accessibilityHidden(true)
       VStack(alignment: .leading, spacing: 4) {
         Text(L10n.text("선택한 영역의 사진"))
-          .font(.headline)
+          .font(ViewerUIMetrics.font(.headline))
         if isLoading {
           HStack(spacing: 6) {
             ProgressView().controlSize(.small)
             Text(L10n.text("선택 영역의 사진을 찾는 중…"))
           }
-          .font(.callout)
+          .font(ViewerUIMetrics.font(.callout))
         } else if matchingAssetURLs.isEmpty {
           Text(L10n.text("이 영역에는 사진이 없습니다."))
-            .font(.callout)
+            .font(ViewerUIMetrics.font(.callout))
           Text(L10n.text("영역을 넓히거나 다른 위치를 선택해 보세요."))
-            .font(.caption).foregroundStyle(.secondary)
+            .font(ViewerUIMetrics.font(.caption)).foregroundStyle(.secondary)
         } else {
           Text(L10n.format("선택 %lld장", Int64(matchingAssetURLs.count)))
-            .font(.callout.monospacedDigit())
+            .font(ViewerUIMetrics.font(.callout).monospacedDigit())
             .foregroundStyle(.secondary)
         }
       }
@@ -238,16 +245,16 @@ struct PhotoMapView: View {
 
       Button { onShowSelection(.viewer) } label: {
         Label(MapSelectionL10n.text("뷰어로 보기"), systemImage: "photo")
-          .font(.headline)
-          .frame(minHeight: 34)
+          .font(ViewerUIMetrics.font(.headline))
+          .viewerFrame(minHeight: 34)
       }
       .buttonStyle(ViewerActionButtonStyle())
       .help(MapSelectionL10n.text("선택한 영역의 사진만 일반 뷰어에서 넘겨 봅니다."))
 
       Button { onShowSelection(.overview) } label: {
         Label(MapSelectionL10n.text("몽땅보기로 보기"), systemImage: "square.grid.2x2")
-          .font(.headline)
-          .frame(minHeight: 34)
+          .font(ViewerUIMetrics.font(.headline))
+          .viewerFrame(minHeight: 34)
       }
       .buttonStyle(ViewerActionButtonStyle(prominent: true))
       .help(MapSelectionL10n.text("선택한 영역의 사진만 몽땅보기로 모아 봅니다."))
@@ -320,22 +327,22 @@ struct PhotoMapView: View {
           TextField(L10n.text("반경"), value: $radiusKilometers,
             format: .number.precision(.fractionLength(0...3)))
             .textFieldStyle(.roundedBorder)
-            .frame(width: 88)
+            .viewerFrame(width: 88)
             .onSubmit(applyRadius)
             .accessibilityLabel(L10n.text("반경 (km)"))
           Text("km").foregroundStyle(.secondary)
           Button(L10n.text("적용"), action: applyRadius)
           Spacer(minLength: 0)
         }
-        .font(.caption)
+        .font(ViewerUIMetrics.font(.caption))
         .controlSize(.small)
         .disabled(isLoading)
       }
       Text(MapSelectionL10n.text("어느 한 영역에라도 포함된 사진을 모읍니다. 겹친 사진은 한 번만 표시됩니다."))
-        .font(.caption).foregroundStyle(.secondary)
+        .font(ViewerUIMetrics.font(.caption)).foregroundStyle(.secondary)
     }
-    .padding(.horizontal, 14)
-    .padding(.bottom, 10)
+    .viewerPadding(.horizontal, 14)
+    .viewerPadding(.bottom, 10)
   }
 
   private var areaChips: some View {
@@ -344,13 +351,13 @@ struct PhotoMapView: View {
         HStack(spacing: 2) {
           Button { activeAreaIndex = index } label: {
             Text(MapSelectionL10n.format("영역 %lld", Int64(index + 1)))
-              .font(.callout.weight(.medium))
+              .font(ViewerUIMetrics.font(.callout).weight(.medium))
           }
           .buttonStyle(ViewerToolButtonStyle(isSelected: activeAreaIndex == index))
           .accessibilityAddTraits(activeAreaIndex == index ? .isSelected : [])
           .help(MapSelectionL10n.text("번호 손잡이를 드래그해 영역을 옮기세요."))
           Button { removeArea(at: index) } label: {
-            Image(systemName: "xmark").font(.caption.weight(.semibold)).frame(width: 22, height: 28)
+            Image(systemName: "xmark").font(ViewerUIMetrics.font(.caption).weight(.semibold)).viewerFrame(width: 22, height: 28)
           }
           .buttonStyle(.plain)
           .accessibilityLabel(MapSelectionL10n.format("영역 %lld 삭제", Int64(index + 1)))
@@ -363,7 +370,7 @@ struct PhotoMapView: View {
   private var areaCountAndClear: some View {
     HStack(spacing: 10) {
       Text(MapSelectionL10n.format("영역 %lld개 / 최대 3개", Int64(areas.count)))
-        .font(.caption.monospacedDigit()).foregroundStyle(.secondary)
+        .font(ViewerUIMetrics.font(.caption).monospacedDigit()).foregroundStyle(.secondary)
         .help(areaLimitHelp)
       Button(MapSelectionL10n.text("모두 해제")) {
         drawingMode = .move
@@ -428,30 +435,33 @@ struct PhotoMapView: View {
     replaceArea(index, with: .radius(center: center, meters: radiusKilometers * 1_000))
   }
 
-  private func previewCard(_ asset: ImageAsset, availableHeight: CGFloat) -> some View {
+  private func previewCard(_ asset: ImageAsset, availableWidth: CGFloat, availableHeight: CGFloat) -> some View {
     ScrollView(.vertical) {
     VStack(alignment: .leading, spacing: 8) {
       HStack {
         Image(systemName: "mappin.circle.fill").foregroundStyle(ViewerTheme.accent)
         Text(L10n.format("이 위치의 사진 %lld장", Int64(pickedAssets.count)))
-          .font(.caption.weight(.semibold))
+          .font(ViewerUIMetrics.font(.caption).weight(.semibold))
         Spacer()
-        Button { pickedAssets = [] } label: { Image(systemName: "xmark") }
+        Button {
+          pickedAssets = []
+          store.photoMapPreview.clearSelection()
+        } label: { Image(systemName: "xmark") }
           .buttonStyle(.plain)
           .accessibilityLabel(L10n.text("닫기"))
       }
-      Button { onOpenAsset(asset) } label: {
-        ThumbnailImageView(
-          asset: asset, thumbnailPipeline: thumbnailPipeline,
-          pipeline: pipeline, maxPixelSize: 512)
-          .frame(height: 135)
-          .frame(maxWidth: .infinity)
-          .clipShape(RoundedRectangle(cornerRadius: 5))
-      }
-      .buttonStyle(.plain)
-      .accessibilityLabel(L10n.format("%@ 열기", asset.filename))
-      .disabled(isLoading)
-      Text(asset.filename).font(.caption).lineLimit(1).help(asset.filename)
+      PhotoMapImagePreview(asset: asset, preview: store.photoMapPreview,
+        thumbnailPipeline: thumbnailPipeline, pipeline: pipeline,
+        adjustments: store.adjustments(for: asset), prefersHDR: store.prefersHDR,
+        interpolationMode: store.imageInterpolationMode,
+        onOpen: { onOpenAsset(asset) })
+        .frame(height: min(180, max(100, availableHeight * 0.45)))
+        .frame(maxWidth: .infinity)
+        .clipShape(RoundedRectangle(cornerRadius: 5))
+        .disabled(isLoading)
+      PhotoMapPreviewControls(preview: store.photoMapPreview)
+        .disabled(isLoading)
+      Text(asset.filename).font(ViewerUIMetrics.font(.caption)).lineLimit(1).help(asset.filename)
       MapBatchActionsMenu(store: store, urls: [asset.url], title: BatchActionsL10n.text("map.photo"))
         .controlSize(.small)
       if pickedAssets.count > 1 {
@@ -467,7 +477,7 @@ struct PhotoMapView: View {
           .disabled(pickedIndex == 0)
           .accessibilityLabel(L10n.text("이전 이미지"))
           Text("\(pickedIndex + 1) / \(pickedAssets.count)")
-            .font(.caption.monospacedDigit())
+            .font(ViewerUIMetrics.font(.caption).monospacedDigit())
           Button { pickedIndex = min(pickedAssets.count - 1, pickedIndex + 1) } label: {
             Image(systemName: "chevron.right")
           }
@@ -480,9 +490,9 @@ struct PhotoMapView: View {
       }
       .controlSize(.small)
     }
-    .padding(12)
+    .viewerPadding(12)
     }
-    .frame(width: 276, height: min(pickedAssets.count > 1 ? 378 : 276, availableHeight))
+    .frame(width: min(276, availableWidth), height: min(pickedAssets.count > 1 ? 465 : 365, availableHeight))
     .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
     .shadow(color: .black.opacity(0.12), radius: 8, y: 2)
   }
@@ -516,5 +526,113 @@ struct PhotoMapView: View {
         if let id { reader.scrollTo(id, anchor: .center) }
       }
     }
+  }
+}
+
+/// Uses the same image geometry as the main viewer, with an independent transform.
+/// Kept separate from the map so photo layout can be verified without map tiles.
+struct PhotoMapImagePreview: View {
+  let asset: ImageAsset
+  @ObservedObject var preview: PhotoMapPreviewState
+  let thumbnailPipeline: ThumbnailPipeline
+  let pipeline: ImagePipeline
+  let adjustments: ImageAdjustments
+  let prefersHDR: Bool
+  let interpolationMode: ImageInterpolationMode
+  let onOpen: () -> Void
+
+  @State private var panStart: CGSize?
+  @State private var zoomStart: CGFloat?
+
+  var body: some View {
+    ViewerImageTile(asset: asset, itemCount: 1,
+      thumbnailPipeline: thumbnailPipeline, pipeline: pipeline,
+      adjustments: adjustments, prefersHDR: prefersHDR,
+      interpolationMode: interpolationMode, comparisonLayout: .off,
+      filenameDisplaySize: .hidden, baseScaleMode: preview.baseScaleMode,
+      committedZoom: preview.zoom, effectiveZoom: preview.zoom,
+      effectivePan: preview.panOffset, showsTileBoundary: false,
+      highlightsSelection: false,
+      onPanGeometryChange: { shown, geometry in
+        preview.setGeometry(geometry, for: shown.id)
+      })
+      .environment(\.colorScheme, .dark)
+      .contentShape(Rectangle())
+      .gesture(DragGesture(minimumDistance: 2)
+        .onChanged { value in
+          guard preview.canPan else { return }
+          if panStart == nil { panStart = preview.panOffset }
+          let start = panStart ?? .zero
+          preview.setPanOffset(CGSize(width: start.width + value.translation.width,
+            height: start.height + value.translation.height))
+        }
+        .onEnded { _ in panStart = nil })
+      .simultaneousGesture(MagnificationGesture()
+        .onChanged { value in
+          if zoomStart == nil { zoomStart = preview.zoom }
+          preview.setZoom((zoomStart ?? 1) * value)
+        }
+        .onEnded { _ in zoomStart = nil })
+      .onTapGesture(count: 2, perform: onOpen)
+      .accessibilityLabel(asset.filename)
+      .accessibilityIdentifier("map.preview.image")
+      .accessibilityAction(named: Text(L10n.text("사진 보기")), onOpen)
+      .onChange(of: asset.id, initial: true) { _, id in
+        panStart = nil
+        zoomStart = nil
+        preview.focus(on: id)
+      }
+  }
+}
+
+struct PhotoMapPreviewControls: View {
+  @ObservedObject var preview: PhotoMapPreviewState
+
+  var body: some View {
+    ViewThatFits(in: .horizontal) {
+      HStack(spacing: 4) {
+        zoomControls
+        Spacer(minLength: 0)
+        fitMenu
+      }
+      VStack(alignment: .leading, spacing: 4) {
+        zoomControls
+        fitMenu
+      }
+    }
+    .buttonStyle(ViewerToolButtonStyle())
+    .controlSize(.small)
+    .disabled(!preview.hasSelection)
+  }
+
+  private var zoomControls: some View {
+    HStack(spacing: 2) {
+      Button(action: preview.zoomOut) {
+        Image(systemName: "minus").viewerFrame(width: 24, height: 28)
+      }
+      .disabled(preview.zoom <= PhotoMapPreviewState.zoomRange.lowerBound)
+      .help(L10n.text("축소"))
+      .accessibilityLabel(L10n.text("축소"))
+      .accessibilityIdentifier("map.preview.zoomOut")
+      Text(Double(preview.zoom).formatted(.percent.precision(.fractionLength(0))))
+        .font(ViewerUIMetrics.font(.caption).monospacedDigit())
+        .viewerFrame(minWidth: 42)
+        .accessibilityIdentifier("map.preview.zoom")
+      Button(action: preview.zoomIn) {
+        Image(systemName: "plus").viewerFrame(width: 24, height: 28)
+      }
+      .disabled(preview.zoom >= PhotoMapPreviewState.zoomRange.upperBound)
+      .help(L10n.text("확대"))
+      .accessibilityLabel(L10n.text("확대"))
+      .accessibilityIdentifier("map.preview.zoomIn")
+    }
+    .font(ViewerUIMetrics.font(.caption))
+    .fixedSize(horizontal: true, vertical: false)
+  }
+
+  private var fitMenu: some View {
+    ImageFitMenu(mode: preview.baseScaleMode, zoom: preview.zoom,
+      identifier: "map.preview.fit", setMode: preview.setScaleMode,
+      center: preview.centerImage)
   }
 }

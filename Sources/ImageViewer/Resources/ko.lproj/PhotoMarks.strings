@@ -3,13 +3,13 @@
 "mode.help" = "분류 ON에서 1–4, QWER, ASDF로 분류 표시를 붙이거나 해제합니다.";
 "mode.toggle" = "분류 모드 켜기/끄기";
 "mode.active" = "분류 모드";
-"mode.unavailable" = "사진·영상을 열면 분류할 수 있습니다.";
+"mode.unavailable" = "파일을 열면 분류할 수 있습니다.";
 "menu.title" = "사진 분류";
 "menu.edit" = "분류 이름·색상 편집…";
 "panel.title" = "사진 분류";
 "panel.hint" = "← → 항목 이동 · 1–4, QWER, ASDF로 분류";
-"panel.multipleHint" = "한 사진·영상에 여러 분류를 붙일 수 있습니다.";
-"panel.noPhoto" = "분류할 사진·영상을 열어 주세요.";
+"panel.multipleHint" = "한 파일에 여러 분류를 붙일 수 있습니다.";
+"panel.noPhoto" = "분류할 파일을 열어 주세요.";
 "panel.loading" = "분류 정보를 불러오는 중…";
 "panel.close" = "분류 모드 종료";
 "labels.edit" = "분류 이름·색상 편집";
@@ -61,7 +61,7 @@
 "labels.previewFormat" = "%@ → %@";
 "mark.addHelpFormat" = "%@ → %@: 분류 ON에서 키를 누르거나 클릭해 붙이고, 다시 누르면 해제합니다. 여러 분류를 함께 붙일 수 있으며 원본 파일은 바뀌지 않습니다.";
 "mark.removeHelpFormat" = "%@ → %@: 붙어 있는 분류입니다. 분류 ON에서 키를 누르거나 클릭해 해제합니다. 다른 분류와 원본 파일은 유지됩니다.";
-"mode.detailHelp" = "⌘⇧M으로 분류를 켜거나 끕니다. ON에서는 선택한 사진·영상 전체에 1–4, QWER, ASDF 또는 분류 패널로 분류를 붙입니다. 체크박스·⌘클릭으로 여러 항목을 고르고 ⇧클릭으로 범위를 선택합니다. 각 카드의 분류 버튼은 그 항목 하나에만 적용됩니다. OFF에서는 일반 보기 단축키를 사용합니다. 이미지 비교에서는 분류 적용을 A만·B만·둘 다로 따로 고릅니다.";
+"mode.detailHelp" = "⌘⇧M으로 분류를 켜거나 끕니다. ON에서는 선택한 파일 전체에 1–4, QWER, ASDF 또는 분류 패널로 분류를 붙입니다. 체크박스·⌘클릭으로 여러 항목을 고르고 ⇧클릭으로 범위를 선택합니다. 각 카드의 분류 버튼은 그 항목 하나에만 적용됩니다. OFF에서는 일반 보기 단축키를 사용합니다. 이미지 비교에서는 분류 적용을 A만·B만·둘 다로 따로 고릅니다.";
 "labels.settingsLink" = "분류 이름·색상 편집…";
 "labels.revert" = "변경 취소";
 "labels.revertHelp" = "설정 창을 닫지 않고 저장된 분류 이름과 색상으로 되돌립니다. 저장하지 않은 변경은 취소됩니다.";
@@ -98,7 +98,7 @@
 
 "card.title" = "분류";
 
-"card.help" = "이 사진·영상의 분류를 선택합니다.";
+"card.help" = "이 파일의 분류를 선택합니다.";
 
 "card.accessibilityFormat" = "%@ 분류";
 
@@ -122,7 +122,7 @@
 
 "panel.selectionHint" = "체크박스·⌘클릭으로 추가 선택 · ⇧클릭으로 범위 선택. 분류 키와 패널은 선택한 항목 전체에, 카드의 분류는 해당 항목에만 적용됩니다.";
 
-"selection.help" = "선택에 추가하거나 제외합니다. 분류 키와 패널 버튼은 선택한 사진·영상 전체에 적용됩니다.";
+"selection.help" = "선택에 추가하거나 제외합니다. 분류 키와 패널 버튼은 선택한 파일 전체에 적용됩니다.";
 
 "selection.accessibilityFormat" = "%@ 선택";
 
@@ -136,4 +136,18 @@
 "inheritance.originals" = "파일을 이동하거나 휴지통에서 복원하면 이 설정과 관계없이 원본의 분류를 유지합니다.";
 
 "panel.viewerSelectionHint" = "%@ 사진 선택";
-"panel.viewerSelectionHelp" = "%@로 현재 페이지의 사진·영상을 하나씩 선택합니다. 끝에 도달하면 같은 페이지의 반대쪽 끝으로 이어집니다. 분류 모드를 켠 뒤 1–4, QWER, ASDF 키로 선택한 항목을 분류할 수 있습니다.";
+"panel.viewerSelectionHelp" = "%@로 현재 프레임에서 좌우는 같은 행, 상하는 가까운 열의 항목으로 선택을 옮깁니다. 행·열 끝에서는 반대쪽 끝으로 순환합니다. 분류 모드를 켜면 1–4, QWER, ASDF 키로 선택한 항목을 분류합니다.";
+
+/* Include/exclude conditions stay within the currently opened collection. */
+"filter.scope" = "현재 열어 둔 폴더와 파일 안에서만 찾습니다.";
+"filter.conditions" = "분류 조건";
+"filter.includeCountFormat" = "포함 · %d";
+"filter.excludeCountFormat" = "제외 · %d";
+"filter.includeHelp" = "결과에 포함할 분류를 고르세요. 아래에서 하나라도 또는 모두 일치를 정할 수 있습니다.";
+"filter.excludeHelp" = "고른 분류가 하나라도 붙은 파일은 제외합니다. 예: S 포함 + E 제외.";
+"filter.included" = "포함";
+"filter.excluded" = "제외";
+"filter.ignored" = "조건 없음";
+"filter.includeRule" = "포함 분류의 일치 조건";
+"filter.includeSummaryFormat" = "포함: %@";
+"filter.excludeSummaryFormat" = "제외: %@";

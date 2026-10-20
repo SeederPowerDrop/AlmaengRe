@@ -50,7 +50,7 @@ struct HomeView: View {
           }
         }
         .frame(width: contentWidth)
-        .padding(.vertical, 30)
+        .viewerPadding(.vertical, 30)
         .frame(maxWidth: .infinity)
       }
       .background(ViewerTheme.chromeGradient)
@@ -68,38 +68,38 @@ struct HomeView: View {
             Image(nsImage: icon).resizable().interpolation(.high).scaledToFit()
           } else {
             Image(systemName: "photo.on.rectangle.angled")
-              .resizable().scaledToFit().foregroundStyle(ViewerTheme.accent).padding(16)
+              .resizable().scaledToFit().foregroundStyle(ViewerTheme.accent).viewerPadding(16)
           }
         }
-        .frame(width: 86, height: 86)
+        .viewerFrame(width: 86, height: 86)
         .accessibilityHidden(true)
 
         VStack(alignment: .leading, spacing: 8) {
           HStack(alignment: .firstTextBaseline, spacing: 10) {
             Text(verbatim: "알맹Re")
-              .font(.system(size: 34, weight: .bold, design: .rounded))
+              .font(ViewerUIMetrics.font(size: 34, weight: .bold, design: .rounded))
               .tracking(-0.8)
               .accessibilityAddTraits(.isHeader)
             if let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String {
               Text(verbatim: version)
-                .font(.system(size: 12, weight: .semibold, design: .rounded))
+                .font(ViewerUIMetrics.font(size: 12, weight: .semibold, design: .rounded))
                 .foregroundStyle(ViewerTheme.accent)
-                .padding(.horizontal, 8).padding(.vertical, 3)
+                .viewerPadding(.horizontal, 8).viewerPadding(.vertical, 3)
                 .background(ViewerTheme.selection, in: Capsule())
             }
           }
           Text(verbatim: strings.text("home.subtitle"))
-            .font(.system(size: 13))
+            .font(ViewerUIMetrics.font(size: 13))
             .foregroundStyle(.secondary)
             .fixedSize(horizontal: false, vertical: true)
           Button { openWindow(id: AboutView.windowID) } label: {
             Label(strings.text("앱 소개"), systemImage: "info.circle")
               .fixedSize(horizontal: true, vertical: false)
-              .frame(minWidth: 90)
+              .viewerFrame(minWidth: 90)
           }
           .buttonStyle(ViewerActionButtonStyle())
           .accessibilityIdentifier("home.about")
-          .padding(.top, 4)
+          .viewerPadding(.top, 4)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
 
@@ -107,7 +107,7 @@ struct HomeView: View {
           Button { store.chooseItems() } label: {
             Label(strings.text("열기…"), systemImage: "folder.badge.plus")
               .fixedSize(horizontal: true, vertical: false)
-              .frame(minWidth: 130)
+              .viewerFrame(minWidth: 130)
           }
           .buttonStyle(ViewerActionButtonStyle(prominent: true))
           .accessibilityIdentifier("home.open")
@@ -116,7 +116,7 @@ struct HomeView: View {
             Button { Task { await store.resumeWorkspace() } } label: {
               Text(verbatim: strings.text("home.resume"))
                 .fixedSize(horizontal: true, vertical: false)
-                .frame(minWidth: 130)
+                .viewerFrame(minWidth: 130)
             }
             .buttonStyle(ViewerActionButtonStyle())
             .accessibilityIdentifier("home.resume")
@@ -125,12 +125,12 @@ struct HomeView: View {
         }
       }
       Label(strings.text("이미지·영상·폴더를 여기에 놓으세요."), systemImage: "square.and.arrow.down")
-        .font(.system(size: 12))
+        .font(ViewerUIMetrics.font(size: 12))
         .foregroundStyle(.secondary)
         .accessibilityIdentifier("home.dropHint")
       inspiration
     }
-    .padding(24)
+    .viewerPadding(24)
     .frame(maxWidth: .infinity, alignment: .leading)
     .background(ViewerTheme.panelGradient, in: RoundedRectangle(cornerRadius: 18))
     .overlay {
@@ -144,11 +144,11 @@ struct HomeView: View {
       let localized = quote.localized(for: strings.languageIdentifier) {
       VStack(alignment: .leading, spacing: 7) {
         Text(verbatim: localized.text)
-          .font(.system(size: 16, weight: .medium))
+          .font(ViewerUIMetrics.font(size: 16, weight: .medium))
           .fixedSize(horizontal: false, vertical: true)
           .accessibilityIdentifier("home.quote.text")
         Text(verbatim: "\(localized.author) · \(localized.work)")
-          .font(.system(size: 11))
+          .font(ViewerUIMetrics.font(size: 11))
           .foregroundStyle(.secondary)
           .fixedSize(horizontal: false, vertical: true)
           .accessibilityIdentifier("home.quote.attribution")
@@ -162,10 +162,10 @@ struct HomeView: View {
               .foregroundStyle(.secondary)
           }
         }
-        .font(.system(size: 11))
+        .font(ViewerUIMetrics.font(size: 11))
       }
-      .padding(.vertical, 5)
-      .padding(.leading, 13)
+      .viewerPadding(.vertical, 5)
+      .viewerPadding(.leading, 13)
       .overlay(alignment: .leading) {
         Capsule().fill(ViewerTheme.accent.opacity(0.5)).frame(width: 2)
       }
@@ -178,10 +178,10 @@ struct HomeView: View {
     HStack(alignment: .center, spacing: 20) {
       VStack(alignment: .leading, spacing: 5) {
         Text(verbatim: strings.text("home.recent"))
-          .font(.system(size: 19, weight: .semibold))
+          .font(ViewerUIMetrics.font(size: 19, weight: .semibold))
           .accessibilityAddTraits(.isHeader)
         Text(verbatim: strings.text("home.recent.detail"))
-          .font(.system(size: 12)).foregroundStyle(.secondary)
+          .font(ViewerUIMetrics.font(size: 12)).foregroundStyle(.secondary)
           .fixedSize(horizontal: false, vertical: true)
       }
       Spacer(minLength: 8)
@@ -198,18 +198,18 @@ struct HomeView: View {
   private var emptyHistory: some View {
     VStack(spacing: 10) {
       Image(systemName: "folder.badge.plus")
-        .font(.system(size: 27, weight: .light))
+        .font(ViewerUIMetrics.font(size: 27, weight: .light))
         .foregroundStyle(.secondary)
-        .padding(.bottom, 4)
+        .viewerPadding(.bottom, 4)
         .accessibilityHidden(true)
       Text(verbatim: strings.text("home.empty"))
-        .font(.system(size: 14, weight: .medium))
+        .font(ViewerUIMetrics.font(size: 14, weight: .medium))
       Text(verbatim: strings.text("home.empty.detail"))
-        .font(.system(size: 12)).foregroundStyle(.secondary)
+        .font(ViewerUIMetrics.font(size: 12)).foregroundStyle(.secondary)
     }
     .multilineTextAlignment(.center)
     .frame(maxWidth: .infinity, minHeight: 180)
-    .padding(.horizontal, 20)
+    .viewerPadding(.horizontal, 20)
     .background(ViewerTheme.panel.opacity(0.55), in: RoundedRectangle(cornerRadius: 14))
     .overlay {
       RoundedRectangle(cornerRadius: 14).strokeBorder(ViewerTheme.separator, lineWidth: 0.75)
@@ -234,18 +234,18 @@ private struct RecentFolderCard: View {
     VStack(alignment: .leading, spacing: 18) {
       HStack(spacing: 14) {
         Image(systemName: folder.isArchive ? "doc.zipper" : "folder.fill")
-          .font(.system(size: 23, weight: .medium))
+          .font(ViewerUIMetrics.font(size: 23, weight: .medium))
           .foregroundStyle(ViewerTheme.accent)
-          .frame(width: 46, height: 46)
+          .viewerFrame(width: 46, height: 46)
           .background(ViewerTheme.selection, in: RoundedRectangle(cornerRadius: 12))
           .accessibilityHidden(true)
         VStack(alignment: .leading, spacing: 5) {
           Text(verbatim: folder.name)
-            .font(.system(size: 17, weight: .semibold))
+            .font(ViewerUIMetrics.font(size: 17, weight: .semibold))
             .lineLimit(1).truncationMode(.middle)
             .accessibilityAddTraits(.isHeader)
           Text(verbatim: folder.location.url.path)
-            .font(.system(size: 11))
+            .font(ViewerUIMetrics.font(size: 11))
             .foregroundStyle(.secondary)
             .lineLimit(1).truncationMode(.middle)
             .help(folder.location.url.path)
@@ -253,9 +253,9 @@ private struct RecentFolderCard: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         VStack(alignment: .trailing, spacing: 5) {
           Text(verbatim: strings.format("home.folder.count", folder.photos.count))
-            .font(.system(size: 11, weight: .medium))
+            .font(ViewerUIMetrics.font(size: 11, weight: .medium))
           Text(folder.lastOpened, format: .dateTime.month(.abbreviated).day())
-            .font(.system(size: 11))
+            .font(ViewerUIMetrics.font(size: 11))
             .foregroundStyle(.secondary)
         }
         Button(action: open) {
@@ -270,8 +270,8 @@ private struct RecentFolderCard: View {
         Menu {
           Button(strings.text("home.folder.remove"), action: remove)
         } label: {
-          Image(systemName: "ellipsis").font(.system(size: 16, weight: .semibold))
-            .frame(width: 22, height: 24)
+          Image(systemName: "ellipsis").font(ViewerUIMetrics.font(size: 16, weight: .semibold))
+            .viewerFrame(width: 22, height: 24)
         }
         .menuStyle(.borderlessButton)
         .menuIndicator(.hidden)
@@ -281,7 +281,7 @@ private struct RecentFolderCard: View {
       }
       if folder.photos.isEmpty {
         Label(strings.text("home.folder.empty"), systemImage: "photo.on.rectangle")
-          .font(.system(size: 12))
+          .font(ViewerUIMetrics.font(size: 12))
           .foregroundStyle(.secondary)
           .frame(maxWidth: .infinity, minHeight: 90)
           .background(ViewerTheme.sidebar.opacity(0.6), in: RoundedRectangle(cornerRadius: 10))
@@ -294,7 +294,7 @@ private struct RecentFolderCard: View {
         }
       }
     }
-    .padding(20)
+    .viewerPadding(20)
     .background(ViewerTheme.panelGradient, in: RoundedRectangle(cornerRadius: 16))
     .overlay {
       RoundedRectangle(cornerRadius: 16).strokeBorder(ViewerTheme.separator, lineWidth: 0.75)
@@ -331,11 +331,11 @@ private struct RecentPhotoCard: View {
         VStack(spacing: 0) {
           thumbnail
           Text(verbatim: photo.filename)
-            .font(.system(size: 12, weight: .medium))
+            .font(ViewerUIMetrics.font(size: 12, weight: .medium))
             .foregroundStyle(.primary)
             .lineLimit(1).truncationMode(.middle)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.horizontal, 10).padding(.vertical, 10)
+            .viewerPadding(.horizontal, 10).viewerPadding(.vertical, 10)
         }
         .contentShape(RoundedRectangle(cornerRadius: 12))
       }
@@ -347,15 +347,15 @@ private struct RecentPhotoCard: View {
       // This is a sibling of the open button, so removing never opens the photo.
       Button(action: remove) {
         Image(systemName: "xmark")
-          .font(.system(size: 10, weight: .semibold))
+          .font(ViewerUIMetrics.font(size: 10, weight: .semibold))
           .foregroundStyle(.primary)
-          .frame(width: 26, height: 26)
+          .viewerFrame(width: 26, height: 26)
           .background(.regularMaterial, in: Circle())
           .overlay { Circle().strokeBorder(ViewerTheme.separator, lineWidth: 0.75) }
           .contentShape(Circle())
       }
       .buttonStyle(.plain)
-      .padding(6)
+      .viewerPadding(6)
       .help(strings.format("home.remove.label", photo.filename))
       .accessibilityLabel(strings.format("home.remove.label", photo.filename))
       .accessibilityIdentifier("home.recent.remove.\(photo.id)")
@@ -383,19 +383,19 @@ private struct RecentPhotoCard: View {
         if let preview {
           Image(nsImage: preview)
             .resizable().interpolation(.high).scaledToFit()
-            .padding(10)
+            .viewerPadding(10)
             .accessibilityHidden(true)
         } else {
           VStack(spacing: 8) {
             Image(systemName: "photo")
-              .font(.system(size: 25, weight: .light))
+              .font(ViewerUIMetrics.font(size: 25, weight: .light))
             Text(verbatim: strings.text("home.preview.unavailable"))
-              .font(.system(size: 11))
+              .font(ViewerUIMetrics.font(size: 11))
               .lineLimit(2)
               .multilineTextAlignment(.center)
           }
           .foregroundStyle(.secondary)
-          .padding(12)
+          .viewerPadding(12)
         }
       }
       .clipped()

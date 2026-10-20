@@ -12,3 +12,9 @@
 "quick.export" = "Format et taille";
 "quick.watermark" = "Filigrane";
 "quick.share" = "Partager";
+
+"classify.menu" = "Classer les fichiers sélectionnés…";
+"quick.classify" = "Classer";
+
+"selection.focused" = "Position de navigation au clavier";
+"selection.overviewHelp" = "⌘-clic : sélectionner/désélectionner\n⌘-flèche : déplacer et inverser la sélection de l’élément de destination\n⇧-clic / ⇧-flèche : sélectionner une plage\n⌘⇧-clic / ⌘⇧-flèche : ajouter une plage à la sélection actuelle";

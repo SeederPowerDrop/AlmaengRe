@@ -30,8 +30,9 @@ struct SettingsView: View {
         .tabItem { Label("파일 연결", systemImage: "doc.badge.gearshape") }
         .tag(SettingsTab.associations)
     }
-    .frame(width: 700, height: 560)
-    .padding(18)
+    .font(ViewerUIMetrics.font(.body))
+    .viewerFrame(width: 700, height: 560)
+    .viewerPadding(18)
     .background(ViewerTheme.chromeGradient)
     .tint(ViewerTheme.accent)
     .environment(\.layoutDirection,
@@ -62,11 +63,11 @@ struct SettingsView: View {
           .accessibilityIdentifier("settings.language")
 
           Text(LanguageSettings.text("help"))
-            .font(.caption)
+            .font(ViewerUIMetrics.font(.caption))
             .foregroundStyle(.secondary)
             .fixedSize(horizontal: false, vertical: true)
           Text(LanguageSettings.text("fallback"))
-            .font(.caption)
+            .font(ViewerUIMetrics.font(.caption))
             .foregroundStyle(.secondary)
             .fixedSize(horizontal: false, vertical: true)
         }
@@ -81,12 +82,12 @@ struct SettingsView: View {
         .pickerStyle(.segmented)
         .accessibilityIdentifier("settings.appearance")
         Text(verbatim: L10n.text("appearance.help"))
-          .font(.caption)
+          .font(ViewerUIMetrics.font(.caption))
           .foregroundStyle(.secondary)
 
         Toggle("HDR/EDR 출력 사용", isOn: $store.prefersHDR)
         Text("HDR 디스플레이에서 확장 밝기 범위를 사용합니다. SDR 화면에서는 자동으로 안전하게 표시됩니다.")
-          .font(.caption)
+          .font(ViewerUIMetrics.font(.caption))
           .foregroundStyle(.secondary)
 
         Picker("썸네일 패널 위치", selection: $store.thumbnailPanelPlacement) {
@@ -102,12 +103,12 @@ struct SettingsView: View {
           }
         }
         Text("이미지 왼쪽 위의 파일 이름을 숨기거나 크기를 조절합니다. 글자는 흰색, 배경은 검정으로 표시됩니다.")
-          .font(.caption)
+          .font(ViewerUIMetrics.font(.caption))
           .foregroundStyle(.secondary)
 
         Toggle("고화질 확대", isOn: $store.isAntialiasingEnabled)
         Text(store.imageInterpolationMode.detail)
-          .font(.caption)
+          .font(ViewerUIMetrics.font(.caption))
           .foregroundStyle(.secondary)
         Picker(
           "확대 비교",
@@ -120,34 +121,34 @@ struct SettingsView: View {
           }
         }
         Text("같은 이미지의 확대 배율과 이동 위치를 맞춰 비교합니다. 비교를 선택하면 고화질 확대가 켜집니다.")
-          .font(.caption)
+          .font(ViewerUIMetrics.font(.caption))
           .foregroundStyle(.secondary)
       }
 
       Section("탐색") {
         Toggle(MotionMediaL10n.text("showVideos"), isOn: $store.showsVideos)
         Text(MotionMediaL10n.text("showVideos.help"))
-          .font(.caption).foregroundStyle(.secondary)
+          .font(ViewerUIMetrics.font(.caption)).foregroundStyle(.secondary)
         Toggle("폴더 트리 표시", isOn: $store.showsFolderTree)
         Text("폴더를 펼쳐 다른 폴더로 이동합니다.")
-          .font(.caption).foregroundStyle(.secondary)
+          .font(ViewerUIMetrics.font(.caption)).foregroundStyle(.secondary)
         Toggle("마지막 이미지 다음에 첫 이미지로 이동", isOn: $store.wrapsNavigation)
       }
 
       Section("전자 앨범") {
         SlideshowOptionsView(store: store)
         Text("탐색 → 전자 앨범 또는 집중 보기 하단의 재생 버튼으로 시작합니다. 사진 두 장 이상 또는 영상이 있으면 재생할 수 있습니다.")
-          .font(.caption)
+          .font(ViewerUIMetrics.font(.caption))
           .foregroundStyle(.secondary)
       }
 
       Section("몽땅보기") {
         Toggle("몽땅보기 번호 표시", isOn: $store.showsOverviewNumbers)
         Text("번호가 이미지 면적의 ¼ 이상을 차지하면 사진 밖 카드의 왼쪽 위로 옮깁니다.")
-          .font(.caption)
+          .font(ViewerUIMetrics.font(.caption))
           .foregroundStyle(.secondary)
         Text("드래그로 영역 선택 · Shift로 추가 · ⌘로 반전 · Esc로 취소")
-          .font(.caption)
+          .font(ViewerUIMetrics.font(.caption))
           .foregroundStyle(.secondary)
       }
 
@@ -159,14 +160,24 @@ struct SettingsView: View {
           }
         }
         Text(store.imageLoadingMode.detail)
-          .font(.caption)
+          .font(ViewerUIMetrics.font(.caption))
           .foregroundStyle(.secondary)
         Text("모든 모드에서 메모리 여유와 발열을 살피고, 다른 앱을 사용하거나 저전력 모드일 때 처리량을 줄입니다.")
-          .font(.caption)
+          .font(ViewerUIMetrics.font(.caption))
           .foregroundStyle(.secondary)
         Text("외장 SSD와 SD 카드에서는 미리 읽기를 줄여 현재 보이는 사진을 먼저 불러옵니다.")
-          .font(.caption)
+          .font(ViewerUIMetrics.font(.caption))
           .foregroundStyle(.secondary)
+      }
+
+      Section(L10n.text("cache.title")) {
+        ImageCacheManagementControls(usage: store.imageCacheUsage,
+          isRefreshing: store.isRefreshingImageCacheUsage,
+          isClearing: store.isPurgingImageCaches,
+          clearFailed: store.imageCachePurgeFailed,
+          refresh: { Task { await store.refreshImageCacheUsage() } },
+          clear: { store.purgeCaches() })
+          .task { await store.refreshImageCacheUsage() }
       }
 
       Section("확대 이미지 이동") {
@@ -176,26 +187,22 @@ struct SettingsView: View {
           }
         }
         Text(store.panInteractionMode.detail)
-          .font(.caption)
+          .font(ViewerUIMetrics.font(.caption))
           .foregroundStyle(.secondary)
       }
 
       Section("디코더") {
         Text(MotionMediaL10n.text("supported"))
-          .font(.caption).foregroundStyle(.secondary)
+          .font(ViewerUIMetrics.font(.caption)).foregroundStyle(.secondary)
         LabeledContent(
           "macOS 네이티브 입력 형식",
           value: L10n.format("%d개 UTI", ImageFormatRegistry.readableTypeIdentifiers.count)
         )
         Text(ImageFormatRegistry.nativeFormatNames.joined(separator: ", "))
-          .font(.caption)
+          .font(ViewerUIMetrics.font(.caption))
           .foregroundStyle(.secondary)
           .textSelection(.enabled)
 
-        HStack {
-          Spacer()
-          Button("이미지 캐시 비우기") { store.purgeCaches() }
-        }
       }
     }
     .formStyle(.grouped)
@@ -208,7 +215,7 @@ struct SettingsView: View {
     VStack(alignment: .leading, spacing: 12) {
       HStack {
         Text("키보드 단축키")
-          .font(.title3.weight(.semibold))
+          .font(ViewerUIMetrics.font(.title3).weight(.semibold))
         Spacer()
         Button("기본값 복원") { shortcuts.reset() }
           .help(ShortcutHelpL10n.text("reset.help"))
@@ -216,7 +223,7 @@ struct SettingsView: View {
 
       HStack(alignment: .top, spacing: 12) {
         Text(ShortcutHelpL10n.text("settings.hint"))
-          .font(.caption)
+          .font(ViewerUIMetrics.font(.caption))
           .foregroundStyle(.secondary)
           .fixedSize(horizontal: false, vertical: true)
         Spacer(minLength: 0)
@@ -241,7 +248,7 @@ struct SettingsView: View {
               )
             }
           }
-          .padding(.vertical, 4)
+          .viewerPadding(.vertical, 4)
         }
       }
     }
@@ -254,7 +261,7 @@ struct SettingsView: View {
     }.max() ?? 190
     // Reserve the key picker, four modifier buttons, status icon, six grid
     // gaps and the scroll bar. Every row shares one measured title column.
-    let maximumWidth = min(340, max(0, availableWidth - 342))
+    let maximumWidth = min(340, max(0, availableWidth / ViewerUIMetrics.multiplier - 342))
     return min(maximumWidth, max(190, ceil(widestTitle) + 2))
   }
 
@@ -262,12 +269,12 @@ struct SettingsView: View {
     VStack(alignment: .leading, spacing: 12) {
       VStack(alignment: .leading, spacing: 4) {
         Text("기본 이미지 앱")
-          .font(.title3.weight(.semibold))
+          .font(ViewerUIMetrics.font(.title3).weight(.semibold))
         Text("선택한 파일 형식만 알맹Re로 열리도록 macOS 기본 앱을 변경합니다. 필요한 경우 macOS가 확인 창을 표시합니다.")
-          .font(.caption)
+          .font(ViewerUIMetrics.font(.caption))
           .foregroundStyle(.secondary)
         Text("Finder에서 이미지를 열면 한 장 보기로 시작합니다. 이미지·영상·폴더를 창에 끌어 놓아도 열 수 있습니다.")
-          .font(.caption)
+          .font(ViewerUIMetrics.font(.caption))
           .foregroundStyle(.secondary)
       }
 
@@ -311,11 +318,11 @@ struct SettingsView: View {
       HStack {
         if let statusMessage = associations.statusMessage {
           Label(statusMessage, systemImage: "checkmark.circle.fill")
-            .font(.caption)
+            .font(ViewerUIMetrics.font(.caption))
             .foregroundStyle(.green)
         } else {
           Text("선택하지 않은 형식의 기본 앱은 변경하지 않습니다.")
-            .font(.caption)
+            .font(ViewerUIMetrics.font(.caption))
             .foregroundStyle(.secondary)
         }
         Spacer()
@@ -346,7 +353,7 @@ struct SettingsView: View {
         VStack(alignment: .leading, spacing: 2) {
           Text(format.title)
           Text(format.extensionsDescription)
-            .font(.caption.monospaced())
+            .font(ViewerUIMetrics.font(.caption).monospaced())
             .foregroundStyle(.secondary)
         }
       }
@@ -354,8 +361,8 @@ struct SettingsView: View {
       Spacer()
       associationStatus(associations.coverage(for: format))
     }
-    .padding(.vertical, 7)
-    .padding(.horizontal, 2)
+    .viewerPadding(.vertical, 7)
+    .viewerPadding(.horizontal, 2)
   }
 
   @ViewBuilder
@@ -396,7 +403,7 @@ private struct ShortcutRow: View {
       Text(action.title)
         .lineLimit(1)
         .truncationMode(.tail)
-        .frame(width: titleColumnWidth, alignment: .leading)
+        .viewerFrame(width: titleColumnWidth, alignment: .leading)
         .help(actionHelp)
         .accessibilityLabel(action.title)
         .accessibilityHint(action.helpDescription)
@@ -407,7 +414,7 @@ private struct ShortcutRow: View {
         }
       }
       .labelsHidden()
-      .frame(width: 90)
+      .viewerFrame(width: 90)
       .accessibilityLabel(action.title)
       .help(ShortcutHelpL10n.format("key.helpFormat", action.title) + "\n\n" + actionHelp)
 
@@ -454,7 +461,7 @@ private struct ShortcutRow: View {
     )
     .toggleStyle(.button)
     .controlSize(.small)
-    .frame(width: 34)
+    .viewerFrame(width: 34)
     .accessibilityLabel("\(action.title) · \(name) (\(label))")
     .help(ShortcutHelpL10n.text(helpKey))
   }

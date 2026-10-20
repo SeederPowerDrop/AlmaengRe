@@ -3,7 +3,7 @@
 "wildcard.hint" = "不明な文字は * または % で置き換えられます：img* · *.png · *旅行* · *（すべて）。通常の文字はファイル名の一部と一致します。";
 "metadata.title" = "撮影情報・メタデータ";
 "metadata.placeholder" = "カメラ、レンズ、ISO、説明、キーワード…";
-"metadata.hint" = "ファイルに記録された EXIF・IPTC 情報と動画タグを検索します。";
+"metadata.hint" = "ファイル内のEXIF・IPTC情報と動画・音声タグを検索します。";
 "location.title" = "位置";
 "location.placeholder" = "記録された都市・国名または GPS 座標…";
 "location.hint" = "記録された地名と座標を検索します。GPS 座標から地名への変換は行いません。";

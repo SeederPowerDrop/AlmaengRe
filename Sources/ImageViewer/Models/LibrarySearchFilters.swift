@@ -108,25 +108,47 @@ struct LibrarySearchFilters: Codable, Equatable, Sendable {
   }
 
   func matches(_ asset: ImageAsset, calendar: Calendar = LibraryCalendarDay.calendar) -> Bool {
-    if minimumBytes != nil || maximumBytes != nil {
+    LibrarySearchPredicate(filters: self, calendar: calendar).matches(asset)
+  }
+}
+
+/// Compile text patterns and capture the user's calendar once per collection,
+/// rather than rebuilding them for every photograph. Inactive text fields must
+/// not assemble EXIF text or format GPS coordinates on a simple filename query.
+struct LibrarySearchPredicate: Sendable {
+  private let filters: LibrarySearchFilters
+  private let calendar: Calendar
+  private let metadataMatcher: LibraryTextMatcher
+  private let locationMatcher: LibraryTextMatcher
+
+  init(filters: LibrarySearchFilters, calendar: Calendar = LibraryCalendarDay.calendar) {
+    self.filters = filters
+    self.calendar = calendar
+    metadataMatcher = LibraryTextMatcher(pattern: filters.metadataText, anchorsWildcards: false)
+    locationMatcher = LibraryTextMatcher(pattern: filters.locationText, anchorsWildcards: false)
+  }
+
+  func matches(_ asset: ImageAsset) -> Bool {
+    if filters.minimumBytes != nil || filters.maximumBytes != nil {
       guard let bytes = asset.byteCount else { return false }
-      if let minimumBytes, bytes < minimumBytes { return false }
-      if let maximumBytes, bytes > maximumBytes { return false }
+      if let minimumBytes = filters.minimumBytes, bytes < minimumBytes { return false }
+      if let maximumBytes = filters.maximumBytes, bytes > maximumBytes { return false }
     }
-    if let date, !date.matches(asset, calendar: calendar) { return false }
+    if let date = filters.date, !date.matches(asset, calendar: calendar) { return false }
     let metadata = asset.sortMetadata
     // A refreshed negative lookup is authoritative. The map location on an old
     // asset may predate a replacement file whose GPS tags have been removed.
     let location: ImageLocation?
     if let metadata { location = metadata.embeddedLocation }
     else { location = asset.location }
-    if gps == .present && location == nil { return false }
-    if gps == .absent && location != nil { return false }
-    if !LibraryTextMatcher(pattern: metadataText, anchorsWildcards: false).matches(
+    if filters.gps == .present && location == nil { return false }
+    if filters.gps == .absent && location != nil { return false }
+    if !metadataMatcher.isEmpty && !metadataMatcher.matches(
       metadata?.searchableText ?? "") { return false }
+    guard !locationMatcher.isEmpty else { return true }
     let locationValue = [metadata?.locationText, location?.coordinateDescription]
       .compactMap { $0 }.joined(separator: "\n")
-    return LibraryTextMatcher(pattern: locationText, anchorsWildcards: false).matches(locationValue)
+    return locationMatcher.matches(locationValue)
   }
 }
 
@@ -138,6 +160,8 @@ struct LibraryTextMatcher: Sendable {
   private let hasWildcard: Bool
   private let plain: String
   private let plainTerms: [String]
+
+  var isEmpty: Bool { plain.isEmpty }
 
   init(pattern: String, anchorsWildcards: Bool = true) {
     let normalized = Self.fold(pattern.trimmingCharacters(in: .whitespacesAndNewlines))

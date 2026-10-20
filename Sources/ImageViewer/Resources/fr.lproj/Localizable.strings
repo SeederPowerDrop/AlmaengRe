@@ -440,7 +440,7 @@
 "전자 앨범 반복 재생" = "Lire l’album en boucle";
 "%d초 간격" = "Toutes les %d secondes";
 "전자 앨범 재생 완료" = "Lecture de l’album terminée";
-"1~300초. 사진은 표시된 뒤 시간을 세고, 영상은 끝까지 재생한 뒤 넘어갑니다. 집중 보기를 나가거나 다른 앱으로 전환하면 일시정지합니다." = "1 à 300 secondes après l’affichage de chaque photo. Les vidéos sont lues jusqu’à la fin avant de passer à la suite. Quitter la vue Concentration ou changer d’app met la lecture en pause.";
+"1~300초. 사진은 표시된 뒤 시간을 세고, 영상은 끝까지 재생한 뒤 넘어갑니다. 집중 보기를 나가거나 다른 앱으로 전환하면 일시정지합니다." = "1–300 secondes. Le temps des photos démarre après leur affichage ; la vidéo et l’audio sont lus jusqu’à la fin avant de passer à la suite. Quitter la vue Concentration ou changer d’application met la lecture en pause.";
 "탐색 → 전자 앨범 또는 집중 보기 하단의 재생 버튼으로 시작합니다. 사진 두 장 이상 또는 영상이 있으면 재생할 수 있습니다." = "Lancez la lecture via Navigation → Album photo ou le bouton de lecture en vue Concentration. Il faut au moins deux photos ou une vidéo.";
 "현재 이미지를 바탕화면으로 설정" = "Utiliser l’image actuelle comme fond d’écran";
 "사진 전체 맞춤" = "Afficher toute la photo";
@@ -817,7 +817,7 @@
 "aiPreview.basicUsage" = "Dans Agrandissement IA, ajustez le zoom et déplacez la séparation pour comparer l’original au résultat, puis enregistrez une copie PNG.";
 
 /* Branded home and recent-photo history */
-"home.subtitle" = "Explorez les instants de vos photos et vidéos, et classez-les à votre façon.";
+"home.subtitle" = "Explorez vos photos, vidéos et fichiers audio, et organisez-les à votre façon.";
 "home.recent" = "Dossiers récemment ouverts";
 "home.recent.detail" = "Jusqu’à 3 dossiers, du plus récemment ouvert au plus ancien, avec jusqu’à 4 images consultées ou utilisées en dernier dans chacun.";
 "home.empty" = "Aucun dossier récent";
@@ -853,10 +853,23 @@
 "appearance.dark" = "Sombre";
 "appearance.help" = "Le mode Système suit automatiquement l’apparence de macOS.";
 
-"%@ 영상을 재생할 수 없어 전자 앨범을 일시정지했습니다." = "L’album photo est en pause, car la vidéo %@ n’a pas pu être lue.";
+"%@ 영상을 재생할 수 없어 전자 앨범을 일시정지했습니다." = "L’album est en pause, car le fichier %@ ne peut pas être lu.";
 "‘%@’은 비어 있는 파일입니다(0바이트). 원본이나 백업에서 다시 복사해 주세요." = "« %@ » est un fichier vide (0 octet). Copiez-le à nouveau depuis l’original ou une sauvegarde.";
 
 "지원 이미지 모두 연결" = "Associer tous les formats d’image pris en charge";
-"Finder에서 이미지를 열면 한 장 보기로 시작합니다. 이미지·영상·폴더를 창에 끌어 놓아도 열 수 있습니다." = "Les images ouvertes depuis le Finder s’affichent une par une. Vous pouvez aussi ouvrir des images, des vidéos et des dossiers en les déposant dans la fenêtre.";
+"Finder에서 이미지를 열면 한 장 보기로 시작합니다. 이미지·영상·폴더를 창에 끌어 놓아도 열 수 있습니다." = "Les images ouvertes depuis le Finder s’affichent une par une. Vous pouvez aussi glisser des images, vidéos, fichiers audio et dossiers dans la fenêtre pour les ouvrir.";
 "연결 확인이 필요한 형식: %@" = "Formats dont l’association doit être vérifiée : %@";
-"이미지·영상·폴더를 여기에 놓으세요." = "Déposez ici des images, des vidéos ou des dossiers.";
+"이미지·영상·폴더를 여기에 놓으세요." = "Déposez des images, vidéos, fichiers audio ou dossiers ici.";
+
+/* Image cache management */
+"cache.title" = "Cache d’images";
+"cache.memoryUsage" = "RAM des images réutilisables : %@";
+"cache.diskUsage" = "Miniatures sur le disque : %@";
+"cache.usageUnknown" = "Indisponible";
+"cache.diskUsageUnavailableHelp" = "Vérifiez l’accès au dossier de cache, puis actualisez la taille.";
+"cache.calculating" = "Calcul de la taille…";
+"cache.refresh" = "Actualiser la taille";
+"cache.clearing" = "Vidage du cache…";
+"cache.usageHelp" = "La RAM estime la taille des bitmaps réutilisables, et non la mémoire totale de l’app. La taille sur disque correspond à la somme des fichiers de miniatures enregistrés.";
+"cache.clearHelp" = "Les originaux, les réglages et la vue actuelle sont conservés. Les aperçus sont recréés au besoin.";
+"cache.clearFailed" = "Certains fichiers du cache sur disque n’ont pas pu être effacés. Vérifiez la taille restante et réessayez.";

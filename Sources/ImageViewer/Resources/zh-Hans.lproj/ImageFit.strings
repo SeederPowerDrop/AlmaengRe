@@ -1,0 +1,16 @@
+/* Image fitting menu and contextual help. */
+"menu.image" = "图像适配";
+"menu.frame" = "画框适配";
+"menu.help" = "选择显示完整图像、适配宽度或高度、居中或实际大小。";
+"menu.frameHelp" = "选择在各画框内显示完整图像或居中。";
+"whole.title" = "显示完整图像";
+"whole.help" = "保持宽高比，调整大小以显示完整图像。";
+"frame.wholeHelp" = "保持各图像的宽高比，在各自画框内显示完整图像。";
+"width.title" = "填满左右空白";
+"width.help" = "保持宽高比并适配宽度。图像的顶部或底部可能超出可见范围。";
+"height.title" = "填满上下空白";
+"height.help" = "保持宽高比并适配高度。图像的左侧或右侧可能超出可见范围。";
+"center.title" = "移到中央";
+"center.help" = "将图像移到中央，不改变缩放比例。";
+"actual.title" = "实际大小 (1:1)";
+"actual.help" = "以一个屏幕像素显示一个图像像素。";

@@ -12,3 +12,9 @@
 "quick.export" = "Định dạng, kích thước";
 "quick.watermark" = "Dấu chìm";
 "quick.share" = "Chia sẻ";
+
+"classify.menu" = "Phân loại tệp đã chọn…";
+"quick.classify" = "Phân loại";
+
+"selection.focused" = "Vị trí điều hướng bàn phím";
+"selection.overviewHelp" = "⌘-nhấp: chọn/bỏ chọn\n⌘-mũi tên: di chuyển và chọn/bỏ chọn mục đích\n⇧-nhấp / ⇧-mũi tên: chọn một dải\n⌘⇧-nhấp / ⌘⇧-mũi tên: thêm một dải vào vùng chọn hiện tại";

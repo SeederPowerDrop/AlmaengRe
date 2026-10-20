@@ -6,7 +6,7 @@
 "unsupported" = "Định dạng hoặc bộ mã hóa này không được hỗ trợ.";
 "unreadableData" = "Không thể đọc dữ liệu tệp. Tệp có thể bị hỏng hoặc có định dạng không được hỗ trợ.";
 "noVideoTrack" = "Tệp này không có rãnh video để hiển thị.";
-"protected" = "Không thể phát video được bảo vệ.";
+"protected" = "Không thể phát tệp được bảo vệ.";
 "invalidVideo" = "Thời lượng hoặc thông tin hiển thị của video không hợp lệ.";
 "rendering" = "Không thể hiển thị hình ảnh. Hãy mở lại ảnh.";
 "resource" = "Thiết bị hoặc bộ nhớ cần để hiển thị hiện không khả dụng. Hãy thử lại sau giây lát.";
