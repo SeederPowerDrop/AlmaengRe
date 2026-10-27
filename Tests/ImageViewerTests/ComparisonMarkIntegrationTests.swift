@@ -148,6 +148,12 @@ struct ComparisonMarkIntegrationTests {
     try await openPhotos(store, fixture: fixture)
     store.photoMarkFilter = PhotoMarkFilter(unmarkedOnly: true)
     try await ready(store)
+    let returnMode: PresentationMode = startBeforeOpening ? .overview : .viewer
+    store.presentationMode = returnMode
+    let libraryAssets = store.assets
+    let libraryCurrentAsset = store.currentAsset
+    let librarySelection = store.selectedURLs
+    let libraryFilter = store.photoMarkFilter
     if startBeforeOpening { store.togglePhotoMarking() }
     store.compareCurrentCollectionByMarks()
     try await ready(store)
@@ -177,6 +183,15 @@ struct ComparisonMarkIntegrationTests {
     #expect(comparison.first.assets.count == 4)
     #expect(!comparison.first.assets.contains { $0.id == selected.id })
     #expect(comparison.second.assets.map(\.id) == [selected.id])
+    // A/B is visible, so its lists update immediately while the ordinary
+    // library keeps its collection and selection until the user returns.
+    #expect(store.assets == libraryAssets && store.currentAsset == libraryCurrentAsset)
+    #expect(store.selectedURLs == librarySelection && store.photoMarkFilter == libraryFilter)
+    #expect(!store.isFiltering)
+    store.toggleFolderComparison()
+    #expect(store.presentationMode == returnMode)
+    try await ready(store)
+    #expect(store.assets.count == 4 && store.photoMarkFilter == libraryFilter)
     #expect(!store.assets.contains { $0.id == selected.id })
   }
 

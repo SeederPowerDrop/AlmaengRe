@@ -159,8 +159,18 @@ final class FolderComparisonPane: ObservableObject {
   fileprivate private(set) var automaticSourceName: String?
   fileprivate private(set) var sourceLocationIdentity: String?
   private var namingSourceKeys: Set<String> = []
-  private var allAssets: [ImageAsset] = []
-  var availableExtensions: [String] { allAssets.map(\.fileExtension) }
+  private var allAssets: [ImageAsset] = [] {
+    didSet { cachedAvailableExtensions = nil }
+  }
+  private var cachedAvailableExtensions: [String]?
+  // Navigation and viewport changes keep the same source collection. Reuse its
+  // bounded format choices rather than scanning every photo for each toolbar.
+  var availableExtensions: [String] {
+    if let cachedAvailableExtensions { return cachedAvailableExtensions }
+    let extensions = Set(allAssets.map(\.fileExtension)).sorted()
+    cachedAvailableExtensions = extensions
+    return extensions
+  }
   private var locationsLoaded = false
   private var queryTask: Task<Void, Never>?
   private var queryGeneration = UUID()

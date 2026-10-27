@@ -1,3 +1,4 @@
+import Combine
 import CoreGraphics
 import Foundation
 import ImageIO
@@ -55,6 +56,49 @@ struct DisplayQualitySettingsTests {
     #expect(
       AppStore(defaults: defaults, monitorsSystemResources: false).thumbnailSize
         == OverviewThumbnailSizing.range.upperBound)
+  }
+
+  @Test("몽땅보기 크기 변경은 해당 화면만 알리고 전체 작업 상태를 다시 발행하지 않는다")
+  func thumbnailSizeChangesStayWithinOverview() throws {
+    let suite = "ImageViewer.OverviewSizeObservationTests.\(UUID().uuidString)"
+    let defaults = try #require(UserDefaults(suiteName: suite))
+    defer { defaults.removePersistentDomain(forName: suite) }
+    let store = AppStore(defaults: defaults, monitorsSystemResources: false,
+      thumbnailDiskCache: nil)
+    store.prefersHDR = true
+    store.zoom = 2.18
+    store.imagesPerPage = 4
+    let query = store.libraryQuery
+    let selected = store.selectedURLs
+    let mode = store.presentationMode
+    let sizeState = store.overviewThumbnailSize
+    var appChanges = 0
+    var overviewChanges = 0
+    let observers = [
+      store.objectWillChange.sink { appChanges += 1 },
+      sizeState.objectWillChange.sink { overviewChanges += 1 },
+    ]
+    defer { withExtendedLifetime(observers) {} }
+
+    for size: CGFloat in [226.4, 149.93548387096774, 77.34193548387097, 480.3612903225807] {
+      store.thumbnailSize = size
+      #expect(sizeState.value == size)
+    }
+    // The native binding and compatibility accessor share one source of truth.
+    sizeState.set(227.53548387096777)
+    #expect(store.thumbnailSize == sizeState.value)
+    #expect(defaults.double(forKey: thumbnailSizeKey) == Double(sizeState.value))
+    #expect(appChanges == 0)
+    #expect(overviewChanges == 5)
+    sizeState.set(sizeState.value)
+    #expect(overviewChanges == 5)
+    #expect(store.overviewThumbnailSize === sizeState)
+    #expect(store.prefersHDR)
+    #expect(store.zoom == 2.18)
+    #expect(store.imagesPerPage == 4)
+    #expect(store.libraryQuery == query)
+    #expect(store.selectedURLs == selected)
+    #expect(store.presentationMode == mode)
   }
 
   @Test("부드러운 안티앨리어싱이 기본이며 원본 픽셀 방식도 기억한다")
