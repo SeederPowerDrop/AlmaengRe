@@ -2,9 +2,9 @@
 
 많은 사진을 한눈에 펼쳐 보고, 비교하고, 분류하는 macOS용 무료 오픈 소스 이미지 뷰어입니다. 알맹이3에서 느꼈던 즐거움을 이어 받아, SwiftUI·트랙패드·Apple의 색 관리 기능에 맞춰 만들고 있습니다.
 
-**현재 버전은 1.1 (빌드 105)**입니다. 비교 화면 전환 시 이전 화면의 검색·GPS·메타데이터 작업을 멈추고, 복귀 시 최신 조건으로 이어서 처리합니다. 변경 내용과 검증 범위는 [1.1 변경 사항](docs/RELEASE_1_1.md)에 정리했습니다.
+**현재 공개 시험 버전은 1.1 (빌드 105) 사전 릴리스**입니다. 비교 화면 전환 시 이전 화면의 검색·GPS·메타데이터 작업을 멈추고, 복귀 시 최신 조건으로 이어서 처리합니다. 변경 내용과 검증 범위는 [1.1 변경 사항](docs/RELEASE_1_1.md)에 정리했습니다.
 
-**macOS 14 이상**, **Apple Silicon·Intel 공용(Universal 2)** 앱입니다. 1.1은 검증된 1.0.49 (104)의 앱 코드를 유지하고 버전과 배포 정보를 갱신합니다. 실제 실행은 Apple Silicon에서 확인하며 Intel Mac에서의 실행은 아직 검증하지 못했습니다.
+**macOS 14 이상**, **Apple Silicon·Intel 공용(Universal 2)** 앱입니다. 1.1은 검증된 1.0.49 (104)의 앱 코드를 유지하고 버전과 배포 정보를 갱신합니다. 핵심 검사는 통과했으나 전체 회귀·장시간 RAW 실측·Intel 실행은 남아 있어 안정판으로 판정하지 않았습니다. 실제 실행은 Apple Silicon에서 확인하며 Intel Mac에서의 실행은 아직 검증하지 못했습니다.
 
 **[알맹Re 1.1 ZIP 다운로드](https://github.com/SeederPowerDrop/AlmaengRe/releases/download/v1.1/AlmaengRe-1.1-macos-universal.zip)** · [릴리스와 변경 내역](https://github.com/SeederPowerDrop/AlmaengRe/releases/tag/v1.1) · [SHA-256 체크섬](https://github.com/SeederPowerDrop/AlmaengRe/releases/download/v1.1/SHA256SUMS.txt)
 

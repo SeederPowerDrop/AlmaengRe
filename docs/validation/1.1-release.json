@@ -22,5 +22,7 @@
   "rustTestsSkipped": 1,
   "fullRegressionRerun": false,
   "intelRuntimeVerified": false,
-  "developerIDNotarized": false
+  "developerIDNotarized": false,
+  "releaseChannel": "prerelease",
+  "stableReleaseAccepted": false
 }
