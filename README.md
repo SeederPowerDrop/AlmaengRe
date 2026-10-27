@@ -1,12 +1,20 @@
 # 알맹Re
 
-빠르고 단정한 macOS용 무료 오픈 소스 이미지 뷰어입니다. 반디뷰의 이미지 중심 흐름에서 영감을 받되, SwiftUI·트랙패드·Apple 컬러 파이프라인에 맞게 새로 설계합니다.
+많은 사진을 한눈에 펼쳐 보고, 비교하고, 분류하는 macOS용 무료 오픈 소스 이미지 뷰어입니다. 알맹이3에서 느꼈던 즐거움을 이어 받아, SwiftUI·트랙패드·Apple의 색 관리 기능에 맞춰 만들고 있습니다.
 
-현재 버전은 검증 범위와 남은 한계를 명시한 **1.0.42 (빌드 97) 사전 릴리스**입니다. **macOS 14 이상**, **Apple Silicon·Intel 공용(Universal 2)** 앱입니다. 실제 앱 검증은 Apple M3, 통합 메모리 24GiB, macOS 15.7.5에서 진행했습니다.
+**현재 버전은 1.1 (빌드 105)**입니다. 비교 화면 전환 시 이전 화면의 검색·GPS·메타데이터 작업을 멈추고, 복귀 시 최신 조건으로 이어서 처리합니다. 변경 내용과 검증 범위는 [1.1 변경 사항](docs/RELEASE_1_1.md)에 정리했습니다.
 
-**[알맹Re 1.0.42 ZIP 다운로드](https://github.com/SeederPowerDrop/AlmaengRe/releases/download/v1.0.42/AlmaengRe-1.0.42-macos-universal.zip)** · [릴리스와 변경 내역](https://github.com/SeederPowerDrop/AlmaengRe/releases/tag/v1.0.42) · [SHA-256 체크섬](https://github.com/SeederPowerDrop/AlmaengRe/releases/download/v1.0.42/SHA256SUMS.txt)
+**macOS 14 이상**, **Apple Silicon·Intel 공용(Universal 2)** 앱입니다. 1.1은 검증된 1.0.49 (104)의 앱 코드를 유지하고 버전과 배포 정보를 갱신합니다. 실제 실행은 Apple Silicon에서 확인하며 Intel Mac에서의 실행은 아직 검증하지 못했습니다.
+
+**[알맹Re 1.1 ZIP 다운로드](https://github.com/SeederPowerDrop/AlmaengRe/releases/download/v1.1/AlmaengRe-1.1-macos-universal.zip)** · [릴리스와 변경 내역](https://github.com/SeederPowerDrop/AlmaengRe/releases/tag/v1.1) · [SHA-256 체크섬](https://github.com/SeederPowerDrop/AlmaengRe/releases/download/v1.1/SHA256SUMS.txt)
 
 ZIP을 풀고 **알맹Re.app**을 **Applications**로 옮겨 설치합니다. 현재 배포본은 ad-hoc 서명이며 **Apple Developer ID 서명·공증은 적용되지 않았습니다**. 인터넷에서 받은 앱은 macOS 보안 정책에 따라 첫 실행이 제한될 수 있습니다. Intel용 실행 파일은 포함되어 있지만 실제 Intel Mac에서의 실행은 아직 검증하지 못했습니다.
+
+## 최근 변경
+
+- **비교 화면 전환:** 이전 목록의 검색·GPS 진행 알림과 대기 중 메타데이터 읽기를 취소합니다. 비교 중 바뀐 검색·분류 조건은 복귀 시 반영하고, 이전 사진과 선택·확대·이동 상태를 유지합니다.
+- **반복 계산 줄이기:** 비교 목록이 유지되는 동안 형식 선택지를 재사용합니다. 몽땅보기 크기 변경은 전용 상태가 전달해 전체 앱의 불필요한 갱신을 줄입니다.
+- **검증 상태 구분:** 1.0.49의 기존 회귀 144개와 실제 RAW 폴더 전환 검사를 확인했습니다. 크기 변경·필터 응답의 추가 성능 실험은 아직 채택하지 않았으며 이번 소스에 포함하지 않았습니다.
 
 ## 대량 사진 탐색과 자원 관리
 
@@ -16,7 +24,9 @@ ZIP을 풀고 **알맹Re.app**을 **Applications**로 옮겨 설치합니다. �
 
 이미지·썸네일 작업은 공유 처리 한도로 제한하고, 부하·메모리 압박·저전력 상태에 맞춰 조절합니다. RAM 예산과 디스크 미리보기 128MiB·정밀 캐시 384MiB를 구분하며, 설정에서 사용량 확인과 비우기를 제공합니다. 캐시 예산은 화면 이미지와 코덱 임시 공간을 포함한 프로세스 전체 메모리 상한이 아닙니다.
 
-| 실제 검증 범위 | 결과 |
+아래 표는 **기존 1.0.42 배포본**의 검증입니다. 1.1의 검사 범위는 [별도 변경 기록](docs/RELEASE_1_1.md)에 명시합니다.
+
+| 1.0.42 실제 검증 범위 | 결과 |
 |---|---|
 | 전체 회귀 재실행 | 1,261개 통과, 36개 생략, 실패 0. 이전 실패 기록은 별도 보존 |
 | 원본 파이프라인 | 비어 있지 않은 805개 중 썸네일 792개 성공, 해당 Mac의 네이티브 영상 처리 한계 13개. 빈 DNG 12개는 별도 |
@@ -27,7 +37,7 @@ ZIP을 풀고 **알맹Re.app**을 **Applications**로 옮겨 설치합니다. �
 
 크기 전환에서 최대 2.36초의 추가 타이머 공백이 관측됐고 원인은 확정하지 못했습니다. 물리적 화면 합성 시간·FPS, OS·Quick Look 캐시를 비운 조건, 모든 기종의 성능과 메모리 누수 여부는 증명하지 않았습니다. 다른 계측을 사용한 이전 빌드와의 전체 개선률도 주장하지 않습니다. 자세한 조건과 이전 실패, 남은 한계는 [1.0.42 QA 보고서](docs/validation/1.0.42-performance-qa.ko.md)에 정리했습니다.
 
-설명서 갱신은 일시 중단되어 아래 기존 설명서는 0.13.1 기준으로 보존하고 있습니다.
+설명서 갱신은 일시 중단되어 아래 기존 설명서는 0.13.1 기준으로 보존하고 있습니다. 최신 소스의 모든 기능·메뉴와 일치하는 설명서는 아닙니다.
 
 ## 사용설명서 / User guides
 
@@ -47,11 +57,17 @@ The **0.13.1 development app** provides its interface and in-app Basic Usage in 
 
 ## 프로젝트의 출발점
 
-이 프로젝트에는 2000년대 국산 이미지 뷰어 **알맹이3**에서 느꼈던 개인적인 추억이 담겨 있습니다. 많은 이미지를 한눈에 훑고, 작은 아이콘을 크게 펼쳐 보고, 확대해도 부드럽게 보이던 경험을 오늘의 macOS에서 이어가고자 합니다.
+맥에서 쓸 만한 이미지 뷰어를 찾다가, 바이브 코딩으로 직접 만들게 되었습니다. 윈도우와 맥의 여러 이미지 뷰어에서 영감을 받아 만든 앱입니다.
 
-**알맹Re**는 그 경험을 다시 이어가고 싶다는 마음으로 붙인 이름입니다. ‘Re’에는 다시 보고, 다시 만든다는 의미를 담았습니다. 언젠가 원 개발자에게도 이 작은 인사가 닿기를 바랍니다.
+어렸을 적 안일준 프로그램 연구소에서 만든 **알맹이3**의 여러 기능에 푹 빠졌던 기억이 있습니다. 작은 사진들을 한눈에 펼쳐 보고, 크게 확대해 살펴보던 경험과 개발자가 직접 적은 제작 이유가 오래도록 마음에 남았습니다. 그 시절의 프로그램과 그 마음을 기리고 싶어 이름을 **알맹Re**로 지었습니다.
 
-알맹이3에 대한 오마주이며 공식 후속작은 아닙니다. 원작의 코드나 자산을 사용하지 않는 독립 오픈 소스 구현으로 개발합니다.
+함께 나눈 지식이 누군가의 시작이 되듯, 제가 만든 도구도 누군가의 가능성을 넓혀 주기를 바랍니다. 누구나 컴퓨터에 필요한 기본적인 기능을 무료로, 편하게 누리고, 사람과 AI가 함께 배우고 만들어 갈 수 있으면 좋겠습니다.
+
+감사합니다. 그리고 ERW FWS WRG
+
+알맹이3에 대한 오마주이며 공식 후속작은 아닙니다. 원작의 코드나 자산을 사용하지 않는 독립 오픈 소스 구현입니다. 앱 안의 소개도 앱에서 선택한 10개 언어로 읽을 수 있습니다.
+
+**English:** AlmaengRe is a free, open-source macOS image viewer for browsing many photos together, comparing them and organizing them. It began as a personal project inspired by image viewers on Windows and Mac, and by fond memories of the Korean viewer Almengi 3. The name pays tribute to that experience and the care behind it. I hope shared knowledge and freely available tools help people and AI learn and create together. This is an independent project and a tribute, not an official successor; it uses none of the original program's code or assets.
 
 ## 지금 되는 것
 
@@ -257,6 +273,9 @@ RAM 캐시는 표시 조건과 자원 정책에 따른 바이트 예산으로 �
 
 ## 문서
 
+- [1.1 변경 사항과 검증 범위](docs/RELEASE_1_1.md)
+- [미완료 검증과 재개 방법](docs/validation/1.1-remaining-validation.ko.md)
+- [1.0.42 배포본 QA 보고서](docs/validation/1.0.42-performance-qa.ko.md)
 - [아키텍처](docs/ARCHITECTURE.md)
 - [대용량 이미지 로딩 설계·조사·성능 측정](docs/IMAGE_LOADING.md)
 - [요구사항 진행표](docs/REQUIREMENTS.md)

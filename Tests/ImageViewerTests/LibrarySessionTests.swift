@@ -250,10 +250,18 @@ struct LibrarySessionTests {
     #expect(changedDuringRestore)
     #expect(restored.libraryQuery == latestQuery)
     #expect(restored.allAssets.count == 3)
-    #expect(restored.assets.map(\.filename) == ["003.png"])
-    #expect(restored.currentAsset?.filename == "003.png")
     #expect(restored.presentationMode == .folderComparison)
     #expect(restored.folderComparison.first.assets.count == 3 && restored.folderComparison.second.assets.count == 2)
+    // The latest user options survive restoration, while the hidden ordinary
+    // collection and focus stay fixed until the user returns from comparison.
+    #expect(restored.assets.map(\.filename) == ["001.png"])
+    #expect(restored.currentAsset?.filename == "001.png")
+    restored.presentationMode = .viewer
+    #expect(restored.isFiltering)
+    #expect(restored.assets.map(\.filename) == ["001.png"])
+    try await wait { !restored.isFiltering }
+    #expect(restored.assets.map(\.filename) == ["003.png"])
+    #expect(restored.currentAsset?.filename == "003.png")
   }
 
   @Test("사용자가 먼저 연 사진은 시작 복원이나 늦게 끝난 검색으로 교체하지 않는다")

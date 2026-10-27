@@ -169,7 +169,7 @@ struct MotionMediaIntegrationTests {
     #expect(restored.alert == nil)
   }
 
-  @Test("비교 화면 복원 중 바꾼 영상 표시는 뒤에 보관된 일반 목록에도 적용된다", arguments: [true, false])
+  @Test("비교 화면 복원 중 바꾼 영상 표시는 일반 보기로 복귀할 때 적용된다", arguments: [true, false])
   func videoToggleDuringComparisonRestoreUpdatesViewer(_ targetShowsVideos: Bool) async throws {
     let fixture = try Fixture()
     let original = fixture.makeStore()
@@ -199,7 +199,8 @@ struct MotionMediaIntegrationTests {
     var committedViewerCount: Int?
     // The first comparison pane starts only after the regular-viewer list has
     // committed. Changing just this preference leaves libraryQuery unchanged,
-    // so the restore's final reconciliation must also inspect video visibility.
+    // so restoration must retain a pending video-visibility reconciliation for
+    // the user's return to the regular viewer.
     let observation = restored.folderComparison.first.$isLoading.sink { loading in
       guard loading, !toggledDuringRestore else { return }
       toggledDuringRestore = true
@@ -214,14 +215,21 @@ struct MotionMediaIntegrationTests {
     #expect(restored.showsVideos == targetShowsVideos)
     #expect(restored.libraryQuery == savedQuery)
     #expect(restored.allAssets.count == 3)
-    #expect(restored.assets.count == (targetShowsVideos ? 3 : 2))
-    #expect(restored.assets.contains { $0.isVideo } == targetShowsVideos)
+    #expect(restored.assets.count == (targetShowsVideos ? 2 : 3))
+    #expect(restored.assets.contains { $0.isVideo } == !targetShowsVideos)
     #expect(restored.selectedURLs.isSubset(of: Set(restored.assets.map(\.url))))
     #expect(restored.presentationMode == .folderComparison)
     #expect(restored.folderComparison.first.assets.count == 2)
     #expect(restored.folderComparison.second.assets.count == 1)
     #expect(restored.folderComparison.first.assets.allSatisfy { !$0.isVideo })
     #expect(restored.alert == nil)
+    restored.presentationMode = .viewer
+    #expect(restored.isFiltering)
+    #expect(restored.assets.count == committedViewerCount)
+    try await ready(restored)
+    #expect(restored.assets.count == (targetShowsVideos ? 3 : 2))
+    #expect(restored.assets.contains { $0.isVideo } == targetShowsVideos)
+    #expect(restored.selectedURLs.isSubset(of: Set(restored.assets.map(\.url))))
   }
 
   @Test("영상 파일 직접 열기는 표시 옵션을 켜고 선택한 영상으로 이동한다")

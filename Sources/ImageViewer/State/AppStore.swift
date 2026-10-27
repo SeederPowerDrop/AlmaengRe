@@ -161,7 +161,13 @@ final class AppStore: ObservableObject {
       if !isApplyingSession { invalidateSessionRestore() }
       if presentationMode == .folderComparison {
         comparisonReturnMode = oldValue
+        // The ordinary library stays available for return, but its GPS/EXIF
+        // scan must not compete with the visible comparison or publish progress.
+        libraryQueryNeedsResume = libraryQueryNeedsResume || isFiltering || isLoading
+        cancelQuery()
         cancelLibraryLoad()
+        metadataTask?.cancel()
+        metadataTask = nil
       }
       if oldValue == .folderComparison { folderComparison.cancelLoads() }
       if oldValue == .map { photoMapPreview.clearSelection() }
@@ -174,7 +180,11 @@ final class AppStore: ObservableObject {
       }
       normalizeMultiImageScale()
       prefetchAroundCurrentPosition()
-      if presentationMode == .map { applyLibraryQuery() }
+      if presentationMode == .map
+        || (oldValue == .folderComparison && libraryQueryNeedsResume) {
+        applyLibraryQuery()
+      }
+      if oldValue == .folderComparison, currentMetadata == nil { refreshMetadata() }
     }
   }
   @Published var baseScaleMode: BaseScaleMode = .fit {
@@ -187,14 +197,12 @@ final class AppStore: ObservableObject {
       normalizeMultiImageScale()
     }
   }
-  @Published var thumbnailSize: CGFloat {
-    didSet {
-      let normalized = OverviewThumbnailSizing.normalized(thumbnailSize)
-      if thumbnailSize != normalized {
-        thumbnailSize = normalized
-      }
-      preferences.set(Double(normalized), forKey: Self.thumbnailSizeDefaultsKey)
-    }
+  let overviewThumbnailSize: OverviewThumbnailSizeState
+  // Keep existing commands and validation callers on the same persisted value,
+  // without publishing an overview-only layout change through the whole app.
+  var thumbnailSize: CGFloat {
+    get { overviewThumbnailSize.value }
+    set { overviewThumbnailSize.set(newValue) }
   }
   @Published var zoom: CGFloat = 1 {
     didSet { viewerPan.setZoom(zoom) }
@@ -312,6 +320,7 @@ final class AppStore: ObservableObject {
   private var sourceLocations: [SessionLocation] = []
   private var queryTask: Task<Void, Never>?
   private var queryGeneration = UUID()
+  private var libraryQueryNeedsResume = false
   private var libraryQueryRevision: UInt64 = 0
   private var queryFocusID: String?
   private var favoriteAccess: [UUID: ImageLibraryAccess] = [:]
@@ -341,7 +350,6 @@ final class AppStore: ObservableObject {
   private static let thumbnailPlacementDefaultsKey = "ImageViewer.ThumbnailPlacement.v1"
   private static let showsVideosDefaultsKey = "ImageViewer.ShowsVideos.v1"
   private static let folderTreeDefaultsKey = "ImageViewer.ShowsFolderTree.v1"
-  private static let thumbnailSizeDefaultsKey = "ImageViewer.OverviewThumbnailSize.v1"
   private static let overviewNumbersDefaultsKey = "ImageViewer.ShowsOverviewNumbers.v1"
   private static let panModeDefaultsKey = "ImageViewer.PanInteractionMode.v1"
   private static let filenameDisplaySizeDefaultsKey = "ImageViewer.FilenameDisplaySize.v1"
@@ -370,11 +378,7 @@ final class AppStore: ObservableObject {
         ? SlideshowSettings.defaultInterval : defaults.double(forKey: Self.slideshowIntervalDefaultsKey))
     slideshowRepeats = defaults.object(forKey: Self.slideshowRepeatsDefaultsKey) == nil
       ? true : defaults.bool(forKey: Self.slideshowRepeatsDefaultsKey)
-    let savedThumbnailSize =
-      defaults.object(forKey: Self.thumbnailSizeDefaultsKey) == nil
-      ? OverviewThumbnailSizing.defaultSize
-      : CGFloat(defaults.double(forKey: Self.thumbnailSizeDefaultsKey))
-    thumbnailSize = OverviewThumbnailSizing.normalized(savedThumbnailSize)
+    overviewThumbnailSize = OverviewThumbnailSizeState(defaults: defaults)
     showsOverviewNumbers = defaults.object(forKey: Self.overviewNumbersDefaultsKey) == nil
       ? true : defaults.bool(forKey: Self.overviewNumbersDefaultsKey)
 
@@ -1963,8 +1967,15 @@ final class AppStore: ObservableObject {
 
   private func applyLibraryQuery() {
     cancelQuery()
+    // Shared classification and preference changes can arrive while A/B is
+    // visible. Keep the latest options and apply them once the library returns.
+    if presentationMode == .folderComparison {
+      libraryQueryNeedsResume = true
+      return
+    }
     // A pending open applies the latest options before committing its new collection.
     guard !isLoading, !isRestoringSession, !isManagingFiles else { return }
+    libraryQueryNeedsResume = false
     let generation = queryGeneration
     let options = libraryQuery
     let source = allAssets
@@ -2578,6 +2589,7 @@ final class AppStore: ObservableObject {
     metadataTask?.cancel()
     prefetchTask?.cancel()
     viewerPrefetchDirection = .forward
+    libraryQueryNeedsResume = false
     assets = newAssets
     let focusedIndex =
       selectedURL.flatMap { selected in
@@ -2603,6 +2615,8 @@ final class AppStore: ObservableObject {
 
   private func refreshMetadata() {
     metadataTask?.cancel()
+    metadataTask = nil
+    guard presentationMode != .folderComparison else { return }
     currentMetadata = nil
     guard let url = currentAsset?.url else { return }
 

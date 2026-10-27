@@ -3,6 +3,7 @@ import SwiftUI
 
 struct OverviewView: View {
   @ObservedObject var store: AppStore
+  @ObservedObject private var thumbnailSizeState: OverviewThumbnailSizeState
   @Environment(\.layoutDirection) private var layoutDirection
   @Environment(\.displayScale) private var displayScale
   @State private var cellFrames = OverviewCellFrameCache()
@@ -27,6 +28,7 @@ struct OverviewView: View {
     onBitmapStateApplied: (@MainActor (ThumbnailBitmapStateEvent) -> Void)? = nil,
     onScrollRequestApplied: (@MainActor (OverviewFocusScrollRequest, Bool) -> Void)? = nil) {
     self.store = store
+    _thumbnailSizeState = ObservedObject(wrappedValue: store.overviewThumbnailSize)
     _thumbnailPreloader = State(initialValue: thumbnailPreloader)
     _refinementGate = StateObject(wrappedValue: refinementGate)
     self.onBitmapStateApplied = onBitmapStateApplied
@@ -48,7 +50,7 @@ struct OverviewView: View {
     VStack(spacing: 0) {
       GeometryReader { geometry in
         // 최대 크기를 골라도 사이드바/정보 패널 사이의 좁은 공간을 넘지 않습니다.
-        let size = min(store.thumbnailSize, max(1, geometry.size.width - 50))
+        let size = min(thumbnailSizeState.value, max(1, geometry.size.width - 50))
         let pixels = OverviewThumbnailSizing.requestedPixelSize(for: size, displayScale: displayScale)
         let collectionRevision = store.assetOrderRevision
         let nativeGeometryScope = OverviewNativeCellGeometryScope(collectionRevision: collectionRevision,
@@ -237,7 +239,7 @@ struct OverviewView: View {
           .onChange(of: geometry.size) { _, _ in cancelMarquee() }
         }
         .onChange(of: OverviewGridNavigation.columnCount(
-          width: geometry.size.width, thumbnailSize: store.thumbnailSize), initial: true) { _, count in
+          width: geometry.size.width, thumbnailSize: thumbnailSizeState.value), initial: true) { _, count in
           store.overviewColumnCount = count
         }
       }
@@ -270,7 +272,7 @@ struct OverviewView: View {
     .onChange(of: layoutDirection, initial: true) { _, direction in
       store.overviewIsRightToLeft = direction == .rightToLeft
     }
-    .onChange(of: store.thumbnailSize) { _, _ in cancelMarquee() }
+    .onChange(of: thumbnailSizeState.value) { _, _ in cancelMarquee() }
     .onChange(of: store.showsOverviewNumbers) { _, _ in cancelMarquee() }
     .onChange(of: store.libraryRevision) { _, _ in
       cancelMarquee()
@@ -372,7 +374,7 @@ struct OverviewView: View {
       "capturedVisibleIndexHints": cellFrames.capturedVisibleIndexHints.sorted(),
       "visibleAssetCount": cellFrames.visibleAssetCount,
       "visibleIndexScope": "current_layout_native_card_visible_rect_then_URL_mapped_current_order",
-      "isFiltering": store.isFiltering, "thumbnailSize": store.thumbnailSize,
+      "isFiltering": store.isFiltering, "thumbnailSize": thumbnailSizeState.value,
       "appActive": NSApp.isActive]
     value["realizedContentFrameCount"] = cellFrames.contentFrames.count
     let frameRows = cellFrames.contentFrames.compactMap { id, frame -> (Int, CGRect)? in
@@ -443,17 +445,18 @@ struct OverviewView: View {
         .accessibilityHidden(true)
       // Keep one control and a stable track while the grid and footer are remeasured.
       // Replacing ViewThatFits candidates during a drag loses native slider tracking.
-      Slider(value: $store.thumbnailSize, in: OverviewThumbnailSizing.range) { editing in
+      Slider(value: Binding(get: { thumbnailSizeState.value }, set: { thumbnailSizeState.set($0) }),
+        in: OverviewThumbnailSizing.range) { editing in
         isAdjustingThumbnailSize = editing
       }
         // Only the available pane width changes the track, never its current value.
         .frame(width: min(140, max(40, footerWidth - 100)))
         .accessibilityLabel(L10n.text("썸네일 크기"))
-        .accessibilityValue(L10n.format("%.1f pt", Double(store.thumbnailSize)))
+        .accessibilityValue(L10n.format("%.1f pt", Double(thumbnailSizeState.value)))
         .accessibilityIdentifier("overview.thumbnailSize")
       numberToggle
       if footerWidth >= 360 {
-        Text(L10n.format("%.1f pt", Double(store.thumbnailSize)))
+        Text(L10n.format("%.1f pt", Double(thumbnailSizeState.value)))
           .font(ViewerUIMetrics.font(.caption).monospacedDigit())
           .foregroundStyle(.secondary)
           .frame(width: 60, alignment: .trailing)

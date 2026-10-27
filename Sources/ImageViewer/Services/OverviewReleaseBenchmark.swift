@@ -35,6 +35,7 @@ final class OverviewReleaseBenchmark {
   private let preparedRun: URL?
   private let preparedFixture: URL?
   private let validatesFilters: Bool
+  private let focusedResizeOnly: Bool
   private let originalInventory: URL?
   private var hasPreparedInput: Bool { preparedRun != nil || preparedFixture != nil }
   private let runID = UUID().uuidString
@@ -74,6 +75,7 @@ final class OverviewReleaseBenchmark {
       URL(fileURLWithPath: $0, isDirectory: true).standardizedFileURL
     }
     validatesFilters = environment["IMAGEVIEWER_RELEASE_BENCHMARK_FILTERS"] == "1"
+    focusedResizeOnly = environment["IMAGEVIEWER_RELEASE_BENCHMARK_FOCUSED_RESIZE"] == "1"
     originalInventory = environment["IMAGEVIEWER_RELEASE_BENCHMARK_ORIGINAL_INVENTORY"].map {
       URL(fileURLWithPath: $0)
     }
@@ -156,6 +158,11 @@ final class OverviewReleaseBenchmark {
     do {
       try require(explicitConfiguration, "explicit_absolute_source_and_output_required")
       try require(ownedOutputWasFresh, "fresh_owned_output_runtime_and_result_files_required")
+      if focusedResizeOnly {
+        try require(preparedFixture != nil
+          && Self.environment["IMAGEVIEWER_RELEASE_BENCHMARK_INTERACTIONS"] == "1",
+          "focused_resize_requires_verified_fixture_and_interactions")
+      }
       #if DEBUG
         throw ReleaseOverviewRunError(phase: "installed_release_configuration_required")
       #endif
@@ -181,6 +188,11 @@ final class OverviewReleaseBenchmark {
         try validatePreparedResume(initialDisk: initialDisk)
       } else {
         try require(report.coldDiskCacheVerified, "cold_owned_disk_cache_required_no_seed_allowed")
+      }
+      if focusedResizeOnly {
+        report.mode = "focused_prepared_deep_resize"
+        try writeJSON(ReleaseOverviewFocusedResizeScope(),
+          to: output.appendingPathComponent("focused-resize-scope.json"))
       }
       report.initialCache = await cacheReport(pixels: 768)
       sourceURLs = try FileManager.default.contentsOfDirectory(at: source,
@@ -320,6 +332,8 @@ final class OverviewReleaseBenchmark {
       }
 
       try await activateOwnWindow(until: min(deadline, uptime + 20))
+      let focusedSampleStart = focusedResizeOnly ? sampler.samples.count : nil
+      if focusedResizeOnly { try requireFocusedResizeForeground(window) }
       // Restored focus/geometry may have moved while the app was inactive.
       // Begin both directional coverage measurements at the actual top edge.
       store.select(index: 0)
@@ -332,70 +346,91 @@ final class OverviewReleaseBenchmark {
         self.preloader.visibleIndices.contains(0)
       }
       try await waitForComparableNativeStart(pixels: pixels, deadline: deadline)
-      report.nativeScrollActivationSucceeded = true
-      report.nativeScrollAppWasActive = NSApp.isActive
-      report.nativeStartCache = await cacheReport(pixels: pixels)
-      _ = await store.thumbnailPipeline.cachedPreviewDiagnosticsSnapshot(clear: true)
-      await store.thumbnailPipeline.setCachedPreviewDiagnosticPhase("outbound")
-      try await progress("native_scroll_to_end", pixels: pixels)
-      begin("installed_release_native_scroll_to_end")
-      phaseWindows.append(("outbound", uptime, nil))
-      var outbound = try await scrollPass(name: "to_end", towardEnd: true, scroll: scroll, root: root, deadline: deadline)
-      phaseWindows[phaseWindows.count - 1].end = uptime
-      _ = end()
-      report.atEndCache = await cacheReport(pixels: pixels)
-      await store.thumbnailPipeline.setCachedPreviewDiagnosticPhase("back")
-      try await progress("native_scroll_back", pixels: pixels)
-      begin("installed_release_native_scroll_back")
-      phaseWindows.append(("back", uptime, nil))
-      var back = try await scrollPass(name: "back_to_start", towardEnd: false, scroll: scroll, root: root, deadline: deadline)
-      phaseWindows[phaseWindows.count - 1].end = uptime
-      _ = end()
-      await store.thumbnailPipeline.setCachedPreviewDiagnosticPhase(nil)
-      try await waitForIdle(until: min(deadline, uptime + 60))
-      let ledger = await store.thumbnailPipeline.cachedPreviewDiagnosticsSnapshot(clear: true)
-      outbound.actualUICachedPreview = uiCacheReport(records: ledger, phase: "outbound", seen: outbound.uniqueVisibleCount)
-      back.actualUICachedPreview = uiCacheReport(records: ledger, phase: "back", seen: back.uniqueVisibleCount)
-      // Diagnostic PNG reads happen only after BOTH genuine UI passes.
-      begin("post_roundtrip_diagnostic_cache_probes")
-      outbound.cacheFirstPixels = await cacheProbes(pixels: pixels, misses: &outbound.cacheFirstPixelMisses)
-      back.cacheFirstPixels = await cacheProbes(pixels: pixels, misses: &back.cacheFirstPixelMisses)
-      _ = end()
-      report.scrolls = [outbound, back]
-      report.afterScrolls = await cacheReport(pixels: pixels)
-      report.foregroundValidationComplete = report.phases.filter { $0.name.hasPrefix("installed_release_native_scroll_") }
-        .allSatisfy { $0.inactiveSampleFraction <= 0.05 && $0.otherForegroundSampleFraction <= 0.05 }
-      try require(report.foregroundValidationComplete, "native_scroll_foreground_validation")
-      for pass in report.scrolls {
-        try require(pass.uniqueVisibleCount == 729, "native_scroll_must_visit_all_729")
-        try require(pass.cacheFirstPixelMisses == 0, "prepared_cache_probe_miss")
-        try require(pass.actualUICachedPreview?.uncancelledMisses == 0, "actual_UI_uncancelled_cache_miss")
-        try require((pass.actualUICachedPreview?.eligibleRecordedRequests ?? 0) > 0
-          && (pass.actualUICachedPreview?.uncancelledHits ?? 0) > 0,
-          "actual_UI_ledger_must_record_real_requests_and_hits")
-        try require(pass.actualUICachedPreview?.ledgerMayHaveReachedLimit == false,
-          "actual_UI_diagnostic_ledger_capacity_reached")
-      }
-      for pass in report.scrolls {
-        // Ready-before-entry is valid retained State. A new callback while the
-        // lagging SwiftUI visibility preference says visible is not required.
-        try require((pass.nativeBitmapVisits?.observedVisits ?? 0) > 0
-          && (pass.nativeBitmapVisits?.samples ?? 0) > 0,
-          "native_cell_bitmap_presence_measurement_required")
-      }
-      if validatesFilters {
-        try await validateLibraryFilters(root: root, pixels: pixels, deadline: deadline)
+      if focusedResizeOnly {
+        begin("installed_release_focused_deep_resize_preflight")
+        try await prepareFocusedResize(root: root, window: window, pixels: pixels, deadline: deadline)
+        _ = end()
+        report.nativeStartCache = await cacheReport(pixels: pixels)
+      } else {
+        report.nativeScrollActivationSucceeded = true
+        report.nativeScrollAppWasActive = NSApp.isActive
+        report.nativeStartCache = await cacheReport(pixels: pixels)
+        _ = await store.thumbnailPipeline.cachedPreviewDiagnosticsSnapshot(clear: true)
+        await store.thumbnailPipeline.setCachedPreviewDiagnosticPhase("outbound")
+        try await progress("native_scroll_to_end", pixels: pixels)
+        begin("installed_release_native_scroll_to_end")
+        phaseWindows.append(("outbound", uptime, nil))
+        var outbound = try await scrollPass(name: "to_end", towardEnd: true, scroll: scroll, root: root, deadline: deadline)
+        phaseWindows[phaseWindows.count - 1].end = uptime
+        _ = end()
+        report.atEndCache = await cacheReport(pixels: pixels)
+        await store.thumbnailPipeline.setCachedPreviewDiagnosticPhase("back")
+        try await progress("native_scroll_back", pixels: pixels)
+        begin("installed_release_native_scroll_back")
+        phaseWindows.append(("back", uptime, nil))
+        var back = try await scrollPass(name: "back_to_start", towardEnd: false, scroll: scroll, root: root, deadline: deadline)
+        phaseWindows[phaseWindows.count - 1].end = uptime
+        _ = end()
+        await store.thumbnailPipeline.setCachedPreviewDiagnosticPhase(nil)
+        try await waitForIdle(until: min(deadline, uptime + 60))
+        let ledger = await store.thumbnailPipeline.cachedPreviewDiagnosticsSnapshot(clear: true)
+        outbound.actualUICachedPreview = uiCacheReport(records: ledger, phase: "outbound", seen: outbound.uniqueVisibleCount)
+        back.actualUICachedPreview = uiCacheReport(records: ledger, phase: "back", seen: back.uniqueVisibleCount)
+        // Diagnostic PNG reads happen only after BOTH genuine UI passes.
+        begin("post_roundtrip_diagnostic_cache_probes")
+        outbound.cacheFirstPixels = await cacheProbes(pixels: pixels, misses: &outbound.cacheFirstPixelMisses)
+        back.cacheFirstPixels = await cacheProbes(pixels: pixels, misses: &back.cacheFirstPixelMisses)
+        _ = end()
+        report.scrolls = [outbound, back]
+        report.afterScrolls = await cacheReport(pixels: pixels)
+        report.foregroundValidationComplete = report.phases.filter { $0.name.hasPrefix("installed_release_native_scroll_") }
+          .allSatisfy { $0.inactiveSampleFraction <= 0.05 && $0.otherForegroundSampleFraction <= 0.05 }
+        try require(report.foregroundValidationComplete, "native_scroll_foreground_validation")
+        for pass in report.scrolls {
+          try require(pass.uniqueVisibleCount == 729, "native_scroll_must_visit_all_729")
+          try require(pass.cacheFirstPixelMisses == 0, "prepared_cache_probe_miss")
+          try require(pass.actualUICachedPreview?.uncancelledMisses == 0, "actual_UI_uncancelled_cache_miss")
+          try require((pass.actualUICachedPreview?.eligibleRecordedRequests ?? 0) > 0
+            && (pass.actualUICachedPreview?.uncancelledHits ?? 0) > 0,
+            "actual_UI_ledger_must_record_real_requests_and_hits")
+          try require(pass.actualUICachedPreview?.ledgerMayHaveReachedLimit == false,
+            "actual_UI_diagnostic_ledger_capacity_reached")
+        }
+        for pass in report.scrolls {
+          // Ready-before-entry is valid retained State. A new callback while the
+          // lagging SwiftUI visibility preference says visible is not required.
+          try require((pass.nativeBitmapVisits?.observedVisits ?? 0) > 0
+            && (pass.nativeBitmapVisits?.samples ?? 0) > 0,
+            "native_cell_bitmap_presence_measurement_required")
+        }
+        if validatesFilters {
+          try await validateLibraryFilters(root: root, pixels: pixels, deadline: deadline)
+        }
       }
       if Self.environment["IMAGEVIEWER_RELEASE_BENCHMARK_INTERACTIONS"] == "1" {
         try await progress("overview_native_resize", pixels: pixels)
         _ = try await OverviewNativeResizeValidation.run(store: store, preloader: preloader,
           root: root, window: window, output: output)
-        try await progress("multiple_viewer_navigation", pixels: pixels)
-        let validator = MultipleViewerNativeValidation()
-        multipleValidator = validator
-        defer { multipleValidator = nil }
-        try await validator.run(store: store, shortcuts: ShortcutStore(defaults: defaults),
-          root: root, window: window, output: output)
+        if !focusedResizeOnly {
+          try await progress("multiple_viewer_navigation", pixels: pixels)
+          let validator = MultipleViewerNativeValidation()
+          multipleValidator = validator
+          defer { multipleValidator = nil }
+          try await validator.run(store: store, shortcuts: ShortcutStore(defaults: defaults),
+            root: root, window: window, output: output)
+        }
+      }
+      if let focusedSampleStart {
+        try requireFocusedResizeForeground(window)
+        let samples = sampler.samples.dropFirst(focusedSampleStart)
+        try require(!samples.isEmpty && samples.allSatisfy {
+          $0.appIsActive && !$0.foregroundIsOtherProcess && $0.foregroundProcessID == getpid()
+            && $0.windowVisible && $0.windowOcclusionVisible
+        }, "focused_resize_sampled_foreground_or_visibility_lost")
+        // Keep the full-scroll fields false/empty: this is a separate scenario.
+        var scope = ReleaseOverviewFocusedResizeScope()
+        scope.focusedForegroundAndVisibilityAccepted = true
+        try writeJSON(scope, to: output.appendingPathComponent("focused-resize-scope.json"))
       }
       report.sourceMetadataUnchanged = sourceURLs.map { ImageFileVersion(url: $0) } == sourceVersions
       try require(report.sourceMetadataUnchanged, "source_metadata_changed")
@@ -435,6 +470,7 @@ final class OverviewReleaseBenchmark {
     var stableSince: Double?
     while uptime < readyDeadline {
       try Task.checkCancellation()
+      if focusedResizeOnly, let window { try requireFocusedResizeForeground(window) }
       let cache = await cacheReport(pixels: pixels)
       let visible = preloader.visibleIndices.filter { photos.indices.contains($0)
         && (photos[$0].byteCount ?? 0) > 0 }.count
@@ -449,6 +485,44 @@ final class OverviewReleaseBenchmark {
       try await Task.sleep(for: .milliseconds(250))
     }
     throw ReleaseOverviewRunError(phase: thermalTarget.timeoutFailurePhase)
+  }
+
+  private func requireFocusedResizeForeground(_ window: NSWindow) throws {
+    try require(NSApp.isActive && NSWorkspace.shared.frontmostApplication?.processIdentifier == getpid(),
+      "focused_resize_actual_own_process_foreground_lost")
+    try require(window.isVisible && window.occlusionState.contains(.visible),
+      "focused_resize_actual_window_visibility_lost")
+  }
+
+  private func prepareFocusedResize(root: NSView, window: NSWindow, pixels: Int,
+    deadline: Double) async throws {
+    let index = 580
+    try require(store.assets.indices.contains(index) && (store.assets[index].byteCount ?? 0) > 0,
+      "focused_resize_nonempty_index580_required")
+    let selected = store.assets[index].url
+    let revision = store.assetOrderRevision
+    store.select(index: index)
+    let revealDeadline = min(deadline, uptime + 30)
+    while true {
+      try Task.checkCancellation()
+      try requireFocusedResizeForeground(window)
+      try require(store.assetOrderRevision == revision, "focused_resize_collection_changed")
+      if store.currentIndex == index, store.currentAsset?.url == selected,
+        preloader.visibleIndices.contains(index),
+        let scroll = overviewScrollView(in: root),
+        OverviewBenchmarkScrollTarget.hasOverviewViewportDimensions(scroll, in: root),
+        OverviewBitmapProbeRegistry.visible(in: scroll, window: window).contains(where: { $0.assetURL == selected }) {
+        break
+      }
+      try require(uptime < revealDeadline, "focused_resize_index580_native_reveal_timeout")
+      try await Task.sleep(for: .milliseconds(100))
+    }
+    try await waitForComparableNativeStart(pixels: pixels, deadline: deadline)
+    try requireFocusedResizeForeground(window)
+    try require(store.assetOrderRevision == revision && store.currentIndex == index
+      && store.currentAsset?.url == selected && preloader.visibleIndices.contains(index),
+      "focused_resize_index580_membership_changed_before_input")
+    try await progress("focused_deep_resize_ready", pixels: pixels)
   }
 
   /// Keep filtering outside the established cold/prepared/native phases. The
@@ -1171,6 +1245,16 @@ private final class OverviewReleaseBenchmarkAttachView: NSView {
 }
 
 private struct ReleaseOverviewRunError: Error { let phase: String }
+private struct ReleaseOverviewFocusedResizeScope: Encodable {
+  let mode = "focused_prepared_deep_resize"
+  let focusIndex = 580
+  let fullCollectionRoundtripExecuted = false
+  let filterSequenceExecuted = false
+  let multipleViewerNavigationExecuted = false
+  let nativeResizeInputTimerAndQualityGatesUnchanged = true
+  let comparisonScope = "same_focused_scenario_only_not_full_scroll_and_seven_filter_history"
+  var focusedForegroundAndVisibilityAccepted = false
+}
 private struct ReleaseOverviewExitStatus: Codable {
   let runID: String
   let exitCode: Int32

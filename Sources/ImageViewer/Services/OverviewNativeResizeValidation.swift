@@ -54,6 +54,39 @@ struct OverviewNativeResizeStep: Codable {
   var finalVisibleGeometryStable = false
   var cacheWithinBudget = false
   var viewportDiagnostics: [OverviewResizeViewportDiagnostic] = []
+  var timerSampleCount = 0
+  var timerGapsAboveThresholdCount = 0
+  var timerGapsTruncated = false
+  var timerGaps: [OverviewResizeTimerGap] = []
+  var timingBoundaries: [OverviewResizeTimingBoundary] = []
+  var inputObservations: [OverviewResizeInputObservation] = []
+  var inputObservationsTruncated = false
+  let timerGapRecordingThresholdSeconds = 0.05
+  let timerGapScope = "largest_64_extra_gaps_above_threshold_including_input_wait_and_post_quiet_diagnostics; previous_and_current_tick_modes_are_snapshots_not_proof_of_the_mode_during_the_entire_gap; not_physical_paint_or_FPS"
+  let inputTimingScope = "local_event_timestamp_and_callback_uptime_or_timer_observed_binding_and_pressed_state; tracking_completed_is_validation_completion_not_physical_mouse_up"
+}
+
+struct OverviewResizeTimerGap: Codable {
+  var previousTickUptime: Double
+  var tickUptime: Double
+  var extraGapSeconds: Double
+  var previousTickPhase: String
+  var tickPhase: String
+  var previousTickRunLoopMode: String
+  var tickRunLoopMode: String
+  var previousProbeCallbackSeconds: Double
+}
+
+struct OverviewResizeTimingBoundary: Codable {
+  var phase: String
+  var uptime: Double
+}
+
+struct OverviewResizeInputObservation: Codable {
+  var kind: String
+  var observedUptime: Double
+  var eventTimestamp: Double?
+  var thumbnailSize: Double
 }
 
 /// At most three metadata snapshots per step. These inspect the existing native
@@ -177,10 +210,11 @@ enum OverviewNativeResizeValidation {
         await store.thumbnailPipeline.setCachedPreviewDiagnosticPhase(phase)
         let eventStart = activeEvents?.count ?? 0
         let previous = latest
+        probe.setPhase("waiting_for_external_input")
         let sampleStart = probe.observations.count
         let readyAt = ProcessInfo.processInfo.systemUptime
         let trackingSession = OverviewResizeTrackingSession(slider: slider, window: window,
-          store: store, targetSize: CGFloat(size))
+          store: store, targetSize: CGFloat(size), resourceProbe: probe)
         let native = try await trackingSession.perform(output: output, step: index)
         withExtendedLifetime(trackingSession) {}
         let started = native.startedUptime
@@ -188,6 +222,13 @@ enum OverviewNativeResizeValidation {
         let cpuStarted = native.startedCPU
         let cpuReleased = native.endedCPU
         var step = OverviewNativeResizeStep()
+        step.timingBoundaries = [
+          OverviewResizeTimingBoundary(phase: "waiting_for_external_input", uptime: readyAt),
+          OverviewResizeTimingBoundary(phase: "input_tracking", uptime: started),
+          OverviewResizeTimingBoundary(phase: "quiet_validation", uptime: released)
+        ]
+        step.inputObservations = native.inputObservations
+        step.inputObservationsTruncated = native.inputObservationsTruncated
         step.requestedSize = size
         step.actualFinalSize = Double(store.thumbnailSize)
         step.nativeTrackingSucceeded = native.succeeded
@@ -247,6 +288,9 @@ enum OverviewNativeResizeValidation {
           try await Task.sleep(for: .milliseconds(40))
         }
         let ended = ProcessInfo.processInfo.systemUptime
+        probe.setPhase("post_quiet_diagnostics")
+        step.timingBoundaries.append(OverviewResizeTimingBoundary(
+          phase: "post_quiet_diagnostics", uptime: ended))
         step.quietWallSeconds = ended - released
         step.quietCPUPercentOneCore = max(0, OverviewResizeResourceProbe.cpuSeconds() - cpuReleased)
           / max(0.000_001, ended - released) * 100
@@ -275,6 +319,20 @@ enum OverviewNativeResizeValidation {
         step.cachedPreviewRequests = requests.count
         step.uncancelledCachedPreviewMisses = requests.filter { !$0.cancelled && !$0.cacheHit }.count
         let samples = Array(probe.observations.dropFirst(sampleStart))
+        step.timingBoundaries.append(OverviewResizeTimingBoundary(
+          phase: "timer_sample_snapshot", uptime: ProcessInfo.processInfo.systemUptime))
+        step.timerSampleCount = samples.count
+        let longGaps = samples.filter { $0.extraGap > step.timerGapRecordingThresholdSeconds }
+        step.timerGapsAboveThresholdCount = longGaps.count
+        step.timerGapsTruncated = longGaps.count > 64
+        step.timerGaps = longGaps.sorted { $0.extraGap > $1.extraGap }.prefix(64)
+          .sorted { $0.tickUptime < $1.tickUptime }.map {
+            OverviewResizeTimerGap(previousTickUptime: $0.previousTickUptime,
+              tickUptime: $0.tickUptime, extraGapSeconds: $0.extraGap,
+              previousTickPhase: $0.previousTickPhase, tickPhase: $0.tickPhase,
+              previousTickRunLoopMode: $0.previousTickRunLoopMode, tickRunLoopMode: $0.tickRunLoopMode,
+              previousProbeCallbackSeconds: $0.previousProbeCallbackSeconds)
+          }
         let gaps = samples.map(\.extraGap).sorted()
         step.mainTimerExtraGapP95Seconds = releaseOverviewPercentile(gaps, fraction: 0.95)
         step.mainTimerExtraGapMaximumSeconds = gaps.last ?? 0
@@ -420,11 +478,14 @@ private final class OverviewResizeTrackingSession {
     let endedUptime: Double
     let startedCPU: Double
     let endedCPU: Double
+    let inputObservations: [OverviewResizeInputObservation]
+    let inputObservationsTruncated: Bool
   }
   private let slider: NSSlider
   private let window: NSWindow
   private let store: AppStore
   private let targetSize: CGFloat
+  private let resourceProbe: OverviewResizeResourceProbe
   private var mouseDown = false
   private var mouseUp = false
   private var sawPressed = false
@@ -435,9 +496,13 @@ private final class OverviewResizeTrackingSession {
   private var started = 0.0
   private var startedCPU = 0.0
   private var lostForeground = false
+  private var inputObservations: [OverviewResizeInputObservation] = []
+  private var inputObservationsTruncated = false
 
-  init(slider: NSSlider, window: NSWindow, store: AppStore, targetSize: CGFloat) {
+  init(slider: NSSlider, window: NSWindow, store: AppStore, targetSize: CGFloat,
+    resourceProbe: OverviewResizeResourceProbe) {
     self.slider = slider; self.window = window; self.store = store; self.targetSize = targetSize
+    self.resourceProbe = resourceProbe
   }
 
   func perform(output: URL, step: Int) async throws -> Outcome {
@@ -452,9 +517,13 @@ private final class OverviewResizeTrackingSession {
         if event.type == .leftMouseDown {
           let point = self.slider.convert(event.locationInWindow, from: nil)
           if self.slider.bounds.insetBy(dx: -12, dy: -12).contains(point) {
+            self.recordInput("local_mouse_down", eventTimestamp: event.timestamp)
             self.observeStart()
           }
-        } else if self.mouseDown { self.mouseUp = true }
+        } else if self.mouseDown {
+          self.recordInput("local_mouse_up", eventTimestamp: event.timestamp)
+          self.mouseUp = true
+        }
       }
       return event
     }
@@ -464,7 +533,11 @@ private final class OverviewResizeTrackingSession {
     RunLoop.main.add(timer, forMode: .common)
     RunLoop.main.add(timer, forMode: .eventTracking)
     defer { timer.invalidate(); if let monitor { NSEvent.removeMonitor(monitor) } }
+    // External computer-use round trips can pause independently of app responsiveness.
+    // Keep this bounded and separate from the unchanged timer and input-delay probes.
+    let externalInputTimeoutSeconds: TimeInterval = 600
     let input: [String: Any] = ["stage": "waiting_for_native_CUA_drag", "step": step,
+      "externalInputTimeoutSeconds": externalInputTimeoutSeconds,
       "targetSize": Double(targetSize), "startingSize": Double(store.thumbnailSize),
       "processID": getpid(), "windowTitle": window.title,
       "scope": "external_CUA_drag_only_app_observes_local_events_and_pressed_mouse_state"]
@@ -472,17 +545,19 @@ private final class OverviewResizeTrackingSession {
       .write(to: output.appendingPathComponent("overview-resize-input.json"), options: .atomic)
     let range = OverviewThumbnailSizing.range
     let tolerance = max(2, Double(range.upperBound - range.lowerBound) / max(1, slider.bounds.width) * 2)
-    while ProcessInfo.processInfo.systemUptime - ready < 90 {
+    while ProcessInfo.processInfo.systemUptime - ready < externalInputTimeoutSeconds {
       try Task.checkCancellation()
       if lostForeground { throw OverviewResizeValidationError(phase: "resize_actual_own_process_foreground_lost") }
       let now = ProcessInfo.processInfo.systemUptime
       if mouseDown, mouseUp, bindingChanges >= 2,
         abs(Double(store.thumbnailSize - targetSize)) <= tolerance,
         now - lastChange >= 0.1 {
+        resourceProbe.setPhase("quiet_validation")
         let result = Outcome(succeeded: true, dragCount: pressedSamples,
           bindingChanges: bindingChanges, mouseDown: true, mouseUp: true,
           startedUptime: started, endedUptime: now, startedCPU: startedCPU,
-          endedCPU: OverviewResizeResourceProbe.cpuSeconds())
+          endedCPU: OverviewResizeResourceProbe.cpuSeconds(),
+          inputObservations: inputObservations, inputObservationsTruncated: inputObservationsTruncated)
         try JSONSerialization.data(withJSONObject: ["stage": "native_drag_completed", "step": step,
           "actualSize": Double(store.thumbnailSize)], options: [.sortedKeys])
           .write(to: output.appendingPathComponent("overview-resize-input.json"), options: .atomic)
@@ -496,6 +571,7 @@ private final class OverviewResizeTrackingSession {
     guard !mouseDown else { return }
     mouseDown = true; started = ProcessInfo.processInfo.systemUptime
     startedCPU = OverviewResizeResourceProbe.cpuSeconds()
+    resourceProbe.setPhase("input_tracking")
   }
   private func observe() {
     if !NSApp.isActive || NSWorkspace.shared.frontmostApplication?.processIdentifier != getpid() {
@@ -503,19 +579,43 @@ private final class OverviewResizeTrackingSession {
     }
     let now = ProcessInfo.processInfo.systemUptime
     let pressed = NSEvent.pressedMouseButtons & 1 != 0
-    if pressed { observeStart(); sawPressed = true; pressedSamples += 1 }
+    if pressed {
+      if !sawPressed { recordInput("timer_pressed_observed") }
+      observeStart(); sawPressed = true; pressedSamples += 1
+    }
     if Double(store.thumbnailSize) != previousValue {
       bindingChanges += 1; previousValue = Double(store.thumbnailSize); lastChange = now
+      recordInput("timer_binding_change_observed")
     }
     // Tracking may consume mouse-up before a local monitor sees it. A real
     // pressed-to-released transition is independently observed on the run loop.
-    if mouseDown && sawPressed && !pressed && bindingChanges > 0 { mouseUp = true }
+    if mouseDown && sawPressed && !pressed && bindingChanges > 0 {
+      if !mouseUp { recordInput("timer_released_observed") }
+      mouseUp = true
+    }
+  }
+  private func recordInput(_ kind: String, eventTimestamp: Double? = nil) {
+    guard inputObservations.count < 128 else { inputObservationsTruncated = true; return }
+    inputObservations.append(OverviewResizeInputObservation(kind: kind,
+      observedUptime: ProcessInfo.processInfo.systemUptime, eventTimestamp: eventTimestamp,
+      thumbnailSize: Double(store.thumbnailSize)))
   }
 }
 
 @MainActor
 private final class OverviewResizeResourceProbe {
-  struct Observation { let extraGap: Double; let cpuPercent: Double; let footprint: UInt64 }
+  struct Observation {
+    let extraGap: Double
+    let cpuPercent: Double
+    let footprint: UInt64
+    let previousTickUptime: Double
+    let tickUptime: Double
+    let previousTickPhase: String
+    let tickPhase: String
+    let previousTickRunLoopMode: String
+    let tickRunLoopMode: String
+    let previousProbeCallbackSeconds: Double
+  }
   private(set) var observations: [Observation] = []
   private var timer: Timer?
   private var previousTick = 0.0
@@ -523,8 +623,15 @@ private final class OverviewResizeResourceProbe {
   private var previousCPU = 0.0
   private var currentCPU = 0.0
   private var currentFootprint: UInt64 = 0
+  private var phase = "preparation"
+  private var previousTickPhase = "preparation"
+  private var previousTickRunLoopMode = "unobserved"
+  private var previousProbeCallbackSeconds = 0.0
+  func setPhase(_ value: String) { phase = value }
   func start() {
     previousTick = ProcessInfo.processInfo.systemUptime
+    previousTickPhase = phase
+    previousTickRunLoopMode = RunLoop.current.currentMode?.rawValue ?? "unobserved"
     previousSample = previousTick; previousCPU = Self.cpuSeconds()
     let timer = Timer(timeInterval: 1.0 / 60, repeats: true) { [weak self] _ in
       MainActor.assumeIsolated { self?.sample() }
@@ -535,6 +642,7 @@ private final class OverviewResizeResourceProbe {
   func stop() { timer?.invalidate(); timer = nil }
   private func sample() {
     let now = ProcessInfo.processInfo.systemUptime
+    let currentMode = RunLoop.current.currentMode?.rawValue ?? "unobserved"
     if now - previousSample >= 0.25 {
       let cpu = Self.cpuSeconds()
       currentCPU = max(0, cpu - previousCPU) / (now - previousSample) * 100
@@ -546,8 +654,15 @@ private final class OverviewResizeResourceProbe {
       if result == 0 { currentFootprint = usage.ri_phys_footprint }
     }
     observations.append(Observation(extraGap: max(0, now - previousTick - 1.0 / 60),
-      cpuPercent: currentCPU, footprint: currentFootprint))
+      cpuPercent: currentCPU, footprint: currentFootprint,
+      previousTickUptime: previousTick, tickUptime: now,
+      previousTickPhase: previousTickPhase, tickPhase: phase,
+      previousTickRunLoopMode: previousTickRunLoopMode, tickRunLoopMode: currentMode,
+      previousProbeCallbackSeconds: previousProbeCallbackSeconds))
     previousTick = now
+    previousTickPhase = phase
+    previousTickRunLoopMode = currentMode
+    previousProbeCallbackSeconds = ProcessInfo.processInfo.systemUptime - now
   }
   static func cpuSeconds() -> Double {
     var usage = rusage()

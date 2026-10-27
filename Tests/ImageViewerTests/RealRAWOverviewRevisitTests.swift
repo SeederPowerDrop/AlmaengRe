@@ -320,9 +320,8 @@ struct RealRAWOverviewRevisitTests {
   }
 
   private func fixtures() throws -> [ImageAsset] {
-    let path = try #require(ProcessInfo.processInfo.environment["IMAGEVIEWER_RAW_DIRECTORY"],
-      "Set IMAGEVIEWER_RAW_DIRECTORY explicitly for this opt-in workload")
-    try #require(path.hasPrefix("/"), "IMAGEVIEWER_RAW_DIRECTORY must be absolute")
+    let path = ProcessInfo.processInfo.environment["IMAGEVIEWER_RAW_DIRECTORY"]
+      ?? "/Users/hyunjinkim/Pictures/iPhoneRAW"
     let urls = try FileManager.default.contentsOfDirectory(
       at: URL(fileURLWithPath: path, isDirectory: true),
       includingPropertiesForKeys: [.fileSizeKey, .contentModificationDateKey, .isRegularFileKey],

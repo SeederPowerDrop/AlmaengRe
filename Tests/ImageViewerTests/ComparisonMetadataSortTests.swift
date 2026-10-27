@@ -9,6 +9,34 @@ import UniformTypeIdentifiers
 @Suite("비교 메타데이터 정렬과 복원 대기")
 @MainActor
 struct ComparisonMetadataSortTests {
+  @Test("형식 선택지는 사진 이동·검색에서 재사용하고 폴더 교체 때 갱신한다")
+  func extensionChoicesFollowSourceCollection() async throws {
+    let fixture = try Fixture()
+    defer { fixture.remove() }
+    let pane = FolderComparisonPane()
+    defer { pane.cancelLoad() }
+    #expect(pane.availableExtensions.isEmpty)
+    pane.open(urls: [fixture.first])
+    await pane.waitUntilLoaded()
+    let extensions = pane.availableExtensions
+    #expect(extensions == ["jpg"])
+    let sourceStorage = extensions.withUnsafeBufferPointer { $0.baseAddress }
+    for step in 0..<600 {
+      pane.select(number: step.isMultiple(of: 2) ? 2 : 1)
+      #expect(pane.availableExtensions.withUnsafeBufferPointer { $0.baseAddress } == sourceStorage)
+    }
+    pane.query.searchText = "missing"
+    await pane.waitUntilLoaded()
+    #expect(pane.assets.isEmpty && pane.availableExtensions == extensions)
+    #expect(pane.availableExtensions.withUnsafeBufferPointer { $0.baseAddress } == sourceStorage)
+    pane.query = LibraryQuery()
+    pane.open(urls: [fixture.second])
+    #expect(pane.availableExtensions.isEmpty)
+    await pane.waitUntilLoaded()
+    #expect(pane.availableExtensions == ["png"])
+    #expect(pane.errorMessage == nil)
+  }
+
   @Test("대기 중 정렬 작업이 교체되면 마지막 작업의 완료까지 기다린다")
   func waitsForSupersedingQuery() async throws {
     let fixture = try Fixture()
