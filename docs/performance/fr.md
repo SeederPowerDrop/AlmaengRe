@@ -1,0 +1,24 @@
+# Essais de performance d’AlmaengRe
+
+[한국어](ko.md) · [English](README.md) · [简体中文](zh-Hans.md) · [Русский](ru.md) · **Français**
+
+Ce rapport présente les mesures qui ont guidé AlmaengRe 1.2 (build 110) et les essais ultérieurs du panneau latéral. Les essais de novembre ont été réalisés sur un Apple M3 doté de 24 Gio de mémoire unifiée, sous macOS 15.7.5. Les mesures sur un M2 doté de 16 Gio restent à faire.
+
+| Essai | Mesures et conclusions |
+| --- | --- |
+| Build 97, référence pour une grande photothèque | 1 261 tests de régression réussis et 36 ignorés. Des vignettes ont été générées pour 792 des 805 fichiers non vides. Les 13 autres cas concernaient les limites du traitement vidéo natif sur le Mac de test. La session en usage mixte a duré 1 864,30 s et compté 343 actions. [Rapport complet du build 97 en coréen](../validation/1.0.42-performance-qa.ko.md) |
+| Builds 105–106, ouverture et défilement | Quatre passages au premier plan avec 729 éléments et 717 vignettes préparées. Après réglage de la taille, la production de 25 vignettes affinées pour les éléments visibles et la fin de la file ont pris 1,482–1,759 s sur le build 105 et 1,426–1,686 s sur le 106. Les plages se chevauchent. Les passages ayant perdu le premier plan ou déclenché le garde-fou mémoire ont été écartés de la comparaison directe. |
+| Builds 106–107, retour à une page RAW | En vue à six images, toutes les images affinées ont été publiées après le retour en 1 056–1 189 ms lors du second passage témoin du build 106 et en 92–215 ms sur le 107. Après le premier rendu des 12 images, aucun rendu affiné supplémentaire n’a été nécessaire. Sur cette paire, le temps CPU du premier affichage et des allers-retours est passé de 18,09 à 9,03 s et le pic de mémoire physique échantillonné de 1 401 à 1 219 Mio. Le budget de cache existant de 128 Mio a été rééquilibré dans les vues d’au moins cinq images. |
+| Builds 107–108, taille des vignettes | Avec le même geste sur une vue de 729 éléments, le plus grand intervalle supplémentaire de la boucle principale est passé de 1 481–1 552 à 816–895 ms. Le curseur suivait le geste, tandis que le redimensionnement de la grille était différé. La durée totale du geste et de la stabilisation a légèrement augmenté sur ces passages. |
+| Builds 108–109, activation et retrait des filtres EXIF | Dans les deux passages comparables au premier plan, le plus grand intervalle parmi quatre mises à jour EXIF est passé de 628 à 598 ms. La première recherche a encore pris environ 4,4 s au total. Les résultats, leur ordre et le rétablissement de la sélection ont été vérifiés. |
+| Builds 109–110, nouvelle optimisation du redimensionnement | La simplification de la disposition de la barre inférieure a réduit le plus grand intervalle supplémentaire de 670–944 à 441–449 ms selon les passages. Après le même geste de 226,4 à 78,206 pt, les 25 vignettes visibles ont satisfait au contrôle de 256 px. |
+| Build 110, RAW et vidéo ensemble | Avec cinq RAW et une vidéo à l’écran, la sortie vidéo observée sur une file indépendante est restée proche de 60 i/s. Les plus grands intervalles du fil principal ont atteint 433–512 ms en défilement direct du panneau latéral et 573–606 ms en combinant défilement, sélection RAW et zoom. |
+| Expériences du build 111, panneau latéral | La réutilisation des lignes a réduit l’intervalle de défilement direct à 48,5–49,2 ms, mais a déclenché 12 avertissements de réentrance AppKit pendant le filtrage de 729 éléments. Les lignes de taille fixe et la grille à une colonne n’ont pas apporté de gain régulier. La disposition limitée aux lignes visibles a porté l’intervalle des opérations combinées à 825–898 ms. La version 1.2 utilise le build 110. |
+
+## Interpréter les résultats
+
+Pour chaque comparaison directe, nous avons conservé la liste de fichiers, les vignettes préparées, la zone visible et les entrées. Quand c’était possible, nous avons inversé l’ordre des passages et isolé les réglages et les caches. La surveillance des ressources suivait la pression mémoire, la mémoire physique échantillonnée de l’app et l’espace d’échange. La comparaison mixte achevée sur le build 110 a conservé une pression normale et enregistré une hausse nulle de l’espace d’échange utilisé. Les budgets concernent les données en cache. La mémoire du processus comprend aussi les images décodées et les buffers de travail des codecs et du rendu.
+
+La publication des images, les intervalles de minuterie et la sortie vidéo indépendante sont des mesures distinctes. La latence d’affichage physique et les pertes d’images du compositeur exigent des mesures spécifiques. Il reste à tester les longues sessions mixtes sur un M2 de 16 Gio, la réactivité des autres apps et le maintien à l’écran de la sélection lors d’un redimensionnement loin du début de la grille.
+
+[Mesures principales au format CSV](measurements.csv) · [Version AlmaengRe 1.2](https://github.com/SeederPowerDrop/AlmaengRe/releases/tag/v1.2)

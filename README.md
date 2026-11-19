@@ -16,6 +16,14 @@
 - **대량 폴더 탐색**에서 썸네일과 필터 상태를 재사용하며, 소수 사진 보기에서는 RAW·HDR 표현과 해상도를 우선합니다.
 - **언어 확인**은 한국어, 영어, 일본어, 중국어 간체, 베트남어, 스페인어, 프랑스어, 독일어, 러시아어, 아랍어에서 진행했습니다.
 
+## 성능 시험 / Performance tests
+
+RAW 페이지 복귀, 몽땅보기 크기 조절, EXIF 필터, 영상 재생 중 스크롤의 시험 조건과 수치를 정리했습니다. 배포에 반영한 개선과 보류한 실험을 함께 확인할 수 있습니다.
+
+Benchmark results for RAW navigation, thumbnail resizing, EXIF filters, and scrolling during video playback.
+
+[한국어](docs/performance/ko.md) · [English](docs/performance/README.md) · [简体中文](docs/performance/zh-Hans.md) · [Русский](docs/performance/ru.md) · [Français](docs/performance/fr.md) · [CSV](docs/performance/measurements.csv)
+
 ## 대량 사진 탐색과 자원 관리
 
 몽땅보기와 필터 왕복에서 준비된 비트맵을 재사용하고, 현재 보이는 사진의 작업을 우선합니다. 4장 이하에서는 품질을, 5장 이상에서는 미리보기와 조작 반응을 우선하며 탐색이 멈추면 표시 크기에 맞게 보완합니다. 이 기준은 폴더 전체 개수가 아니라 현재 보이는 항목 수입니다. RAW·HDR, 원본과 내보내기 품질을 낮추는 방식으로 속도를 보완하지 않습니다.
