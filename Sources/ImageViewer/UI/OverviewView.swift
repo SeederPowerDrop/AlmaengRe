@@ -247,7 +247,9 @@ struct OverviewView: View {
       Divider()
 
       OverviewFooterLayout {
-        overviewControls
+        OverviewControls(store: store, sizeState: thumbnailSizeState,
+          committedSize: thumbnailSizeState.value, footerWidth: footerWidth,
+          isAdjustingThumbnailSize: $isAdjustingThumbnailSize)
         ViewThatFits(in: .horizontal) {
           BatchQuickActionsView(store: store)
           BatchQuickActionsView(store: store, layout: .icons)
@@ -439,59 +441,6 @@ struct OverviewView: View {
     }
   }
 
-  private var overviewControls: some View {
-    HStack(spacing: 8) {
-      Image(systemName: "photo")
-        .accessibilityHidden(true)
-      // Keep one control and a stable track while the grid and footer are remeasured.
-      // Replacing ViewThatFits candidates during a drag loses native slider tracking.
-      Slider(value: Binding(get: { thumbnailSizeState.value }, set: { thumbnailSizeState.set($0) }),
-        in: OverviewThumbnailSizing.range) { editing in
-        isAdjustingThumbnailSize = editing
-      }
-        // Only the available pane width changes the track, never its current value.
-        .frame(width: min(140, max(40, footerWidth - 100)))
-        .accessibilityLabel(L10n.text("썸네일 크기"))
-        .accessibilityValue(L10n.format("%.1f pt", Double(thumbnailSizeState.value)))
-        .accessibilityIdentifier("overview.thumbnailSize")
-      numberToggle
-      if footerWidth >= 360 {
-        Text(L10n.format("%.1f pt", Double(thumbnailSizeState.value)))
-          .font(ViewerUIMetrics.font(.caption).monospacedDigit())
-          .foregroundStyle(.secondary)
-          .frame(width: 60, alignment: .trailing)
-      }
-      Spacer(minLength: 0)
-      if footerWidth >= 360 {
-        ViewThatFits(in: .horizontal) {
-          HStack(spacing: 8) {
-            BatchActionsMenu(store: store)
-            Text(store.positionDescription)
-              .font(ViewerUIMetrics.font(size: 11, weight: .medium))
-              .monospacedDigit()
-              .foregroundStyle(.secondary)
-              .viewerPadding(.horizontal, 8)
-              .viewerPadding(.vertical, 4)
-              .background(ViewerTheme.controlFill, in: RoundedRectangle(cornerRadius: 5))
-              .fixedSize()
-          }
-          BatchActionsMenu(store: store, compact: true)
-        }
-      } else {
-        BatchActionsMenu(store: store, compact: true)
-      }
-    }
-  }
-
-  private var numberToggle: some View {
-    Toggle(isOn: $store.showsOverviewNumbers) {
-      Label("몽땅보기 번호 표시", systemImage: "number")
-    }
-    .toggleStyle(.button)
-    .labelStyle(.iconOnly)
-    .help("몽땅보기 번호 표시")
-  }
-
   private var marqueeGesture: some Gesture {
     DragGesture(minimumDistance: 4, coordinateSpace: .named(contentSpace))
       .updating($isDragging) { _, active, _ in active = true }
@@ -629,6 +578,97 @@ struct OverviewNativeViewportGeometry: Equatable {
   }
 }
 
+/// Observe transient pointer movement in the footer, away from the photo grid.
+private struct OverviewControls: View {
+  @ObservedObject var store: AppStore
+  let sizeState: OverviewThumbnailSizeState
+  let committedSize: CGFloat
+  let footerWidth: CGFloat
+  @Binding var isAdjustingThumbnailSize: Bool
+  @State private var dragSize: CGFloat? = nil
+
+  var body: some View {
+    HStack(spacing: footerWidth < 180 ? 6 : 8) {
+      Image(systemName: "photo")
+        .accessibilityHidden(true)
+      // Keep one control and a stable track while the grid and footer are remeasured.
+      // Replacing ViewThatFits candidates during a drag loses native slider tracking.
+      Slider(value: Binding(get: { displayedSize }, set: { size in updateSize(size) }),
+        in: OverviewThumbnailSizing.range) { editing in
+        changeEditing(editing)
+      }
+        // Only the available pane width changes the track, never its current value.
+        .frame(width: min(140, max(40, footerWidth - 100)))
+        .accessibilityLabel(L10n.text("썸네일 크기"))
+        .accessibilityValue(L10n.format("%.1f pt", Double(displayedSize)))
+        .accessibilityIdentifier("overview.thumbnailSize")
+      numberToggle
+      if footerWidth >= 360 {
+        Text(L10n.format("%.1f pt", Double(displayedSize)))
+          .font(ViewerUIMetrics.font(.caption).monospacedDigit())
+          .foregroundStyle(.secondary)
+          .frame(width: 60, alignment: .trailing)
+      }
+      Spacer(minLength: 0)
+      if footerWidth >= 360 {
+        ViewThatFits(in: .horizontal) {
+          HStack(spacing: 8) {
+            BatchActionsMenu(store: store)
+            Text(store.positionDescription)
+              .font(ViewerUIMetrics.font(size: 11, weight: .medium))
+              .monospacedDigit()
+              .foregroundStyle(.secondary)
+              .viewerPadding(.horizontal, 8)
+              .viewerPadding(.vertical, 4)
+              .background(ViewerTheme.controlFill, in: RoundedRectangle(cornerRadius: 5))
+              .fixedSize()
+          }
+          BatchActionsMenu(store: store, compact: true)
+        }
+      } else {
+        BatchActionsMenu(store: store, compact: true)
+      }
+    }
+    .onDisappear { finishDrag() }
+  }
+
+  private var displayedSize: CGFloat { dragSize ?? committedSize }
+
+  private func updateSize(_ size: CGFloat) {
+    guard dragSize != nil else {
+      sizeState.set(size)
+      return
+    }
+    dragSize = size
+    sizeState.previewAfterDragPause(size)
+  }
+
+  private func changeEditing(_ editing: Bool) {
+    if editing {
+      dragSize = displayedSize
+      isAdjustingThumbnailSize = true
+    } else {
+      finishDrag()
+    }
+  }
+
+  private func finishDrag() {
+    guard let dragSize else { return }
+    sizeState.set(dragSize)
+    self.dragSize = nil
+    isAdjustingThumbnailSize = false
+  }
+
+  private var numberToggle: some View {
+    Toggle(isOn: $store.showsOverviewNumbers) {
+      Label("몽땅보기 번호 표시", systemImage: "number")
+    }
+    .toggleStyle(.button)
+    .labelStyle(.iconOnly)
+    .help("몽땅보기 번호 표시")
+  }
+}
+
 /// Wrap the action row without removing/recreating the slider during layout changes.
 private struct OverviewFooterLayout: Layout {
   private let horizontalSpacing: CGFloat = 12
@@ -683,6 +723,18 @@ private struct OverviewFooterLayout: Layout {
       cache.measurements[width] = measured
     }
     return measured
+  }
+
+  // Placement is defined by the two top anchors below. The footer does not
+  // export subview alignment guides to its outer VStack.
+  func explicitAlignment(of guide: HorizontalAlignment, in bounds: CGRect,
+    proposal: ProposedViewSize, subviews: Subviews, cache: inout Cache) -> CGFloat? {
+    nil
+  }
+
+  func explicitAlignment(of guide: VerticalAlignment, in bounds: CGRect,
+    proposal: ProposedViewSize, subviews: Subviews, cache: inout Cache) -> CGFloat? {
+    nil
   }
 
   func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout Cache) -> CGSize {

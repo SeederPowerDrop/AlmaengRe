@@ -28,6 +28,33 @@ struct ImageSystemResourceMonitorTests {
     #expect(weakMonitor == nil)
   }
 
+  @Test("An existing kernel pressure level is included in the first monitor update",
+    arguments: [ImageResourcePressure.warning, .critical])
+  func existingPressureIsDeliveredWithoutANewEvent(pressure: ImageResourcePressure) async throws {
+    let probe = ImageResourceSnapshotProbe()
+    let monitor = ImageSystemResourceMonitor(memoryPressureReader: { pressure }) {
+      snapshot in Task { await probe.record(snapshot) }
+    }
+    let clock = ContinuousClock()
+    let deadline = clock.now.advanced(by: .seconds(2))
+    while await probe.first == nil && clock.now < deadline {
+      try await Task.sleep(for: .milliseconds(5))
+    }
+    let initial = try #require(await probe.first)
+    #expect(initial.memoryPressure == pressure)
+    withExtendedLifetime(monitor) {}
+  }
+
+  @Test("Kernel pressure values map to policy levels without treating unknown values as normal")
+  func kernelPressureValueMapping() {
+    #expect(ImageMemoryPressureMonitor.pressure(forKernelValue: 1) == .normal)
+    #expect(ImageMemoryPressureMonitor.pressure(forKernelValue: 2) == .warning)
+    #expect(ImageMemoryPressureMonitor.pressure(forKernelValue: 4) == .critical)
+    #expect(ImageMemoryPressureMonitor.pressure(forKernelValue: 0) == nil)
+    #expect(ImageMemoryPressureMonitor.pressure(forKernelValue: 3) == nil)
+    #expect(ImageMemoryPressureMonitor.pressure(forKernelValue: -1) == nil)
+  }
+
   @Test("CPU 부하는 두 번 높아야 제한하고 세 번 회복한 뒤에 제한을 푼다")
   func cpuContentionUsesHysteresis() {
     var filter = ImageCPUActivityFilter()

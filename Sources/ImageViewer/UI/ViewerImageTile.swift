@@ -303,7 +303,11 @@ struct ViewerImageTile: View {
   }
 
   private func load(_ request: ViewerFrameRequest) {
-    loader.load(request, cachedPreview: { [thumbnailPipeline] request in
+    loader.load(request, cachedRender: { [pipeline, itemCount] request in
+      await pipeline.setViewerVisibleItemCount(itemCount)
+      return await pipeline.cachedStillFrame(for: request.asset, maxPixelSize: request.maxPixelSize,
+        adjustments: request.adjustments, prefersHDR: request.prefersHDR)
+    }, cachedPreview: { [thumbnailPipeline] request in
       guard request.adjustments.isIdentity,
         let image = await thumbnailPipeline.cachedMemoryPreview(for: request.asset,
           maxPixelSize: 512) else { return nil }

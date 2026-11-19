@@ -163,6 +163,84 @@ struct ImagePipelineLoadingTests {
     #expect(frames.allSatisfy { $0.image === frames[0].image })
   }
 
+  @Test("Immediate still-frame lookup requires the same rendition and current file version")
+  func cachedStillFrameRequiresMatchingRenditionAndFileVersion() async throws {
+    let url = temporaryURL()
+    defer { try? FileManager.default.removeItem(at: url) }
+    try writePNG(url: url, width: 800, height: 400)
+    let version = ImageFileVersion(url: url)
+    let asset = ImageAsset(url: url, byteCount: version.byteCount.map(Int64.init),
+      modificationDate: version.modificationDate)
+    let pipeline = ImagePipeline()
+    let rendered = try await pipeline.renderFrame(url: url, maxPixelSize: 512,
+      adjustments: .identity, prefersHDR: false)
+    let reused = try #require(await pipeline.cachedStillFrame(for: asset, maxPixelSize: 510,
+      adjustments: .identity, prefersHDR: false))
+    #expect(reused.image === rendered.image)
+    let time = try #require(asset.modificationDate).timeIntervalSinceReferenceDate
+    for neighbor in [time.nextDown, time.nextUp] {
+      let scanned = ImageAsset(url: url, byteCount: asset.byteCount,
+        modificationDate: Date(timeIntervalSinceReferenceDate: neighbor))
+      let reused = try #require(await pipeline.cachedStillFrame(for: scanned, maxPixelSize: 512,
+        adjustments: .identity, prefersHDR: false))
+      #expect(reused.image === rendered.image)
+    }
+    #expect(await pipeline.cachedStillFrame(for: asset, maxPixelSize: 768,
+      adjustments: .identity, prefersHDR: false) == nil)
+    #expect(await pipeline.cachedStillFrame(for: asset, maxPixelSize: 512,
+      adjustments: .identity, prefersHDR: true) == nil)
+    var edited = ImageAdjustments.identity
+    edited.exposure = 0.5
+    #expect(await pipeline.cachedStillFrame(for: asset, maxPixelSize: 512,
+      adjustments: edited, prefersHDR: false) == nil)
+    let unknown = ImageAsset(url: url, byteCount: asset.byteCount, modificationDate: nil)
+    #expect(await pipeline.cachedStillFrame(for: unknown, maxPixelSize: 512,
+      adjustments: .identity, prefersHDR: false) == nil)
+    try FileManager.default.setAttributes([.modificationDate: Date(timeIntervalSince1970: 1_700_000_000)],
+      ofItemAtPath: url.path)
+    #expect(await pipeline.cachedStillFrame(for: asset, maxPixelSize: 512,
+      adjustments: .identity, prefersHDR: false) == nil)
+  }
+
+  @Test("Two six-image half-float pages retain fitted frames within the 16 GiB comfortable budget")
+  func twoSixImagePagesReuseFinalFramesWithinExistingBudget() async throws {
+    let gib: UInt64 = 1024 * 1024 * 1024
+    let governor = ImageResourceGovernor(mode: .comfortable,
+      snapshot: ImageResourceSnapshot(physicalMemory: 16 * gib, activeProcessorCount: 8,
+        appleSilicon: true), storageOverride: .internalSSD, monitorsMemoryPressure: false)
+    let pipeline = ImagePipeline(governor: governor)
+    await pipeline.setViewerVisibleItemCount(6)
+    var adjustments = ImageAdjustments.identity
+    adjustments.exposure = 0.1
+    var urls: [URL] = []
+    var frames: [RenderedFrame] = []
+    defer { for url in urls { try? FileManager.default.removeItem(at: url) } }
+    for _ in 0..<12 {
+      let url = temporaryURL()
+      urls.append(url)
+      try writePNG(url: url, width: 1024, height: 768)
+      let frame = try await pipeline.renderFrame(url: url, maxPixelSize: 1024,
+        adjustments: adjustments, prefersHDR: true)
+      #expect(frame.image.bitsPerComponent == 16)
+      frames.append(frame)
+    }
+    let snapshot = await pipeline.cacheSnapshot()
+    #expect(snapshot.byteLimit == 128 * ImageLoadingPolicy.mebibyte)
+    #expect(snapshot.byteCount <= snapshot.byteLimit)
+    for (url, frame) in zip(urls, frames) {
+      let version = ImageFileVersion(url: url)
+      let asset = ImageAsset(url: url, byteCount: version.byteCount.map(Int64.init),
+        modificationDate: version.modificationDate)
+      let cached = try #require(await pipeline.cachedStillFrame(for: asset, maxPixelSize: 1024,
+        adjustments: adjustments, prefersHDR: true))
+      #expect(cached.image === frame.image)
+    }
+    #expect(await pipeline.decodeReuseSnapshot().cache.byteLimit == 32 * ImageLoadingPolicy.mebibyte)
+    await pipeline.setViewerVisibleItemCount(1)
+    #expect(await pipeline.decodeReuseSnapshot().cache.byteLimit == 64 * ImageLoadingPolicy.mebibyte)
+    #expect(await pipeline.cacheSnapshot().byteLimit == snapshot.byteLimit)
+  }
+
   @Test("Delayed storage admission shares completed pixels without repopulating purged caches",
     arguments: [false, true])
   func delayedAdmissionRechecksCache(purgeWhileWaiting: Bool) async throws {

@@ -580,9 +580,9 @@ actor ThumbnailPipeline {
     // ImageIO's synchronous RAW decoder cannot be interrupted once it starts.
     // Let transient grid/map cells disappear before admitting their work. Cached
     // pixels and the selected photo's interactive preview remain immediate.
-    let hasDiskImage = await diskCache?.contains(for: key) ?? false
-    if waitsForStableVisibility && !hasDiskImage
-      && ImageFormatRegistry.cameraRAWExtensions.contains(asset.fileExtension) {
+    if waitsForStableVisibility,
+      ImageFormatRegistry.cameraRAWExtensions.contains(asset.fileExtension),
+      await diskCache?.contains(for: key) != true {
       try await Task.sleep(for: .milliseconds(100))
       try Task.checkCancellation()
       if let cached = cache.image(for: key) { return cached }

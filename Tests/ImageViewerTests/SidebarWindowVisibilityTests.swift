@@ -167,21 +167,27 @@ struct SidebarWindowVisibilityTests {
     #expect(!gate.isWindowSuppressed)
   }
 
-  @Test("첫 파일이 같은 필터 적용·해제도 선택한 사진의 실제 스크롤 위치를 복원한다")
-  func sameFirstFilterRestoreRevealsRetainedSelection() async throws {
+  @Test("첫 파일이 같은 필터 적용·해제도 선택한 사진의 실제 스크롤 위치를 복원한다",
+    arguments: [ThumbnailPanelPlacement.left, .top])
+  func sameFirstFilterRestoreRevealsRetainedSelection(placement: ThumbnailPanelPlacement) async throws {
     let fixture = try Fixture(count: 40)
     defer { fixture.cleanup() }
     try await open(fixture, count: 40)
     let gate = OverviewRefinementGate()
     gate.windowVisibilityChanged(isApplicationActive: false, isWindowVisible: true)
-    let (host, nativeWindow) = window(SidebarView(store: fixture.store, placement: .left,
-      visibilityGate: gate, observesNativeWindowVisibility: false))
+    let (host, nativeWindow) = window(SidebarView(store: fixture.store, placement: placement,
+      visibilityGate: gate, observesNativeWindowVisibility: false)
+      .environment(\.layoutDirection, .leftToRight), width: placement.isHorizontal ? 620 : 340)
     defer { close(nativeWindow); gate.stop() }
     try await wait(host: host) { !self.descendants(NSScrollView.self, in: host).isEmpty }
     let scroll = try #require(descendants(NSScrollView.self, in: host).first)
+    func isScrolledToRetainedSelection() -> Bool {
+      let origin = scroll.contentView.bounds.origin
+      return (placement.isHorizontal ? origin.x : origin.y) > 1_000
+    }
     try await settle(host)
     fixture.store.selectForBatch(index: 35, modifiers: [])
-    try await wait(host: host) { scroll.contentView.bounds.origin.y > 1_000 }
+    try await wait(host: host) { isScrolledToRetainedSelection() }
     try await settle(host)
     let selected = try #require(fixture.store.currentAsset?.url)
     let first = fixture.store.assets.first?.url
@@ -196,7 +202,7 @@ struct SidebarWindowVisibilityTests {
     fixture.store.libraryQuery.searchText = ""
     try await wait(host: host) {
       !fixture.store.isFiltering && fixture.store.assets.count == 40 && fixture.store.currentIndex == 35
-        && scroll.contentView.bounds.origin.y > 1_000
+        && isScrolledToRetainedSelection()
     }
     #expect(fixture.store.currentAsset?.url == selected)
     #expect(fixture.store.selectedURLs == [selected])

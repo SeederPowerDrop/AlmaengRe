@@ -16,14 +16,20 @@ final class ImageSystemResourceMonitor: @unchecked Sendable {
   private var lastDeliveredSnapshot: ImageResourceSnapshot?
   private var previousCPUTicks: ImageCPUTicks?
   private var cpuFilter = ImageCPUActivityFilter()
+  private let memoryPressureReader: @Sendable () -> ImageResourcePressure?
 
   init(
     isAppActive: Bool = true,
+    memoryPressureReader: @escaping @Sendable () -> ImageResourcePressure? = {
+      ImageMemoryPressureMonitor.currentPressure
+    },
     handler: @escaping @Sendable (ImageResourceSnapshot) -> Void
   ) {
     self.handler = handler
+    self.memoryPressureReader = memoryPressureReader
     snapshot = .currentHardware
     snapshot.isAppActive = isAppActive
+    if let pressure = memoryPressureReader() { snapshot.memoryPressure = pressure }
     pressureSource = DispatchSource.makeMemoryPressureSource(
       eventMask: [.normal, .warning, .critical], queue: queue)
     timer = DispatchSource.makeTimerSource(queue: queue)
@@ -95,6 +101,7 @@ final class ImageSystemResourceMonitor: @unchecked Sendable {
   }
 
   private func refreshPowerState() {
+    if let pressure = memoryPressureReader() { snapshot.memoryPressure = pressure }
     let processInfo = ProcessInfo.processInfo
     snapshot.lowPowerMode = processInfo.isLowPowerModeEnabled
     switch processInfo.thermalState {

@@ -53,7 +53,7 @@ struct ImageResourceSnapshot: Equatable, Codable, Sendable {
     self.cpuBusyFraction = cpuBusyFraction
   }
 
-  /// Initial hardware facts only. The monitor supplies live pressure, CPU and app state.
+  /// Hardware and initial pressure. The monitor supplies continuing resource updates.
   static var currentHardware: Self {
     let process = ProcessInfo.processInfo
     let thermal: ImageThermalLevel
@@ -74,7 +74,8 @@ struct ImageResourceSnapshot: Equatable, Codable, Sendable {
       activeProcessorCount: process.activeProcessorCount,
       appleSilicon: appleSilicon,
       lowPowerMode: process.isLowPowerModeEnabled,
-      thermal: thermal
+      thermal: thermal,
+      memoryPressure: ImageMemoryPressureMonitor.currentPressure ?? .normal
     )
   }
 }

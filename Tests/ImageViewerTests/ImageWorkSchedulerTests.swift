@@ -5,16 +5,22 @@ import Testing
 
 @Suite("이미지 로딩 작업 제한·우선순위·취소")
 struct ImageWorkSchedulerTests {
-  @Test("요청한 폴더 준비는 utility로 진행하고 추측 선읽기는 background로 유지한다")
-  func idlePreparationUsesUtilityWhileSpeculativePrefetchStaysBackground() async throws {
+  @Test("폴더 준비는 전경에서 utility, 비활성 상태에서 background로 진행한다")
+  func idlePreparationFollowsConfiguredPriority() async throws {
     let scheduler = ImageWorkScheduler<Int, TaskPriority>(maxConcurrentTasks: 1)
-    await scheduler.configure(concurrencyLimit: 1, executionPriority: .userInitiated,
-      permitsPrefetch: true, permitsIdleThumbnails: true, revision: 1)
-    let idlePriority = try await scheduler.value(for: 1, priority: .idleThumbnail) { _ in
-      Task.currentPriority
+    let phases: [(ImageExecutionPriority, TaskPriority)] = [
+      (.utility, .utility), (.background, .background), (.utility, .utility),
+    ]
+    for (index, phase) in phases.enumerated() {
+      let (execution, expected) = phase
+      await scheduler.configure(concurrencyLimit: 1, executionPriority: execution,
+        permitsPrefetch: true, permitsIdleThumbnails: true, revision: UInt64(index + 1))
+      let priority = try await scheduler.value(for: index, priority: .idleThumbnail) { _ in
+        Task.currentPriority
+      }
+      #expect(priority == expected)
     }
-    #expect(idlePriority == .utility)
-    let prefetchPriority = try await scheduler.value(for: 2, priority: .prefetch) { _ in
+    let prefetchPriority = try await scheduler.value(for: phases.count, priority: .prefetch) { _ in
       Task.currentPriority
     }
     #expect(prefetchPriority == .background)

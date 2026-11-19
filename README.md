@@ -1,20 +1,20 @@
-# 알맹Re
+# 알맹Re (AlmaengRe)
 
-많은 사진을 한눈에 펼쳐 보고, 비교하고, 분류하는 macOS용 무료 오픈 소스 이미지 뷰어입니다. 알맹이3에서 느꼈던 즐거움을 이어 받아, SwiftUI·트랙패드·Apple의 색 관리 기능에 맞춰 만들고 있습니다.
+**사진이 많은 폴더를 한눈에 보고, 비교하고, 정리하는 무료 오픈 소스 macOS 뷰어.** 사진과 영상을 한 창에서 탐색하고, RAW 사진을 열어 EXIF·GPS를 확인하거나 여러 사진을 한꺼번에 분류할 수 있습니다.
 
-**현재 공개 시험 버전은 1.1 (빌드 105) 사전 릴리스**입니다. 비교 화면 전환 시 이전 화면의 검색·GPS·메타데이터 작업을 멈추고, 복귀 시 최신 조건으로 이어서 처리합니다. 변경 내용과 검증 범위는 [1.1 변경 사항](docs/RELEASE_1_1.md)에 정리했습니다.
+**AlmaengRe is a free, open-source macOS photo and video viewer** for browsing large folders, comparing images side by side, and organizing your library.
 
-**macOS 14 이상**, **Apple Silicon·Intel 공용(Universal 2)** 앱입니다. 1.1은 검증된 1.0.49 (104)의 앱 코드를 유지하고 버전과 배포 정보를 갱신합니다. 핵심 검사는 통과했으나 전체 회귀·장시간 RAW 실측·Intel 실행은 남아 있어 안정판으로 판정하지 않았습니다. 실제 실행은 Apple Silicon에서 확인하며 Intel Mac에서의 실행은 아직 검증하지 못했습니다.
+**[1.2 DMG 다운로드 / Download 1.2](https://github.com/SeederPowerDrop/AlmaengRe/releases/download/v1.2/AlmaengRe-1.2-macos-arm64.dmg)** · [릴리스 / Release notes](https://github.com/SeederPowerDrop/AlmaengRe/releases/tag/v1.2) · [SHA-256](https://github.com/SeederPowerDrop/AlmaengRe/releases/download/v1.2/SHA256SUMS.txt)
 
-**[알맹Re 1.1 ZIP 다운로드](https://github.com/SeederPowerDrop/AlmaengRe/releases/download/v1.1/AlmaengRe-1.1-macos-universal.zip)** · [릴리스와 변경 내역](https://github.com/SeederPowerDrop/AlmaengRe/releases/tag/v1.1) · [SHA-256 체크섬](https://github.com/SeederPowerDrop/AlmaengRe/releases/download/v1.1/SHA256SUMS.txt)
+**macOS 14 이상 · Apple Silicon**. DMG를 열고 **알맹Re.app**을 **Applications**로 드래그합니다. 메뉴 막대의 **언어**나 일반 설정에서 지원하는 10개 언어를 고를 수 있습니다. 배포본은 ad-hoc 서명되어 있어 macOS가 첫 실행을 제한할 수 있습니다.
 
-ZIP을 풀고 **알맹Re.app**을 **Applications**로 옮겨 설치합니다. 현재 배포본은 ad-hoc 서명이며 **Apple Developer ID 서명·공증은 적용되지 않았습니다**. 인터넷에서 받은 앱은 macOS 보안 정책에 따라 첫 실행이 제한될 수 있습니다. Intel용 실행 파일은 포함되어 있지만 실제 Intel Mac에서의 실행은 아직 검증하지 못했습니다.
+![몽땅보기 화면 예시](docs/user-guide/figures/overview.png)
 
-## 최근 변경
+## 1.2에서 달라진 점
 
-- **비교 화면 전환:** 이전 목록의 검색·GPS 진행 알림과 대기 중 메타데이터 읽기를 취소합니다. 비교 중 바뀐 검색·분류 조건은 복귀 시 반영하고, 이전 사진과 선택·확대·이동 상태를 유지합니다.
-- **반복 계산 줄이기:** 비교 목록이 유지되는 동안 형식 선택지를 재사용합니다. 몽땅보기 크기 변경은 전용 상태가 전달해 전체 앱의 불필요한 갱신을 줄입니다.
-- **검증 상태 구분:** 1.0.49의 기존 회귀 144개와 실제 RAW 폴더 전환 검사를 확인했습니다. 크기 변경·필터 응답의 추가 성능 실험은 아직 채택하지 않았으며 이번 소스에 포함하지 않았습니다.
+- **몽땅보기 크기 조절**에서 하단 도구 모음의 반복 배치를 줄여 슬라이더를 드래그할 때 반응을 개선했습니다.
+- **대량 폴더 탐색**에서 썸네일과 필터 상태를 재사용하며, 소수 사진 보기에서는 RAW·HDR 표현과 해상도를 우선합니다.
+- **언어 확인**은 한국어, 영어, 일본어, 중국어 간체, 베트남어, 스페인어, 프랑스어, 독일어, 러시아어, 아랍어에서 진행했습니다.
 
 ## 대량 사진 탐색과 자원 관리
 

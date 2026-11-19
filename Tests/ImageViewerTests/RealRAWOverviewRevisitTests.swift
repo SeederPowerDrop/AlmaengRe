@@ -321,7 +321,7 @@ struct RealRAWOverviewRevisitTests {
 
   private func fixtures() throws -> [ImageAsset] {
     let path = ProcessInfo.processInfo.environment["IMAGEVIEWER_RAW_DIRECTORY"]
-      ?? "/Users/hyunjinkim/Pictures/iPhoneRAW"
+      ?? FileManager.default.homeDirectory.appendingPathComponent("Pictures/iPhoneRAW").path
     let urls = try FileManager.default.contentsOfDirectory(
       at: URL(fileURLWithPath: path, isDirectory: true),
       includingPropertiesForKeys: [.fileSizeKey, .contentModificationDateKey, .isRegularFileKey],

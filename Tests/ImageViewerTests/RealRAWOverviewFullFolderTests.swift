@@ -25,7 +25,7 @@ struct RealRAWOverviewFullFolderTests {
     defer { _ = NSApp.setActivationPolicy(previousActivationPolicy) }
     let foregroundSeeded = environment["IMAGEVIEWER_RAW_OVERVIEW_FULL_MODE"] == "foreground_seeded"
     let source = URL(fileURLWithPath: environment["IMAGEVIEWER_RAW_DIRECTORY"]
-      ?? "/Users/hyunjinkim/Pictures/iPhoneRAW", isDirectory: true)
+      ?? FileManager.default.homeDirectory.appendingPathComponent("Pictures/iPhoneRAW").path, isDirectory: true)
     let output = URL(fileURLWithPath: environment["IMAGEVIEWER_FULL_OVERVIEW_OUTPUT"]
       ?? FileManager.default.temporaryDirectory
         .appendingPathComponent("ImageViewer-full-overview-\(UUID())").path,

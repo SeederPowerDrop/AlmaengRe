@@ -236,9 +236,9 @@ actor ImageWorkScheduler<Key: Hashable & Sendable, Value: Sendable> {
       let operation = job.operation
       let taskPriority: TaskPriority
       if job.priority == .idleThumbnail {
-        // Explicitly requested folder preparation must make progress under
-        // contention. Queue order, admission and adaptive pacing remain idle work.
-        taskPriority = .utility
+        // Let compact preparation yield to other apps when this viewer is inactive.
+        // Foreground preparation still uses the paced utility lane.
+        taskPriority = executionPriority == .background ? .background : .utility
       } else if job.priority == .prefetch {
         taskPriority = .background
       } else {

@@ -59,7 +59,7 @@ final class ViewerFrameLoader: ObservableObject {
   }
 
   typealias Preview = @Sendable (ViewerFrameRequest) async throws -> RenderedFrame
-  typealias CachedPreview = @Sendable (ViewerFrameRequest) async -> RenderedFrame?
+  typealias CachedFrame = @Sendable (ViewerFrameRequest) async -> RenderedFrame?
   typealias Render = @Sendable (ViewerFrameRequest, Int) async throws -> RenderedFrame
   typealias FailureReason = @Sendable (Error, URL) async -> String?
   typealias SettleWait = @Sendable (Duration) async throws -> Void
@@ -80,6 +80,7 @@ final class ViewerFrameLoader: ObservableObject {
   private var previewTask: Task<Void, Never>?
   private var cachedPreviewTask: Task<Void, Never>?
   private var renderTask: Task<Void, Never>?
+  private var isCheckingCachedRender = false
   private let settleDelay: Duration
   private let rawNavigationSettleDelay: Duration
   private let editingSettleDelay: Duration
@@ -114,7 +115,8 @@ final class ViewerFrameLoader: ObservableObject {
   }
 
   func load(
-    _ request: ViewerFrameRequest, cachedPreview: CachedPreview? = nil,
+    _ request: ViewerFrameRequest, cachedRender: CachedFrame? = nil,
+    cachedPreview: CachedFrame? = nil,
     preview: @escaping Preview, render: @escaping Render,
     onReady: @escaping (ImageAsset) -> Void = { _ in }
   ) {
@@ -132,6 +134,7 @@ final class ViewerFrameLoader: ObservableObject {
     target = work
     errorMessage = nil
     renderTask?.cancel()
+    isCheckingCachedRender = false
     cachedPreviewTask?.cancel()
     cachedPreviewTask = nil
     if let presentation, let pixels = presentation.refinedPixelSize,
@@ -161,6 +164,27 @@ final class ViewerFrameLoader: ObservableObject {
         _ = self?.acceptPreview(frame, for: work, lifetime: session)
       }
     }
+    if let cachedRender {
+      // A fitted frame can skip settling entirely. Leave the RAM preview lane
+      // available, but only start source work if the fitted frame is missing.
+      isCheckingCachedRender = true
+      renderTask = Task { [weak self] in
+        let frame = await cachedRender(request)
+        guard !Task.isCancelled, let self, self.lifetime == session,
+          self.target?.revision == work.revision else { return }
+        self.isCheckingCachedRender = false
+        if let frame {
+          self.present(frame, for: work, refinedPixelSize: request.maxPixelSize)
+        } else {
+          self.startDecoding(work, lifetime: session, refinementDelay: refinementDelay)
+        }
+      }
+    } else {
+      startDecoding(work, lifetime: session, refinementDelay: refinementDelay)
+    }
+  }
+
+  private func startDecoding(_ work: Work, lifetime session: UInt64, refinementDelay: Duration) {
     if previewTask == nil {
       previewTask = Task { [weak self] in
         defer { if self?.lifetime == session { self?.previewTask = nil } }
@@ -183,6 +207,7 @@ final class ViewerFrameLoader: ObservableObject {
         }
       }
     }
+    let request = work.request
     renderTask = Task { [weak self, waitForSettling, failureReason] in
       do {
         // Larger pages prioritize immediate previews, then let the bounded
@@ -239,13 +264,16 @@ final class ViewerFrameLoader: ObservableObject {
     previewTask = nil
     cachedPreviewTask = nil
     renderTask = nil
+    isCheckingCachedRender = false
     target = nil
     presentation = nil
     errorMessage = nil
   }
 
   private func previewWork(lifetime session: UInt64) -> Work? {
-    lifetime == session ? target : nil
+    // An earlier source preview may finish while the current target checks RAM.
+    // Only admit a new preview once that lookup has missed.
+    lifetime == session && !isCheckingCachedRender ? target : nil
   }
 
   private func canReuse(_ presentation: Presentation, for request: ViewerFrameRequest) -> Bool {

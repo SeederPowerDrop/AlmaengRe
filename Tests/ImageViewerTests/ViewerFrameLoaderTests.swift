@@ -438,6 +438,47 @@ struct ViewerFrameLoaderTests {
     #expect(await cached.cancelledCompletions == [0])
   }
 
+  @Test("정밀 프레임이 캐시에 있으면 이전 미리보기를 기다리거나 다시 디코딩하지 않는다")
+  func cachedRenderSkipsQuietWindowAndSourceWork() async throws {
+    let settling = ControlledViewerSettling()
+    let loader = ViewerFrameLoader(waitForSettling: { await settling.wait($0) })
+    defer {
+      loader.stop()
+      Task { await settling.releaseAll() }
+    }
+    let previews = ControlledViewerFrames()
+    let renders = ControlledViewerFrames()
+    let first = request(1)
+    var latest = request(2)
+    latest.loadingPolicy = .responsive
+    let detailed = try frame(width: latest.maxPixelSize)
+    let oldPreview = try frame(width: 8)
+    var ready: [ImageAsset] = []
+
+    loader.load(first, cachedRender: { _ in nil },
+      preview: { try await previews.run($0) },
+      render: { try await renders.run($0, frameIndex: $1) })
+    try await waitUntil { await previews.starts.count == 1 }
+    try await waitUntil { await settling.delays == [.milliseconds(120)] }
+
+    loader.load(latest, cachedRender: { _ in detailed },
+      preview: { try await previews.run($0) },
+      render: { try await renders.run($0, frameIndex: $1) },
+      onReady: { ready.append($0) })
+    try await waitUntil { loader.presentation?.frame.image === detailed.image }
+    await previews.succeed(0, with: oldPreview)
+    await settling.releaseAll()
+    try await waitUntil { await previews.completions.count == 1 }
+    await drainResumedTasks()
+
+    #expect(loader.presentation?.request == latest)
+    #expect(loader.presentation?.frame.image === detailed.image)
+    #expect(await settling.delays == [.milliseconds(120)])
+    #expect(await previews.starts.map(\.request) == [first])
+    #expect(await renders.starts.isEmpty)
+    #expect(ready == [latest.asset])
+  }
+
   @Test("정밀 프레임이 먼저 끝나면 늦은 RAM 미리보기로 화질이 떨어지지 않는다")
   func lateCacheReplyDoesNotDowngradeRefinedFrame() async throws {
     let loader = ViewerFrameLoader(settleDelay: .zero)

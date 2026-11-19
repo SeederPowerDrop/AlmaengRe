@@ -90,6 +90,7 @@ actor ImagePipeline {
   private var generation: UInt64 = 0
   private var resourceRevision: UInt64 = 0
   private var registeredCacheClient = false
+  private var favorsFinalViewerFrames = false
 
   init(maxConcurrentDecodes: Int? = nil, governor: ImageResourceGovernor? = nil,
     reusesDecodedInputs: Bool = true)
@@ -139,12 +140,8 @@ actor ImagePipeline {
       return try AudioMediaPreview.frame(for: url, maxPixelSize: maxPixelSize)
     }
     await registerCacheClientIfNeeded()
-    let key = FrameCacheKey(
-      file: ImageFileVersion(url: url), frameIndex: max(0, frameIndex),
-      pixelSize: maxPixelSize.map(ImageLoadingPolicy.pixelBucket),
-      adjustments: adjustments, prefersHDR: prefersHDR,
-      usesSpatialPreview: priority == .interactivePreview && adjustments.usesSpatialFiltering,
-      generation: generation)
+    let key = frameCacheKey(file: ImageFileVersion(url: url), frameIndex: frameIndex,
+      maxPixelSize: maxPixelSize, adjustments: adjustments, prefersHDR: prefersHDR, priority: priority)
     // Use fresh file information, so restoring an empty file needs no cache reset.
     guard key.file.byteCount != 0 else { throw ImagePipelineError.emptyFile(url) }
     if let frame = cache.value(for: key) { return frame }
@@ -176,6 +173,42 @@ actor ImagePipeline {
     }
     try Task.checkCancellation()
     return frame
+  }
+
+  /// Looks for an exact RAM candidate before checking whether the source changed.
+  func cachedStillFrame(
+    for asset: ImageAsset, maxPixelSize: Int, adjustments: ImageAdjustments, prefersHDR: Bool
+  ) -> RenderedFrame? {
+    guard !Task.isCancelled, cache.count > 0, !asset.isPlaybackMedia,
+      let knownSize = asset.byteCount, let byteCount = Int(exactly: knownSize), byteCount > 0,
+      let modificationDate = asset.modificationDate else { return nil }
+    // Folder scan dates cross the Rust boundary as Unix-epoch doubles. At
+    // current timestamps this can round one step away from Foundation's date.
+    // Neighboring keys only identify candidates. Fresh version equality is exact.
+    let time = modificationDate.timeIntervalSinceReferenceDate
+    var freshVersion: ImageFileVersion?
+    for candidate in [time, time.nextDown, time.nextUp] {
+      let file = ImageFileVersion(url: asset.url, byteCount: byteCount,
+        modificationDate: Date(timeIntervalSinceReferenceDate: candidate))
+      let key = frameCacheKey(file: file, frameIndex: 0, maxPixelSize: maxPixelSize,
+        adjustments: adjustments, prefersHDR: prefersHDR, priority: .visible)
+      guard let frame = cachedFrame(for: key), frame.frameIndex == 0, frame.frameCount == 1
+      else { continue }
+      if freshVersion == nil { freshVersion = ImageFileVersion(url: asset.url) }
+      if freshVersion == file { return frame }
+    }
+    return nil
+  }
+
+  private func frameCacheKey(
+    file: ImageFileVersion, frameIndex: Int, maxPixelSize: Int?, adjustments: ImageAdjustments,
+    prefersHDR: Bool, priority: ImageWorkPriority
+  ) -> FrameCacheKey {
+    FrameCacheKey(file: file, frameIndex: max(0, frameIndex),
+      pixelSize: maxPixelSize.map(ImageLoadingPolicy.pixelBucket),
+      adjustments: adjustments, prefersHDR: prefersHDR,
+      usesSpatialPreview: priority == .interactivePreview && adjustments.usesSpatialFiltering,
+      generation: generation)
   }
 
   private func cachedFrame(for key: FrameCacheKey) -> RenderedFrame? {
@@ -215,6 +248,23 @@ actor ImagePipeline {
       byteCount: cache.totalCost + inputs.byteCount, byteLimit: cache.costLimit + inputs.byteLimit)
   }
 
+  /// Larger visible pages retain two settled pages within the same total budget.
+  /// Single-image and editing callers keep their larger working-input allowance.
+  func setViewerVisibleItemCount(_ count: Int) {
+    guard !Task.isCancelled else { return }
+    let favorsFinalFrames = count > 4
+    guard favorsFinalViewerFrames != favorsFinalFrames else { return }
+    favorsFinalViewerFrames = favorsFinalFrames
+    allocateCacheBudget(cacheSnapshot().byteLimit)
+  }
+
+  private func allocateCacheBudget(_ budget: Int) {
+    let inputShare = favorsFinalViewerFrames ? budget / 4 : budget / 2
+    let inputBudget = reusesDecodedInputs ? min(64 * ImageLoadingPolicy.mebibyte, inputShare) : 0
+    decodedInputs.setCostLimit(inputBudget)
+    cache.costLimit = budget - inputBudget
+  }
+
   func decodeReuseSnapshot() -> ImageDecodeReuseSnapshot {
     decodedInputs.snapshot()
   }
@@ -232,11 +282,8 @@ actor ImagePipeline {
     resourceRevision = update.revision
     let budget = max(0, update.limits.renderCacheBytes)
     let smaller = budget < cacheSnapshot().byteLimit
-    // Two small RAW working inputs (preview and fitted detail) avoid developing
-    // the sensor again for each slider value. Repartition the existing allowance.
-    let inputBudget = reusesDecodedInputs ? min(64 * ImageLoadingPolicy.mebibyte, budget / 2) : 0
-    decodedInputs.setCostLimit(inputBudget)
-    cache.costLimit = budget - inputBudget
+    // Repartition this allowance according to the actual visible page.
+    allocateCacheBudget(budget)
     if smaller {
       generation &+= 1
       cache.removeAll()

@@ -186,9 +186,6 @@ struct SidebarView: View {
       .accessibilityLabel(asset.filename)
       .accessibilityValue(L10n.text(isSelected ? "선택됨" : "선택 안 됨"))
       .accessibilityAddTraits(isSelected ? .isSelected : [])
-      // 목록 순번은 새 폴더에서도 다시 0부터 시작합니다. 실제 파일 URL을 써야
-      // 같은 순번에 있던 이전 폴더의 썸네일 상태가 재사용되지 않습니다.
-      .id(asset.id)
       .help(asset.filename)
     }
   }

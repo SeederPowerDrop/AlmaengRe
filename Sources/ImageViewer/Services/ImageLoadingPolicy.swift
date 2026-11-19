@@ -1,6 +1,7 @@
 import CoreGraphics
 import CAlmaengCore
 import Foundation
+import Darwin
 
 final class ImageMemoryPressureMonitor: @unchecked Sendable {
   private let source: any DispatchSourceMemoryPressure
@@ -13,6 +14,25 @@ final class ImageMemoryPressureMonitor: @unchecked Sendable {
       handler(self.source.data.rawValue)
     }
     source.resume()
+  }
+
+  /// DispatchSource reports transitions after subscription. Read the current
+  /// level separately so an existing warning is present in the first snapshot.
+  static var currentPressure: ImageResourcePressure? {
+    var value: Int32 = 0
+    var size = MemoryLayout<Int32>.size
+    guard sysctlbyname("kern.memorystatus_vm_pressure_level", &value, &size, nil, 0) == 0,
+      size == MemoryLayout<Int32>.size else { return nil }
+    return pressure(forKernelValue: value)
+  }
+
+  static func pressure(forKernelValue value: Int32) -> ImageResourcePressure? {
+    switch value {
+    case 1: .normal
+    case 2: .warning
+    case 4: .critical
+    default: nil
+    }
   }
 
   deinit { source.cancel() }
@@ -77,6 +97,12 @@ struct ImageFileVersion: Hashable, Sendable {
     let values = try? freshURL.resourceValues(forKeys: [.fileSizeKey, .contentModificationDateKey])
     byteCount = values?.fileSize
     modificationDate = values?.contentModificationDate
+  }
+
+  init(url: URL, byteCount: Int, modificationDate: Date) {
+    self.url = url.standardizedFileURL
+    self.byteCount = byteCount
+    self.modificationDate = modificationDate
   }
 
   var encoded: NSString {
