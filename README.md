@@ -111,6 +111,8 @@ Mac에서 AI로 가로·세로를 2배 확대하고, 경계선을 움직여 원�
 
 ## 성능 시험 / Performance tests
 
+**과거에는 무엇을 개선했나요?** [성능 개선 연혁](docs/performance/history.ko.md)에서 9월 로딩 설계 → 10월 선로딩·캐시 재사용·작업 취소 → 11월 RAW 복귀·몽땅보기 크기 조절까지 확인할 수 있습니다. 당시 실패·미완료 검사와 미채택 실험도 함께 보존했습니다.
+
 RAW 페이지 복귀, 몽땅보기 크기 조절, EXIF 필터, 영상 재생 중 스크롤의 시험 조건과 수치를 정리했습니다. 배포에 반영한 개선과 보류한 실험을 함께 확인할 수 있습니다.
 
 Benchmark results for RAW navigation, thumbnail resizing, EXIF filters, and scrolling during video playback.
