@@ -22,3 +22,7 @@ We matched the file list, prepared thumbnails, viewport and input sequence withi
 Frame publication, timer gaps and independent video output are separate measurements. They give no direct reading of physical display latency or compositor frame drops. The reported ranges reflect the observed runs. Remaining checks include long mixed sessions on M2 with 16 GiB, responsiveness of other apps and keeping a deep selection in view when resizing the grid.
 
 [Selected measurements as CSV](measurements.csv) · [AlmaengRe 1.2 release](https://github.com/SeederPowerDrop/AlmaengRe/releases/tag/v1.2)
+
+## Earlier work and historical results
+
+The [performance history (Korean)](history.ko.md) connects the September loading design, October preload/cache and mixed-use tests, and November RAW-navigation and resizing comparisons. It preserves incomplete or failed historical checks and distinguishes shipped changes from unshipped experiments.
