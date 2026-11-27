@@ -82,13 +82,13 @@
 "color.gray" = "رمادي";
 
 /* Independent tag filters for comparison panes. */
-"comparison.open" = "مقارنة الصور الحالية حسب التصنيف";
+"comparison.open" = "مقارنة الملفات الحالية حسب التصنيف";
 "comparison.openHelp" = "افتح قائمة المصدر الحالية في A وB. احتفظ بفلاتر البحث والتنسيق ومنطقة الخريطة، واختر التصنيفات لكل لوحة على حدة.";
 "comparison.filter" = "اختيار التصنيفات";
-"comparison.allPhotos" = "كل الصور";
+"comparison.allPhotos" = "كل الملفات";
 "comparison.titleFormat" = "تصنيفات اللوحة %@";
-"comparison.selectionHelp" = "اختر عدة تصنيفات لعرضها في هذه اللوحة. قد تظهر الصورة نفسها على الجانبين.";
-"comparison.empty" = "لا توجد صور تطابق هذه الشروط.";
+"comparison.selectionHelp" = "اختر التصنيفات المعروضة في هذه اللوحة. يمكن أن يظهر الملف نفسه على الجانبين.";
+"comparison.empty" = "لا توجد ملفات تطابق هذه الشروط.";
 "comparison.emptyHelp" = "غيّر شروط التصنيف أو تحقق من فلاتر البحث والتنسيق ومنطقة الخريطة المشتركة.";
 "comparison.reset" = "إزالة فلتر التصنيف لهذه اللوحة";
 

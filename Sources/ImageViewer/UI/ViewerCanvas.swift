@@ -31,6 +31,9 @@ struct ViewerCanvas: View {
 
   var body: some View {
     VStack(spacing: 0) {
+      if store.selectionViewingContext != nil {
+        SelectionViewingBanner(store: store)
+      }
       if frameLayout.isEditing && store.visibleAssets.count > 1 {
         ViewerFrameEditingBar(layout: frameLayout, count: store.visibleAssets.count)
       }
@@ -54,9 +57,21 @@ struct ViewerCanvas: View {
     }
     .onAppear {
       store.beginTrackingViewerPresentation()
-      store.videoGridPlayback.updateVisibleAssets(store.visibleAssets)
+      updatePlaybackPage()
     }
-    .onChange(of: store.visibleAssets) { _, assets in store.videoGridPlayback.updateVisibleAssets(assets) }
+    .onChange(of: store.visibleAssets) { _, _ in updatePlaybackPage() }
+    .onChange(of: store.automaticallyPlaysSingleMedia) { _, _ in updatePlaybackPage() }
+    .onChange(of: store.imagesPerPage) { _, _ in updatePlaybackPage() }
+    .onChange(of: store.isSlideshowPlaying) { _, _ in
+      updatePlaybackPage()
+      if !store.isSlideshowPlaying { videoPlayback.cancelPendingSingleAutoplay() }
+    }
+    .onChange(of: store.allowsVideoPlayback, initial: true) { _, allowed in
+      if !allowed { videoPlayback.cancelPendingSingleAutoplay() }
+    }
+    .onReceive(NotificationCenter.default.publisher(for: NSApplication.didResignActiveNotification)) { _ in
+      videoPlayback.cancelPendingSingleAutoplay()
+    }
     .onDisappear {
       store.endTrackingViewerPresentation()
       store.videoGridPlayback.reset()
@@ -65,13 +80,25 @@ struct ViewerCanvas: View {
 
   private var showsVideoControls: Bool {
     // Keep the active toggle reachable on photo-only and partial final pages.
-    videoPlayback.followsPages ||
-      (store.visibleAssets.count > 1 && store.visibleAssets.contains(where: \.isPlaybackMedia))
+    store.visibleAssets.contains(where: \.isPlaybackMedia) || videoPlayback.followsPages
   }
 
-  private var videoControls: some View {
-    VideoGridPlaybackControls(state: store.videoGridPlayback, visibleAssets: store.visibleAssets)
-      .disabled(!store.allowsVideoPlayback)
+  @ViewBuilder private var videoControls: some View {
+    if store.imagesPerPage == 1, let asset = store.currentAsset, asset.isPlaybackMedia {
+      SingleMediaPlaybackControls(state: videoPlayback, asset: asset,
+        autoplay: $store.automaticallyPlaysSingleMedia,
+        isEnabled: store.allowsVideoPlayback && !store.isSlideshowPlaying)
+    } else {
+      VideoGridPlaybackControls(state: store.videoGridPlayback, visibleAssets: store.visibleAssets)
+        .disabled(!store.allowsVideoPlayback)
+    }
+  }
+
+  private func updatePlaybackPage() {
+    videoPlayback.updateVisibleAssets(store.visibleAssets,
+      singleAutoplay: store.imagesPerPage == 1 && !store.isSlideshowPlaying
+        ? store.automaticallyPlaysSingleMedia : nil)
+    if !store.allowsVideoPlayback { videoPlayback.cancelPendingSingleAutoplay() }
   }
 
   private func focusImageCanvas() {
@@ -128,6 +155,7 @@ struct ViewerCanvas: View {
                 photoMarkStore: store,
                 onToggleSelection: { selectAsset(asset, modifiers: .command) },
                 gridPlayback: store.videoGridPlayback,
+                tracksSinglePlayback: store.imagesPerPage == 1 && !store.isSlideshowPlaying,
                 onSelect: {
                   selectAsset(asset, modifiers: NSEvent.modifierFlags)
                 },

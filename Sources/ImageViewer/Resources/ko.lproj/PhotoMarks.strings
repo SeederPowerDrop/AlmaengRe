@@ -82,13 +82,13 @@
 "color.gray" = "회색";
 
 /* Independent tag filters for comparison panes. */
-"comparison.open" = "현재 사진으로 분류 비교";
+"comparison.open" = "현재 파일로 분류 비교";
 "comparison.openHelp" = "현재 열린 원본 목록을 A와 B에 엽니다. 검색·형식·지도 영역은 유지하고, 분류는 각 영역에서 따로 고릅니다.";
 "comparison.filter" = "분류 선택";
-"comparison.allPhotos" = "모든 사진";
+"comparison.allPhotos" = "모든 파일";
 "comparison.titleFormat" = "%@ 영역의 분류";
-"comparison.selectionHelp" = "이 영역에서 볼 분류를 여러 개 고르세요. 양쪽에 같은 사진이 포함될 수도 있습니다.";
-"comparison.empty" = "이 조건에 맞는 사진이 없습니다.";
+"comparison.selectionHelp" = "이 영역에서 볼 분류를 여러 개 고르세요. 양쪽에 같은 파일이 포함될 수도 있습니다.";
+"comparison.empty" = "이 조건에 맞는 파일이 없습니다.";
 "comparison.emptyHelp" = "분류 조건을 바꾸거나 공통 검색·형식·지도 영역을 확인하세요.";
 "comparison.reset" = "이 영역의 분류 조건 해제";
 

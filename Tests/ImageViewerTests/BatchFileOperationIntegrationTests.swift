@@ -406,7 +406,7 @@ struct BatchFileOperationIntegrationTests {
     #expect(restoredMarks.marks(for: moved) == [.one])
   }
 
-  @Test("Command-Delete는 검토 창만 열고 일반 Delete나 선택 해제는 삭제하지 않는다",
+  @Test("기존 Command-Delete는 검토 창을 열고 선택 해제 상태에서는 삭제하지 않는다",
     arguments: [false, true])
   func trashShortcutRequiresReviewAndSelection(overview: Bool) async throws {
     let fixture = try Fixture()
@@ -415,10 +415,7 @@ struct BatchFileOperationIntegrationTests {
     try await openPhotos(store, fixture: fixture)
     store.presentationMode = overview ? .overview : .viewer
     let shortcuts = ShortcutStore(defaults: fixture.defaults)
-    let plainDelete = try key(51)
     let commandDelete = try key(51, modifiers: .command)
-    _ = store.handleViewerKeyDown(plainDelete, shortcuts: shortcuts)
-    #expect(store.fileOperationRequest == nil && store.batchSheet == nil)
     #expect(try fixture.names(in: fixture.photos).count == 4)
     #expect(store.handleViewerKeyDown(commandDelete, shortcuts: shortcuts))
     let request = try #require(store.fileOperationRequest)
@@ -431,12 +428,132 @@ struct BatchFileOperationIntegrationTests {
     store.batchSheet = nil
     store.clearSelection()
     #expect(store.selectedURLs.isEmpty)
-    _ = store.handleViewerKeyDown(plainDelete, shortcuts: shortcuts)
     _ = store.handleViewerKeyDown(commandDelete, shortcuts: shortcuts)
     #expect(store.fileOperationRequest == nil && store.batchSheet == nil)
     #expect(try fixture.names(in: fixture.photos).count == 4)
     #expect(try fixture.names(in: fixture.fakeTrash).isEmpty)
     for asset in store.allAssets { #expect(try Data(contentsOf: asset.url) == fixture.png) }
+  }
+
+  @Test("Del·Fn-Delete는 단일 보기의 현재 파일 또는 다중·몽땅보기의 선택 파일만 휴지통으로 보낸다",
+    arguments: ["single", "multi", "overview"], [UInt16(51), 117])
+  func deleteKeyUsesModeSpecificTargets(mode: String, code: UInt16) async throws {
+    let fixture = try Fixture()
+    let store = fixture.makeStore(operator: fixture.fakeTrashOperator())
+    defer { cleanup(store, fixture: fixture) }
+    try await openPhotos(store, fixture: fixture)
+    let original = store.assets
+    store.presentationMode = mode == "overview" ? .overview : .viewer
+    store.setImagesPerPage(mode == "multi" ? 2 : 1)
+    store.selectForBatch(index: 0, modifiers: [])
+    store.selectForBatch(index: 2, modifiers: .command)
+    let current = try #require(store.currentAsset)
+    if mode == "single" { store.selectAllAssets() }
+    let expected = mode == "single" ? [current] : [original[0], original[2]]
+    let shortcuts = ShortcutStore(defaults: fixture.defaults)
+    let event = try key(code, modifiers: code == 117 ? .function : .capsLock)
+    #expect(store.handleViewerKeyDown(event, shortcuts: shortcuts))
+    let request = try #require(store.fileOperationRequest)
+    #expect(request.operation == .trash && request.assets == expected)
+    #expect(store.batchSheet == .fileOperation)
+    #expect(try fixture.names(in: fixture.photos).count == 4)
+    // Confirm through the existing operation pipeline using a fixture-local
+    // recoverable trash. Never touch the user's actual files or system Trash.
+    let plan = try BatchFileOperationPlanner.plan(assets: request.assets, operation: .trash)
+    let result = await store.performFileOperation(plan)
+    #expect(result.failures.isEmpty && result.completed.count == expected.count)
+    #expect(try fixture.names(in: fixture.fakeTrash) == expected.map(\.filename).sorted())
+    for asset in original where !expected.contains(asset) {
+      #expect(try Data(contentsOf: asset.url) == fixture.png)
+    }
+    #expect(store.assets.count == 4 - expected.count)
+    #expect(store.currentAsset != nil && !expected.contains(where: { $0.id == store.currentAsset?.id }))
+  }
+
+  @Test("다중·몽땅보기는 선택이 없으면 현재 파일로 대체하지 않고 단일 보기는 현재 파일을 대상으로 한다",
+    arguments: ["single", "multi", "overview"])
+  func deleteWithNoSelectionIsScopedToMode(mode: String) async throws {
+    let fixture = try Fixture()
+    let store = fixture.makeStore(operator: fixture.fakeTrashOperator())
+    defer { cleanup(store, fixture: fixture) }
+    try await openPhotos(store, fixture: fixture)
+    store.presentationMode = mode == "overview" ? .overview : .viewer
+    store.setImagesPerPage(mode == "multi" ? 2 : 1)
+    store.clearSelection()
+    let current = try #require(store.currentAsset)
+    let shortcuts = ShortcutStore(defaults: fixture.defaults)
+    #expect(store.handleViewerKeyDown(try key(51), shortcuts: shortcuts))
+    if mode == "single" { #expect(store.fileOperationRequest?.assets == [current]) }
+    else { #expect(store.fileOperationRequest == nil && store.batchSheet == nil) }
+    #expect(try fixture.names(in: fixture.photos).count == 4)
+  }
+
+  @Test("사진·영상·음성을 함께 선택해도 Del은 선택한 원본만 보내고 몽땅보기 미리보기를 멈춘다",
+    arguments: [false, true])
+  func deleteMixedSelectionAndSuspendPreview(overview: Bool) async throws {
+    let fixture = try Fixture()
+    for name in ["clip.mp4", "sound.wav"] {
+      // File management is independent of decoding, including damaged media.
+      try Data([1, 2, 3]).write(to: fixture.photos.appendingPathComponent(name))
+    }
+    let store = fixture.makeStore(operator: fixture.fakeTrashOperator())
+    defer { cleanup(store, fixture: fixture) }
+    try await openPhotos(store, fixture: fixture, count: 6)
+    let original = store.assets
+    store.presentationMode = overview ? .overview : .viewer
+    store.setImagesPerPage(overview ? 1 : 3)
+    let names: Set<String> = ["photo1.png", "clip.mp4", "sound.wav"]
+    let targets = original.filter { names.contains($0.filename) }
+    for (offset, asset) in targets.enumerated() {
+      let index = try #require(store.assets.firstIndex { $0.id == asset.id })
+      store.selectForBatch(index: index, modifiers: offset == 0 ? [] : .command)
+    }
+    let previewAsset = try #require(targets.first { $0.isAudio })
+    store.overviewMediaPreview.setEnabled(true)
+    store.overviewMediaPreview.hover(previewAsset, isInside: true)
+    let shortcuts = ShortcutStore(defaults: fixture.defaults)
+    #expect(store.handleViewerKeyDown(try key(117), shortcuts: shortcuts))
+    let request = try #require(store.fileOperationRequest)
+    #expect(request.assets == targets)
+    #expect(!store.overviewMediaPreview.isEnabled && store.overviewMediaPreview.asset == nil)
+    let plan = try BatchFileOperationPlanner.plan(assets: request.assets, operation: .trash)
+    let result = await store.performFileOperation(plan)
+    #expect(result.completed.count == 3 && result.failures.isEmpty)
+    #expect(Set(try fixture.names(in: fixture.fakeTrash)) == names)
+    for asset in original where !names.contains(asset.filename) {
+      #expect(try Data(contentsOf: asset.url) == fixture.png)
+    }
+  }
+
+  @Test("텍스트 편집·키 놓기·자동 반복·다른 조합의 Delete는 파일 삭제를 시작하지 않는다")
+  func deleteRespectsTextInputAndRepeatedKeys() async throws {
+    let fixture = try Fixture()
+    let store = fixture.makeStore(operator: fixture.fakeTrashOperator())
+    defer { cleanup(store, fixture: fixture) }
+    try await openPhotos(store, fixture: fixture)
+    let shortcuts = ShortcutStore(defaults: fixture.defaults)
+    let monitor = InputEventMonitor.Coordinator(onKeyDown: {
+      store.handleViewerKeyDown($0, shortcuts: shortcuts)
+    }, onPointerPan: { _, _ in false }, onHorizontalSwipe: { _ in })
+    defer { monitor.stopMonitoring() }
+    for code in [UInt16(51), 117] {
+      #expect(!monitor.handleKey(try key(code), isTextInput: true))
+      let keyUp = try #require(NSEvent.keyEvent(with: .keyUp, location: .zero, modifierFlags: [],
+        timestamp: 0, windowNumber: 0, context: nil, characters: "\u{7f}",
+        charactersIgnoringModifiers: "\u{7f}", isARepeat: false, keyCode: code))
+      #expect(!monitor.handleKey(keyUp, isTextInput: false))
+      #expect(monitor.handleKey(try key(code, repeating: true), isTextInput: false))
+      for flags in [NSEvent.ModifierFlags.shift, .option, .control] {
+        _ = monitor.handleKey(try key(code, modifiers: flags), isTextInput: false)
+        #expect(store.fileOperationRequest == nil)
+      }
+    }
+    #expect(store.fileOperationRequest == nil && store.batchSheet == nil)
+    #expect(try fixture.names(in: fixture.photos).count == 4)
+    #expect(monitor.handleKey(try key(51), isTextInput: false))
+    let request = try #require(store.fileOperationRequest)
+    _ = monitor.handleKey(try key(51, repeating: true), isTextInput: false)
+    #expect(store.fileOperationRequest?.id == request.id)
   }
 
   @Test("직접 연 파일을 이동한 뒤에도 남은 폴더를 저장하고 다시 이어본다")
@@ -529,10 +646,10 @@ struct BatchFileOperationIntegrationTests {
     #expect(restored.currentFolderURL?.standardizedFileURL == fixture.photos.standardizedFileURL)
   }
 
-  private func key(_ code: UInt16, modifiers: NSEvent.ModifierFlags = []) throws -> NSEvent {
+  private func key(_ code: UInt16, modifiers: NSEvent.ModifierFlags = [], repeating: Bool = false) throws -> NSEvent {
     try #require(NSEvent.keyEvent(with: .keyDown, location: .zero, modifierFlags: modifiers,
       timestamp: 0, windowNumber: 0, context: nil, characters: "\u{7f}",
-      charactersIgnoringModifiers: "\u{7f}", isARepeat: false, keyCode: code))
+      charactersIgnoringModifiers: "\u{7f}", isARepeat: repeating, keyCode: code))
   }
 
   private func assertCannotStart(_ store: AppStore) {

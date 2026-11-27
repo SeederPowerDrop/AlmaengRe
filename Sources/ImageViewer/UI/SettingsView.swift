@@ -129,6 +129,7 @@ struct SettingsView: View {
         Toggle(MotionMediaL10n.text("showVideos"), isOn: $store.showsVideos)
         Text(MotionMediaL10n.text("showVideos.help"))
           .font(ViewerUIMetrics.font(.caption)).foregroundStyle(.secondary)
+        SingleMediaPlaybackOptions(autoplay: $store.automaticallyPlaysSingleMedia)
         Toggle("폴더 트리 표시", isOn: $store.showsFolderTree)
         Text("폴더를 펼쳐 다른 폴더로 이동합니다.")
           .font(ViewerUIMetrics.font(.caption)).foregroundStyle(.secondary)

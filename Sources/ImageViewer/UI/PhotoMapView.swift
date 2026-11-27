@@ -24,7 +24,7 @@ enum PhotoMapDrawingMode: String, CaseIterable, Identifiable {
 
   var instruction: String {
     switch self {
-    case .move: L10n.text("사진 핀을 눌러 미리 보고, 영역을 선택해 사진을 모아 보세요.")
+    case .move: MediaPlaybackL10n.text("map.instruction")
     case .radius: MapSelectionL10n.text("현재 지도 중심에 반경 영역을 추가합니다. 번호 손잡이를 드래그해 옮길 수 있습니다.")
     case .rectangle: MapSelectionL10n.text("현재 지도 중심에 사각형 영역을 추가합니다. 번호 손잡이를 드래그해 옮길 수 있습니다.")
     case .polygon: L10n.text("지도 위에 원하는 영역을 그리세요. 끝점은 자동으로 연결됩니다.")
@@ -116,8 +116,8 @@ struct PhotoMapView: View {
 
         if !isLoading && assets.isEmpty {
           ContentUnavailableView(
-            L10n.text("위치 정보가 있는 사진이 없습니다"), systemImage: "mappin.slash",
-            description: Text(L10n.text("GPS 정보가 저장된 사진이 이 지도에 표시됩니다.")))
+            MediaPlaybackL10n.text("map.empty.title"), systemImage: "mappin.slash",
+            description: Text(MediaPlaybackL10n.text("map.empty.help")))
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background(.regularMaterial)
             .allowsHitTesting(false)
@@ -141,10 +141,10 @@ struct PhotoMapView: View {
           ProgressView().controlSize(.small)
           Text(L10n.format("위치 읽는 중 %lld / %lld", Int64(scannedCount), Int64(totalCount)))
         } else {
-          Label(L10n.format("GPS 사진 %lld장", Int64(assets.count)), systemImage: "mappin.and.ellipse")
+          Label(MediaPlaybackL10n.format("map.count", Int64(assets.count)), systemImage: "mappin.and.ellipse")
         }
         if selection != nil {
-          Text(L10n.format("선택 %lld장", Int64(matchingAssetURLs.count)))
+          Text(MediaPlaybackL10n.format("map.selectionCount", Int64(matchingAssetURLs.count)))
             .foregroundStyle(ViewerTheme.accent)
         }
         if let radiusLabel {
@@ -440,7 +440,7 @@ struct PhotoMapView: View {
     VStack(alignment: .leading, spacing: 8) {
       HStack {
         Image(systemName: "mappin.circle.fill").foregroundStyle(ViewerTheme.accent)
-        Text(L10n.format("이 위치의 사진 %lld장", Int64(pickedAssets.count)))
+        Text(MediaPlaybackL10n.format("map.locationCount", Int64(pickedAssets.count)))
           .font(ViewerUIMetrics.font(.caption).weight(.semibold))
         Spacer()
         Button {
@@ -450,7 +450,14 @@ struct PhotoMapView: View {
           .buttonStyle(.plain)
           .accessibilityLabel(L10n.text("닫기"))
       }
-      PhotoMapImagePreview(asset: asset, preview: store.photoMapPreview,
+      if asset.isPlaybackMedia {
+        InlineMediaViewer(store: store, asset: asset,
+          allowsPlayback: store.allowsVideoPlayback && !isLoading)
+          .frame(height: min(300, max(200, availableHeight * 0.55)))
+          .frame(maxWidth: .infinity)
+          .clipShape(RoundedRectangle(cornerRadius: 5))
+      } else {
+        PhotoMapImagePreview(asset: asset, preview: store.photoMapPreview,
         thumbnailPipeline: thumbnailPipeline, pipeline: pipeline,
         adjustments: store.adjustments(for: asset), prefersHDR: store.prefersHDR,
         interpolationMode: store.imageInterpolationMode,
@@ -461,6 +468,7 @@ struct PhotoMapView: View {
         .disabled(isLoading)
       PhotoMapPreviewControls(preview: store.photoMapPreview)
         .disabled(isLoading)
+      }
       Text(asset.filename).font(ViewerUIMetrics.font(.caption)).lineLimit(1).help(asset.filename)
       MapBatchActionsMenu(store: store, urls: [asset.url], title: BatchActionsL10n.text("map.photo"))
         .controlSize(.small)
@@ -485,7 +493,7 @@ struct PhotoMapView: View {
           .accessibilityLabel(L10n.text("다음 이미지"))
         }
         Spacer()
-        Button(L10n.text("사진 보기")) { onOpenAsset(asset) }
+        Button(MediaPlaybackL10n.text("map.open")) { onOpenAsset(asset) }
           .disabled(isLoading)
       }
       .controlSize(.small)

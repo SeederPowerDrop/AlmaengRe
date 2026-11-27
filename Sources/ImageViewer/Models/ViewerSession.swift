@@ -62,7 +62,12 @@ struct ViewerSession: Codable, Equatable, Sendable {
   var scaleMode: String? = nil
   var imagesPerPage: Int = 1
   var query = LibraryQuery()
+  /// Optional for sessions saved before ordinary-view classification was persisted.
+  var photoMarkFilter: PhotoMarkFilter? = nil
   var comparison: ComparisonSession?
+  var selectionViewing: SelectionViewingSession? = nil
+  /// Avoid storing the same large selection twice. Nil in older sessions.
+  var selectionUsesViewingScope: Bool? = nil
 }
 
 struct FavoriteFolder: Codable, Equatable, Identifiable, Sendable {

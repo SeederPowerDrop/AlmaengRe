@@ -20,7 +20,11 @@ enum MediaFormatRegistry {
     !url.hasDirectoryPath && audioExtensions.contains(url.pathExtension.lowercased())
   }
 
-  static func isPlaybackMedia(_ url: URL) -> Bool { isVideo(url) || isAudio(url) }
+  static func isPlaybackMedia(_ url: URL) -> Bool {
+    guard !url.hasDirectoryPath else { return false }
+    let fileExtension = url.pathExtension.lowercased()
+    return videoExtensions.contains(fileExtension) || audioExtensions.contains(fileExtension)
+  }
 
   static func isVideo(_ url: URL) -> Bool {
     !url.hasDirectoryPath && videoExtensions.contains(url.pathExtension.lowercased())

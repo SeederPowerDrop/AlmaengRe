@@ -23,13 +23,16 @@ struct VideoViewerTile: View {
   var posterPixelSize = 768
   let allowsPlayback: Bool
   let onOpenTools: () -> Void
+  var allowsEditingTools = true
   let onOpenFullScreen: (Double, Bool) -> Void
   var onReady: (ImageAsset) -> Void = { _ in }
   var onDisplayedAssetChange: ((ImageAsset?) -> Void)? = nil
   var photoMarkStore: AppStore? = nil
   var onToggleSelection: (() -> Void)? = nil
   @ObservedObject var gridPlayback = VideoGridPlaybackState()
+  var tracksSinglePlayback = false
   var onSelect: () -> Void = {}
+  var usesCompactPlaybackControls = false
   var slideshowPlaybackID: UUID? = nil
   var onSlideshowFinished: (ImageAsset, UUID) -> Void = { _, _ in }
   var onSlideshowFailed: (ImageAsset, UUID) -> Void = { _, _ in }
@@ -64,9 +67,9 @@ struct VideoViewerTile: View {
 
   var body: some View {
     VStack(spacing: 0) {
-      ViewThatFits(in: .horizontal) {
-        fullHeader
-        compactHeader
+      Group {
+        if usesCompactPlaybackControls { compactHeader }
+        else { ViewThatFits(in: .horizontal) { fullHeader; compactHeader } }
       }
       .buttonStyle(.borderless)
       .font(ViewerUIMetrics.font(.caption)).foregroundStyle(.white).background(.black)
@@ -84,6 +87,8 @@ struct VideoViewerTile: View {
         if let playback = controller.playback {
           VideoTilePlayerSurface(playback: playback, isMultiTile: isMultiTile,
             isAudio: asset.isAudio,
+            tracksSinglePlayback: tracksSinglePlayback,
+            usesCompactControls: usesCompactPlaybackControls,
             isInteractive: allowsPlayback && appIsActive,
             isSoundEnabled: controller.isSoundEnabled,
             onToggleSound: {
@@ -100,16 +105,14 @@ struct VideoViewerTile: View {
               // A child onChange may still carry its previous interaction or
               // album values. Consult the controller's current lifetime and
               // reject a rate event superseded by a later native action.
-              guard controller.acceptsNativeAudioPlaybackChanges,
-                let current = controller.playback, current === playback,
-                playing == (current.player.rate != 0) else { return }
+              guard (tracksSinglePlayback ? controller.acceptsNativePlaybackChanges : controller.acceptsNativeAudioPlaybackChanges),
+                controller.acceptsNativePlaybackChange(playing, from: playback) else { return }
               gridPlayback.nativeAudioPlaybackChanged(asset.id,
                 isPlaying: playing, isSoundEnabled: soundEnabled)
             },
             onAudioSoundChange: { enabled in
-              guard controller.acceptsNativeAudioSoundChanges,
-                let current = controller.playback, current === playback,
-                enabled == !current.player.isMuted else { return }
+              guard (tracksSinglePlayback ? controller.acceptsNativePlaybackChanges : controller.acceptsNativeAudioSoundChanges),
+                controller.acceptsNativeSoundChange(enabled, from: playback) else { return }
               gridPlayback.nativeAudioSoundChanged(asset.id, isEnabled: enabled)
             },
             onEnded: { completedSlideshowID in
@@ -270,10 +273,12 @@ struct VideoViewerTile: View {
         .help(MotionMediaL10n.text("video.fullscreen"))
         .accessibilityLabel(MotionMediaL10n.text("video.fullscreen"))
         .disabled(!allowsPlayback)
-        Button(action: onOpenTools) { Image(systemName: "film.stack") }
-          .help(MotionMediaL10n.text("editor.open"))
-          .accessibilityLabel(MotionMediaL10n.text("editor.open"))
-          .disabled(!allowsPlayback)
+        if allowsEditingTools {
+          Button(action: onOpenTools) { Image(systemName: "film.stack") }
+            .help(MotionMediaL10n.text("editor.open"))
+            .accessibilityLabel(MotionMediaL10n.text("editor.open"))
+            .disabled(!allowsPlayback)
+        }
       }
     }
     .viewerPadding(10)
@@ -315,10 +320,12 @@ struct VideoViewerTile: View {
                 systemImage: "arrow.up.left.and.arrow.down.right")
             }
             .disabled(!allowsPlayback)
-            Button(action: onOpenTools) {
-              Label(MotionMediaL10n.text("editor.open"), systemImage: "film.stack")
+            if allowsEditingTools {
+              Button(action: onOpenTools) {
+                Label(MotionMediaL10n.text("editor.open"), systemImage: "film.stack")
+              }
+              .disabled(!allowsPlayback)
             }
-            .disabled(!allowsPlayback)
           }
         } label: {
           Image(systemName: "ellipsis.circle").viewerFrame(width: 18, height: 28)
@@ -502,6 +509,8 @@ private struct VideoTilePlayerSurface: View {
   @ObservedObject var playback: VideoPlaybackState
   let isMultiTile: Bool
   let isAudio: Bool
+  let tracksSinglePlayback: Bool
+  let usesCompactControls: Bool
   let isInteractive: Bool
   let isSoundEnabled: Bool
   let onToggleSound: () -> Void
@@ -525,6 +534,12 @@ private struct VideoTilePlayerSurface: View {
           .accessibilityIdentifier("video.failure.current")
       } else if playback.document != nil {
         if isAudio {
+          if usesCompactControls {
+            NativeVideoPlayerView(player: playback.player, isInteractive: isInteractive,
+              showsFullScreenToggleButton: false, keepsControlsVisibleWhenInactive: true)
+              .background(.black)
+              .accessibilityIdentifier("audio.nativePlayer")
+          } else {
           GeometryReader { geometry in
             VStack(spacing: 8) {
               VStack(spacing: 12) {
@@ -544,17 +559,19 @@ private struct VideoTilePlayerSurface: View {
             .frame(width: geometry.size.width, height: geometry.size.height)
           }
           .background(.black)
+          }
         } else if isMultiTile {
           // The SwiftUI surface owns grid gestures. A native event monitor
           // would also catch double-clicks on the overlaid sound button.
-          StudyVideoPlayerView(playback: playback, isInteractive: false)
+          StudyVideoPlayerView(playback: playback, isInteractive: false,
+            waitsForFirstVideoFrame: true)
             .allowsHitTesting(false)
           Color.clear.contentShape(Rectangle())
             .onTapGesture(count: 2, perform: onOpenFullScreen)
             .onTapGesture(perform: onSelect)
         } else {
           StudyVideoPlayerView(playback: playback, isInteractive: isInteractive,
-            onDoubleClick: onOpenFullScreen)
+            onDoubleClick: onOpenFullScreen, waitsForFirstVideoFrame: true)
         }
       }
       if isMultiTile && !isAudio {
@@ -583,12 +600,12 @@ private struct VideoTilePlayerSurface: View {
       if document != nil { onReady() }
     }
     .onChange(of: playback.isPlaying) { _, playing in
-      if isAudio && isInteractive {
+      if (isAudio || tracksSinglePlayback) && isInteractive {
         onAudioPlaybackChange(playing, !playback.player.isMuted)
       }
     }
     .onChange(of: playback.isSoundEnabled) { _, enabled in
-      if isAudio && isInteractive { onAudioSoundChange(enabled) }
+      if (isAudio || tracksSinglePlayback) && isInteractive { onAudioSoundChange(enabled) }
     }
   }
 

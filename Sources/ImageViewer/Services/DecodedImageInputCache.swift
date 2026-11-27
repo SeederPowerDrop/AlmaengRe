@@ -1,4 +1,5 @@
 import CoreGraphics
+import CoreImage
 import Foundation
 
 struct DecodedImageInputKey: Hashable, Sendable {
@@ -27,17 +28,29 @@ struct ImageDecodeReuseSnapshot: Sendable {
   let cache: ImageCacheSnapshot
   let decodedFrameCount: Int
   let reuseCount: Int
+  let metalPreparedCount: Int
+  let metalReuseCount: Int
+  let metalKernelSeconds: Double
+  let metalCompileSeconds: Double
 }
 
-/// Only immutable decoded bitmaps enter this shared, byte-accounted store. Its
+/// Only immutable decoded inputs enter this shared, byte-accounted store. Its
 /// allowance is taken from the pipeline's existing budget, never added to it.
 /// The short lock covers bookkeeping, not decoding or Core Image rendering.
 final class DecodedImageInputCache: @unchecked Sendable {
+  private enum Input {
+    case bitmap(CGImage)
+    case metal(MetalWorkingImage)
+  }
   private let lock = NSLock()
-  private var images = ImageCostCache<DecodedImageInputKey, CGImage>(costLimit: 0)
+  private var images = ImageCostCache<DecodedImageInputKey, Input>(costLimit: 0)
   private var generation: UInt64 = 0
   private var decodedFrameCount = 0
   private var reuseCount = 0
+  private var metalPreparedCount = 0
+  private var metalReuseCount = 0
+  private var metalKernelSeconds = 0.0
+  private var metalCompileSeconds = 0.0
 
   func generationToken() -> UInt64 {
     lock.lock()
@@ -55,9 +68,24 @@ final class DecodedImageInputCache: @unchecked Sendable {
     lock.lock()
     defer { lock.unlock() }
     guard generation == self.generation else { return nil }
-    let image = images.value(for: key)
-    if image != nil { reuseCount += 1 }
+    guard case .bitmap(let image) = images.value(for: key) else { return nil }
+    reuseCount += 1
     return image
+  }
+
+  func lookupWorkingImage(_ key: DecodedImageInputKey, generation: UInt64) -> CIImage? {
+    lock.lock()
+    guard generation == self.generation, let input = images.value(for: key) else {
+      lock.unlock()
+      return nil
+    }
+    reuseCount += 1
+    if case .metal = input { metalReuseCount += 1 }
+    lock.unlock()
+    switch input {
+    case .bitmap(let image): return CIImage(cgImage: image)
+    case .metal(let working): return working.image
+    }
   }
 
   func insert(_ image: CGImage, for key: DecodedImageInputKey, generation: UInt64) {
@@ -66,7 +94,18 @@ final class DecodedImageInputCache: @unchecked Sendable {
     decodedFrameCount += 1
     // A purge/pressure update can run while a synchronous RAW decode finishes.
     guard generation == self.generation else { return }
-    images.insert(image, for: key, cost: image.bytesPerRow * image.height)
+    images.insert(.bitmap(image), for: key, cost: image.bytesPerRow * image.height)
+  }
+
+  func insert(_ image: MetalWorkingImage, for key: DecodedImageInputKey, generation: UInt64) {
+    lock.lock()
+    defer { lock.unlock() }
+    decodedFrameCount += 1
+    metalPreparedCount += 1
+    metalKernelSeconds += image.kernelSeconds
+    metalCompileSeconds += image.compileSeconds
+    guard generation == self.generation else { return }
+    images.insert(.metal(image), for: key, cost: image.byteCount)
   }
 
   func setCostLimit(_ limit: Int) {
@@ -89,6 +128,8 @@ final class DecodedImageInputCache: @unchecked Sendable {
     return ImageDecodeReuseSnapshot(
       cache: ImageCacheSnapshot(entryCount: images.count, byteCount: images.totalCost,
         byteLimit: images.costLimit),
-      decodedFrameCount: decodedFrameCount, reuseCount: reuseCount)
+      decodedFrameCount: decodedFrameCount, reuseCount: reuseCount,
+      metalPreparedCount: metalPreparedCount, metalReuseCount: metalReuseCount,
+      metalKernelSeconds: metalKernelSeconds, metalCompileSeconds: metalCompileSeconds)
   }
 }

@@ -29,7 +29,7 @@ struct AudioManagementIntegrationTests {
     #expect(store.assets.count == 3)
   }
 
-  @Test("음성도 분류하며 개별 재생은 소리를 소유하고 이미지 편집·내보내기는 열지 않는다")
+  @Test("음성도 분류하며 직접 열기는 무음 재생하고 이미지 편집·내보내기는 열지 않는다")
   func classificationAndExplicitPlayback() async throws {
     let fixture = try Fixture()
     let store = fixture.makeStore()
@@ -51,8 +51,8 @@ struct AudioManagementIntegrationTests {
     #expect(store.presentationMode == .viewer && store.imagesPerPage == 1)
     #expect(store.currentAsset == audio && !store.canPan)
     #expect(store.videoGridPlayback.playingIDs == [audio.id])
-    #expect(store.videoGridPlayback.audioID == audio.id)
-    #expect(!store.videoGridPlayback.command(for: audio.id).isMuted)
+    #expect(store.videoGridPlayback.audioID == nil)
+    #expect(store.videoGridPlayback.command(for: audio.id).isMuted)
     store.openAudioForPlayback(audio)
     #expect(store.videoGridPlayback.playingIDs == [audio.id])
     store.videoGridPlayback.pauseAll()

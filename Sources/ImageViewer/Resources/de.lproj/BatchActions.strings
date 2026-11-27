@@ -18,3 +18,9 @@
 
 "selection.focused" = "Position der Tastaturnavigation";
 "selection.overviewHelp" = "⌘-Klick: Auswahl umschalten\n⌘-Pfeiltaste: bewegen und Auswahl des Zielobjekts umschalten\n⇧-Klick / ⇧-Pfeiltaste: Bereich auswählen\n⌘⇧-Klick / ⌘⇧-Pfeiltaste: Bereich zur bestehenden Auswahl hinzufügen";
+"selection.view.title" = "Nur ausgewählte Dateien ansehen";
+"selection.view.single" = "Einzeln ansehen";
+"selection.view.multiple" = "Mehrere ansehen";
+"selection.view.active" = "%d ausgewählte Dateien werden angezeigt";
+"selection.view.return" = "Zurück zur Übersicht";
+"selection.view.help" = "Navigieren Sie innerhalb der Auswahl. Bei der Rückkehr bleiben die ursprüngliche Auswahl und Listenposition erhalten.";

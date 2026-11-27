@@ -71,7 +71,7 @@ struct ComparisonPhotoMarkControls: View {
   private var status: some View {
     HStack(spacing: 5) {
       if pane.isFiltering { ProgressView().controlSize(.mini) }
-      Text(L10n.format("%d개 이미지", pane.assets.count))
+      Text(MediaPlaybackL10n.format("collection.count", Int64(pane.assets.count)))
         .font(ViewerUIMetrics.font(.caption).monospacedDigit()).foregroundStyle(.secondary).fixedSize()
     }
   }

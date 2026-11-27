@@ -9,6 +9,7 @@ struct OverviewView: View {
   @State private var cellFrames = OverviewCellFrameCache()
   @State private var nativeCellGeometry = OverviewNativeCellGeometryRegistry()
   @State private var thumbnailPreloader = OverviewThumbnailPreloader()
+  @State private var appIsActive = NSApp?.isActive == true
   @StateObject private var refinementGate: OverviewRefinementGate
   private let onBitmapStateApplied: (@MainActor (ThumbnailBitmapStateEvent) -> Void)?
   private let onScrollRequestApplied: (@MainActor (OverviewFocusScrollRequest, Bool) -> Void)?
@@ -109,6 +110,10 @@ struct OverviewView: View {
               OverviewScrollMotionObserver(gate: refinementGate, cellGeometryRegistry: nativeCellGeometry,
                 onViewportChange: { viewport in
                 cellFrames.nativeViewport = viewport
+                if let scroll = refinementGate.nativeScrollView {
+                  store.rememberOverviewScrollOrigin(scroll.contentView.bounds.origin,
+                    viewportWidth: scroll.contentView.bounds.width)
+                }
                 updateNativeViewportMembership(pixels: pixels, scope: nativeGeometryScope)
                 traceReveal("native_viewport")
               })
@@ -231,6 +236,8 @@ struct OverviewView: View {
             guard dragID == nil || !sameCollection else { return }
             appliedScrollRequest = scrollRequest
             appliedScrollIndex = store.currentIndex
+            if let scroll = refinementGate.nativeScrollView,
+              store.restoreOverviewScrollPosition(in: scroll) { return }
             traceReveal("will_scroll", requested: scrollRequest, extra: ["animated": animated])
             scrollTo(target, with: proxy, animated: animated)
             traceReveal("scroll_submitted", requested: scrollRequest, extra: ["animated": animated])
@@ -245,6 +252,8 @@ struct OverviewView: View {
       }
 
       Divider()
+
+      SelectionViewingEntryBar(store: store)
 
       OverviewFooterLayout {
         OverviewControls(store: store, sizeState: thumbnailSizeState,
@@ -271,6 +280,19 @@ struct OverviewView: View {
       .background(ViewerTheme.panelGradient)
     }
     .background(ViewerTheme.chromeGradient)
+    .onChange(of: canPreviewMedia, initial: true) { _, allowed in
+      store.overviewMediaPreview.setEnabled(allowed)
+    }
+    .onChange(of: store.assetOrderRevision) { _, _ in
+      store.overviewMediaPreview.retain(in: store.assets)
+    }
+    .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
+      appIsActive = true
+    }
+    .onReceive(NotificationCenter.default.publisher(for: NSApplication.didResignActiveNotification)) { _ in
+      appIsActive = false
+      store.overviewMediaPreview.setEnabled(false)
+    }
     .onChange(of: layoutDirection, initial: true) { _, direction in
       store.overviewIsRightToLeft = direction == .rightToLeft
     }
@@ -296,6 +318,7 @@ struct OverviewView: View {
       }
     }
     .onDisappear {
+      store.overviewMediaPreview.setEnabled(false)
       cancelMarquee()
       appliedScrollRequest = nil
       appliedScrollIndex = nil
@@ -308,6 +331,12 @@ struct OverviewView: View {
       nativeCellGeometry.stop()
       refinementGate.stop()
     }
+  }
+
+  private var canPreviewMedia: Bool {
+    appIsActive && store.presentationMode == .overview && store.allowsVideoPlayback
+      && !isAdjustingThumbnailSize && !refinementGate.isDeferring
+      && store.overviewSelectionSession == nil
   }
 
   private func updateThumbnailPreloading(visibleIndices: Set<Int>, pixels: Int) {

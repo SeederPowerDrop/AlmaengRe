@@ -22,11 +22,28 @@ struct VideoDocument: Sendable, Equatable {
     guard url.isFileURL, FileManager.default.isReadableFile(atPath: url.path) else {
       throw VideoProcessingError.sourceUnavailable
     }
-    let asset = AVURLAsset(url: url, options: [AVURLAssetPreferPreciseDurationAndTimingKey: true])
+    let request = VideoDocumentLoadingRequest(url: url)
+    return try await withTaskCancellationHandler {
+      try Task.checkCancellation()
+      do {
+        let result = try await read(request.asset, url: url, allowsAudioOnly: allowsAudioOnly)
+        try Task.checkCancellation()
+        return result
+      } catch {
+        // AVFoundation may finish cancellation with AVError.operationCancelled.
+        // Keep the task's cancellation contract for players and export callers.
+        try Task.checkCancellation()
+        throw error
+      }
+    } onCancel: { request.cancel() }
+  }
+
+  private static func read(_ asset: AVURLAsset, url: URL, allowsAudioOnly: Bool) async throws -> Self {
     let (playable, duration, exportable, protected) = try await asset.load(
       .isPlayable, .duration, .isExportable, .hasProtectedContent)
     try Task.checkCancellation()
     let videoTracks = try await asset.loadTracks(withMediaType: .video)
+    try Task.checkCancellation()
     guard let track = videoTracks.first else {
       if allowsAudioOnly {
         if protected { throw VideoProcessingError.protectedContent }
@@ -44,6 +61,7 @@ struct VideoDocument: Sendable, Equatable {
     }
     let (naturalSize, transform, frameRate) = try await track.load(
       .naturalSize, .preferredTransform, .nominalFrameRate)
+    try Task.checkCancellation()
     let audioTracks = try await asset.loadTracks(withMediaType: .audio)
     try Task.checkCancellation()
     if allowsAudioOnly && audioTracks.isEmpty { throw ImagePipelineError.unsupported(url) }
@@ -70,6 +88,16 @@ struct VideoDocument: Sendable, Equatable {
     if !isPlayable { return ImagePipelineError.unsupported(url) }
     return VideoProcessingError.noVideoTrack
   }
+}
+
+/// One immutable AVAsset per metadata request, never shared with a player item.
+/// AVFoundation cancellation is safe to invoke from the task's cancellation handler.
+private final class VideoDocumentLoadingRequest: @unchecked Sendable {
+  let asset: AVURLAsset
+  init(url: URL) {
+    asset = NativeVideoAsset.make(url: url, preciseTiming: true)
+  }
+  func cancel() { asset.cancelLoading() }
 }
 
 struct VideoTimeRange: Sendable, Equatable {

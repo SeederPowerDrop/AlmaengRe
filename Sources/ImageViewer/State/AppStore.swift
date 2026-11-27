@@ -18,7 +18,13 @@ enum BatchSheet: String, Identifiable {
 @MainActor
 final class AppStore: ObservableObject {
   @Published private(set) var showsHome = true
-  let videoGridPlayback = VideoGridPlaybackState()
+  let mediaSoundSession = MediaSoundSession()
+  let overviewMediaPreview = OverviewMediaPreviewState()
+  let videoGridPlayback: VideoGridPlaybackState
+  @Published var automaticallyPlaysSingleMedia: Bool {
+    didSet { preferences.set(automaticallyPlaysSingleMedia, forKey: Self.singleMediaAutoplayDefaultsKey) }
+  }
+  private static let singleMediaAutoplayDefaultsKey = "ImageViewer.SingleMediaAutoplay.v1"
   let frameLayout: ViewerFrameLayoutStore
   let recentPhotos: RecentPhotoStore
   private var recentPreviewTasks: [String: Task<Void, Never>] = [:]
@@ -128,6 +134,10 @@ final class AppStore: ObservableObject {
   @Published private(set) var selectedURLs: Set<URL> = [] {
     didSet { cachedSelectedAssets = nil }
   }
+  @Published private(set) var selectionViewingContext: SelectionViewingContext?
+  private var overviewScrollOrigin: CGPoint?
+  private var overviewScrollWidth: CGFloat?
+  private var pendingOverviewScrollRestore: SelectionOverviewScrollRestore?
   @Published var batchSheet: BatchSheet? {
     didSet {
       if batchSheet != nil { pauseSlideshow() }
@@ -158,6 +168,7 @@ final class AppStore: ObservableObject {
   @Published var presentationMode: PresentationMode = .viewer {
     didSet {
       guard oldValue != presentationMode else { return }
+      if presentationMode != .viewer { finishSelectionViewing() }
       if !isApplyingSession { invalidateSessionRestore() }
       if presentationMode == .folderComparison {
         comparisonReturnMode = oldValue
@@ -171,6 +182,7 @@ final class AppStore: ObservableObject {
       }
       if oldValue == .folderComparison { folderComparison.cancelLoads() }
       if oldValue == .map { photoMapPreview.clearSelection() }
+      if presentationMode != .overview { overviewMediaPreview.setEnabled(false) }
       if presentationMode != .viewer {
         videoGridPlayback.reset()
         frameLayout.isEditing = false
@@ -320,11 +332,17 @@ final class AppStore: ObservableObject {
   private var sourceLocations: [SessionLocation] = []
   private var queryTask: Task<Void, Never>?
   private var queryGeneration = UUID()
+  private typealias CollectionQueryResult = (all: [ImageAsset], visible: [ImageAsset], map: [ImageAsset])
+  private var collectionQueryTask: Task<CollectionQueryResult, any Error>?
+  private var collectionQueryID = UUID()
+  private var collectionQueryGeneration = UUID()
   private var libraryQueryNeedsResume = false
   private var libraryQueryRevision: UInt64 = 0
   private var queryFocusID: String?
   private var favoriteAccess: [UUID: ImageLibraryAccess] = [:]
   private let library = ImageLibrary()
+  private let querySession: RustQuerySession
+  private let queryExecutor: LibraryQueryExecutor
   private let exporter: ImageExporter
   private let metadataWriter = ImageMetadataWriter()
   private let batchRenamer = BatchRenamer()
@@ -360,9 +378,15 @@ final class AppStore: ObservableObject {
 
   init(defaults: UserDefaults = .standard, monitorsSystemResources: Bool = true,
     photoMarkDatabaseURL: URL? = nil, batchFileOperator: BatchFileOperator = BatchFileOperator(),
-    thumbnailDiskCache: ThumbnailDiskCache? = .shared) {
+    thumbnailDiskCache: ThumbnailDiskCache? = .shared,
+    queryExecutor: LibraryQueryExecutor = .shared) {
+    self.queryExecutor = queryExecutor
+    let queryReusePool = RustQueryReusePool()
+    querySession = RustQuerySession(pool: queryReusePool)
     self.batchFileOperator = batchFileOperator
+    videoGridPlayback = VideoGridPlaybackState(soundSession: mediaSoundSession)
     preferences = defaults
+    automaticallyPlaysSingleMedia = defaults.object(forKey: Self.singleMediaAutoplayDefaultsKey) as? Bool ?? true
     frameLayout = ViewerFrameLayoutStore(defaults: defaults)
     recentPhotos = RecentPhotoStore(defaults: defaults)
     showsVideos = defaults.object(forKey: Self.showsVideosDefaultsKey) as? Bool ?? true
@@ -392,7 +416,7 @@ final class AppStore: ObservableObject {
     let loadingGovernor = ImageResourceGovernor(mode: loadingMode)
     self.loadingGovernor = loadingGovernor
     folderComparison = FolderComparisonStore(defaults: defaults, photoMarks: photoMarks,
-      loadingGovernor: loadingGovernor)
+      loadingGovernor: loadingGovernor, queryReusePool: queryReusePool, queryExecutor: queryExecutor)
     let pipeline = ImagePipeline(governor: loadingGovernor)
     self.pipeline = pipeline
     aiUpscaling = AIUpscalingStore(pipeline: pipeline)
@@ -414,6 +438,7 @@ final class AppStore: ObservableObject {
     if monitorsSystemResources {
       resourceMonitor = ImageSystemResourceMonitor(isAppActive: NSApp?.isActive ?? true) {
         snapshot in
+        queryReusePool.setReuseAllowed(snapshot.memoryPressure == .normal)
         Task { await loadingGovernor.update(snapshot) }
       }
     }
@@ -486,6 +511,147 @@ final class AppStore: ObservableObject {
     let selected = visibleAssets(matching: selectedURLs)
     cachedSelectedAssets = selected
     return selected
+  }
+
+  var canViewSelectedFiles: Bool {
+    presentationMode == .overview && !showsHome && !isVideoFullScreenPresented
+      && canStartBatchOperation
+  }
+
+  func viewSelectedFiles(together: Bool = false) {
+    guard canViewSelectedFiles else { return }
+    let chosen = selectedAssets
+    let chosenURLs = Set(chosen.map(\.url))
+    let anchorURL = selectionAnchor.flatMap { assets.indices.contains($0) ? assets[$0].url : nil }
+    let saved = SelectionViewingSession(memberIDs: Set(chosen.map(\.sessionID)),
+      overviewFocusID: currentAsset?.sessionID,
+      overviewImagesPerPage: imagesPerPage,
+      scrollX: overviewScrollOrigin.map { Double($0.x) }, scrollY: overviewScrollOrigin.map { Double($0.y) },
+      overviewAnchorID: selectionAnchor.flatMap { assets.indices.contains($0) ? assets[$0].sessionID : nil },
+      overviewViewportWidth: overviewScrollWidth.map { Double($0) }, overviewThumbnailSize: Double(thumbnailSize))
+    pauseSlideshow()
+    selectionViewingContext = SelectionViewingContext(saved: saved, overviewAssets: assets,
+      query: libraryQuery, markFilter: photoMarkFilter, memberURLs: chosenURLs,
+      overviewFocusURL: currentAsset?.url, overviewAnchorURL: anchorURL)
+    overviewMediaPreview.setEnabled(false)
+    videoGridPlayback.reset()
+    pageStartIndex = 0
+    currentIndex = 0
+    assets = chosen
+    imagesPerPage = together ? min(10, chosen.count) : 1
+    let focus = together ? 0 : (chosen.firstIndex { $0.sessionID == saved.overviewFocusID } ?? 0)
+    currentIndex = focus
+    if !together { pageStartIndex = focus }
+    queryFocusID = currentAsset?.sessionID
+    selectedURLs = chosenURLs
+    selectionAnchor = focus
+    presentationMode = .viewer
+    resetViewport()
+    refreshMetadata()
+    prefetchAroundCurrentPosition()
+  }
+
+  /// Called only at accepted query commits; no reread or decode on entry/exit.
+  private func selectionViewingAssets(from full: [ImageAsset]) -> [ImageAsset] {
+    guard var context = selectionViewingContext else { return full }
+    var changed = false
+    if context.query != libraryQuery || context.markFilter != photoMarkFilter {
+      context.saved.scrollX = nil; context.saved.scrollY = nil
+      context.query = libraryQuery; context.markFilter = photoMarkFilter
+      changed = true
+    }
+    if context.overviewAssets != full {
+      if !context.overviewAssets.lazy.map(\.url).elementsEqual(full.lazy.map(\.url)) {
+        context.saved.scrollX = nil; context.saved.scrollY = nil
+      }
+      context.overviewAssets = full; changed = true
+    }
+    if changed { selectionViewingContext = context }
+    return full.filter { context.memberURLs.contains($0.url) }
+  }
+
+  private func finishSelectionViewing() {
+    guard let context = selectionViewingContext else { return }
+    pauseSlideshow()
+    selectionViewingContext = nil
+    pageStartIndex = 0; currentIndex = 0
+    assets = context.overviewAssets
+    imagesPerPage = min(10, max(1, context.saved.overviewImagesPerPage))
+    var focusedIndex: Int?, anchorIndex: Int?, firstSelectedIndex: Int?
+    var restoredSelection: [ImageAsset] = []
+    restoredSelection.reserveCapacity(min(context.memberURLs.count, assets.count))
+    for (index, asset) in assets.enumerated() {
+      if asset.url == context.overviewFocusURL { focusedIndex = index }
+      if asset.url == context.overviewAnchorURL { anchorIndex = index }
+      if context.memberURLs.contains(asset.url) {
+        restoredSelection.append(asset)
+        if firstSelectedIndex == nil { firstSelectedIndex = index }
+      }
+    }
+    let focus = focusedIndex ?? firstSelectedIndex ?? 0
+    currentIndex = focus; pageStartIndex = focus
+    selectedURLs = Set(restoredSelection.map(\.url))
+    cachedSelectedAssets = restoredSelection
+    selectionAnchor = anchorIndex ?? firstSelectedIndex
+    queryFocusID = currentAsset?.sessionID
+    pendingOverviewScrollRestore = nil
+    if !assets.isEmpty, let x = context.saved.scrollX, let y = context.saved.scrollY,
+      x.isFinite, y.isFinite {
+      pendingOverviewScrollRestore = SelectionOverviewScrollRestore(origin: CGPoint(x: x, y: y),
+        viewportWidth: context.saved.overviewViewportWidth, thumbnailSize: context.saved.overviewThumbnailSize)
+    }
+    resetViewport()
+    refreshMetadata()
+  }
+
+  func rememberOverviewScrollOrigin(_ origin: CGPoint, viewportWidth: CGFloat? = nil) {
+    guard presentationMode == .overview, selectionViewingContext == nil,
+      pendingOverviewScrollRestore == nil else { return }
+    overviewScrollOrigin = origin
+    overviewScrollWidth = viewportWidth
+  }
+
+  @discardableResult
+  func restoreOverviewScrollPosition(in scroll: NSScrollView) -> Bool {
+    guard let restoration = pendingOverviewScrollRestore, let document = scroll.documentView else { return false }
+    pendingOverviewScrollRestore = nil
+    let bounds = scroll.contentView.bounds
+    // A different grid needs a logical focus reveal, not an old pixel offset.
+    if let width = restoration.viewportWidth, abs(width - bounds.width) > 1 { return false }
+    if let size = restoration.thumbnailSize, abs(size - Double(thumbnailSize)) > 0.1 { return false }
+    let origin = restoration.origin
+    let point = CGPoint(x: max(0, min(origin.x, document.frame.width - bounds.width)),
+      y: max(0, min(origin.y, document.frame.height - bounds.height)))
+    scroll.contentView.scroll(to: point)
+    scroll.reflectScrolledClipView(scroll.contentView)
+    overviewScrollOrigin = point
+    overviewScrollWidth = bounds.width
+    return true
+  }
+
+  private func discardSelectionViewingForNewSource() {
+    selectionViewingContext = nil
+    pendingOverviewScrollRestore = nil
+    overviewScrollOrigin = nil
+    overviewScrollWidth = nil
+  }
+
+  private func remapSelectionViewing(_ mapping: [URL: URL]) {
+    guard var context = selectionViewingContext else { return }
+    let ids = Dictionary(allAssets.compactMap { asset -> (String, String)? in
+      guard let url = mapping[asset.url] else { return nil }
+      return (asset.sessionID, asset.replacingURL(url).sessionID)
+    }, uniquingKeysWith: { first, _ in first })
+    context.saved.memberIDs = Set(context.saved.memberIDs.map { ids[$0] ?? $0 })
+    if let id = context.saved.overviewFocusID { context.saved.overviewFocusID = ids[id] ?? id }
+    if let id = context.saved.overviewAnchorID { context.saved.overviewAnchorID = ids[id] ?? id }
+    context.memberURLs = Set(context.memberURLs.map { mapping[$0] ?? $0 })
+    if let url = context.overviewFocusURL { context.overviewFocusURL = mapping[url] ?? url }
+    if let url = context.overviewAnchorURL { context.overviewAnchorURL = mapping[url] ?? url }
+    context.overviewAssets = context.overviewAssets.map { asset in
+      mapping[asset.url].map { asset.replacingURL($0) } ?? asset
+    }
+    selectionViewingContext = context
   }
 
   func visibleAsset(at url: URL) -> ImageAsset? {
@@ -689,6 +855,7 @@ final class AppStore: ObservableObject {
     explicitBatchAssets = targets
     batchSheet = .fileOperation
     videoGridPlayback.pauseAll()
+    overviewMediaPreview.setEnabled(false)
   }
 
   func performFileOperation(_ plan: BatchFileOperationPlan,
@@ -798,6 +965,11 @@ final class AppStore: ObservableObject {
       await photoMarks.reconcileAssets(destinations)?.wait()
     }
     if request.operation != .copy {
+      if var context = selectionViewingContext {
+        context.overviewAssets.removeAll { removedURLs.contains($0.url) }
+        context.saved.scrollX = nil; context.saved.scrollY = nil
+        selectionViewingContext = context
+      }
       allAssets.removeAll { removedURLs.contains($0.url) }
       mapAssets.removeAll { removedURLs.contains($0.url) }
       assets.removeAll { removedURLs.contains($0.url) }
@@ -826,7 +998,7 @@ final class AppStore: ObservableObject {
         if let queried = try? await queryAssets(allAssets, options: libraryQuery) {
           allAssets = queried.all
           mapAssets = queried.map
-          assets = queried.visible
+          assets = selectionViewingAssets(from: queried.visible)
         }
       }
     }
@@ -882,6 +1054,7 @@ final class AppStore: ObservableObject {
       result[asset.photoMarkID] = asset.replacingURL(destination).photoMarkID
     }
     photoMarks.remapAssets(renamedMarkIDs)
+    remapSelectionViewing(mapping)
     // Refresh only the open library so an explicit selection from several folders stays intact.
     allAssets = allAssets.map { asset in
       mapping[asset.url].map { asset.replacingURL($0) } ?? asset
@@ -892,7 +1065,7 @@ final class AppStore: ObservableObject {
     let queried = try await queryAssets(allAssets, options: libraryQuery)
     allAssets = queried.all
     mapAssets = queried.map
-    assets = queried.visible
+    assets = selectionViewingAssets(from: queried.visible)
     currentIndex = assets.firstIndex { $0.url == focusedURL } ?? 0
     queryFocusID = currentAsset?.sessionID
     pageStartIndex = currentIndex
@@ -1371,11 +1544,12 @@ final class AppStore: ObservableObject {
     // A metadata editor may replace the file atomically. The user explicitly
     // edited this photo, so carry its marks to the fresh identity before filtering.
     photoMarks.remapAssets([asset.photoMarkID: savedAsset.photoMarkID])
+    remapSelectionViewing([sourceURL: destinationURL])
 
     let queried = try await queryAssets(refreshedAssets, options: libraryQuery)
     allAssets = queried.all
     mapAssets = queried.map
-    assets = queried.visible
+    assets = selectionViewingAssets(from: queried.visible)
     sourceLocations = sourceLocations.map { location in
       location.url.standardizedFileURL == sourceURL.standardizedFileURL
         ? SessionLocation(url: destinationURL) : location
@@ -1405,10 +1579,19 @@ final class AppStore: ObservableObject {
       return false
     }
     if handlePhotoMarkKeyDown(event) { return true }
-    if event.keyCode == 51,
-      event.modifierFlags.intersection([.command, .option, .control, .shift]) == .command,
+    let deleteModifiers = event.modifierFlags.intersection([.command, .option, .control, .shift])
+    if (event.keyCode == 51 || event.keyCode == 117),
+      deleteModifiers.isEmpty || deleteModifiers == .command,
       presentationMode == .viewer || presentationMode == .overview {
-      presentFileOperation(.trash)
+      // Holding Delete must not open another operation after closing its sheet.
+      guard !event.isARepeat else { return true }
+      // Plain Delete follows the item being viewed in single view. Grid views
+      // use only explicit selections; Command-Delete keeps its existing scope.
+      if deleteModifiers.isEmpty, presentationMode == .viewer, imagesPerPage == 1 {
+        if let currentAsset { presentFileOperation(.trash, urls: [currentAsset.url]) }
+      } else {
+        presentFileOperation(.trash)
+      }
       return true
     }
     if presentationMode == .viewer, imagesPerPage > 1,
@@ -1450,31 +1633,56 @@ final class AppStore: ObservableObject {
       && alert == nil
   }
 
+  var canToggleViewerMediaPlayback: Bool {
+    presentationMode == .viewer && imagesPerPage == 1 && !isEditingViewerFrames
+      && allowsVideoPlayback && currentAsset?.isPlaybackMedia == true
+  }
+
+  func handleViewerSpaceTap() {
+    if canToggleViewerMediaPlayback, let asset = currentAsset {
+      let wasSlideshowPlaying = isSlideshowPlaying
+      pauseSlideshow()
+      videoGridPlayback.updateVisibleAssets(visibleAssets, singleAutoplay: automaticallyPlaysSingleMedia)
+      if wasSlideshowPlaying { videoGridPlayback.pauseAll(); return }
+      videoGridPlayback.togglePlayback(asset.id)
+    } else { toggleImageFocus() }
+  }
+
   var fullScreenVideoAsset: ImageAsset? { videoFullScreenController?.asset }
   var isFullScreenVideoReadyToMark: Bool {
     videoFullScreenController?.playback.document != nil
       && videoFullScreenController?.playback.player.currentItem?.status == .readyToPlay
   }
 
-  /// An explicit open from the overview starts the chosen recording audibly.
+  /// A click explicitly starts playback even in manual mode. Prepare the same
+  /// single-view policy before SwiftUI mounts the viewer, preserving its intent.
   func openAudioForPlayback(_ asset: ImageAsset) {
     guard allowsVideoPlayback, asset.isAudio, assets.contains(where: { $0.id == asset.id }) else { return }
     pauseSlideshow()
     select(asset: asset)
     setImagesPerPage(1)
     presentationMode = .viewer
-    videoGridPlayback.updateVisibleAssets(visibleAssets)
-    if videoGridPlayback.audioID != asset.id { videoGridPlayback.toggleSound(asset.id) }
+    videoGridPlayback.updateVisibleAssets(visibleAssets, singleAutoplay: automaticallyPlaysSingleMedia)
+    if !videoGridPlayback.playingIDs.contains(asset.id) { videoGridPlayback.togglePlayback(asset.id) }
   }
 
   func openVideoFullScreen(_ asset: ImageAsset, at seconds: Double = 0, isMuted: Bool = false) {
-    guard allowsVideoPlayback, asset.isVideo, assets.contains(where: { $0.id == asset.id }) else { return }
+    guard allowsVideoPlayback, asset.isVideo, containsPlaybackAsset(asset) else { return }
     pauseSlideshow()
-    let controller = VideoFullScreenController(asset: asset, seconds: seconds, isMuted: isMuted, store: self) { [weak self] in
+    let controller = VideoFullScreenController(asset: asset, seconds: seconds,
+      isMuted: isMuted && !mediaSoundSession.isEnabled, store: self) { [weak self] in
       self?.videoFullScreenController = nil
     }
     videoFullScreenController = controller
     controller.present()
+  }
+
+  func containsPlaybackAsset(_ asset: ImageAsset) -> Bool {
+    let version = PresentedAssetVersion(asset)
+    if allAssets.contains(where: { PresentedAssetVersion($0) == version }) { return true }
+    guard presentationMode == .folderComparison else { return false }
+    return [folderComparison.first.currentAsset, folderComparison.second.currentAsset]
+      .contains { $0.map(PresentedAssetVersion.init) == version }
   }
 
   var canToggleImageFocus: Bool {
@@ -1697,7 +1905,7 @@ final class AppStore: ObservableObject {
   }
 
   var canCompareCurrentCollectionByMarks: Bool {
-    allAssets.contains(where: { !$0.isPlaybackMedia }) && !sourceLocations.isEmpty && !isLoading && !isFiltering
+    !allAssets.isEmpty && !sourceLocations.isEmpty && !isLoading && !isFiltering
       && !isBatchBusy && batchSheet == nil && !isSavingMetadata && !isExporting
       && photoMarks.isReady && !folderComparison.first.isLocked && !folderComparison.second.isLocked
       && !folderComparison.isEditingNames && folderComparison.editingPhotoMarkSide == nil
@@ -1857,12 +2065,52 @@ final class AppStore: ObservableObject {
   }
 
   private func cancelQuery() {
+    collectionQueryTask?.cancel()
     queryGeneration = UUID()
     queryTask?.cancel()
     queryTask = nil
     isFiltering = false
     locationScanGeneration = UUID()
     isIndexingLocations = false
+  }
+
+  /// A changed filter cancels only this child query, preserving the completed
+  /// folder scan and its access leases. A new open/restore invalidates the owner.
+  private func queryLoadedCollection(_ assets: [ImageAsset],
+    options currentOptions: () -> LibraryQuery
+  ) async throws -> (options: LibraryQuery, videos: Bool, result: CollectionQueryResult) {
+    let generation = collectionQueryGeneration
+    var source = assets
+    var retryUnavailable = true
+    while true {
+      try Task.checkCancellation()
+      guard collectionQueryGeneration == generation else { throw CancellationError() }
+      let options = currentOptions(), videos = showsVideos
+      let input = source, retry = retryUnavailable
+      let id = UUID()
+      let child = Task {
+        try await self.queryAssets(input, options: options, retryUnavailable: retry, includesVideos: videos)
+      }
+      collectionQueryID = id
+      collectionQueryTask = child
+      defer { if collectionQueryID == id { collectionQueryTask = nil } }
+      do {
+        let result = try await withTaskCancellationHandler {
+          try await child.value
+        } onCancel: { child.cancel() }
+        try Task.checkCancellation()
+        guard collectionQueryGeneration == generation else { throw CancellationError() }
+        if options == currentOptions(), videos == showsVideos { return (options, videos, result) }
+        source = result.all
+        retryUnavailable = false
+      } catch is CancellationError {
+        try Task.checkCancellation()
+        guard collectionQueryGeneration == generation else { throw CancellationError() }
+        // Changes can arrive faster than EXIF reads or native sorts. Debounce
+        // retries too, instead of starting a new scan for every intermediate key.
+        try await Task.sleep(for: .milliseconds(100))
+      }
+    }
   }
 
   private func queryAssets(_ source: [ImageAsset], options: LibraryQuery,
@@ -1918,18 +2166,16 @@ final class AppStore: ObservableObject {
       QueryPerformanceTrace.record("store.merge_metadata", since: mergeStarted, count: source.count, synchronous: true)
     }
     let preparedInputs = inputs
-    let work = Task.detached(priority: .userInitiated) {
+    let querySession = querySession
+    let result = try await queryExecutor.value {
       try Task.checkCancellation()
-      let visible = try RustImageEngine.query(preparedInputs, options: options)
+      let visible = try RustImageEngine.query(preparedInputs, options: options, session: querySession)
       var mapOptions = options
       mapOptions.geographicSelection = nil
       let map = options.geographicSelection == nil ? visible
-        : try RustImageEngine.query(preparedInputs, options: mapOptions)
+        : try RustImageEngine.query(preparedInputs, options: mapOptions, session: querySession)
       return (visible, map)
     }
-    let result = try await withTaskCancellationHandler {
-      try await work.value
-    } onCancel: { work.cancel() }
     try Task.checkCancellation()
     // Use the latest marks after suspended image work. A keypress or filter change
     // during folder loading must not commit a stale classification result.
@@ -1997,7 +2243,8 @@ final class AppStore: ObservableObject {
         // collections and clearing their derived indices and selection caches.
         if allAssets != result.all { allAssets = result.all }
         if mapAssets != result.map { mapAssets = result.map }
-        if assets != result.visible { assets = result.visible }
+        let visible = selectionViewingAssets(from: result.visible)
+        if assets != visible { assets = visible }
         else {
           // Preserve a query commit's interaction contract even when its result
           // is unchanged; only the expensive collection notification is omitted.
@@ -2174,6 +2421,7 @@ final class AppStore: ObservableObject {
       isApplyingSession = false
       isPhotoMarking = false
       isFocusMode = false
+      discardSelectionViewingForNewSource()
       libraryAccess = [access] + opened.access
       sourceLocations = [SessionLocation(url: url)]
       currentFolderURL = opened.folderURL?.standardizedFileURL
@@ -2218,6 +2466,7 @@ final class AppStore: ObservableObject {
       isApplyingSession = false
       isPhotoMarking = false
       isFocusMode = false
+      discardSelectionViewingForNewSource()
       libraryAccess = opened.access
       sourceLocations = [SessionLocation(url: url)]
       currentFolderURL = opened.folderURL?.standardizedFileURL
@@ -2391,6 +2640,7 @@ final class AppStore: ObservableObject {
   // MARK: - Last session
 
   private func invalidateSessionRestore() {
+    invalidateCollectionQuery()
     restoreGeneration = UUID()
     folderComparison.cancelSessionRestore()
   }
@@ -2421,16 +2671,19 @@ final class AppStore: ObservableObject {
         !folderComparison.isMatching else { return }
     }
     guard !sourceLocations.isEmpty || comparison != nil else { return }
+    let selectionUsesScope = selectionViewingContext.map { $0.memberURLs == selectedURLs } ?? false
     sessionPersistence.save(ViewerSession(
       sources: sourceLocations,
       selectedID: queryFocusID ?? currentAsset?.sessionID,
-      selectedIDs: Set(assets.filter { selectedURLs.contains($0.url) }.map(\.sessionID)),
+      selectedIDs: selectionUsesScope ? [] : Set(assets.filter { selectedURLs.contains($0.url) }.map(\.sessionID)),
       presentationMode: presentationMode.rawValue,
       returnMode: comparisonReturnMode.rawValue,
       zoom: Double(zoom), panX: Double(panOffset.width), panY: Double(panOffset.height),
       actualPixels: baseScaleMode == .actualPixels, scaleMode: baseScaleMode.rawValue,
       imagesPerPage: imagesPerPage,
-      query: libraryQuery, comparison: comparison))
+      query: libraryQuery, photoMarkFilter: photoMarkFilter, comparison: comparison,
+      selectionViewing: selectionViewingContext?.saved,
+      selectionUsesViewingScope: selectionUsesScope ? true : nil))
   }
 
   /// Explicit resume only: constructing the store keeps startup on Home.
@@ -2442,18 +2695,21 @@ final class AppStore: ObservableObject {
     sessionSaveTask?.cancel()
     cancelQuery()
     isRestoringSession = true
+    photoMarkFilter = session.photoMarkFilter ?? PhotoMarkFilter()
     let generation = restoreGeneration
     let startingQueryRevision = libraryQueryRevision
     var appliedQuery: LibraryQuery?
     var appliedShowsVideos: Bool?
+    var appliedPhotoMarkFilter: PhotoMarkFilter?
     defer {
       isApplyingSession = false
       isRestoringSession = false
-      // Comparison restoration also suspends. Do not lose query or video-visibility changes
+      // Comparison restoration also suspends. Do not lose query, classification or video-visibility changes
       // received after the ordinary collection was committed but before A/B is ready.
       if restoreGeneration == generation, !Task.isCancelled,
-        let appliedQuery, let appliedShowsVideos,
-        libraryQuery != appliedQuery || showsVideos != appliedShowsVideos || presentationMode == .map {
+        let appliedQuery, let appliedShowsVideos, let appliedPhotoMarkFilter,
+        libraryQuery != appliedQuery || showsVideos != appliedShowsVideos
+          || photoMarkFilter != appliedPhotoMarkFilter || presentationMode == .map {
         applyLibraryQuery()
       }
     }
@@ -2463,16 +2719,10 @@ final class AppStore: ObservableObject {
         let restoredAccess = ImageLibraryAccess(urls)
         let opened = try await library.open(urls: urls, allowsEmptyFolder: true, includesVideos: true)
         // Once the user changes search/sort/filter, that choice outranks the saved query.
-        var options = libraryQueryRevision == startingQueryRevision ? session.query : libraryQuery
-        var videos = showsVideos
-        var result = try await queryAssets(opened.assets, options: options, includesVideos: videos)
-        while options != (libraryQueryRevision == startingQueryRevision ? session.query : libraryQuery) || videos != showsVideos {
-          try Task.checkCancellation()
-          options = libraryQueryRevision == startingQueryRevision ? session.query : libraryQuery
-          videos = showsVideos
-          result = try await queryAssets(result.all, options: options,
-            retryUnavailable: false, includesVideos: videos)
+        let latest = try await queryLoadedCollection(opened.assets) {
+          libraryQueryRevision == startingQueryRevision ? session.query : libraryQuery
         }
+        let options = latest.options, videos = latest.videos, result = latest.result
         guard !Task.isCancelled, restoreGeneration == generation else { return }
         isApplyingSession = true
         libraryAccess = [restoredAccess] + opened.access
@@ -2484,10 +2734,18 @@ final class AppStore: ObservableObject {
         let focused = result.visible.first { $0.sessionID == session.selectedID }?.url
         let restoredMode = PresentationMode(rawValue: session.presentationMode) ?? .viewer
         let mode: PresentationMode = [.overview, .map].contains(restoredMode) ? restoredMode : .viewer
-        applyLoadedAssets(result.visible, focusing: focused, mode: mode)
+        if mode == .viewer, let saved = session.selectionViewing {
+          selectionViewingContext = SelectionViewingContext(saved: saved, overviewAssets: result.visible,
+            query: options, markFilter: photoMarkFilter, sourceAssets: result.all)
+        }
+        applyLoadedAssets(selectionViewingAssets(from: result.visible), focusing: focused, mode: mode)
         recordRecentFolders(opened: opened, sourceURLs: urls)
         queryFocusID = session.selectedID ?? currentAsset?.sessionID
-        selectedURLs = Set(assets.filter { session.selectedIDs.contains($0.sessionID) }.map(\.url))
+        if session.selectionUsesViewingScope == true, selectionViewingContext != nil {
+          selectedURLs = Set(assets.map(\.url))
+        } else {
+          selectedURLs = Set(assets.filter { session.selectedIDs.contains($0.sessionID) }.map(\.url))
+        }
         imagesPerPage = min(10, max(1, session.imagesPerPage))
         let savedScale = BaseScaleMode.restored(rawValue: session.scaleMode,
           actualPixels: session.actualPixels)
@@ -2498,6 +2756,7 @@ final class AppStore: ObservableObject {
           height: session.panY.isFinite ? session.panY : 0)
         appliedQuery = options
         appliedShowsVideos = videos
+        appliedPhotoMarkFilter = photoMarkFilter
         isApplyingSession = false
       } catch is CancellationError {
         return
@@ -2523,10 +2782,19 @@ final class AppStore: ObservableObject {
   }
 
   private func cancelLibraryLoad() {
+    invalidateCollectionQuery()
+    querySession.reset()
     loadGeneration = UUID()
     loadTask?.cancel()
     loadTask = nil
     isLoading = false
+  }
+
+  private func invalidateCollectionQuery() {
+    collectionQueryGeneration = UUID()
+    collectionQueryID = UUID()
+    collectionQueryTask?.cancel()
+    collectionQueryTask = nil
   }
 
   private func load(folder: URL, fromTree: Bool = false) {
@@ -2551,18 +2819,11 @@ final class AppStore: ObservableObject {
         let opened = try await library.open(urls: urls, allowsEmptyFolder: fromTree, includesVideos: true)
         try Task.checkCancellation()
         guard let self, self.loadGeneration == generation else { return }
-        var options = self.libraryQuery
-        var videos = self.showsVideos
-        var queried = try await self.queryAssets(opened.assets, options: options, includesVideos: videos)
-        while options != self.libraryQuery || videos != self.showsVideos {
-          try Task.checkCancellation()
-          options = self.libraryQuery
-          videos = self.showsVideos
-          queried = try await self.queryAssets(queried.all, options: options,
-            retryUnavailable: false, includesVideos: videos)
-        }
+        let latest = try await self.queryLoadedCollection(opened.assets) { self.libraryQuery }
+        let queried = latest.result
         try Task.checkCancellation()
         guard self.loadGeneration == generation else { return }
+        self.discardSelectionViewingForNewSource()
         self.libraryAccess = opened.access
         self.sourceLocations = urls.map { SessionLocation(url: $0) }
         self.currentFolderURL = opened.folderURL?.standardizedFileURL

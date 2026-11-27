@@ -82,13 +82,13 @@
 "color.gray" = "Gray";
 
 /* Independent tag filters for comparison panes. */
-"comparison.open" = "Compare Current Photos by Tag";
+"comparison.open" = "Compare Current Files by Classification";
 "comparison.openHelp" = "Open the current source collection in A and B. Keep the search, format, and map area filters, and choose tags separately for each pane.";
 "comparison.filter" = "Choose Tags";
-"comparison.allPhotos" = "All Photos";
+"comparison.allPhotos" = "All Files";
 "comparison.titleFormat" = "Tags for Pane %@";
-"comparison.selectionHelp" = "Choose multiple tags to show in this pane. The same photo may appear on both sides.";
-"comparison.empty" = "No photos match these conditions.";
+"comparison.selectionHelp" = "Choose the classifications to show in this pane. The same file may appear on both sides.";
+"comparison.empty" = "No files match these conditions.";
 "comparison.emptyHelp" = "Change the tags or check the shared search, format, and map area filters.";
 "comparison.reset" = "Clear This Pane’s Tag Filter";
 

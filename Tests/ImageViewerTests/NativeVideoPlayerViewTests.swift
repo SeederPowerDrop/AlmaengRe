@@ -10,6 +10,31 @@ import Testing
 @Suite("네이티브 영상 플레이어의 SwiftUI 호스팅", .serialized)
 @MainActor
 struct NativeVideoPlayerViewTests {
+  @Test("첫 프레임을 기다리는 플레이어는 검은 로딩 화면으로 미리보기를 가리지 않는다")
+  func unreadyVideoSurfaceKeepsPosterVisible() async throws {
+    _ = NSApplication.shared
+    let player = AVPlayer()
+    let host = NSHostingView(rootView: NativeVideoPlayerView(player: player,
+      waitsForFirstVideoFrame: true))
+    let window = NSWindow(contentRect: NSRect(x: -2_000, y: -2_000, width: 480, height: 270),
+      styleMask: [.borderless], backing: .buffered, defer: false)
+    window.isReleasedWhenClosed = false
+    window.contentView = host
+    window.orderBack(nil)
+    defer { window.orderOut(nil); window.contentView = nil; window.close() }
+    try await waitUntil { host.layoutSubtreeIfNeeded(); return playerViews(in: host).count == 1 }
+    let view = try #require(playerViews(in: host).first)
+    #expect(!view.isReadyForDisplay && view.alphaValue == 0)
+    // Audio uses the same bridge, but has no video frame to wait for.
+    host.rootView = NativeVideoPlayerView(player: player)
+    try await waitUntil { view.alphaValue == 1 }
+    host.rootView = NativeVideoPlayerView(player: player, waitsForFirstVideoFrame: true)
+    try await waitUntil { view.alphaValue == 0 }
+    #expect(playerViews(in: host).first === view)
+    NativeVideoPlayerView.dismantleNSView(view, coordinator: ())
+    #expect(view.player == nil)
+  }
+
   @Test("호스팅·플레이어 교체·입력 비활성화·해제가 네이티브 AVPlayerView로 이어진다")
   func hostsUpdatesAndDismantlesNativePlayer() async throws {
     _ = NSApplication.shared

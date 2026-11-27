@@ -55,7 +55,7 @@ struct AudioLibraryTests {
     }
   }
 
-  @Test("음성은 사진 GPS 디코더를 건너뛰고 정렬 시 네이티브 미디어 메타데이터 경로를 쓴다")
+  @Test("음성의 GPS와 정렬은 같은 네이티브 메타데이터 결과를 재사용한다")
   func audioNeverUsesImageHeaderReader() async throws {
     let folder = try makeFolder()
     defer { try? FileManager.default.removeItem(at: folder) }
@@ -70,7 +70,7 @@ struct AudioLibraryTests {
     let library = ImageLibrary()
     let located = try await library.enrichLocations([audio], cache: cache)
     #expect(located[0].hasReadLocation && located[0].location == nil)
-    #expect(await reads.values.isEmpty)
+    #expect(await reads.values == [true])
     let sorted = try await library.enrichSortMetadata(located, for: .capturedNewest, cache: cache)
     #expect(sorted[0].sortMetadata?.additionalSearchText == "Voice recording")
     #expect(await reads.values == [true])

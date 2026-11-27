@@ -108,8 +108,8 @@ struct LibraryLocationMetadataCacheTests {
     }
   }
 
-  @Test("지도 색인은 동영상 헤더를 열지 않는다")
-  func videoRemainsOutsideMapScope() async throws {
+  @Test("지도 색인은 동영상의 네이티브 위치 조회 결과를 한 번만 읽는다")
+  func videoLocationLookupIsCached() async throws {
     let counter = ReadCounter()
     let cache = LibrarySortMetadataCache { _, _ in
       await counter.increment()
@@ -119,7 +119,8 @@ struct LibraryLocationMetadataCacheTests {
       byteCount: 1, modificationDate: nil)
     let located = try await ImageLibrary().enrichLocations([asset], cache: cache)
     #expect(located[0].hasReadLocation && located[0].location == nil)
-    #expect(await counter.value == 0)
+    _ = try await ImageLibrary().enrichLocations(located, cache: cache)
+    #expect(await counter.value == 1)
   }
 
   private func fixture() throws -> URL {

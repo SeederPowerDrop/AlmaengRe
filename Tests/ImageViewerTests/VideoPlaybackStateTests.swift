@@ -9,6 +9,61 @@ import Testing
 @Suite("영상 재생 위치와 탐색 수명", .serialized)
 @MainActor
 struct VideoPlaybackStateTests {
+  @Test("준비 중 취소와 준비 후 수동 정지를 반복해도 모니터가 깨어나고 이전 관찰자가 남지 않는다")
+  func eventMonitorCancellationAndManualStop() async throws {
+    let fixture = try await Fixture.make()
+    defer { fixture.remove() }
+    let state = VideoPlaybackState()
+    for round in 0..<12 {
+      let monitor = Task { await state.monitor(fixture.asset) }
+      if round % 2 == 0 { monitor.cancel() }
+      else {
+        try await waitUntil { state.player.currentItem?.status == .readyToPlay }
+        state.stop()
+      }
+      await monitor.value
+      #expect(state.player.currentItem == nil && state.document == nil)
+      #expect(!state.isPlaying && state.currentSeconds == 0 && state.errorMessage == nil)
+    }
+  }
+
+  @Test("일시정지한 1·10 재생기의 유휴 CPU·깨우기 비용을 측정한다",
+    .enabled(if: ProcessInfo.processInfo.environment["IMAGEVIEWER_FOUNDATION_OUTPUT"] != nil))
+  func pausedPlayerResources() async throws {
+    let fixture = try await Fixture.make()
+    defer { fixture.remove() }
+    var rows: [[String: Any]] = []
+    for count in [1,10] {
+      let states = (0..<count).map { _ in VideoPlaybackState() }
+      let monitors = states.map { state in Task { await state.monitor(fixture.asset) } }
+      defer { monitors.forEach { $0.cancel() }; states.forEach { $0.stop() } }
+      try await waitUntil { states.allSatisfy { $0.player.currentItem?.status == .readyToPlay } }
+      try await Task.sleep(for: .seconds(1))
+      func usage() -> rusage_info_v4 {
+        var value = rusage_info_v4()
+        withUnsafeMutablePointer(to: &value) {
+          _ = $0.withMemoryRebound(to: rusage_info_t?.self, capacity: 1) { proc_pid_rusage(getpid(), RUSAGE_INFO_V4, $0) }
+        }
+        return value
+      }
+      let before = usage()
+      let cpu = OverviewWarmCPUCost.processCPUSeconds() ?? 0
+      try await Task.sleep(for: .seconds(2))
+      let cpuUsed = (OverviewWarmCPUCost.processCPUSeconds() ?? cpu) - cpu
+      let after = usage()
+      #expect(states.allSatisfy { !$0.isPlaying && $0.player.rate == 0 })
+      rows.append(["players":count,"sampleSeconds":2,"processCPUSeconds":cpuUsed,
+        "interruptWakeups":after.ri_interrupt_wkups-before.ri_interrupt_wkups,
+        "footprintBytes":after.ri_phys_footprint])
+      monitors.forEach { $0.cancel() }; states.forEach { $0.stop() }
+      for monitor in monitors { await monitor.value }
+    }
+    let output = URL(fileURLWithPath: try #require(ProcessInfo.processInfo.environment["IMAGEVIEWER_FOUNDATION_OUTPUT"]))
+    try FileManager.default.createDirectory(at: output, withIntermediateDirectories: true)
+    try JSONSerialization.data(withJSONObject: rows, options: [.prettyPrinted,.sortedKeys])
+      .write(to: output.appendingPathComponent("paused-players.json"))
+  }
+
   @Test("영상 준비만으로 두 동명 자막을 켜고 전체 화면 전환은 끈 자막을 되살리지 않는다")
   func monitoringAutomaticallyConnectsSubtitles() async throws {
     let fixture = try await Fixture.make()

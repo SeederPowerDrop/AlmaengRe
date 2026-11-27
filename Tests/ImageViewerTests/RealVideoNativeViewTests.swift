@@ -2,6 +2,7 @@ import AppKit
 @preconcurrency import AVFoundation
 import AVKit
 import CoreVideo
+import Combine
 import Darwin
 import Foundation
 import SwiftUI
@@ -73,7 +74,8 @@ struct RealVideoNativeViewTests {
     _ = NSApplication.shared
     let state = VideoPlaybackState()
     state.player.isMuted = true
-    let host = NSHostingView(rootView: NativeVideoPlayerView(player: state.player))
+    let host = NSHostingView(rootView: NativeVideoPlayerView(player: state.player,
+      waitsForFirstVideoFrame: true))
     let window = NSWindow(contentRect: NSRect(x: -2_000, y: -2_000, width: 480, height: 270),
       styleMask: [.borderless], backing: .buffered, defer: false)
     window.isReleasedWhenClosed = false
@@ -101,13 +103,27 @@ struct RealVideoNativeViewTests {
     #expect(view.videoGravity == .resizeAspect)
     #expect(!view.allowsVideoFrameAnalysis && !view.updatesNowPlayingInfoCenter)
     let item = try #require(state.player.currentItem)
+    Self.log(["phase":"native-selected","selectedBytes":selected.bytes,
+      "width":document.pixelWidth,"height":document.pixelHeight])
+    let failureObserver = NotificationCenter.default.publisher(for: .AVPlayerItemFailedToPlayToEndTime,object: item)
+      .sink { notification in
+        Self.logNativeError(notification.userInfo?[AVPlayerItemFailedToPlayToEndTimeErrorKey] as? Error,
+          source: "failed_notification")
+      }
+    let itemObserver = item.publisher(for: \.status).sink { status in
+      if status == .failed { Self.logNativeError(item.error,source: "item_status") }
+    }
+    let playerObserver = state.player.publisher(for: \.status).sink { status in
+      if status == .failed { Self.logNativeError(state.player.error,source: "player_status") }
+    }
+    defer { failureObserver.cancel(); itemObserver.cancel(); playerObserver.cancel() }
     let output = AVPlayerItemVideoOutput(pixelBufferAttributes: nil)
     output.suppressesPlayerRendering = false
     item.add(output)
     defer { item.remove(output) }
     try await waitUntil("native-first-frame", state: state) {
       host.layoutSubtreeIfNeeded()
-      return view.isReadyForDisplay
+      return view.isReadyForDisplay && view.alphaValue == 1
     }
     let readySeconds = ProcessInfo.processInfo.systemUptime - started
 
@@ -200,6 +216,10 @@ struct RealVideoNativeViewTests {
     while true {
       try Task.checkCancellation()
       if state.errorMessage != nil || state.player.currentItem?.status == .failed {
+        Self.log(["phase":"native-failure","stage":phase,
+          "reason":state.errorMessage ?? "item_failed",
+          "itemErrorDomain":(state.player.currentItem?.error as NSError?)?.domain ?? "none",
+          "itemErrorCode":(state.player.currentItem?.error as NSError?)?.code ?? 0])
         throw Failure.playback(phase)
       }
       if try predicate() { return }
@@ -223,5 +243,15 @@ struct RealVideoNativeViewTests {
     line.append(encoded)
     line.append(0x0a)
     FileHandle.standardOutput.write(line)
+  }
+
+  private static func logNativeError(_ error: Error?, source: String) {
+    var cause = error as NSError?
+    var codes: [[String: Any]] = []
+    while let current = cause, codes.count < 6 {
+      codes.append(["domain":current.domain,"code":current.code])
+      cause = current.userInfo[NSUnderlyingErrorKey] as? NSError
+    }
+    log(["phase":"native-error-codes","source":source,"codes":codes])
   }
 }

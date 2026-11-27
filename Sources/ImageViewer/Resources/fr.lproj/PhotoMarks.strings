@@ -82,13 +82,13 @@
 "color.gray" = "Gris";
 
 /* Independent tag filters for comparison panes. */
-"comparison.open" = "Comparer les photos actuelles par étiquette";
+"comparison.open" = "Comparer les fichiers actuels par classement";
 "comparison.openHelp" = "Ouvrez la collection source actuelle dans A et B. Conservez les filtres de recherche, de format et de zone cartographique, puis choisissez les étiquettes séparément pour chaque volet.";
 "comparison.filter" = "Choisir les étiquettes";
-"comparison.allPhotos" = "Toutes les photos";
+"comparison.allPhotos" = "Tous les fichiers";
 "comparison.titleFormat" = "Étiquettes du volet %@";
-"comparison.selectionHelp" = "Choisissez plusieurs étiquettes à afficher dans ce volet. Une même photo peut apparaître des deux côtés.";
-"comparison.empty" = "Aucune photo ne correspond à ces critères.";
+"comparison.selectionHelp" = "Choisissez les classements à afficher dans ce volet. Un même fichier peut apparaître des deux côtés.";
+"comparison.empty" = "Aucun fichier ne correspond à ces conditions.";
 "comparison.emptyHelp" = "Modifiez les étiquettes ou vérifiez les filtres communs de recherche, de format et de zone cartographique.";
 "comparison.reset" = "Effacer le filtre d’étiquettes de ce volet";
 

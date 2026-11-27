@@ -18,7 +18,10 @@ struct RealRAWAdjustmentPerformanceTests {
     let original = ImageFileVersion(url: url)
     let governor = ImageResourceGovernor(mode: .comfortable, storageOverride: .internalSSD)
     let reusesInputs = ProcessInfo.processInfo.environment["RAW_ADJUSTMENT_DISABLE_REUSE"] != "1"
-    let pipeline = ImagePipeline(governor: governor, reusesDecodedInputs: reusesInputs)
+    let prepareUnedited = ProcessInfo.processInfo.environment["RAW_ADJUSTMENT_PREPARE_UNEDITED"] == "1"
+    let usesMetal = ProcessInfo.processInfo.environment["RAW_ADJUSTMENT_DISABLE_METAL"] != "1"
+    let pipeline = ImagePipeline(governor: governor, reusesDecodedInputs: reusesInputs,
+      preparesUneditedRAWInputs: prepareUnedited, usesMetalRAWInputs: usesMetal)
 
     let warmStarted = now
     let identity = try await pipeline.renderFrame(url: url, maxPixelSize: 2_048,
@@ -73,6 +76,8 @@ struct RealRAWAdjustmentPerformanceTests {
     var fields: [String: Any] = [
       "readOnly": true,
       "inputReuseEnabled": reusesInputs,
+      "preparesUneditedRAWInputs": prepareUnedited,
+      "usesMetalRAWInputs": usesMetal,
       "editCount": 12,
       "renderCount": previewSeconds.count + detailSeconds.count,
       "sourceBytes": sourceBytes,
@@ -103,6 +108,10 @@ struct RealRAWAdjustmentPerformanceTests {
       fields["decodedInputReuseCount"] = reuse.reuseCount
       fields["decodedInputCacheBytes"] = reuse.cache.byteCount
       fields["decodedInputCacheLimitBytes"] = reuse.cache.byteLimit
+      fields["metalPreparedCount"] = reuse.metalPreparedCount
+      fields["metalReuseCount"] = reuse.metalReuseCount
+      fields["metalPreparationKernelSeconds"] = reuse.metalKernelSeconds
+      fields["metalPreparationCompileSeconds"] = reuse.metalCompileSeconds
     }
     let encoded = try JSONSerialization.data(withJSONObject: fields, options: [.sortedKeys])
     FileHandle.standardOutput.write(Data("RAW_ADJUSTMENT_PERFORMANCE ".utf8) + encoded + Data("\n".utf8))

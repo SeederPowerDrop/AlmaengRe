@@ -60,7 +60,7 @@ struct VideoLibraryTests {
   }
 
   @Test("영상에는 사진 GPS 디코더를 쓰지 않고 원래 식별정보를 유지한다")
-  func videoLocationsAreSkipped() async throws {
+  func unreadableVideoLocationRetainsIdentity() async throws {
     let fixture = try Fixture()
     defer { fixture.remove() }
     let video = fixture.folder.appendingPathComponent("clip.mp4")

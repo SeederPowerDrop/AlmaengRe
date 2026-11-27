@@ -5,6 +5,49 @@ import Testing
 
 @Suite("장시간 실제 앱 관측의 명시적 격리와 원본 증거")
 struct SustainedPerformanceValidationTests {
+  @Test("백그라운드 압력 알림은 actor 검사에 걸리지 않고 메인 actor로 전달된다")
+  @MainActor
+  func pressureCallbackHopsToMainActor() async throws {
+    var received: ImageResourcePressure?
+    let callback = SustainedPressureCallback.make { received = $0 }
+    await Task.detached { callback(DispatchSource.MemoryPressureEvent.warning.rawValue) }.value
+    let deadline = ContinuousClock.now + .seconds(5)
+    while received == nil {
+      try #require(ContinuousClock.now < deadline)
+      await Task.yield()
+    }
+    #expect(received == .warning)
+  }
+  @Test("관측 시간은 실제 30~120분만 허용하고 잘못된 값을 기본 시간으로 숨기지 않는다")
+  func configuredDurationsAreExplicit() {
+    #expect(SustainedPerformancePlan.requestedDuration(environment: [:]) == 1800)
+    for raw in ["1800","3600","7200"] {
+      #expect(SustainedPerformancePlan.requestedDuration(environment: ["IMAGEVIEWER_SUSTAINED_SECONDS":raw]) == Double(raw))
+    }
+    for raw in ["0","60","nan","inf","7201","invalid"] {
+      #expect(SustainedPerformancePlan.requestedDuration(environment: ["IMAGEVIEWER_SUSTAINED_SECONDS":raw]) == nil)
+    }
+    #expect(SustainedPerformancePlan.actions.contains(.rapidQueries))
+    #expect(SustainedPerformancePlan.actions.contains(.comparisonQueries))
+    #expect(SustainedPerformancePlan.actions.contains(.audioPlayback))
+  }
+
+  @Test("음성 검사용 파일은 유효한 무음 WAV이며 기존 파일을 덮어쓰지 않는다")
+  func generatedAudioIsPrivateAndPlayable() async throws {
+    let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+    try FileManager.default.createDirectory(at: root,withIntermediateDirectories: true)
+    defer { try? FileManager.default.removeItem(at: root) }
+    let url = try SustainedAudioFixture.create(in: root)
+    let bytes = try Data(contentsOf: url)
+    #expect(bytes.count == 96_044)
+    #expect(String(decoding: bytes.prefix(4),as: UTF8.self) == "RIFF")
+    #expect(bytes.dropFirst(44).allSatisfy { $0 == 0 })
+    let document = try await VideoDocument.load(url: url,allowsAudioOnly: true)
+    #expect(document.hasAudio && document.isPlayable && abs(document.durationSeconds - 3) < 0.01)
+    do { _ = try SustainedAudioFixture.create(in: root); Issue.record("Must not overwrite an existing fixture") }
+    catch { #expect(try Data(contentsOf: url) == bytes) }
+  }
+
   @Test("일반 실행·짧은 실행·잘못된 시간은30분관측으로 승인되지 않는다")
   func requiresBothExplicitPrivateFlagsAndRealDuration() {
     let valid = ["IMAGEVIEWER_SUSTAINED_QA": "1", "IMAGEVIEWER_MANUAL_QA": "1",

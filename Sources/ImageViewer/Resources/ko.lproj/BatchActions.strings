@@ -18,3 +18,9 @@
 
 "selection.focused" = "키보드 탐색 위치";
 "selection.overviewHelp" = "⌘ 클릭: 선택·해제\n⌘ 방향키: 이동한 항목 선택·해제\n⇧ 클릭 / ⇧ 방향키: 범위 선택\n⌘⇧ 클릭 / ⌘⇧ 방향키: 기존 선택에 범위 추가";
+"selection.view.title" = "선택한 파일만 보기";
+"selection.view.single" = "한 장씩 보기";
+"selection.view.multiple" = "여러 장 보기";
+"selection.view.active" = "선택한 %d개만 보는 중";
+"selection.view.return" = "몽땅보기로 돌아가기";
+"selection.view.help" = "선택한 파일 안에서만 이동합니다. 돌아가면 기존 선택과 목록 위치를 이어갑니다.";

@@ -18,3 +18,9 @@
 
 "selection.focused" = "Position de navigation au clavier";
 "selection.overviewHelp" = "⌘-clic : sélectionner/désélectionner\n⌘-flèche : déplacer et inverser la sélection de l’élément de destination\n⇧-clic / ⇧-flèche : sélectionner une plage\n⌘⇧-clic / ⌘⇧-flèche : ajouter une plage à la sélection actuelle";
+"selection.view.title" = "Voir uniquement la sélection";
+"selection.view.single" = "Un par un";
+"selection.view.multiple" = "Plusieurs à la fois";
+"selection.view.active" = "Affichage de %d fichiers sélectionnés";
+"selection.view.return" = "Retour à la vue d’ensemble";
+"selection.view.help" = "Parcourez les fichiers sélectionnés. Au retour, la sélection et la position d’origine sont conservées.";

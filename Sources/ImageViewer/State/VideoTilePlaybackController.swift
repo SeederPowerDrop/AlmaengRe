@@ -49,10 +49,28 @@ final class VideoTilePlaybackController: ObservableObject {
 
   init(coordinator: VideoHoverPlaybackCoordinator = .shared) { self.coordinator = coordinator }
 
+  deinit { monitor?.cancel() }
+
   var acceptsNativeAudioSoundChanges: Bool { asset?.isAudio == true && permitsPlayback }
 
   var acceptsNativeAudioPlaybackChanges: Bool {
     acceptsNativeAudioSoundChanges && slideshowPlaybackID == nil
+  }
+
+  var acceptsNativePlaybackChanges: Bool { permitsPlayback && slideshowPlaybackID == nil }
+
+  /// Controller writes include startup, teardown and audio-owner handoff. Only
+  /// a native choice that differs from that applied policy may change the
+  /// user's persistent sound intent. Compare the originating player as well.
+  func acceptsNativeSoundChange(_ enabled: Bool, from state: VideoPlaybackState) -> Bool {
+    acceptsNativePlaybackChanges && playback === state && state.player.currentItem != nil
+      && enabled == !state.player.isMuted && enabled != isSoundEnabled
+  }
+
+  func acceptsNativePlaybackChange(_ playing: Bool, from state: VideoPlaybackState) -> Bool {
+    acceptsNativePlaybackChanges && playback === state && state.player.currentItem != nil
+      && !state.isSeeking && playing == (state.player.rate != 0)
+      && playing != desiredPlaying && (playing || state.hasStartedCurrentItem)
   }
 
   func update(asset: ImageAsset, isMultiTile: Bool, isHovered: Bool,
@@ -148,13 +166,14 @@ final class VideoTilePlaybackController: ObservableObject {
         playback?.pause()
       } else if slideshowPlaybackID != nil {
         desiredPlaying = true
+        if slideshowChanged { setSoundEnabled(true) }
         if slideshowChanged || regainingPlayback { playback?.resume(completionID: slideshowPlaybackID) }
       } else if command.mode != .hover {
         // A partial final grid page can contain just one video. Honor its
         // explicit page command while leaving ordinary single-view controls alone.
         desiredPlaying = command.mode == .playing
         if commandChanged || regainingPlayback || startsNewPlayback {
-          setSoundEnabled(desiredPlaying && !command.isMuted)
+          setSoundEnabled(!command.isMuted)
           if desiredPlaying {
             if playIntentChanged || regainingPlayback || startsNewPlayback { playback?.resume() }
           } else { playback?.pause() }

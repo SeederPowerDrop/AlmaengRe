@@ -82,13 +82,13 @@
 "color.gray" = "Xám";
 
 /* Independent tag filters for comparison panes. */
-"comparison.open" = "So sánh ảnh hiện tại theo nhãn";
+"comparison.open" = "So sánh tệp hiện tại theo phân loại";
 "comparison.openHelp" = "Mở danh sách gốc hiện tại trong A và B. Giữ bộ lọc tìm kiếm, định dạng và vùng bản đồ, rồi chọn nhãn riêng cho từng khung.";
 "comparison.filter" = "Chọn nhãn";
-"comparison.allPhotos" = "Tất cả ảnh";
+"comparison.allPhotos" = "Tất cả tệp";
 "comparison.titleFormat" = "Nhãn của khung %@";
-"comparison.selectionHelp" = "Chọn nhiều nhãn để hiển thị trong khung này. Cùng một ảnh có thể xuất hiện ở cả hai bên.";
-"comparison.empty" = "Không có ảnh khớp với các điều kiện này.";
+"comparison.selectionHelp" = "Chọn các phân loại hiển thị trong khung này. Một tệp có thể xuất hiện ở cả hai bên.";
+"comparison.empty" = "Không có tệp khớp các điều kiện này.";
 "comparison.emptyHelp" = "Đổi điều kiện nhãn hoặc kiểm tra bộ lọc chung về tìm kiếm, định dạng và vùng bản đồ.";
 "comparison.reset" = "Xóa bộ lọc nhãn của khung này";
 

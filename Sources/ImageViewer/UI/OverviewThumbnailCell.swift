@@ -21,36 +21,35 @@ struct OverviewThumbnailCell: View {
   private var isSelected: Bool { store.selectedURLs.contains(asset.url) }
   private var isCurrent: Bool { store.currentAsset?.url == asset.url }
 
+  // Keep the same Text slot and modifiers when numbers are hidden, but avoid
+  // resolving an ordinal and localized integer that cannot be seen.
+  private var overviewOrdinalText: Text {
+    guard store.showsOverviewNumbers else { return Text(verbatim: "") }
+    return Text("\((currentIndexForAsset?(asset.id) ?? index) + 1)")
+  }
+
   var body: some View {
     VStack(alignment: .leading, spacing: 7) {
       OverviewNumberedImageLayout(
-        imageHeight: size, imagePixels: imagePixelSize, showsNumber: store.showsOverviewNumbers
+        imageHeight: size, imagePixels: asset.isAudio ? CGSize(width: 256, height: 256) : imagePixelSize,
+        showsNumber: store.showsOverviewNumbers
       ) {
-        ThumbnailImageView(
-          asset: asset, thumbnailPipeline: store.thumbnailPipeline, pipeline: store.pipeline,
-          maxPixelSize: OverviewThumbnailSizing.requestedPixelSize(for: size, displayScale: displayScale),
-          adjustments: store.adjustments(for: asset), prefersPreciseImage: true,
-          defersLoading: isAdjustingSize || defersLoadingForOcclusion, prefersCompactPreview: true,
-          defersRefinement: defersRefinement,
-          overviewRefinementGate: overviewRefinementGate,
-          onDisplayedImageSizeChange: store.showsOverviewNumbers ? { size in
-            if imagePixelSize != size { imagePixelSize = size }
-          } : nil,
-          onBitmapStateApplied: onBitmapStateApplied
-        )
-        .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
-        .overlay(alignment: .bottomTrailing) {
+        Group {
           if asset.isPlaybackMedia {
-            Image(systemName: asset.isAudio ? "waveform" : "play.fill")
-              .font(ViewerUIMetrics.font(.caption).weight(.semibold)).foregroundStyle(.white)
-              .viewerPadding(8).background(.black.opacity(0.7), in: Circle()).viewerPadding(6)
-              .allowsHitTesting(false)
+            OverviewMediaThumbnail(asset: asset, preview: store.overviewMediaPreview, pointSize: size) {
+              if asset.isAudio {
+                OverviewAudioArtwork(fileExtension: asset.fileExtension)
+              } else { thumbnailImage }
+            }
+          } else {
+            thumbnailImage
           }
         }
+        .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
 
         // This URL-backed cell can survive an order change without recreation.
         // Read the current ordinal from the same lookup as viewport membership.
-        Text("\((currentIndexForAsset?(asset.id) ?? index) + 1)")
+        overviewOrdinalText
           .font(ViewerUIMetrics.font(size: 11, weight: .medium, design: .monospaced))
           .foregroundStyle(.white)
           .lineLimit(1)
@@ -110,7 +109,7 @@ struct OverviewThumbnailCell: View {
     .onHover { isHovered = $0 }
     .gesture(cardTapGesture)
     .contextMenu { BatchAssetContextMenu(store: store, url: asset.url) }
-    .accessibilityElement(children: store.isPhotoMarking ? .contain : .ignore)
+    .accessibilityElement(children: store.isPhotoMarking || asset.isPlaybackMedia ? .contain : .ignore)
     .accessibilityLabel(asset.filename)
     .accessibilityIdentifier("overview.asset.\(asset.sessionID)")
     .accessibilityValue(accessibilityValue)
@@ -127,6 +126,18 @@ struct OverviewThumbnailCell: View {
     .accessibilityAction {
       selectCard(modifiers: [])
     }
+  }
+
+  private var thumbnailImage: some View {
+    ThumbnailImageView(
+      asset: asset, thumbnailPipeline: store.thumbnailPipeline, pipeline: store.pipeline,
+      maxPixelSize: OverviewThumbnailSizing.requestedPixelSize(for: size, displayScale: displayScale),
+      adjustments: store.adjustments(for: asset), prefersPreciseImage: true,
+      defersLoading: isAdjustingSize || defersLoadingForOcclusion, prefersCompactPreview: true,
+      defersRefinement: defersRefinement, overviewRefinementGate: overviewRefinementGate,
+      onDisplayedImageSizeChange: store.showsOverviewNumbers ? { size in
+        if imagePixelSize != size { imagePixelSize = size }
+      } : nil, onBitmapStateApplied: onBitmapStateApplied)
   }
 
   /// Register modifier combinations explicitly. A plain SwiftUI tap does not

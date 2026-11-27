@@ -9,6 +9,7 @@ final class VideoPlaybackState: ObservableObject {
   @Published private(set) var errorMessage: String?
   @Published private(set) var currentSeconds = 0.0
   @Published private(set) var isPlaying = false
+  private(set) var hasStartedCurrentItem = false
   @Published private(set) var isSoundEnabled = false
   @Published private(set) var completedPlaybackCount = 0
   private(set) var completedSlideshowID: UUID?
@@ -21,7 +22,11 @@ final class VideoPlaybackState: ObservableObject {
   private var failureSubscription: AnyCancellable?
   private var audioOutputSubscription: AnyCancellable?
   private var audioRateSubscription: AnyCancellable?
-  private var pendingPlaybackFailure: Error?
+  private var itemStatusSubscription: AnyCancellable?
+  private var playerStatusSubscription: AnyCancellable?
+  private var positionObserver: Any?
+  private var positionObserverInterval: Double?
+  private var monitorLifetime: VideoPlaybackMonitorLifetime?
   private var generation = UUID()
   private var seekToken = UUID()
   private var playWhenSeekCompletes = false
@@ -30,6 +35,9 @@ final class VideoPlaybackState: ObservableObject {
   /// Owned by a SwiftUI task: changing files or leaving the view cancels this
   /// monitor, pauses audio and releases the old player item and its decode work.
   func monitor(_ asset: ImageAsset) async {
+    // A cancelled task may first reach the main actor after a newer monitor.
+    // It must not tear down the newer item's state before noticing cancellation.
+    guard !Task.isCancelled else { return }
     stop()
     errorMessage = nil
     if asset.isAudio {
@@ -62,31 +70,14 @@ final class VideoPlaybackState: ObservableObject {
       // time-domain algorithm for interactive playback.
       item.audioTimePitchAlgorithm = .timeDomain
       player.replaceCurrentItem(with: item)
-      if asset.isAudio { observeAudioOutput(item, token: token) }
+      observeAudioOutput(item, token: token)
       observeCompletion(completionID: nil)
       observeFailure(item, token: token)
       study?.prepareAutomaticSubtitles()
-      while !Task.isCancelled, generation == token {
-        if let item = player.currentItem {
-          // Keep the slider at the requested position while the decoder seeks.
-          // Capture actions wait for completion and then use the actual time.
-          if !isSeeking { synchronizeCurrentTime() }
-          synchronizePlayingState()
-          updateSteppingAvailability()
-          // A mid-stream decode/read failure can arrive through the failure
-          // notification while item.status still says readyToPlay. A stalled
-          // player alone is recoverable and is deliberately not an error.
-          if pendingPlaybackFailure != nil || item.status == .failed || player.status == .failed {
-            let reason = await MediaLoadFailure.message(
-              for: pendingPlaybackFailure ?? item.error ?? player.error ?? AVError(.unknown), url: asset.url)
-            guard !Task.isCancelled, generation == token,
-              player.currentItem === item else { return }
-            errorMessage = reason
-            return
-          }
-        }
-        try await Task.sleep(for: .milliseconds(60))
-      }
+      let lifetime = VideoPlaybackMonitorLifetime()
+      monitorLifetime = lifetime
+      observeProgress(item, token: token, lifetime: lifetime)
+      try await lifetime.wait()
     } catch is CancellationError {
       // Leaving the view is normal cancellation, not a playback failure.
     } catch {
@@ -172,7 +163,15 @@ final class VideoPlaybackState: ObservableObject {
   }
 
   func stop() {
+    hasStartedCurrentItem = false
     generation = UUID()
+    monitorLifetime?.finish(.success(()))
+    monitorLifetime = nil
+    if let positionObserver { player.removeTimeObserver(positionObserver) }
+    positionObserver = nil
+    positionObserverInterval = nil
+    itemStatusSubscription?.cancel(); itemStatusSubscription = nil
+    playerStatusSubscription?.cancel(); playerStatusSubscription = nil
     seekToken = UUID()
     hasReachedEnd = false
     if isSeeking { isSeeking = false }
@@ -190,7 +189,6 @@ final class VideoPlaybackState: ObservableObject {
     audioRateSubscription?.cancel()
     audioRateSubscription = nil
     if isSoundEnabled { isSoundEnabled = false }
-    pendingPlaybackFailure = nil
     if study != nil { study = nil }
     if document != nil { document = nil }
     if currentSeconds != 0 { currentSeconds = 0 }
@@ -229,7 +227,7 @@ final class VideoPlaybackState: ObservableObject {
             self.player.currentItem === item else { return }
           let error = reportedError ?? item.error ?? self.player.error ?? AVError(.unknown)
           guard !MediaLoadFailure.isCancellation(error) else { return }
-          self.pendingPlaybackFailure = error
+          self.monitorLifetime?.finish(.failure(error))
           self.pause()
         }
       }
@@ -249,19 +247,61 @@ final class VideoPlaybackState: ObservableObject {
         let enabled = !self.player.isMuted
         if self.isSoundEnabled != enabled { self.isSoundEnabled = enabled }
       }
-    // Native pause/play actions must not disappear between the 60ms position
-    // samples, especially immediately after a programmatic resume or seek.
+    // Observe native pause/play actions independently of position updates.
     audioRateSubscription = player.publisher(for: \.rate)
       .receive(on: RunLoop.main)
       .sink { [weak self, weak item] _ in
         guard let self, let item, self.generation == token,
           self.player.currentItem === item else { return }
         self.synchronizePlayingState()
+        self.observePosition(item, token: token)
       }
+  }
+
+  private func observeProgress(_ item: AVPlayerItem, token: UUID,
+    lifetime: VideoPlaybackMonitorLifetime) {
+    observePosition(item, token: token)
+    // Stepping capabilities are fixed once the item is ready. Status events
+    // also report decode failures without a timer polling paused players.
+    itemStatusSubscription = item.publisher(for: \.status)
+      .receive(on: RunLoop.main).sink { [weak self, weak item] _ in
+        guard let self, let item, self.generation == token,
+          self.player.currentItem === item else { return }
+        self.updateSteppingAvailability()
+        if item.status == .failed { lifetime.finish(.failure(item.error ?? AVError(.unknown))) }
+      }
+    playerStatusSubscription = player.publisher(for: \.status)
+      .receive(on: RunLoop.main).sink { [weak self, weak item] _ in
+        guard let self, let item, self.generation == token,
+          self.player.currentItem === item else { return }
+        if self.player.status == .failed {
+          lifetime.finish(.failure(item.error ?? self.player.error ?? AVError(.unknown)))
+        }
+      }
+  }
+
+  private func observePosition(_ item: AVPlayerItem, token: UUID) {
+    // AVPlayer intervals use media time. Keep the previous ~60ms wall-clock
+    // cadence at slow/fast speeds; a paused item's clock does not tick.
+    let rate = Double(abs(player.rate))
+    let interval = 0.06 * (rate.isFinite && rate > 0 ? rate : 1)
+    guard positionObserverInterval != interval else { return }
+    if let positionObserver { player.removeTimeObserver(positionObserver) }
+    positionObserverInterval = interval
+    positionObserver = player.addPeriodicTimeObserver(forInterval: CMTime(seconds: interval, preferredTimescale: 60_000),
+      queue: .main) { [weak self, weak item] _ in
+      MainActor.assumeIsolated {
+        guard let self, let item, self.generation == token,
+          self.player.currentItem === item else { return }
+        if !self.isSeeking { self.synchronizeCurrentTime() }
+        self.synchronizePlayingState()
+      }
+    }
   }
 
   private func synchronizePlayingState() {
     let playing = player.rate != 0
+    if playing, player.currentItem != nil { hasStartedCurrentItem = true }
     if isPlaying != playing { isPlaying = playing }
   }
 

@@ -18,3 +18,9 @@
 
 "selection.focused" = "Posición de navegación con teclado";
 "selection.overviewHelp" = "⌘-clic: seleccionar/quitar\n⌘-flecha: mover y alternar la selección del elemento de destino\n⇧-clic / ⇧-flecha: seleccionar un intervalo\n⌘⇧-clic / ⌘⇧-flecha: añadir un intervalo a la selección actual";
+"selection.view.title" = "Ver solo los archivos seleccionados";
+"selection.view.single" = "De uno en uno";
+"selection.view.multiple" = "Varios a la vez";
+"selection.view.active" = "Viendo %d archivos seleccionados";
+"selection.view.return" = "Volver a la vista general";
+"selection.view.help" = "Navega entre los archivos seleccionados. Al volver se conservan la selección y la posición originales.";

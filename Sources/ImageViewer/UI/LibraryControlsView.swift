@@ -112,10 +112,10 @@ struct MapSelectionScopeView: View {
         .foregroundStyle(ViewerTheme.accent)
         .accessibilityHidden(true)
       VStack(alignment: .leading, spacing: 3) {
-        Text(MapSelectionL10n.text("지도에서 선택한 사진만 보는 중"))
+        Text(MediaPlaybackL10n.text("map.scope.title"))
           .font(ViewerUIMetrics.font(size: 12, weight: .semibold))
         HStack(spacing: 6) {
-          Text(MapSelectionL10n.format("영역 %lld개 · 표시 %lld장",
+          Text(MediaPlaybackL10n.format("map.scope.count",
             Int64(store.libraryQuery.geographicSelection?.areas.count ?? 0),
             Int64(store.assets.count)))
             .monospacedDigit()

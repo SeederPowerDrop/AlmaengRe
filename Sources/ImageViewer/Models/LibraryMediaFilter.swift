@@ -23,6 +23,34 @@ enum LibraryMediaFilter {
   }
 }
 
+/// Normalize query-side extensions once. File metadata and codec support are
+/// unchanged; this predicate owns no library index, image data or persistent cache.
+struct PreparedLibraryMediaPredicate {
+  private let kind: LibraryMediaKind
+  private let excludesPlayback: Bool
+  private let extensions: Set<String>
+
+  init(query: LibraryQuery) {
+    kind = query.mediaKind
+    excludesPlayback = !query.formats.isEmpty
+    extensions = Set(query.fileExtensions.map(LibraryMediaFilter.normalizedExtension))
+  }
+
+  var isActive: Bool { kind != .all || excludesPlayback || !extensions.isEmpty }
+
+  func matches(_ asset: ImageAsset) -> Bool {
+    switch kind {
+    case .all: break
+    case .images: if asset.isPlaybackMedia { return false }
+    case .videos: if !asset.isVideo { return false }
+    case .audio: if !asset.isAudio { return false }
+    }
+    // Image-only mode already performed this check above.
+    if excludesPlayback && kind != .images && asset.isPlaybackMedia { return false }
+    return extensions.isEmpty || extensions.contains(asset.fileExtension)
+  }
+}
+
 enum MediaFormatsL10n {
   static func text(_ key: String) -> String {
     L10n.text(key, localeIdentifier: L10n.languageIdentifier, table: "MediaFormats")

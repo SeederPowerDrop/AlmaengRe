@@ -65,19 +65,56 @@ enum RustImageEngine {
   private struct ScanRequest: Encodable { let op = "scan"; let path: String }
   private struct ZIPRequest: Encodable { let op = "zip"; let path: String; let destination: String; let extensions: [String] }
 
-  static func query(_ assets: [ImageAsset], options: LibraryQuery) throws -> [ImageAsset] {
+  static func query(_ assets: [ImageAsset], options: LibraryQuery,
+    session: RustQuerySession? = nil) throws -> [ImageAsset] {
+    try query(assets, options: options, legacyJSON: false,session: session)
+  }
+
+  #if DEBUG
+  /// Differential oracle for transport changes, never selected by production.
+  static func queryUsingLegacyJSON(_ assets: [ImageAsset], options: LibraryQuery) throws -> [ImageAsset] {
+    try query(assets, options: options, legacyJSON: true)
+  }
+  #endif
+
+  private static func query(_ assets: [ImageAsset], options: LibraryQuery,
+    legacyJSON: Bool, session: RustQuerySession? = nil) throws -> [ImageAsset] {
     let totalStarted = QueryPerformanceTrace.start()
     defer { QueryPerformanceTrace.record("engine.query_total", since: totalStarted, count: assets.count, synchronous: true) }
+    try Task.checkCancellation()
+    let request = QueryPerformanceTrace.measure("ffi.query.reuse_lookup",count: assets.count) { session?.begin(assets) }
     let predicateStarted = QueryPerformanceTrace.start()
     let nameMatcher = LibraryTextMatcher(pattern: options.searchText)
-    let searchPredicate = LibrarySearchPredicate(filters: options.searchFilters)
-    var filtered: [ImageAsset] = []
-    filtered.reserveCapacity(assets.count)
-    for asset in assets {
+    var filtered: [ImageAsset]
+    var selectedIndices: [Int]?
+    if legacyJSON {
+      // Preserve the old filtering path as the debug differential oracle.
+      let searchPredicate = LibrarySearchPredicate(filters: options.searchFilters)
+      filtered = []; filtered.reserveCapacity(assets.count)
+      for asset in assets {
+        try Task.checkCancellation()
+        if nameMatcher.matches(asset.filename), LibraryMediaFilter.matches(asset, query: options),
+          searchPredicate.matches(asset) { filtered.append(asset) }
+      }
+    } else {
       try Task.checkCancellation()
-      if nameMatcher.matches(asset.filename), LibraryMediaFilter.matches(asset, query: options),
-        searchPredicate.matches(asset) {
-        filtered.append(asset)
+      let mediaPredicate = PreparedLibraryMediaPredicate(query: options)
+      let searchPredicate = options.searchFilters.isActive ? LibrarySearchPredicate(filters: options.searchFilters) : nil
+      if nameMatcher.isEmpty && !mediaPredicate.isActive && searchPredicate == nil {
+        // Share the source buffer. A plain sort needs no Swift filename reads,
+        // per-item predicate calls or a second whole-library asset array.
+        filtered = assets
+      } else {
+        filtered = []; filtered.reserveCapacity(assets.count)
+        if request?.snapshot != nil { selectedIndices = []; selectedIndices?.reserveCapacity(assets.count) }
+        for (index,asset) in assets.enumerated() {
+          try Task.checkCancellation()
+          if (nameMatcher.isEmpty || nameMatcher.matches(asset.filename)),
+            mediaPredicate.matches(asset), searchPredicate?.matches(asset) ?? true {
+            filtered.append(asset)
+            selectedIndices?.append(index)
+          }
+        }
       }
     }
     QueryPerformanceTrace.record("engine.swift_predicates", since: predicateStarted, count: assets.count, synchronous: true)
@@ -85,10 +122,61 @@ enum RustImageEngine {
     // Names were matched above, including glob syntax the engine does not parse.
     var nativeOptions = options
     nativeOptions.searchText = ""
-    let records = QueryPerformanceTrace.measure("engine.make_records", count: filtered.count) { filtered.map(Record.init) }
-    let indices: [Int] = try call(QueryRequest(assets: records, options: nativeOptions), profile: "query")
-    guard indices.allSatisfy({ filtered.indices.contains($0) }) else { throw RustImageEngineError(detail: "Invalid image index") }
-    return QueryPerformanceTrace.measure("engine.map_results", count: indices.count) { indices.map { filtered[$0] } }
+    let indices: [Int]
+    if legacyJSON {
+      let records = QueryPerformanceTrace.measure("engine.make_records", count: filtered.count) { filtered.map(Record.init) }
+      indices = try call(QueryRequest(assets: records, options: nativeOptions), profile: "query")
+    } else {
+      let input: RustQueryInput
+      if let snapshot = request?.snapshot {
+        input = QueryPerformanceTrace.measure("ffi.query.reuse_input",count: filtered.count) {
+          filtered.count == assets.count ? snapshot.input
+            : selectedIndices.map { snapshot.input.selecting($0) } ?? snapshot.input
+        }
+      } else {
+        input = try QueryPerformanceTrace.measure("ffi.query.pack_records",count: filtered.count) { try RustQueryInput(filtered) }
+      }
+      indices = try queryRecords(filtered, options: nativeOptions,input: input)
+      // A narrow first search keeps the old cheap path. Cache only input that
+      // already covers the source, rather than packing hidden files up front.
+      if request?.snapshot == nil, filtered.count == assets.count, let request {
+        session?.remember(input,source: assets,request: request)
+      }
+    }
+    var preservesOrder = indices.count == filtered.count
+    for (position,index) in indices.enumerated() {
+      guard filtered.indices.contains(index) else { throw RustImageEngineError(detail: "Invalid image index") }
+      if index != position { preservesOrder = false }
+    }
+    return QueryPerformanceTrace.measure("engine.map_results", count: indices.count) {
+      preservesOrder ? filtered : indices.map { filtered[$0] }
+    }
+  }
+
+  private static func queryRecords(_ assets: [ImageAsset], options: LibraryQuery,input: RustQueryInput) throws -> [Int] {
+    let optionsData = try QueryPerformanceTrace.measure("ffi.query.options_encode") { try JSONEncoder().encode(options) }
+    let result = QueryPerformanceTrace.measure("ffi.query.rust_call", count: assets.count) {
+      input.records.withUnsafeBufferPointer { records in
+        input.strings.withUnsafeBytes { strings in
+          optionsData.withUnsafeBytes { options in
+            am_query_records(records.baseAddress, records.count,
+              strings.bindMemory(to: UInt8.self).baseAddress, strings.count,
+              options.bindMemory(to: UInt8.self).baseAddress, options.count)
+          }
+        }
+      }
+    }
+    defer { am_query_indices_free(result) }
+    try Task.checkCancellation()
+    if let error = result.error.ptr {
+      throw RustImageEngineError(detail: String(decoding: UnsafeBufferPointer(start: error,
+        count: result.error.len), as: UTF8.self))
+    }
+    guard result.len >= 0, result.len <= assets.count,
+      result.len == 0 || result.ptr != nil else { throw RustImageEngineError(detail: "Invalid query response") }
+    return QueryPerformanceTrace.measure("ffi.query.copy_indices", count: result.len) {
+      Array(UnsafeBufferPointer(start: result.ptr, count: result.len))
+    }
   }
 
   static func match(first: [ImageAsset], second: [ImageAsset], sort: LibrarySort = .nameAscending) throws -> [ImageMatchPair] {

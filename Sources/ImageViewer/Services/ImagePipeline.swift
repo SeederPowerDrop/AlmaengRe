@@ -93,13 +93,18 @@ actor ImagePipeline {
   private var favorsFinalViewerFrames = false
 
   init(maxConcurrentDecodes: Int? = nil, governor: ImageResourceGovernor? = nil,
-    reusesDecodedInputs: Bool = true)
+    reusesDecodedInputs: Bool = true, preparesUneditedRAWInputs: Bool = false,
+    usesMetalRAWInputs: Bool = true, releasesRenderContextsOnPurge: Bool = true)
   {
     let decodedInputs = DecodedImageInputCache()
     self.decodedInputs = decodedInputs
     self.reusesDecodedInputs = reusesDecodedInputs
-    workers = (0..<4).map { _ in ImageDecoder(decodedInputs: reusesDecodedInputs ? decodedInputs : nil) }
-    largeImageDecoder = ImageDecoder(decodedInputs: reusesDecodedInputs ? decodedInputs : nil)
+    workers = (0..<4).map { _ in ImageDecoder(decodedInputs: reusesDecodedInputs ? decodedInputs : nil,
+      preparesUneditedRAWInputs: preparesUneditedRAWInputs, usesMetalRAWInputs: usesMetalRAWInputs,
+      releasesRenderContextsOnPurge: releasesRenderContextsOnPurge) }
+    largeImageDecoder = ImageDecoder(decodedInputs: reusesDecodedInputs ? decodedInputs : nil,
+      preparesUneditedRAWInputs: preparesUneditedRAWInputs, usesMetalRAWInputs: usesMetalRAWInputs,
+      releasesRenderContextsOnPurge: releasesRenderContextsOnPurge)
     self.governor = governor ?? ImageResourceGovernor(
       mode: maxConcurrentDecodes == nil ? .comfortable : .priority,
       maximumConcurrentLoadsOverride: maxConcurrentDecodes)
@@ -303,17 +308,17 @@ actor ImagePipeline {
 private actor ImageDecoder {
   private let sourceCache = NSCache<NSString, ImageSourceBox>()
   private let decodedInputs: DecodedImageInputCache?
-  private var existingContext: CIContext?
-  private var context: CIContext {
-    if let existingContext { return existingContext }
-    let context = CIContext(options: [
-      .cacheIntermediates: false,
-      .highQualityDownsample: true,
-      .name: "ImageViewer Core Image Decoder",
-    ])
-    existingContext = context
-    return context
+  private let preparesUneditedRAWInputs: Bool
+  private let usesMetalRAWInputs: Bool
+  private let releasesRenderContextsOnPurge: Bool
+  private var existingRenderer: MetalImageRenderer?
+  private var renderer: MetalImageRenderer {
+    if let existingRenderer { return existingRenderer }
+    let value = MetalImageRenderer(usesMetal: usesMetalRAWInputs)
+    existingRenderer = value
+    return value
   }
+  private var context: CIContext { renderer.context }
   private var existingSoftwareContext: CIContext?
   private var softwareContext: CIContext {
     if let existingSoftwareContext { return existingSoftwareContext }
@@ -327,8 +332,12 @@ private actor ImageDecoder {
     return context
   }
 
-  init(decodedInputs: DecodedImageInputCache? = nil) {
+  init(decodedInputs: DecodedImageInputCache? = nil, preparesUneditedRAWInputs: Bool = false,
+    usesMetalRAWInputs: Bool = true, releasesRenderContextsOnPurge: Bool = true) {
     self.decodedInputs = decodedInputs
+    self.preparesUneditedRAWInputs = preparesUneditedRAWInputs
+    self.usesMetalRAWInputs = usesMetalRAWInputs
+    self.releasesRenderContextsOnPurge = releasesRenderContextsOnPurge
     sourceCache.countLimit = 2
   }
 
@@ -521,10 +530,14 @@ private actor ImageDecoder {
     // fusion. Keep settled noise/sharpness/texture/clarity on the original graph;
     // only interactive samples may reuse that working plane. Their cache keys
     // are distinct, so a sample can never stand in for precise output.
-    if isDirectRAW, let maxPixelSize,
+    // Browsing an unedited RAW needs only its final display image. Preparing a
+    // Float32 editing plane here adds a render/materialization and competes with
+    // other visible files for the same budget. Build it on the first adjustment;
+    // later edits still share the exact high-precision input as before.
+    if isDirectRAW, !adjustments.isIdentity || preparesUneditedRAWInputs, let maxPixelSize,
       !adjustments.usesSpatialFiltering || usesSpatialPreview
     {
-      image = reusableRAWWorkingImage(image, file: file, frameIndex: frameIndex,
+      image = try reusableRAWWorkingImage(image, file: file, frameIndex: frameIndex,
         maxPixelSize: maxPixelSize, adjustments: adjustments, prefersHDR: prefersHDR,
         inputGeneration: inputGeneration)
     }
@@ -583,8 +596,15 @@ private actor ImageDecoder {
 
   func purgeCaches() {
     sourceCache.removeAllObjects()
-    existingContext?.clearCaches()
+    existingRenderer?.context.clearCaches()
     existingSoftwareContext?.clearCaches()
+    // clearCaches() can leave a context's large Metal workspaces allocated.
+    // Explicit purge/pressure already invalidates the pixel caches; release the
+    // idle contexts too. They are rebuilt lazily by the next actual render.
+    if releasesRenderContextsOnPurge {
+      existingRenderer = nil
+      existingSoftwareContext = nil
+    }
   }
 
   private func imageSource(for url: URL) -> CGImageSource? {
@@ -662,7 +682,7 @@ private actor ImageDecoder {
   private func reusableRAWWorkingImage(
     _ image: CIImage, file: ImageFileVersion, frameIndex: Int, maxPixelSize: Int,
     adjustments: ImageAdjustments, prefersHDR: Bool, inputGeneration: UInt64
-  ) -> CIImage {
+  ) throws -> CIImage {
     guard let decodedInputs else { return image }
     let originalExtent = image.extent
     let extent = originalExtent.integral
@@ -675,21 +695,32 @@ private actor ImageDecoder {
     else { return image }
     let key = DecodedImageInputKey(file: file, frameIndex: frameIndex,
       pixelSize: maxPixelSize, geometry: DecodedImageGeometry(adjustments), prefersHDR: prefersHDR)
-    let bitmap: CGImage
-    if let reused = decodedInputs.lookup(key, generation: inputGeneration) {
-      bitmap = reused
+    let working: CIImage
+    if let reused = decodedInputs.lookupWorkingImage(key, generation: inputGeneration) {
+      working = reused
     } else {
-      // ProRAW/gain-map DNGs use a lazy CIImage rather than ImageIO thumbnails.
-      // Materialize only the fitted, unadjusted working plane. Float32 extended
-      // linear RGB retains highlights, negative/wide-gamut values and precision;
-      // an SDR or half-float intermediate would change the editing source.
+      // Retain the established Float32 raster boundary: it preserves crop phase,
+      // alpha, negative values and HDR precision, including edge-aware previews.
       guard let rendered = context.createCGImage(image, from: extent, format: .RGBAf,
         colorSpace: CGColorSpace(name: CGColorSpace.extendedLinearSRGB)!)
       else { return image }
-      bitmap = rendered
+      if usesMetalRAWInputs {
+        do {
+          if let prepared = try renderer.workingImage(rendered, canRetain: {
+            decodedInputs.canRetain(cost: $0, generation: inputGeneration)
+          }) {
+            decodedInputs.insert(prepared, for: key, generation: inputGeneration)
+            return prepared.image.transformed(
+              by: CGAffineTransform(translationX: extent.minX, y: extent.minY))
+              .cropped(to: originalExtent)
+          }
+        } catch is CancellationError { throw CancellationError() }
+        catch { /* Keep the previous Float32 CGImage path if Metal rejects this input. */ }
+      }
+      working = CIImage(cgImage: rendered)
       decodedInputs.insert(rendered, for: key, generation: inputGeneration)
     }
-    return CIImage(cgImage: bitmap).transformed(
+    return working.transformed(
       by: CGAffineTransform(translationX: extent.minX, y: extent.minY))
       // Restore fractional bounds too: edge-aware filters must clamp to exactly
       // the same crop/downsample extent as the uncached pipeline.

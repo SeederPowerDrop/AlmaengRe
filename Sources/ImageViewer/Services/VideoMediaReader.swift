@@ -9,7 +9,7 @@ enum VideoMediaReader {
   static func metadata(for url: URL) async throws -> ImageMetadata {
     try Task.checkCancellation()
     guard MediaFormatRegistry.isVideo(url) else { throw ImagePipelineError.unsupported(url) }
-    let asset = AVURLAsset(url: url)
+    let asset = NativeVideoAsset.make(url: url)
     let size = try await videoSize(of: asset, url: url)
     try Task.checkCancellation()
     return ImageMetadata(
@@ -22,7 +22,7 @@ enum VideoMediaReader {
   static func posterFrame(for url: URL, maxPixelSize: Int) async throws -> RenderedFrame {
     try Task.checkCancellation()
     guard MediaFormatRegistry.isVideo(url) else { throw ImagePipelineError.unsupported(url) }
-    let asset = AVURLAsset(url: url)
+    let asset = NativeVideoAsset.make(url: url)
     let sourceSize = try await videoSize(of: asset, url: url)
     try Task.checkCancellation()
     let limit = min(4096, max(1, maxPixelSize))
