@@ -88,8 +88,7 @@ struct RootView: View {
         }
         .labelStyle(.titleAndIcon)
         .buttonStyle(ViewerToolButtonStyle())
-        .help(!store.showsHome && store.presentationMode == .folderComparison
-          ? L10n.text("이미지 또는 폴더를 선택하세요.") : MotionMediaL10n.text("open.message"))
+        .help(MotionMediaL10n.text("open.message"))
       }
 
       if !store.showsHome {
@@ -252,6 +251,9 @@ struct RootView: View {
               if store.presentationMode != .map && store.libraryQuery.geographicSelection != nil {
                 MapSelectionScopeView(store: store)
                 Divider()
+              }
+              if store.assets.isEmpty, store.selectionViewingContext != nil {
+                SelectionViewingBanner(store: store)
               }
               if store.presentationMode == .map, !store.allAssets.isEmpty {
                 viewerWorkspace
@@ -425,8 +427,10 @@ struct RootView: View {
           guard store.presentationMode == .viewer, !store.isEditingViewerFrames else { return }
           store.navigatePage(delta < 0 ? 1 : -1)
         },
-        canHandleSpaceTap: { store.canToggleImageFocus && !shortcuts.hasPlainSpaceBinding },
-        onSpaceTap: { store.toggleImageFocus() }
+        canHandleSpaceTap: {
+          (store.canToggleViewerMediaPlayback || store.canToggleImageFocus) && !shortcuts.hasPlainSpaceBinding
+        },
+        onSpaceTap: { store.handleViewerSpaceTap() }
       )
     }
   }

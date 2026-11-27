@@ -34,12 +34,16 @@ let package = Package(
         .linkedFramework("ImageIO"),
         .linkedFramework("QuickLookThumbnailing"),
         .linkedFramework("QuartzCore"),
+        .linkedFramework("VideoToolbox"),
+        .linkedFramework("Metal"),
+        .linkedFramework("IOSurface"),
       ]
     ),
     .testTarget(
       name: "ImageViewerTests",
       dependencies: ["ImageViewer"],
-      path: "Tests/ImageViewerTests"
+      path: "Tests/ImageViewerTests",
+      resources: [.copy("Fixtures/VP9")]
     ),
   ]
 )

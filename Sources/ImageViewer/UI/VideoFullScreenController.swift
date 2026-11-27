@@ -41,6 +41,16 @@ final class VideoFullScreenController: NSWindowController, NSWindowDelegate {
     window.collectionBehavior = [.fullScreenPrimary]
     super.init(window: window)
     playback.player.isMuted = isMuted
+    playback.$isSoundEnabled.dropFirst()
+      .receive(on: RunLoop.main)
+      .sink { [weak self] enabled in
+        guard let self, !enabled, !self.isClosing, !self.didFinish,
+          self.playback.document != nil, self.playback.player.isMuted else { return }
+        // A native mute is an explicit sound choice; closing or pausing the
+        // full-screen player leaves the app's session preference intact.
+        self.store?.mediaSoundSession.setEnabled(false)
+      }
+      .store(in: &subscriptions)
     // Readiness changes inside AVKit, independently of AppStore. Republish only
     // those transitions so the classification menu enables as soon as it loads.
     playback.player.publisher(for: \.currentItem)

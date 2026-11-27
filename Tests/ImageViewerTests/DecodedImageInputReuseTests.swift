@@ -136,7 +136,8 @@ struct DecodedImageInputReuseTests {
     defer { try? FileManager.default.removeItem(at: directory) }
     let url = directory.appendingPathComponent("pressure.tiff")
     try writeTIFF(url, width: 1_024, height: 768)
-    let governor = ImageResourceGovernor(mode: .comfortable, snapshot: machine, storageOverride: .internalSSD)
+    let governor = ImageResourceGovernor(mode: .comfortable, snapshot: machine,
+      storageOverride: .internalSSD, monitorsMemoryPressure: false)
     let pipeline = ImagePipeline(governor: governor)
     var adjustments = ImageAdjustments.identity
     adjustments.exposure = 0.4
@@ -167,6 +168,31 @@ struct DecodedImageInputReuseTests {
     await pipeline.purgeCaches()
   }
 
+  @Test("GPU 컨텍스트를 비운 뒤에도 열린 HDR 프레임은 유효하고 새 조정은 다시 렌더한다")
+  func visibleFrameSurvivesContextRelease() async throws {
+    let directory = try makeDirectory()
+    defer { try? FileManager.default.removeItem(at: directory) }
+    let url = directory.appendingPathComponent("visible-after-purge.tiff")
+    try writeTIFF(url, width: 512, height: 384, usesP3: true)
+    let pipeline = makePipeline()
+    var adjustments = ImageAdjustments.identity
+    adjustments.exposure = 0.4
+    let visible = try await pipeline.renderFrame(url: url, maxPixelSize: 512,
+      adjustments: adjustments, prefersHDR: true)
+    let pixelsBefore = try floatPixels(visible.image)
+    await pipeline.purgeCaches()
+    #expect(await pipeline.cacheSnapshot().byteCount == 0)
+    #expect(try floatPixels(visible.image) == pixelsBefore)
+    let rebuilt = try await pipeline.renderFrame(url: url, maxPixelSize: 512,
+      adjustments: adjustments, prefersHDR: true)
+    try expectSamePixels(rebuilt, visible)
+    adjustments.exposure = 0.6
+    let changed = try await pipeline.renderFrame(url: url, maxPixelSize: 512,
+      adjustments: adjustments, prefersHDR: true)
+    #expect(try floatPixels(changed.image) != pixelsBefore)
+    await pipeline.purgeCaches()
+  }
+
   @Test("캐시 비우기 전에 대기하던 요청은 새 입력 캐시를 읽거나 다시 채우지 않는다",
     arguments: [false, true])
   func delayedAdmissionCannotRepopulatePurgedInputs(populateNewGeneration: Bool) async throws {
@@ -176,7 +202,7 @@ struct DecodedImageInputReuseTests {
     try writeTIFF(url, width: 1_024, height: 768, usesP3: true)
     let gate = DecodedInputStorageAdmissionGate()
     let governor = ImageResourceGovernor(mode: .comfortable, snapshot: machine,
-      storageResolver: { _ in await gate.resolve() })
+      storageResolver: { _ in await gate.resolve() }, monitorsMemoryPressure: false)
     let pipeline = ImagePipeline(governor: governor)
     let reference = makePipeline(reusesInputs: false)
     let adjustments: ImageAdjustments = {
@@ -239,12 +265,14 @@ struct DecodedImageInputReuseTests {
   }
 
   private func makePipeline(reusesInputs: Bool = true) -> ImagePipeline {
-    let governor = ImageResourceGovernor(mode: .comfortable, snapshot: machine, storageOverride: .internalSSD)
+    let governor = ImageResourceGovernor(mode: .comfortable, snapshot: machine,
+      storageOverride: .internalSSD, monitorsMemoryPressure: false)
     return ImagePipeline(governor: governor, reusesDecodedInputs: reusesInputs)
   }
 
   private func pipelineGovernorLimits() async -> ImageResourceLimits {
-    let governor = ImageResourceGovernor(mode: .comfortable, snapshot: machine, storageOverride: .internalSSD)
+    let governor = ImageResourceGovernor(mode: .comfortable, snapshot: machine,
+      storageOverride: .internalSSD, monitorsMemoryPressure: false)
     return await governor.limits(for: URL(fileURLWithPath: "/tmp/fixture.tiff"))
   }
 

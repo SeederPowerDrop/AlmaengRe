@@ -291,7 +291,8 @@ struct FolderComparisonView: View {
       }
       .buttonStyle(ViewerActionButtonStyle())
       .disabled(comparison.pane(comparison.activeSide).isLocked
-        || comparison.pane(comparison.activeSide).currentAsset == nil)
+        || comparison.pane(comparison.activeSide).currentAsset == nil
+        || comparison.pane(comparison.activeSide).currentAsset?.isPlaybackMedia == true)
   }
 
   private var statusBar: some View {
@@ -536,6 +537,17 @@ private struct ComparisonImageCanvas: View {
         ProgressView("폴더 읽는 중…")
           .controlSize(.small)
       } else if let asset = pane.currentAsset {
+        if asset.isPlaybackMedia {
+          InlineMediaViewer(store: store, asset: asset,
+            allowsPlayback: store.allowsVideoPlayback && !pane.isFiltering
+              && !comparison.isMatching && !comparison.isEditingControls,
+            hasSoundFocus: comparison.activeSide == side,
+            onSelect: { comparison.activeSide = side },
+            onDisplayedAssetChange: { shown in
+              guard pane.currentAsset?.id == asset.id else { return }
+              pane.recordPresentedAsset(shown)
+            })
+        } else {
         ViewerImageTile(asset: asset, itemCount: 2, thumbnailPipeline: store.thumbnailPipeline,
           pipeline: store.pipeline, adjustments: .identity, prefersHDR: store.prefersHDR,
           interpolationMode: store.imageInterpolationMode, comparisonLayout: .off,
@@ -553,6 +565,7 @@ private struct ComparisonImageCanvas: View {
           // Keep one loader per pane, just as the normal viewer keeps one per slot.
           // Navigation replaces the pending destination while the last completed
           // image stays visible; folder loading/missing matches still remove the tile.
+        }
       } else {
         emptyPane
       }
@@ -563,14 +576,16 @@ private struct ComparisonImageCanvas: View {
     .contentShape(Rectangle())
     .onAppear { pane.beginTrackingPresentation() }
     .onDisappear { pane.endTrackingPresentation() }
-    .onTapGesture {
+    .simultaneousGesture(TapGesture().onEnded {
       if comparison.activeSide != side { comparison.activeSide = side }
-    }
+    })
     .simultaneousGesture(MagnificationGesture()
       .onChanged { value in
+        guard pane.currentAsset?.isPlaybackMedia != true else { return }
         comparison.updateLiveMagnification(value, on: side)
       }
       .onEnded { value in
+        guard pane.currentAsset?.isPlaybackMedia != true else { return }
         comparison.endLiveMagnification(value, on: side)
       })
     .simultaneousGesture(DragGesture(minimumDistance: 3)
@@ -605,7 +620,7 @@ private struct ComparisonImageCanvas: View {
     if let error = pane.errorMessage { return error }
     if canRecoverMissingMatch { return L10n.text("이 폴더에 같은 이름의 사진이 없습니다.") }
     if !pane.sourceURLs.isEmpty { return PhotoMarkL10n.text("comparison.empty") }
-    return L10n.text("이미지 또는 폴더를 선택하세요.")
+    return MotionMediaL10n.text("open.message")
   }
 
   private var emptyPane: some View {

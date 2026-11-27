@@ -18,3 +18,9 @@
 
 "selection.focused" = "Vị trí điều hướng bàn phím";
 "selection.overviewHelp" = "⌘-nhấp: chọn/bỏ chọn\n⌘-mũi tên: di chuyển và chọn/bỏ chọn mục đích\n⇧-nhấp / ⇧-mũi tên: chọn một dải\n⌘⇧-nhấp / ⌘⇧-mũi tên: thêm một dải vào vùng chọn hiện tại";
+"selection.view.title" = "Chỉ xem tệp đã chọn";
+"selection.view.single" = "Xem từng tệp";
+"selection.view.multiple" = "Xem nhiều tệp";
+"selection.view.active" = "Đang xem %d tệp đã chọn";
+"selection.view.return" = "Trở về tổng quan";
+"selection.view.help" = "Chỉ duyệt trong các tệp đã chọn. Khi trở về, giữ nguyên lựa chọn và vị trí trong danh sách.";

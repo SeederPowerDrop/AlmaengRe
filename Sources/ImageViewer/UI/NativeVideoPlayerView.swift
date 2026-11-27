@@ -1,4 +1,5 @@
 import AVKit
+import Combine
 import SwiftUI
 
 /// Use AppKit's player directly. The SwiftUI AVKit overlay can fail while
@@ -9,6 +10,7 @@ struct NativeVideoPlayerView: NSViewRepresentable {
   var onDoubleClick: (() -> Void)? = nil
   var showsFullScreenToggleButton = true
   var keepsControlsVisibleWhenInactive = false
+  var waitsForFirstVideoFrame = false
 
   func makeNSView(context: Context) -> PlayerView {
     let view = PlayerView()
@@ -16,13 +18,13 @@ struct NativeVideoPlayerView: NSViewRepresentable {
     view.allowsVideoFrameAnalysis = false
     view.allowsPictureInPicturePlayback = false
     view.updatesNowPlayingInfoCenter = false
-    view.player = player
+    view.setPresentation(player: player, waitsForFirstVideoFrame: waitsForFirstVideoFrame)
     view.onDoubleClick = onDoubleClick
     return view
   }
 
   func updateNSView(_ view: PlayerView, context: Context) {
-    if view.player !== player { view.player = player }
+    view.setPresentation(player: player, waitsForFirstVideoFrame: waitsForFirstVideoFrame)
     view.isInteractive = isInteractive
     view.onDoubleClick = onDoubleClick
     let controlsStyle: AVPlayerViewControlsStyle =
@@ -35,6 +37,7 @@ struct NativeVideoPlayerView: NSViewRepresentable {
 
   static func dismantleNSView(_ view: PlayerView, coordinator: ()) {
     view.player?.pause()
+    view.stopObservingDisplayReadiness()
     view.player = nil
     view.onDoubleClick = nil
     view.removeDoubleClickMonitor()
@@ -44,6 +47,36 @@ struct NativeVideoPlayerView: NSViewRepresentable {
     var isInteractive = true
     var onDoubleClick: (() -> Void)?
     private var doubleClickMonitor: Any?
+    private var displayReadinessSubscription: AnyCancellable?
+    private var waitsForFirstVideoFrame = false
+
+    func setPresentation(player: AVPlayer, waitsForFirstVideoFrame: Bool) {
+      self.waitsForFirstVideoFrame = waitsForFirstVideoFrame
+      if self.player !== player {
+        // Metadata/item readiness precedes the first drawable video frame.
+        // Keep the tile's existing poster visible beneath AVKit's black surface.
+        if waitsForFirstVideoFrame { alphaValue = 0 }
+        self.player = player
+      }
+      if waitsForFirstVideoFrame, displayReadinessSubscription == nil {
+        displayReadinessSubscription = publisher(for: \.isReadyForDisplay)
+          .receive(on: RunLoop.main)
+          .sink { [weak self] _ in self?.synchronizeDisplayReadiness() }
+      } else if !waitsForFirstVideoFrame {
+        stopObservingDisplayReadiness()
+      }
+      synchronizeDisplayReadiness()
+    }
+
+    func stopObservingDisplayReadiness() {
+      displayReadinessSubscription?.cancel()
+      displayReadinessSubscription = nil
+    }
+
+    private func synchronizeDisplayReadiness() {
+      let opacity: CGFloat = !waitsForFirstVideoFrame || isReadyForDisplay ? 1 : 0
+      if alphaValue != opacity { alphaValue = opacity }
+    }
 
     override func viewDidMoveToWindow() {
       super.viewDidMoveToWindow()

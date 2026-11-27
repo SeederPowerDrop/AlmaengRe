@@ -24,8 +24,8 @@ struct RealRAWOverviewFullFolderTests {
     _ = NSApp.setActivationPolicy(.regular)
     defer { _ = NSApp.setActivationPolicy(previousActivationPolicy) }
     let foregroundSeeded = environment["IMAGEVIEWER_RAW_OVERVIEW_FULL_MODE"] == "foreground_seeded"
-    let source = URL(fileURLWithPath: environment["IMAGEVIEWER_RAW_DIRECTORY"]
-      ?? FileManager.default.homeDirectory.appendingPathComponent("Pictures/iPhoneRAW").path, isDirectory: true)
+    let sourcePath = try #require(environment["IMAGEVIEWER_RAW_DIRECTORY"], "Set IMAGEVIEWER_RAW_DIRECTORY to the DNG fixture folder")
+    let source = URL(fileURLWithPath: sourcePath, isDirectory: true)
     let output = URL(fileURLWithPath: environment["IMAGEVIEWER_FULL_OVERVIEW_OUTPUT"]
       ?? FileManager.default.temporaryDirectory
         .appendingPathComponent("ImageViewer-full-overview-\(UUID())").path,

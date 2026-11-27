@@ -7,6 +7,44 @@ import UniformTypeIdentifiers
 
 @Suite("사진과 영상의 개별 확장자 필터")
 struct LibraryMediaFilterTests {
+  @Test("미디어 통합 판정은 모든 지원 확장자·대문자·폴더·ZIP에서 개별 판정과 일치한다")
+  func unifiedMediaKindPreservesContract() {
+    let extensions = MediaFormatRegistry.videoExtensions.union(MediaFormatRegistry.audioExtensions)
+      .union(["png","dng","jpg","","unknown"])
+    for ext in extensions {
+      for suffix in [ext,ext.uppercased()] {
+        for directory in [false,true] {
+          let url = URL(fileURLWithPath: "/fixture/file.\(suffix)",isDirectory: directory)
+          let asset = ImageAsset(url: url,byteCount: 100,modificationDate: nil)
+          #expect(asset.isPlaybackMedia == (asset.isVideo || asset.isAudio))
+          #expect(MediaFormatRegistry.isPlaybackMedia(url) == (MediaFormatRegistry.isVideo(url) || MediaFormatRegistry.isAudio(url)))
+          var archived = asset
+          archived.archiveOrigin = ArchiveImageOrigin(archiveURL: URL(fileURLWithPath: "/archive.zip"),entryPath: "file.\(suffix)")
+          #expect(!archived.isPlaybackMedia)
+        }
+      }
+    }
+  }
+
+  @Test("미리 준비한 미디어 조건이 공백·대소문자·별칭·ZIP·확장자 없는 이름에서 기존 조건과 같다")
+  func preparedPredicateMatchesExistingContract() {
+    var samples = assets + ["sound.M4A","song.wav","RAW.DNG","no_extension","folder.mp4/"].map {
+      ImageAsset(url: URL(fileURLWithPath: "/synthetic/\($0)"),byteCount: 100,modificationDate: nil)
+    }
+    samples.append(ImageAsset(url: URL(fileURLWithPath: "/extracted/cache.png"),byteCount: 100,
+      modificationDate: nil,archiveOrigin: ArchiveImageOrigin(archiveURL: URL(fileURLWithPath: "/archive.zip"),entryPath: "photo.DNG")))
+    let extensionSets: [Set<String>] = [[],[""],["*"],["*.PNG"," png ",".MP4"],["%M4A%","DNG","*.jpg"]]
+    for kind in LibraryMediaKind.allCases {
+      for formats: Set<ImageFormatFilter> in [[],[.other],[.jpeg,.raw]] {
+        for extensions in extensionSets {
+          let query = LibraryQuery(formats: formats,mediaKind: kind,fileExtensions: extensions)
+          let prepared = PreparedLibraryMediaPredicate(query: query)
+          #expect(samples.filter(prepared.matches) == samples.filter { LibraryMediaFilter.matches($0,query: query) })
+        }
+      }
+    }
+  }
+
   private let assets = ["photo.jpg", "photo.png", "clip.mp4", "clip.mov", "extra.qoi"].map {
     ImageAsset(url: URL(fileURLWithPath: "/synthetic/\($0)"), byteCount: 100, modificationDate: nil)
   }

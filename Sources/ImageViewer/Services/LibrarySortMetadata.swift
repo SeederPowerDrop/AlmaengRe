@@ -261,7 +261,7 @@ enum LibrarySortMetadataReader {
 
 private final class SortPlaybackMetadataRequest: @unchecked Sendable {
   private let asset: AVURLAsset
-  init(url: URL) { asset = AVURLAsset(url: url) }
+  init(url: URL) { asset = NativeVideoAsset.make(url: url) }
 
   func value() async throws -> LibrarySortMetadata {
     try await withTaskCancellationHandler {
@@ -303,22 +303,29 @@ private final class SortPlaybackMetadataRequest: @unchecked Sendable {
           }
         }
         var searchable: [String] = [], places: [String] = [], remaining = 8_192
+        let locationIdentifiers: Set<AVMetadataIdentifier> = [
+          .quickTimeMetadataLocationISO6709, .quickTimeUserDataLocationISO6709,
+          .commonIdentifierLocation,
+          // AVFoundation exposes MP4/M4A's 3GPP 'loci' atom in ISO user data.
+          AVMetadataIdentifier(rawValue: "uiso/loci"),
+        ]
         for item in items.prefix(128) {
           try Task.checkCancellation()
-          guard remaining > 0 else { break }
+          let isLocation = item.identifier.map(locationIdentifiers.contains) == true
+          guard remaining > 0 || isLocation else { continue }
           guard let value = LibrarySortMetadataReader.boundedText(try? await item.load(.stringValue)) else { continue }
           let identifier = item.identifier?.rawValue ?? ""
-          let line = String((identifier + " " + value).prefix(remaining))
-          searchable.append(line); remaining -= line.count + 1
-          if identifier.lowercased().contains("location") { places.append(value) }
+          if remaining > 0 {
+            let line = String((identifier + " " + value).prefix(remaining))
+            searchable.append(line); remaining -= line.count + 1
+          }
+          if identifier.lowercased().contains("location") || isLocation { places.append(value) }
+          if isLocation, result.embeddedLocation == nil {
+            result.embeddedLocation = LibrarySortMetadataReader.iso6709Location(value)
+          }
         }
         result.additionalSearchText = searchable.isEmpty ? nil : searchable.joined(separator: "\n")
         result.locationText = places.isEmpty ? nil : places.joined(separator: "\n")
-        if let location = AVMetadataItem.metadataItems(from: items,
-          filteredByIdentifier: .quickTimeMetadataLocationISO6709).first,
-          let value = try? await location.load(.stringValue) {
-          result.embeddedLocation = LibrarySortMetadataReader.iso6709Location(value)
-        }
       }
       try Task.checkCancellation()
       return result

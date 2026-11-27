@@ -2,6 +2,7 @@ import AppKit
 import CryptoKit
 import Darwin
 import Foundation
+@preconcurrency import AVKit
 @preconcurrency import MapKit
 
 /// Explicit installed-app diagnostics only. Production budgets and source files
@@ -45,6 +46,7 @@ enum SustainedPerformanceValidation {
 enum SustainedPerformanceAction: String, CaseIterable, Codable, Hashable, Sendable {
   case mixedOverview, fourPhotos, sixPhotos, filenameFilter, metadataFilter, mapSelection
   case videoOverview, fourVideos, sixVideos
+  case rapidQueries, comparisonQueries, audioPlayback
 }
 
 enum SustainedPerformancePlan {
@@ -55,6 +57,12 @@ enum SustainedPerformancePlan {
   static let actions = SustainedPerformanceAction.allCases
   static let maximumLogRecords = 12_000
   static let maximumLogBytes = 32 * 1_024 * 1_024
+  static func requestedDuration(environment: [String: String]) -> Double? {
+    guard let raw = environment["IMAGEVIEWER_SUSTAINED_SECONDS"] else { return minimumDurationSeconds }
+    guard let value = Double(raw), value.isFinite,
+      value >= minimumDurationSeconds, value <= maximumDurationSeconds else { return nil }
+    return value
+  }
   // ManualViewerQAContext constructs ThumbnailDiskCache with these unchanged
   // production defaults. Test each tier independently, as well as the sum.
   static let previewDiskByteLimit = 128 * 1_024 * 1_024
@@ -291,6 +299,8 @@ private final class SustainedPerformanceRun {
     let resident: UInt64?
     let queued: Int
     let running: Int
+    let queryRunning: Int
+    let queryQueued: Int
     let ownForeground: Bool
     let windowVisible: Bool
     let referencePresented: Bool
@@ -343,7 +353,7 @@ private final class SustainedPerformanceRun {
   private var recordCount = 0
   private var loggingFailed = false
   private var sampleTask: Task<Void, Never>?
-  private var pressureSource: (any DispatchSourceMemoryPressure)?
+  private var pressureMonitor: ImageMemoryPressureMonitor?
   private var observedPressure: ImageResourcePressure?
   private var previousTicks: ImageCPUTicks?
   private var began = 0.0
@@ -443,6 +453,9 @@ private final class SustainedPerformanceRun {
         "version": Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "unknown",
         "processID": getpid(), "sourceFiles": sourceBefore?.entries.count ?? 0,
         "allAssets": store.allAssets.count, "videoAssets": store.allAssets.filter(\.isVideo).count,
+        "audioAssets": store.allAssets.filter(\.isAudio).count,
+        "queryConcurrencyLimit": LibraryQueryExecutor.shared.maximumConcurrentTasks,
+        "requiredActions": SustainedPerformancePlan.actions.map(\.rawValue),
         "sourceInventoryDigest": sourceBefore?.digest ?? "", "normalPreferencesDigest": normalPreferencesBefore,
         "privateDefaultsSuiteHash": SustainedMetadataDigest.hash(Data(privateSuite.utf8)),
         "sourcePathsExported": false, "sourcePixelsExported": false,
@@ -475,7 +488,7 @@ private final class SustainedPerformanceRun {
       stopReason = (error as? SustainedFailure)?.phase ?? "sustained_setup_error"
     }
     let task = sampleTask; sampleTask?.cancel(); sampleTask = nil; await task?.value
-    pressureSource?.setEventHandler {}; pressureSource?.cancel(); pressureSource = nil
+    pressureMonitor = nil
     if observerInstalled { ViewerFrameLoader.diagnosticPresentationObserver = previousObserver }
     posterObservation?.stop(); posterObservation = nil
     let measuredWall = began > 0 ? elapsed : 0
@@ -765,6 +778,67 @@ private final class SustainedPerformanceRun {
         details["locatedItems"] = located.count
         details["nativeProgrammaticPinSelectionAttempted"] = !annotations.isEmpty
         details["tileNetworkPaintMeasured"] = false
+      case .rapidQueries:
+        for index in 0..<24 {
+          store.libraryQuery = index.isMultiple(of: 2)
+            ? LibraryQuery(searchText: "*\(index % 10)*") : LibraryQuery(mediaKind: .videos)
+          try await Task.sleep(for: .milliseconds(8)); try checkBudgetAndDeadline()
+        }
+        let final = LibraryQuery(sort: .nameDescending)
+        let lastInput = now
+        store.libraryQuery = final; try await ready(30)
+        let expected = try RustImageEngine.query(store.allAssets, options: final)
+        try require(store.assets.map(\.id) == expected.map(\.id), "rapid_query_stale_result")
+        details = ["inputChanges": 25, "latestResultMatches": true,
+          "lastInputToCommitSeconds": now-lastInput, "includesInputDebounce": true]
+      case .comparisonQueries:
+        let comparison = store.folderComparison
+        store.presentationMode = .folderComparison
+        comparison.first.open(urls: [source]); comparison.second.open(urls: [source])
+        for index in 0..<16 {
+          comparison.first.query = LibraryQuery(searchText: index.isMultiple(of: 2) ? "*1*" : "*2*")
+          comparison.second.query = LibraryQuery(mediaKind: index.isMultiple(of: 2) ? .images : .videos)
+          try await Task.sleep(for: .milliseconds(8)); try checkBudgetAndDeadline()
+        }
+        let first = LibraryQuery(sort: .nameDescending, mediaKind: .images)
+        let second = LibraryQuery(mediaKind: .videos)
+        comparison.first.query = first; comparison.second.query = second
+        try await wait(60) {
+          !comparison.first.isLoading && !comparison.second.isLoading
+            && !comparison.first.isFiltering && !comparison.second.isFiltering && !comparison.isMatching
+        }
+        let a = try RustImageEngine.query(store.allAssets, options: first)
+        let b = try RustImageEngine.query(store.allAssets, options: second)
+        try require(comparison.first.errorMessage == nil && comparison.second.errorMessage == nil
+          && comparison.first.assets.map(\.id) == a.map(\.id)
+          && comparison.second.assets.map(\.id) == b.map(\.id), "comparison_query_stale_result")
+        details = ["inputChanges": 34, "latestResultMatches": true,
+          "firstMatches": a.count, "secondMatches": b.count]
+        store.presentationMode = .overview
+      case .audioPlayback:
+        try require(NSApp.isActive, "environment_not_foreground_for_audio")
+        store.libraryQuery = LibraryQuery(mediaKind: .audio); try await ready(30)
+        try require(!store.assets.isEmpty, "audio_source_required")
+        store.presentationMode = .viewer; store.setImagesPerPage(1); store.select(index: 0)
+        store.videoGridPlayback.playAll()
+        try await wait(20) {
+          guard let content = self.window?.contentView else { return false }
+          return self.descendants(AVPlayerView.self, in: content).contains { $0.player?.currentItem?.status == .readyToPlay }
+        }
+        guard let content = window?.contentView,
+          let player = descendants(AVPlayerView.self, in: content).compactMap(\.player).first else {
+          throw SustainedFailure("audio_native_player_missing")
+        }
+        player.isMuted = true
+        let startTime = player.currentTime().seconds
+        try await pause(0.7)
+        let endTime = player.currentTime().seconds
+        try require(endTime.isFinite && startTime.isFinite && endTime > startTime + 0.05,
+          "audio_clock_not_advancing")
+        store.videoGridPlayback.pauseAll(); store.presentationMode = .overview
+        try await wait(15) { player.currentItem == nil && player.rate == 0 }
+        details = ["clockAdvanced": true, "oldItemReleased": true, "muted": player.isMuted,
+          "clockAdvanceSeconds": endTime-startTime, "audioSourceCount": store.assets.count]
       }
       actionCounts[action.rawValue, default: 0] += 1
     } catch { failure = (error as? SustainedFailure)?.phase ?? "mixed_action_error" }
@@ -809,7 +883,8 @@ private final class SustainedPerformanceRun {
       while now < idleDeadline {
         try Task.checkCancellation()
         let queue = await store.loadingGovernor.stateSnapshot()
-        if queue.runningCount == 0 && queue.queuedCount == 0 {
+        let query = await LibraryQueryExecutor.shared.stateSnapshot()
+        if queue.runningCount == 0 && queue.queuedCount == 0 && query.runningCount == 0 && query.queuedCount == 0 {
           if idleSince == nil { idleSince = now }
           if now - (idleSince ?? now) >= 1 { stableQueue = true; break }
         } else { idleSince = nil }
@@ -823,7 +898,7 @@ private final class SustainedPerformanceRun {
     let samples = quietWasStarted ? recentSamples.filter { $0.elapsed >= quietStart - began } : []
     let comparable = quietWasStarted && failure.isEmpty && stableQueue && !samples.isEmpty && samples.allSatisfy {
       $0.referencePresented && $0.referenceGeometryMatches && $0.ownForeground && $0.windowVisible
-        && $0.queued == 0 && $0.running == 0
+        && $0.queued == 0 && $0.running == 0 && $0.queryRunning == 0 && $0.queryQueued == 0
     }
     let footprints = samples.compactMap(\.footprint).sorted()
     let residents = samples.compactMap(\.resident).sorted()
@@ -848,6 +923,8 @@ private final class SustainedPerformanceRun {
       "RSSMedianBytes": SustainedPerformancePlan.medianByteCount(residents),
       "sampledCPUPercentOneCoreP95": releaseOverviewPercentile(cpus, fraction: 0.95),
       "queuedMaximum": samples.map(\.queued).max() ?? 0, "runningMaximum": samples.map(\.running).max() ?? 0,
+      "queryQueuedMaximum": samples.map(\.queryQueued).max() ?? 0,
+      "queryRunningMaximum": samples.map(\.queryRunning).max() ?? 0,
       "thermalRawValues": Array(Set(samples.map(\.thermal))).sorted(),
       "quietBudgetsValid": samples.allSatisfy(\.budgetsValid),
       "sampleScope": "same_current_photo_version_accepted_precise_native_CGImage_and_window_geometry_not_physical_paint"]
@@ -866,7 +943,9 @@ private final class SustainedPerformanceRun {
     async let thumbnails = store.thumbnailPipeline.cacheSnapshot()
     async let disk = store.thumbnailPipeline.diskCacheSnapshot()
     async let queue = store.loadingGovernor.stateSnapshot()
+    async let queries = LibraryQueryExecutor.shared.stateSnapshot()
     let (renderedCache, thumbCache, diskCache, work) = await (rendered, thumbnails, disk, queue)
+    let query = await queries
     let at = now, cpu = Self.cpuSeconds(), interval = max(0.000_001, at - lastSample)
     let cpuPercent = max(0, cpu - lastCPU) / interval * 100
     let ticks = ImageCPUTicks.read()
@@ -889,6 +968,7 @@ private final class SustainedPerformanceRun {
     let thermal = ProcessInfo.processInfo.thermalState.rawValue
     let sample = Sample(elapsed: at - began, cpu: cpu, intervalCPU: cpuPercent,
       footprint: footprint, resident: resident, queued: work.queuedCount, running: work.runningCount,
+      queryRunning: query.runningCount, queryQueued: query.queuedCount,
       ownForeground: ownForeground, windowVisible: visible, referencePresented: referencePresented(),
       referenceGeometryMatches: referenceGeometryMatches(), budgetsValid: budgets, thermal: thermal)
     recentSamples.append(sample)
@@ -903,6 +983,9 @@ private final class SustainedPerformanceRun {
       "sampleIntervalSeconds": interval, "processCPUSecondsSinceStart": max(0, cpu - initialCPU),
       "intervalCPUPercentOneCore": cpuPercent, "runningOperations": work.runningCount,
       "queuedOperations": work.queuedCount, "waiters": work.waiterCount,
+      "queryRunningOperations": query.runningCount, "queryQueuedOperations": query.queuedCount,
+      "queryWaiters": query.waiterCount,
+      "queryConcurrencyLimit": LibraryQueryExecutor.shared.maximumConcurrentTasks,
       "renderedBitmapRAMBytes": renderedCache.byteCount, "renderedBitmapRAMLimit": renderedCache.byteLimit,
       "thumbnailRAMBytes": thumbCache.byteCount, "thumbnailRAMLimit": thumbCache.byteLimit,
       "diskAccountingComplete": diskCache?.isComplete ?? false, "diskSnapshotAvailable": diskCache != nil, "diskBytes": diskCache?.byteCount ?? 0,
@@ -1044,14 +1127,9 @@ private final class SustainedPerformanceRun {
       .write(to: output.appendingPathComponent(name), options: .atomic)
   }
   private func startPressureObservation() {
-    let source = DispatchSource.makeMemoryPressureSource(eventMask: [.normal, .warning, .critical], queue: .global(qos: .utility))
-    pressureSource = source
-    source.setEventHandler { [weak self] in
-      let data = source.data
-      let level: ImageResourcePressure = data.contains(.critical) ? .critical : data.contains(.warning) ? .warning : .normal
-      Task { @MainActor [weak self] in self?.observedPressure = level }
-    }
-    source.resume()
+    pressureMonitor = ImageMemoryPressureMonitor(handler: SustainedPressureCallback.make { [weak self] level in
+      self?.observedPressure = level
+    })
   }
   private func restoreOriginalPrivateState() async {
     guard let original else { return }

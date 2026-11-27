@@ -18,3 +18,9 @@
 
 "selection.focused" = "键盘导航位置";
 "selection.overviewHelp" = "⌘点按：选择或取消\n⌘方向键：移动并切换目标项目的选择状态\n⇧点按 / ⇧方向键：选择范围\n⌘⇧点按 / ⌘⇧方向键：将范围添加到现有选择";
+"selection.view.title" = "仅查看所选文件";
+"selection.view.single" = "逐个查看";
+"selection.view.multiple" = "同时查看多个";
+"selection.view.active" = "正在查看所选的%d个文件";
+"selection.view.return" = "返回总览";
+"selection.view.help" = "仅浏览所选文件。返回后保留原来的选择和列表位置。";

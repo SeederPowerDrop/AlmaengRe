@@ -193,10 +193,12 @@ struct StudyVideoPlayerView: View {
   @ObservedObject var playback: VideoPlaybackState
   var isInteractive = true
   var onDoubleClick: (() -> Void)? = nil
+  var waitsForFirstVideoFrame = false
 
   var body: some View {
     NativeVideoPlayerView(player: playback.player, isInteractive: isInteractive,
-      onDoubleClick: onDoubleClick, showsFullScreenToggleButton: false)
+      onDoubleClick: onDoubleClick, showsFullScreenToggleButton: false,
+      waitsForFirstVideoFrame: waitsForFirstVideoFrame)
       .overlay {
         if let session = playback.study, let document = playback.document {
           VideoSubtitleOverlay(session: session, seconds: playback.currentSeconds,

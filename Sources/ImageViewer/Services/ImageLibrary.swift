@@ -188,18 +188,15 @@ actor ImageLibrary {
         try Task.checkCancellation()
       }
       if result[index].hasReadLocation || result[index].location != nil { continue }
-      if result[index].isPlaybackMedia {
-        // Playback-media GPS metadata is outside the supported map scope. Do not feed a
-        // video or audio file into ImageIO or retry a negative lookup on every filter change.
-        result[index].hasReadLocation = true
-        continue
-      }
       let version = LibrarySortFileVersion(url: result[index].url)
       let metadata: LibrarySortMetadata
       if let retained = result[index].sortMetadata, result[index].sortMetadataVersion == version {
         metadata = retained
       } else {
-        metadata = try await cache.metadata(for: version, isVideo: false, governor: governor)
+        // The shared metadata cache routes video/audio through AVFoundation,
+        // retaining both positive and negative GPS lookups without decoding media.
+        metadata = try await cache.metadata(for: version,
+          isVideo: result[index].isPlaybackMedia, governor: governor)
       }
       try Task.checkCancellation()
       // A source can be edited or replaced while its header is being inspected.

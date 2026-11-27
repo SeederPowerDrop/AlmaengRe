@@ -210,12 +210,17 @@ final class FolderComparisonPane: ObservableObject {
   var onCollectionOpened: ((OpenedImageLibrary, [URL]) -> Void)?
 
   private let library = ImageLibrary()
+  private let querySession: RustQuerySession
+  private let queryExecutor: LibraryQueryExecutor
   private let loadingGovernor: ImageResourceGovernor?
   private var loadTask: Task<Void, Never>?
   private var loadGeneration = UUID()
   private var access: [ImageLibraryAccess] = []
 
-  init(photoMarks: PhotoMarkStore? = nil, loadingGovernor: ImageResourceGovernor? = nil) {
+  init(photoMarks: PhotoMarkStore? = nil, loadingGovernor: ImageResourceGovernor? = nil,
+    queryReusePool: RustQueryReusePool? = nil, queryExecutor: LibraryQueryExecutor = .shared) {
+    self.queryExecutor = queryExecutor
+    querySession = RustQuerySession(pool: queryReusePool ?? RustQueryReusePool())
     self.photoMarks = photoMarks
     self.loadingGovernor = loadingGovernor
     markSubscription = photoMarks?.$revision.dropFirst().sink { [weak self] _ in
@@ -301,7 +306,7 @@ final class FolderComparisonPane: ObservableObject {
     onContentsChanged?()
     loadTask = Task { [weak self, library] in
       do {
-        let opened = try await library.open(urls: urls, allowsEmptyFolder: true)
+        let opened = try await library.open(urls: urls, allowsEmptyFolder: true, includesVideos: true)
         try Task.checkCancellation()
         guard let self, self.loadGeneration == generation else { return }
         self.access = opened.access
@@ -353,6 +358,7 @@ final class FolderComparisonPane: ObservableObject {
   }
 
   func cancelLoad() {
+    querySession.reset()
     loadGeneration = UUID()
     loadTask?.cancel()
     loadTask = nil
@@ -371,6 +377,8 @@ final class FolderComparisonPane: ObservableObject {
     queryGeneration = UUID()
     let generation = queryGeneration
     let source = allAssets
+    let querySession = querySession
+    let queryExecutor = queryExecutor
     let options = query
     let selectedID = currentAsset?.sessionID
     let needsLocations = (options.sort.requiresLocation || options.geographicSelection != nil)
@@ -395,13 +403,10 @@ final class FolderComparisonPane: ObservableObject {
         let prepared = try await library.enrichQueryMetadata(located, for: options,
           governor: loadingGovernor)
         try Task.checkCancellation()
-        let work = Task.detached(priority: .userInitiated) {
+        let queried = try await queryExecutor.value {
           try Task.checkCancellation()
-          return try RustImageEngine.query(prepared, options: options)
+          return try RustImageEngine.query(prepared, options: options, session: querySession)
         }
-        let queried = try await withTaskCancellationHandler {
-          try await work.value
-        } onCancel: { work.cancel() }
         try Task.checkCancellation()
         guard let self, self.queryGeneration == generation else { return }
         self.needsSourceReconciliation = false
@@ -626,15 +631,21 @@ final class FolderComparisonStore: ObservableObject {
   private var isChoosingPair = false
   private var matchTask: Task<Void, Never>?
   private var matchGeneration = UUID()
+  private let queryExecutor: LibraryQueryExecutor
   private var restoreGeneration = UUID()
   private var isRestoringSession = false
   private var isSynchronizingNavigationTarget = false
 
   init(defaults: UserDefaults = .standard, alignment: ComparisonAlignment? = nil,
-    photoMarks: PhotoMarkStore? = nil, loadingGovernor: ImageResourceGovernor? = nil
+    photoMarks: PhotoMarkStore? = nil, loadingGovernor: ImageResourceGovernor? = nil,
+    queryReusePool: RustQueryReusePool? = nil, queryExecutor: LibraryQueryExecutor = .shared
   ) {
-    first = FolderComparisonPane(photoMarks: photoMarks, loadingGovernor: loadingGovernor)
-    second = FolderComparisonPane(photoMarks: photoMarks, loadingGovernor: loadingGovernor)
+    self.queryExecutor = queryExecutor
+    let pool = queryReusePool ?? RustQueryReusePool()
+    first = FolderComparisonPane(photoMarks: photoMarks, loadingGovernor: loadingGovernor,
+      queryReusePool: pool, queryExecutor: queryExecutor)
+    second = FolderComparisonPane(photoMarks: photoMarks, loadingGovernor: loadingGovernor,
+      queryReusePool: pool, queryExecutor: queryExecutor)
     self.defaults = defaults
     let savedAlignment = alignment ?? defaults.string(forKey: "ImageViewer.ComparisonAlignment.v1")
       .flatMap(ComparisonAlignment.init(rawValue:)) ?? .sequence
@@ -682,19 +693,17 @@ final class FolderComparisonStore: ObservableObject {
     let selectedA = first.currentAsset?.sessionID
     let selectedB = second.currentAsset?.sessionID
     let sort = query.sort
+    let queryExecutor = queryExecutor
     let generation = matchGeneration
     isMatching = true
     matchTask = Task { [weak self] in
       do {
         await Task.yield()
         try Task.checkCancellation()
-        let work = Task.detached(priority: .userInitiated) {
+        let result = try await queryExecutor.value {
           try Task.checkCancellation()
           return try RustImageEngine.match(first: a, second: b, sort: sort)
         }
-        let result = try await withTaskCancellationHandler {
-          try await work.value
-        } onCancel: { work.cancel() }
         try Task.checkCancellation()
         guard let self, self.matchGeneration == generation else { return }
         self.pairs = result
@@ -774,7 +783,7 @@ final class FolderComparisonStore: ObservableObject {
   }
 
   func chooseItems(for side: FolderComparisonSide, selectItems: @MainActor () -> [URL]? = {
-    let panel = ImageOpenPanel.make()
+    let panel = ImageOpenPanel.make(includesVideos: true)
     return panel.runModal() == .OK ? panel.urls : nil
   }) {
     guard !isEditingControls, !pane(side).isLocked else { return }
@@ -816,8 +825,7 @@ final class FolderComparisonStore: ObservableObject {
     initialFilter: PhotoMarkFilter
   ) -> Bool {
     guard !isEditingControls, !first.isLocked, !second.isLocked else { return false }
-    let images = assets.filter { !$0.isPlaybackMedia }
-    guard !images.isEmpty else { return false }
+    guard !assets.isEmpty else { return false }
     resetLiveInput()
     restoreGeneration = UUID()
     editingPhotoMarkSide = nil
@@ -825,9 +833,9 @@ final class FolderComparisonStore: ObservableObject {
     navigationTarget = .both
     activeSide = .first
     self.query = query
-    first.useOpenedCollection(images, folder: folderURL, sources: sources, grants: access,
+    first.useOpenedCollection(assets, folder: folderURL, sources: sources, grants: access,
       options: query, filter: initialFilter)
-    second.useOpenedCollection(images, folder: folderURL, sources: sources, grants: access,
+    second.useOpenedCollection(assets, folder: folderURL, sources: sources, grants: access,
       options: query, filter: PhotoMarkFilter())
     return true
   }
@@ -959,7 +967,7 @@ final class FolderComparisonStore: ObservableObject {
 
   func updateZoom(_ multiplier: CGFloat, on side: FolderComparisonSide? = nil) {
     let side = side ?? activeSide
-    guard !pane(side).isLocked, multiplier.isFinite, multiplier > 0 else { return }
+    guard canAdjustImageViewport(on: side), multiplier.isFinite, multiplier > 0 else { return }
     if activeSide != side { activeSide = side }
     let active = pane(side)
     active.viewport.update {
@@ -969,9 +977,15 @@ final class FolderComparisonStore: ObservableObject {
     if linksViewport { copyActiveViewport() }
   }
 
+  private func canAdjustImageViewport(on side: FolderComparisonSide) -> Bool {
+    let target = pane(side)
+    return !target.isLocked && target.currentAsset?.isPlaybackMedia != true
+  }
+
   func canPan(on side: FolderComparisonSide) -> Bool {
     let target = pane(side)
-    return !target.isLocked && (target.zoom > 1 || target.scaleMode.canOverflowAtBaseScale)
+    return canAdjustImageViewport(on: side)
+      && (target.zoom > 1 || target.scaleMode.canOverflowAtBaseScale)
   }
 
   /// 비교 모드에서는 설정과 관계없이 트랙패드 두 손가락 이동을 항상 제공합니다.
@@ -1003,18 +1017,18 @@ final class FolderComparisonStore: ObservableObject {
 
   func setScale(_ mode: BaseScaleMode) {
     let active = pane(activeSide)
-    guard !active.isLocked else { return }
+    guard canAdjustImageViewport(on: activeSide) else { return }
     resetLiveInput()
     active.viewport.update { $0.scaleMode = mode; $0.zoom = 1; $0.normalizedPan = .zero }
     if linksViewport { copyActiveViewport() }
   }
 
   func centerImage() {
-    guard !pane(activeSide).isLocked else { return }
+    guard canAdjustImageViewport(on: activeSide) else { return }
     let sides = linksViewport ? FolderComparisonSide.allCases : [activeSide]
     // Preserve the size currently on screen even if a pinch is still active.
     // Centering must not replace a pane's fit mode or the locked reference.
-    let targets = sides.filter { !pane($0).isLocked }.map { ($0, effectiveZoom(on: $0)) }
+    let targets = sides.filter { canAdjustImageViewport(on: $0) }.map { ($0, effectiveZoom(on: $0)) }
     resetLiveInput()
     for (side, zoom) in targets {
       pane(side).viewport.update { $0.zoom = zoom; $0.normalizedPan = .zero }
@@ -1048,7 +1062,7 @@ final class FolderComparisonStore: ObservableObject {
 
   private func copyActiveViewport() {
     let source = pane(activeSide), destination = pane(activeSide == .first ? .second : .first)
-    guard !source.isLocked, !destination.isLocked else { return }
+    guard canAdjustImageViewport(on: .first), canAdjustImageViewport(on: .second) else { return }
     destination.viewport.update {
       $0.zoom = source.zoom
       $0.normalizedPan = source.normalizedPan
@@ -1057,7 +1071,7 @@ final class FolderComparisonStore: ObservableObject {
   }
 
   func updateLiveMagnification(_ value: CGFloat, on side: FolderComparisonSide) {
-    guard !pane(side).isLocked, value.isFinite, value > 0 else { return }
+    guard canAdjustImageViewport(on: side), value.isFinite, value > 0 else { return }
     let startsGesture = gestureSide != side
     prepareLiveInput(on: side)
     isMagnifying = true
@@ -1107,7 +1121,7 @@ final class FolderComparisonStore: ObservableObject {
   }
 
   func endLiveMagnification(_ value: CGFloat, on side: FolderComparisonSide) {
-    guard !pane(side).isLocked, value.isFinite, value > 0 else { return }
+    guard canAdjustImageViewport(on: side), value.isFinite, value > 0 else { return }
     updateLiveMagnification(value, on: side)
     isMagnifying = false
     commitLiveTransform(on: side)
@@ -1149,7 +1163,8 @@ final class FolderComparisonStore: ObservableObject {
   }
 
   func showsLiveInput(on side: FolderComparisonSide) -> Bool {
-    guard let gestureSide, !pane(gestureSide).isLocked, !pane(side).isLocked else { return false }
+    guard let gestureSide, canAdjustImageViewport(on: gestureSide),
+      canAdjustImageViewport(on: side) else { return false }
     return gestureSide == side || linksViewport
   }
 

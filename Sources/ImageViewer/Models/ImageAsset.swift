@@ -24,7 +24,7 @@ struct ImageAsset: Identifiable, Hashable, Sendable {
   var isReadOnly: Bool { archiveOrigin != nil }
   var isVideo: Bool { archiveOrigin == nil && MediaFormatRegistry.isVideo(url) }
   var isAudio: Bool { archiveOrigin == nil && MediaFormatRegistry.isAudio(url) }
-  var isPlaybackMedia: Bool { isVideo || isAudio }
+  var isPlaybackMedia: Bool { archiveOrigin == nil && MediaFormatRegistry.isPlaybackMedia(url) }
   var sessionID: String {
     guard let archiveOrigin else { return url.standardizedFileURL.absoluteString }
     return archiveOrigin.archiveURL.standardizedFileURL.absoluteString + "#" + archiveOrigin.entryPath

@@ -7,6 +7,10 @@ struct BatchActionsMenu: View {
 
   var body: some View {
     Menu {
+      if store.presentationMode == .overview {
+        SelectionViewingMenuItems(store: store)
+        Divider()
+      }
       Button { store.presentSelectionClassification() } label: {
         Label(BatchActionsL10n.text("classify.menu"), systemImage: "tag")
       }

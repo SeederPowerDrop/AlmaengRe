@@ -82,13 +82,13 @@
 "color.gray" = "Grau";
 
 /* Independent tag filters for comparison panes. */
-"comparison.open" = "Aktuelle Fotos nach Markierung vergleichen";
+"comparison.open" = "Aktuelle Dateien nach Kategorien vergleichen";
 "comparison.openHelp" = "Öffnet die aktuelle Quellsammlung in A und B. Such-, Format- und Kartenbereichsfilter bleiben erhalten. Wähle Markierungen für jeden Bereich getrennt aus.";
 "comparison.filter" = "Markierungen wählen";
-"comparison.allPhotos" = "Alle Fotos";
+"comparison.allPhotos" = "Alle Dateien";
 "comparison.titleFormat" = "Markierungen für Bereich %@";
-"comparison.selectionHelp" = "Wähle mehrere Markierungen aus, die in diesem Bereich angezeigt werden sollen. Dasselbe Foto kann auf beiden Seiten erscheinen.";
-"comparison.empty" = "Keine Fotos entsprechen diesen Bedingungen.";
+"comparison.selectionHelp" = "Wählen Sie die Kategorien für diesen Bereich. Dieselbe Datei kann auf beiden Seiten erscheinen.";
+"comparison.empty" = "Keine Dateien entsprechen diesen Bedingungen.";
 "comparison.emptyHelp" = "Ändere die Markierungen oder prüfe die gemeinsamen Such-, Format- und Kartenbereichsfilter.";
 "comparison.reset" = "Markierungsfilter dieses Bereichs aufheben";
 

@@ -8,9 +8,11 @@
 
 *알맹Re 메인 화면 · 합성 데모 사진을 연 0.13.1 개발 버전 화면입니다.*
 
-**[1.2 DMG 다운로드 / Download 1.2](https://github.com/SeederPowerDrop/AlmaengRe/releases/download/v1.2/AlmaengRe-1.2-macos-arm64.dmg)** · [릴리스 / Release notes](https://github.com/SeederPowerDrop/AlmaengRe/releases/tag/v1.2) · [SHA-256](https://github.com/SeederPowerDrop/AlmaengRe/releases/download/v1.2/SHA256SUMS.txt)
+**[1.2.1 ZIP 다운로드 / Download 1.2.1](https://github.com/SeederPowerDrop/AlmaengRe/releases/download/v1.2.1/AlmaengRe-1.2.1-macos-arm64.zip)** · [릴리스 / Release notes](https://github.com/SeederPowerDrop/AlmaengRe/releases/tag/v1.2.1) · [SHA-256](https://github.com/SeederPowerDrop/AlmaengRe/releases/download/v1.2.1/SHA256SUMS.txt)
 
-**macOS 14 이상 · Apple Silicon**. DMG를 열고 **알맹Re.app**을 **Applications**로 드래그합니다. 메뉴 막대의 **언어**나 일반 설정에서 지원하는 10개 언어를 고를 수 있습니다. 배포본은 ad-hoc 서명되어 있어 macOS가 첫 실행을 제한할 수 있습니다.
+**macOS 14 이상 · Apple Silicon**. ZIP 압축을 풀고 **알맹Re.app**을 **Applications**로 옮깁니다. 메뉴 막대의 **언어**나 일반 설정에서 지원하는 10개 언어를 고를 수 있습니다. 배포본은 ad-hoc 서명되어 있어 macOS가 첫 실행을 제한할 수 있습니다.
+
+1.2.1은 영상·음성 미리 재생, 선택한 항목만 보기, VP9 재생, RAW 편집의 메모리 정리, HDR HEIC 저장을 개선합니다. [1.2.1 변경 사항과 검증 범위](docs/RELEASE_1_2_1.md)
 
 ## 핵심 기능 화면으로 보기
 

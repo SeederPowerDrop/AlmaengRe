@@ -26,7 +26,7 @@ actor VideoExporter {
     guard seconds.isFinite, seconds >= 0, seconds < document.durationSeconds else {
       throw VideoProcessingError.invalidFrameTime
     }
-    let asset = AVURLAsset(url: sourceURL, options: [AVURLAssetPreferPreciseDurationAndTimingKey: true])
+    let asset = NativeVideoAsset.make(url: sourceURL, preciseTiming: true)
     let generator = AVAssetImageGenerator(asset: asset)
     generator.appliesPreferredTrackTransform = true
     generator.requestedTimeToleranceBefore = .zero
@@ -72,7 +72,7 @@ actor VideoExporter {
     guard document.isExportable else { throw VideoProcessingError.notExportable }
     try range.validate(durationSeconds: document.durationSeconds)
     try Task.checkCancellation()
-    let asset = AVURLAsset(url: sourceURL, options: [AVURLAssetPreferPreciseDurationAndTimingKey: true])
+    let asset = NativeVideoAsset.make(url: sourceURL, preciseTiming: true)
     guard let session = AVAssetExportSession(asset: asset, presetName: options.preset.avPresetName) else {
       throw VideoProcessingError.unsupportedPreset
     }

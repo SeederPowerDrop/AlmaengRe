@@ -320,8 +320,8 @@ struct RealRAWOverviewRevisitTests {
   }
 
   private func fixtures() throws -> [ImageAsset] {
-    let path = ProcessInfo.processInfo.environment["IMAGEVIEWER_RAW_DIRECTORY"]
-      ?? FileManager.default.homeDirectory.appendingPathComponent("Pictures/iPhoneRAW").path
+    let path = try #require(ProcessInfo.processInfo.environment["IMAGEVIEWER_RAW_DIRECTORY"],
+      "Set IMAGEVIEWER_RAW_DIRECTORY to the DNG fixture folder")
     let urls = try FileManager.default.contentsOfDirectory(
       at: URL(fileURLWithPath: path, isDirectory: true),
       includingPropertiesForKeys: [.fileSizeKey, .contentModificationDateKey, .isRegularFileKey],

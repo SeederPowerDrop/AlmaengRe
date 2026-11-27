@@ -126,6 +126,9 @@ actor ImageExporter {
       // explicitly instead of leaving the encoder to choose a black matte.
       outputImage = try flattenedOnWhite(outputImage)
     }
+    if format == .heic {
+      outputImage = try heicEncodingImage(outputImage, adjustedSource: frame.image)
+    }
     try Task.checkCancellation()
 
     // 정밀 렌더를 기다리는 동안 저장 경로의 링크가 달라졌을 수도 있어 쓰기 직전 다시 확인합니다.
@@ -176,6 +179,46 @@ actor ImageExporter {
     guard CGImageDestinationFinalize(destination) else {
       throw ImageExportError.finalizationFailed
     }
+  }
+
+  private func heicEncodingImage(_ image: CGImage, adjustedSource: CGImage) throws -> CGImage {
+    // Tagged PQ/HLG images and ordinary SDR bitmaps already have a transfer
+    // function understood by ImageIO. Linear floating-point renders need an
+    // explicit PQ conversion when their final pixels extend above SDR white.
+    guard adjustedSource.bitmapInfo.contains(.floatComponents), let space = adjustedSource.colorSpace,
+      CGColorSpaceUsesExtendedRange(space) else { return image }
+    try Task.checkCancellation()
+    let headroom: Float
+    if #available(macOS 15.0, *) { headroom = adjustedSource.contentHeadroom }
+    else { headroom = 0 }
+    if headroom == 1 { return image }
+    // Limit the lifetime of large encoding workspaces to this save. Display
+    // decoder cache purges do not own the long-lived single and batch exporters.
+    let gamut = CGColorSpace(name: CGColorSpace.extendedLinearITUR_2020)!
+    let context = CIContext(options: [.workingColorSpace: gamut, .cacheIntermediates: false,
+      .name: "ImageViewer HDR HEIC export"])
+    if headroom == 0 {
+      // Editing can invalidate headroom metadata. Measure in BT.2020 before
+      // resizing: Lanczos ringing at SDR edges must not label an SDR image HDR.
+      // Only one RGBA pixel is read back, including for large RAW exports.
+      let source = CIImage(cgImage: adjustedSource)
+      let maximum = source.unpremultiplyingAlpha().applyingFilter("CIAreaMaximum",
+        parameters: [kCIInputExtentKey: CIVector(cgRect: source.extent)])
+      var components = [Float](repeating: .nan, count: 4)
+      context.render(maximum, toBitmap: &components, rowBytes: 16, bounds: maximum.extent,
+        format: .RGBAf, colorSpace: gamut)
+      guard components.allSatisfy(\.isFinite) else { throw ImageExportError.finalizationFailed }
+      // Allow one half-float rounding step in the color conversion at white.
+      if components.prefix(3).allSatisfy({ $0 <= 1 + 1.0 / 1024 }) { return image }
+    }
+    try Task.checkCancellation()
+    // An extended-linear image passed directly to the HEIC encoder can be
+    // tagged SDR and clipped even when the container reports ten-bit depth.
+    let pq = CGColorSpace(name: CGColorSpace.itur_2100_PQ)!
+    let input = CIImage(cgImage: image)
+    guard let encoded = context.createCGImage(input, from: input.extent,
+      format: .RGBA16, colorSpace: pq, deferred: true) else { throw ImageExportError.finalizationFailed }
+    return encoded
   }
 
   private func flattenedOnWhite(_ image: CGImage) throws -> CGImage {

@@ -164,7 +164,12 @@ struct LibraryTextMatcher: Sendable {
   var isEmpty: Bool { plain.isEmpty }
 
   init(pattern: String, anchorsWildcards: Bool = true) {
-    let normalized = Self.fold(pattern.trimmingCharacters(in: .whitespacesAndNewlines))
+    let trimmed = pattern.trimmingCharacters(in: .whitespacesAndNewlines)
+    if trimmed.isEmpty {
+      self.pattern = []; hasWildcard = false; plain = ""; plainTerms = []
+      return
+    }
+    let normalized = Self.fold(trimmed)
       .replacingOccurrences(of: "%", with: "*")
     hasWildcard = normalized.contains("*")
     plain = normalized

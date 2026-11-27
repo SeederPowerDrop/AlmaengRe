@@ -1,6 +1,7 @@
 mod archive;
 mod geography;
 mod policy;
+mod query_ffi;
 #[cfg(test)]
 mod query_profile;
 mod raster;

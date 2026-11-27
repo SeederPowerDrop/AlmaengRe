@@ -274,7 +274,7 @@ struct ComparisonPhotoMarkFilterTests {
     #expect(names(pane) == ["b.png"])
   }
 
-  @Test("원본 컬렉션의 접근 권한과 ZIP 수명을 유지하며 비디오는 비교에서 제외한다")
+  @Test("혼합 컬렉션의 접근 권한과 ZIP 수명을 유지하며 영상도 비교에 포함한다")
   func cachedCollectionRetainsSourceAccessAndArchiveLease() async throws {
     let fixture = try Fixture()
     let comparison = fixture.comparison(nil)
@@ -301,7 +301,8 @@ struct ComparisonPhotoMarkFilterTests {
     access = nil
     await ready(comparison)
     #expect(retainedLease != nil && retainedAccess != nil)
-    #expect(names(comparison.first) == ["a.png"] && names(comparison.second) == ["a.png"])
+    #expect(names(comparison.first) == ["a.png", "video.mp4"])
+    #expect(names(comparison.second) == ["a.png", "video.mp4"])
     let session = try #require(comparison.captureSession())
     #expect(session.first.sources == sources && session.second.sources == sources)
     #expect(session.first.selectedID == archive.standardizedFileURL.absoluteString + "#a.png")

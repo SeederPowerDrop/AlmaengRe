@@ -18,3 +18,9 @@
 
 "selection.focused" = "キーボードの移動位置";
 "selection.overviewHelp" = "⌘クリック：選択・解除\n⌘矢印キー：移動先の項目を選択・解除\n⇧クリック / ⇧矢印キー：範囲選択\n⌘⇧クリック / ⌘⇧矢印キー：現在の選択に範囲を追加";
+"selection.view.title" = "選択したファイルのみ表示";
+"selection.view.single" = "1つずつ表示";
+"selection.view.multiple" = "まとめて表示";
+"selection.view.active" = "選択した%d件を表示中";
+"selection.view.return" = "一覧に戻る";
+"selection.view.help" = "選択したファイル内だけを移動します。戻ると元の選択と一覧の位置が復元されます。";

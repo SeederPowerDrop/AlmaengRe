@@ -10,6 +10,80 @@ import Testing
 @Suite("여러 영상 타일의 미리보기 수명", .serialized)
 @MainActor
 struct VideoTilePlaybackControllerTests {
+  @Test("타일 소유자를 해제하면 별도 stop 호출 없이 플레이어 항목을 정리한다")
+  func droppingControllerCancelsPlayback() async throws {
+    let fixture = try await Fixture.make()
+    defer { fixture.remove() }
+    var controller: VideoTilePlaybackController? = VideoTilePlaybackController(coordinator: VideoHoverPlaybackCoordinator())
+    weak var owner = controller
+    hover(try #require(controller), fixture.asset)
+    let playback = try #require(controller?.playback)
+    defer { playback.stop() }
+    try await waitUntil { playback.player.currentItem != nil && playback.document != nil }
+    controller = nil
+    #expect(owner == nil)
+    try await waitUntil(phase: "discarded tile releases its item") { playback.player.currentItem == nil }
+    #expect(playback.document == nil && playback.player.rate == 0)
+  }
+
+  @Test("이미 취소된 늦은 감시 작업은 현재 재생 항목을 초기화하지 않는다")
+  func alreadyCancelledMonitorLeavesCurrentPlaybackIntact() async throws {
+    let fixture = try await Fixture.make()
+    defer { fixture.remove() }
+    let playback = VideoPlaybackState()
+    let current = Task { await playback.monitor(fixture.asset) }
+    defer { current.cancel(); playback.stop() }
+    try await waitUntil { playback.player.currentItem != nil && playback.document != nil }
+    let item = playback.player.currentItem
+    let document = playback.document
+    let late = Task {
+      withUnsafeCurrentTask { $0?.cancel() }
+      await playback.monitor(fixture.asset)
+    }
+    await late.value
+    #expect(playback.player.currentItem === item)
+    #expect(playback.document == document)
+    current.cancel()
+    await current.value
+  }
+
+  @Test("첫 프레임 표시와 다음 영상 전환은 재로딩 없이 미리보기에서 이어진다")
+  func firstFrameHandoffAndNavigationKeepOnePlayerItem() async throws {
+    let fixture = try await Fixture.make()
+    defer { fixture.remove() }
+    _ = NSApplication.shared
+    let player = AVPlayer()
+    player.isMuted = true
+    let host = NSHostingView(rootView: NativeVideoPlayerView(player: player,
+      waitsForFirstVideoFrame: true))
+    let window = NSWindow(contentRect: NSRect(x: -2_000, y: -2_000, width: 480, height: 270),
+      styleMask: [.borderless], backing: .buffered, defer: false)
+    window.isReleasedWhenClosed = false
+    window.contentView = host
+    window.orderBack(nil)
+    defer { player.replaceCurrentItem(with: nil); window.orderOut(nil); window.contentView = nil; window.close() }
+    try await waitUntil { host.layoutSubtreeIfNeeded(); return nativePlayer(in: host) != nil }
+    let native = try #require(nativePlayer(in: host))
+    #expect(!native.isReadyForDisplay && native.alphaValue == 0)
+    for _ in 0..<3 {
+      let item = AVPlayerItem(url: fixture.video)
+      player.replaceCurrentItem(with: item)
+      try await waitUntil(phase: "paused first frame revealed") {
+        host.layoutSubtreeIfNeeded()
+        return native.isReadyForDisplay && native.alphaValue == 1
+      }
+      #expect(player.currentItem === item && player.rate == 0)
+      // Resizing/refreshing must keep both the decoder and native surface.
+      host.rootView = NativeVideoPlayerView(player: player, waitsForFirstVideoFrame: true)
+      host.layoutSubtreeIfNeeded()
+      #expect(nativePlayer(in: host) === native && player.currentItem === item)
+      player.replaceCurrentItem(with: nil)
+      try await waitUntil(phase: "unready surface reveals poster again") {
+        !native.isReadyForDisplay && native.alphaValue == 0
+      }
+    }
+  }
+
   @Test("대기 중인 여러 타일과 비활성 앱은 재생 항목이나 영상 문서를 만들지 않는다")
   func idleTilesNeverAllocatePlayers() async throws {
     let coordinator = VideoHoverPlaybackCoordinator()
@@ -30,6 +104,35 @@ struct VideoTilePlaybackControllerTests {
     }
     await Task.yield()
     #expect(controllers.allSatisfy { $0.playback == nil })
+  }
+
+  @Test("새 항목의 초기 정지·자동 명령 응답·소리 인계는 네이티브 사용자 조작으로 오인하지 않는다")
+  func nativeIntentExcludesProgrammaticTransitions() async throws {
+    let fixture = try await Fixture.make()
+    defer { fixture.remove() }
+    let controller = VideoTilePlaybackController(coordinator: VideoHoverPlaybackCoordinator())
+    defer { controller.stop() }
+    let playing = VideoTilePlaybackCommand(mode: .playing, isMuted: false, generation: UUID())
+    controller.update(asset: fixture.asset, isMultiTile: false, isHovered: false,
+      allowsPlayback: true, appIsActive: true, command: playing)
+    let state = try #require(controller.playback)
+    #expect(!controller.acceptsNativePlaybackChange(false, from: state))
+    try await waitUntil { state.player.currentTime().seconds > 0.04 }
+    #expect(!controller.acceptsNativePlaybackChange(true, from: state))
+    #expect(!controller.acceptsNativeSoundChange(true, from: state))
+    controller.setSoundEnabled(false)
+    #expect(!controller.acceptsNativeSoundChange(false, from: state))
+    controller.setSoundEnabled(true)
+    state.player.isMuted = true
+    #expect(controller.acceptsNativeSoundChange(false, from: state))
+    state.player.pause()
+    #expect(controller.acceptsNativePlaybackChange(false, from: state))
+    let paused = VideoTilePlaybackCommand(mode: .paused, isMuted: true, generation: UUID())
+    controller.update(asset: fixture.asset, isMultiTile: false, isHovered: false,
+      allowsPlayback: true, appIsActive: true, command: paused)
+    #expect(!controller.acceptsNativePlaybackChange(false, from: state))
+    state.player.play()
+    #expect(controller.acceptsNativePlaybackChange(true, from: state))
   }
 
   @Test("호버는 무음으로 시작하고 소리를 켜면 포인터가 떠나도 재생을 유지한다")

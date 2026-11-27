@@ -1,6 +1,7 @@
 import CryptoKit
 import Darwin
 import Foundation
+import AppKit
 
 @MainActor
 final class ManualViewerQAContext {
@@ -51,14 +52,30 @@ final class ManualViewerQAContext {
 
   func start() {
     guard !started else { return }; started = true
+    if ProcessInfo.processInfo.environment["IMAGEVIEWER_SUSTAINED_QA"] == "1" {
+      // One real activation before observation, never a forged activity flag
+      // or repeated focus-stealing during a running measurement.
+      NSApp.activate(ignoringOtherApps: true)
+    }
     Task { [self] in
       guard await wait(15, until: { store.photoMarks.isReady }) else { record("marks_not_ready"); return }
-      store.open(urls: [source])
-      let ready = await wait(90, until: { !store.isLoading && !store.isFiltering && !store.showsHome })
+      var sources = [source]
+      if ProcessInfo.processInfo.environment["IMAGEVIEWER_SUSTAINED_QA"] == "1",
+        ProcessInfo.processInfo.environment["IMAGEVIEWER_SUSTAINED_AUDIO_FIXTURE"] == "1" {
+        do { sources.append(try SustainedAudioFixture.create(in: output.appendingPathComponent("runtime"))) }
+        catch { record("audio_fixture_failed"); return }
+      }
+      store.open(urls: sources)
+      let ready = await wait(90, until: {
+        !store.isLoading && !store.isFiltering && !store.showsHome
+          && (ProcessInfo.processInfo.environment["IMAGEVIEWER_SUSTAINED_QA"] != "1" || NSApp.isActive)
+      })
       record(ready ? "ready" : "open_not_ready")
       if ready, ProcessInfo.processInfo.environment["IMAGEVIEWER_SUSTAINED_QA"] == "1" {
+        guard let duration = SustainedPerformancePlan.requestedDuration(environment: ProcessInfo.processInfo.environment)
+          else { record("invalid_sustained_duration"); return }
         let completed = await SustainedPerformanceValidation.run(store: store, output: output,
-          durationSeconds: 1_800)
+          durationSeconds: duration)
         record(completed ? "sustained_completed" : "sustained_failed")
       }
     }
@@ -71,6 +88,7 @@ final class ManualViewerQAContext {
     let value: [String: Any] = ["status": status, "sourceHash": SHA256.hash(data: Data(source.path.utf8)).map { String(format: "%02x", $0) }.joined(),
       "assetCount": store.allAssets.count, "videoCount": store.allAssets.filter(\.isVideo).count,
       "defaultsSuiteName": suiteName,
+      "processID": getpid(), "audioCount": store.allAssets.filter(\.isAudio).count,
       "version": Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "unknown",
       "build": Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "unknown"]
     if let data = try? JSONSerialization.data(withJSONObject: value, options: [.prettyPrinted, .sortedKeys]) { try? data.write(to: output.appendingPathComponent("manual-qa-context.json"), options: .atomic) }

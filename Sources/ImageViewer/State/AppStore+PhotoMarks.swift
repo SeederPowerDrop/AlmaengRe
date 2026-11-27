@@ -74,7 +74,7 @@ extension AppStore {
       canInteractWhileMarking else { return false }
     if let fullScreenVideoAsset {
       return Self.matchesPresentedAsset(asset, fullScreenVideoAsset)
-        && allAssets.contains { Self.matchesPresentedAsset($0, asset) }
+        && containsPlaybackAsset(asset)
         && isFullScreenVideoReadyToMark
     }
     if presentationMode == .folderComparison {

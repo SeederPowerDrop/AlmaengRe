@@ -82,13 +82,13 @@
 "color.gray" = "グレー";
 
 /* Independent tag filters for comparison panes. */
-"comparison.open" = "現在の写真を分類で比較";
+"comparison.open" = "現在のファイルを分類で比較";
 "comparison.openHelp" = "現在開いている元の一覧をAとBに開きます。検索・形式・地図範囲を維持し、分類は各ペインで個別に選びます。";
 "comparison.filter" = "分類を選択";
-"comparison.allPhotos" = "すべての写真";
+"comparison.allPhotos" = "すべてのファイル";
 "comparison.titleFormat" = "%@ペインの分類";
-"comparison.selectionHelp" = "このペインに表示する分類を複数選びます。両側に同じ写真が含まれる場合もあります。";
-"comparison.empty" = "この条件に合う写真はありません。";
+"comparison.selectionHelp" = "この領域に表示する分類を選びます。同じファイルが両側に含まれる場合もあります。";
+"comparison.empty" = "条件に一致するファイルがありません。";
 "comparison.emptyHelp" = "分類条件を変えるか、共通の検索・形式・地図範囲を確認してください。";
 "comparison.reset" = "このペインの分類条件を解除";
 

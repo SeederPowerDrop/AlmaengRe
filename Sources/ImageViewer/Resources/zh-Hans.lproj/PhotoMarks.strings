@@ -82,13 +82,13 @@
 "color.gray" = "灰色";
 
 /* Independent tag filters for comparison panes. */
-"comparison.open" = "按分类对比当前照片";
+"comparison.open" = "按分类比较当前文件";
 "comparison.openHelp" = "在A和B中打开当前的原始列表。保留搜索、格式和地图范围筛选，并分别选择各窗格的分类。";
 "comparison.filter" = "选择分类";
-"comparison.allPhotos" = "所有照片";
+"comparison.allPhotos" = "所有文件";
 "comparison.titleFormat" = "%@窗格的分类";
-"comparison.selectionHelp" = "选择此窗格要显示的多个分类。同一照片也可能同时出现在两侧。";
-"comparison.empty" = "没有符合这些条件的照片。";
+"comparison.selectionHelp" = "选择此区域要显示的分类。同一文件可以出现在两侧。";
+"comparison.empty" = "没有符合条件的文件。";
 "comparison.emptyHelp" = "请更改分类条件，或检查共用的搜索、格式和地图范围筛选。";
 "comparison.reset" = "清除此窗格的分类条件";
 
